@@ -47,6 +47,13 @@ DEFAULT_VISUALIZER_32 = Path(
     r"F:\TruckSim2019\TruckSim2019.0_Prog\Programs\VsVisualizer\VsVisualizer.exe"
 )
 DEFAULT_TRUCKSIM_DATA = Path(r"F:\TruckSim2019\TruckSim2019.0_Data")
+#: The animator's 3D shape assets live here, not under ``_Data``.  The parsfle
+#: references them with a *relative* path (``Animator\3D_Shape_Files\...``), so VS
+#: Visualizer resolves them against its working directory.  Launching from
+#: ``_Data`` therefore cannot find the vehicle meshes and logs
+#: "Unable to load asset file ... tire.obj" for every part; launching from
+#: ``Prog\Resources`` resolves all of them (verified: 0 asset warnings).
+DEFAULT_RESOURCE_ROOT = Path(r"F:\TruckSim2019\TruckSim2019.0_Prog\Resources")
 
 
 # --------------------------------------------------------------------- discovery
@@ -468,5 +475,14 @@ def default_visualizer() -> Path:
 
 
 def default_workdir() -> Path:
-    """VS Visualizer expects to start in the TruckSim data directory."""
+    """Working directory for VS Visualizer.
+
+    Must be the directory that *contains* ``Animator\\3D_Shape_Files``, because the
+    parsfle refers to shape assets with relative paths.  On this install that is
+    ``TruckSim2019.0_Prog\\Resources``; ``_Data`` looks like the natural choice but
+    its ``Animator`` tree does not hold the vehicle meshes, so launching from there
+    produces "Unable to load asset file" for every truck part.
+    """
+    if DEFAULT_RESOURCE_ROOT.exists():
+        return DEFAULT_RESOURCE_ROOT
     return DEFAULT_TRUCKSIM_DATA if DEFAULT_TRUCKSIM_DATA.exists() else Path(os.getcwd())

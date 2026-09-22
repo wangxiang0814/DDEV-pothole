@@ -293,6 +293,15 @@ class NativeVideoTests(unittest.TestCase):
         self.assertIn("creation = 0x00000008", source)
         self.assertNotIn("0x00000010 | 0x00000008", source)
 
+    def test_workdir_is_the_tree_that_holds_the_3d_shape_assets(self):
+        # The parsfle uses relative asset paths, so the working directory must
+        # contain Animator\3D_Shape_Files. Verified: launching from _Data gives an
+        # "Unable to load asset file" warning per truck part; Prog\Resources gives 0.
+        from ddevsim.native_video import DEFAULT_RESOURCE_ROOT, default_workdir
+
+        self.assertEqual(default_workdir(), DEFAULT_RESOURCE_ROOT)
+        self.assertIn("Resources", str(DEFAULT_RESOURCE_ROOT))
+
 
 if __name__ == "__main__":
     unittest.main()
