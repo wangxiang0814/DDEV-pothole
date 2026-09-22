@@ -197,5 +197,6 @@ python scripts\export_native_video.py runs\batch_sweep_a\cases\depth_010\model\o
 | `contains several histories` | 目录里有多个 `.vs`。直接指向具体 `.vs` 文件即可。 |
 | `.vsb payload ... is not a whole number of frames` | 历史文件被截断（仿真中途被杀）。重新跑该工况。 |
 | 界面起不来，弹 `can't open user configuration file.` | VS Visualizer 无法写 `%LOCALAPPDATA%\VS Visualizer\<版本>\`。属权限问题，与输入文件无关（零参数启动也复现）。换到有写权限的桌面会话即可。 |
-| 提示实体形状资源缺失（`Unable to load asset file`） | 资源按工作目录解析；脚本已用 TruckSim `_Data` 目录作为工作目录。若仍缺失可试 `-altresource <TruckSim2019.0_Data>`。 |
+| 提示实体形状资源缺失（`Unable to load asset file ... .obj`） | parsfle 里的形状资源是**相对路径**，VS Visualizer 按工作目录解析。必须以**含 `Animator\3D_Shape_Files` 的目录**为工作目录启动 —— 本机是 `F:\TruckSim2019\TruckSim2019.0_Prog\Resources`，**不是** `_Data`（`_Data\Animator` 里没有 HD Utility 的车辆网格）。脚本已默认这么做。**不要**用 `-altresource` 指向 `Prog\Resources`：那会替换整个资源根，导致 `Shaders\Components\lispm_shadow.vert` 找不到且数据集不再加载。 |
+| 少量 `Failed to read image file ... .dds` 警告 | 缺的是法线贴图等外观贴图，不影响几何与动画，可忽略。 |
 | 退出码是 −1（4294967295） | TruckSim 2019 的常态，**不能**作为失败判据；看产物文件是否存在且非空。 |
