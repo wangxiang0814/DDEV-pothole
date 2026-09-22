@@ -104,11 +104,14 @@ class PotholeCaseTests(unittest.TestCase):
                 encoding="ascii",
             )
             artifacts = build_single_wheel_pothole_case(source_run, source_sim, root / "case")
+            run_all = artifacts["run_all"].read_text(encoding="utf-8")
             simfile = artifacts["simfile"].read_text(encoding="ascii")
             self.assertIn("FILEBASE output\\single_wheel_deep_pothole", simfile)
             self.assertNotIn("hd_utility_ddev", simfile)
-            self.assertIn("PORTS_EXP %d" % (16 + len(SCENARIO_EXPORTS)), simfile)
-            run_all = artifacts["run_all"].read_text(encoding="utf-8")
+            # PORTS_EXP is derived from the EXPORT lines actually present, so that a
+            # source which already carries scenario channels cannot desynchronise.
+            exports = len([l for l in run_all.splitlines() if l.startswith("EXPORT ")])
+            self.assertIn("PORTS_EXP %d" % exports, simfile)
             for name in SCENARIO_EXPORTS:
                 self.assertIn("EXPORT " + name, run_all)
             self.assertTrue(artifacts["run_all"].is_file())

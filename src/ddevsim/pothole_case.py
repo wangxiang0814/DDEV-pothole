@@ -31,6 +31,10 @@ class PotholeScenario:
     road_length_m: float = 40.0
     stop_s: float = 9.0
     target_speed_kph: float = 2.8
+    #: Distance from the vehicle's start station to the entry lip.  The start station
+    #: is derived from it rather than hard-coded, so the scenario stays consistent when
+    #: the hole is moved.
+    approach_distance_m: float = 1.1
 
     # ---- visual scene -----------------------------------------------------
     # Camera framing is part of the scenario because a bad lens makes the
@@ -438,16 +442,41 @@ def build_single_wheel_pothole_case(
     final_end = transformed.rfind("\nEND")
     if final_end < 0:
         raise ValueError("scenario run has no final END")
-    scenario_exports = "\n".join("EXPORT " + name for name in SCENARIO_EXPORTS)
-    transformed = transformed[:final_end] + "\n" + scenario_exports + transformed[final_end:]
+    # The source may already export some scenario channels (a control object built with
+    # extra_exports does), so append only the ones missing: a duplicate EXPORT is
+    # rejected by the solver's contract.
+    already = set(re.findall(r"(?m)^EXPORT\s+(\S+)\s*$", transformed))
+    missing = [name for name in SCENARIO_EXPORTS if name not in already]
+    if missing:
+        scenario_exports = "\n".join("EXPORT " + name for name in missing)
+        transformed = transformed[:final_end] + "\n" + scenario_exports + transformed[final_end:]
+    # A merged parameter file carries one TSTOP per unit block and the solver honours
+    # the last, which can override the value written into the Procedures block, so all
+    # of them are pinned to the scenario duration.
+    transformed, tstop_count = re.subn(
+        r"(?m)^TSTOP\s+[-+0-9.eE]+\s*$", "TSTOP %s" % _fmt(scenario.stop_s), transformed
+    )
+    if tstop_count == 0:
+        raise ValueError("scenario run declares no TSTOP")
+    # Same hazard for the start station.  If the source's own SSTART wins, the vehicle
+    # spawns at its old origin (observed: station -5 instead of 100) and simply never
+    # reaches the hole, leaving the support-phase state machine in the approach step.
+    start_station = scenario.leading_edge_m - scenario.approach_distance_m
+    transformed, sstart_count = re.subn(
+        r"(?m)^SSTART\s+[-+0-9.eE]+\s*$", "SSTART %s" % _fmt(start_station), transformed
+    )
+    if sstart_count == 0:
+        raise ValueError("scenario run declares no SSTART")
     run_all = target_dir / "run_all.par"
     run_all.write_text(transformed, encoding="utf-8")
     simfile_text = Path(source_simfile).read_text(encoding="ascii")
     if "hd_utility_ddev" not in simfile_text:
         raise ValueError("source simfile does not use expected hd_utility_ddev history basename")
     simfile_text = simfile_text.replace("hd_utility_ddev", history_name)
-    base_exports = 16  # the fixed DDEV feedback contract
-    total_exports = base_exports + len(SCENARIO_EXPORTS)
+    # Derive PORTS_EXP from the exports actually present rather than from a fixed 16:
+    # a source case may already carry the scenario channels, and a mismatch between
+    # the simfile's declared port count and the EXPORT lines aborts the solver.
+    total_exports = len(re.findall(r"(?m)^EXPORT\s+\S+\s*$", transformed))
     simfile_text, port_count = re.subn(
         r"(?m)^PORTS_EXP\s+\d+\s*$", "PORTS_EXP %d" % total_exports, simfile_text
     )

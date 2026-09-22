@@ -1,0 +1,17 @@
+{
+  "wheel_load_n": {
+    "FL": 19.494029599999998,
+    "FR": 34.3053935,
+    "RL": 3179.8022040000005,
+    "RR": 3254.2890310000003
+  },
+  "deflection_m": {
+    "FL": 0.15722749930000005,
+    "FR": 0.1572219528,
+    "RL": 0.06448843942,
+    "RR": 0.06450940489000001
+  },
+  "settle_s": 0.05,
+  "source_csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\corner_module_ddev\\single_wheel_deep_pothole\\static_calibration.csv",
+  "model": "Corner Module DDEV (Compact Utility Truck I_I)"
+}

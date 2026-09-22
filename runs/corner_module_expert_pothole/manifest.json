@@ -1,0 +1,216 @@
+{
+  "created_utc": "2026-09-22T16:14:45.664400+00:00",
+  "model": "Corner Module DDEV (Compact Utility Truck I_I)",
+  "scenario_name": "right single-wheel deep pothole",
+  "scenario": {
+    "leading_edge_m": 101.1,
+    "trailing_edge_m": 101.89999999999999,
+    "length_m": 0.8,
+    "width_m": 0.6,
+    "depth_m": 0.2,
+    "friction": 0.7,
+    "target_speed_kph": 2.8,
+    "stop_s": 9.0
+  },
+  "controller": "Liu et al. 2024 feedforward + integral sliding mode (three-wheel support)",
+  "input_order": [
+    "IMP_MYUSM_L1",
+    "IMP_MYUSM_R1",
+    "IMP_MYUSM_L2",
+    "IMP_MYUSM_R2",
+    "IMP_FS_L1",
+    "IMP_FS_R1",
+    "IMP_FS_L2",
+    "IMP_FS_R2"
+  ],
+  "output_order": [
+    "AVy_L1",
+    "AVy_R1",
+    "AVy_L2",
+    "AVy_R2",
+    "Fz_L1",
+    "Fz_R1",
+    "Fz_L2",
+    "Fz_R2",
+    "CmpS_L1",
+    "CmpS_R1",
+    "CmpS_L2",
+    "CmpS_R2",
+    "Vz_Wc_L1",
+    "Vz_Wc_R1",
+    "Vz_Wc_L2",
+    "Vz_Wc_R2",
+    "Xo",
+    "Vx",
+    "Roll_E",
+    "Pitch",
+    "X_L1",
+    "X_R1",
+    "X_L2",
+    "X_R2"
+  ],
+  "calibration": {
+    "wheel_load_n": {
+      "FL": 19.494029599999998,
+      "FR": 34.3053935,
+      "RL": 3179.8022040000005,
+      "RR": 3254.2890310000003
+    },
+    "deflection_m": {
+      "FL": 0.15722749930000005,
+      "FR": 0.1572219528,
+      "RL": 0.06448843942,
+      "RR": 0.06450940489000001
+    },
+    "settle_s": 0.05,
+    "source_csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\corner_module_ddev\\single_wheel_deep_pothole\\static_calibration.csv",
+    "model": "Corner Module DDEV (Compact Utility Truck I_I)"
+  },
+  "vehicle": {
+    "sprung_mass_kg": 600.0,
+    "payload_mass_kg": 200.0,
+    "unsprung_mass_per_axle_kg": 80.0,
+    "wheelbase_m": 1.925,
+    "track_m": 1.26,
+    "tyre_radius_m": 0.263,
+    "cg_height_m": 0.7,
+    "roll_centre_height_m": 0.263,
+    "cg_to_front_axle_m": 1.9090373559103986,
+    "cg_to_rear_axle_m": 0.01596264408960138,
+    "jounce_limit_m": 0.061,
+    "rebound_limit_m": 0.061,
+    "static_wheel_load_n": {
+      "FL": 19.494029599999998,
+      "FR": 34.3053935,
+      "RL": 3179.8022040000005,
+      "RR": 3254.2890310000003
+    },
+    "sources": {
+      "M_SU": "parsed:run_all.par",
+      "M_PL": "parsed:run_all.par",
+      "M_US": "parsed:run_all.par",
+      "H_CG_SU": "parsed:run_all.par",
+      "LX_CG_SU": "parsed:run_all.par",
+      "IXX_SU": "parsed:run_all.par",
+      "IYY_SU": "parsed:run_all.par",
+      "IZZ_SU": "parsed:run_all.par",
+      "L_TRACK": "parsed:run_all.par",
+      "R0": "parsed:run_all.par",
+      "wheelbase_m": "parsed:x_length (validated vs measured X_L1-X_L2)",
+      "roll_centre_height_m": "assumed:roll centre at axle-centre height (no label in the model)",
+      "travel": "parsed:jounce/rebound stop tables",
+      "static_wheel_load_n": "measured",
+      "cg_to_front_axle_m": "derived:static wheel loads",
+      "cg_to_rear_axle_m": "derived:static wheel loads"
+    }
+  },
+  "plan": {
+    "pothole_span_m": [
+      101.1,
+      101.89999999999999
+    ],
+    "pre_lift_distance_m": 0.25,
+    "control_period_s": 0.01,
+    "actuator_gain_matrix_used": true,
+    "required_command_n": {
+      "FR": 358262.4147578061,
+      "RR": 397972.20425024955
+    },
+    "force_limits_n": [
+      -100000.0,
+      100000.0
+    ],
+    "support_solutions": {
+      "FR": {
+        "lifted_corner": "FR",
+        "target_load_n": {
+          "FL": -99.56962499819521,
+          "FR": 0.0,
+          "RL": 5221.383525527296,
+          "RR": 4292.5700994709
+        },
+        "feedforward_force_n": {
+          "FL": -1094.5614352315285,
+          "FR": -34.3053935,
+          "RL": 2041.5813215272956,
+          "RR": 1038.2810684708993
+        },
+        "cg_lateral_shift_m": 0.05549206349206348,
+        "cg_longitudinal_shift_m": -0.036322077922077915,
+        "roll_angle_deg": -7.275654541343787,
+        "pitch_angle_deg": 4.76224660887957,
+        "deflection_target_m": {
+          "FL": 0.08,
+          "FR": -0.08,
+          "RL": -0.08,
+          "RR": -0.08
+        },
+        "minimal_load_n": -99.56962499819521
+      },
+      "RR": {
+        "lifted_corner": "RR",
+        "target_load_n": {
+          "FL": -4392.139724469095,
+          "FR": 4292.5700994709,
+          "RL": 9513.953624998196,
+          "RR": 0.0
+        },
+        "feedforward_force_n": {
+          "FL": -5387.131534702428,
+          "FR": 4258.2647059709,
+          "RL": 6334.151420998195,
+          "RR": -3254.2890310000003
+        },
+        "cg_lateral_shift_m": 0.05549206349206348,
+        "cg_longitudinal_shift_m": -0.036322077922077915,
+        "roll_angle_deg": -7.275654541343787,
+        "pitch_angle_deg": 4.76224660887957,
+        "deflection_target_m": {
+          "FL": -0.08,
+          "FR": -0.08,
+          "RL": 0.08,
+          "RR": -0.08
+        },
+        "minimal_load_n": -4392.139724469095
+      }
+    },
+    "feedforward_commands": {
+      "FR": {
+        "FL": 106563.0,
+        "FR": 114171.0,
+        "RL": -353224.7,
+        "RR": -358262.4
+      },
+      "RR": {
+        "FL": 64759.4,
+        "FR": 146561.4,
+        "RL": -327120.5,
+        "RR": -397972.2
+      }
+    },
+    "final_step": 4,
+    "final_step_name": "4 recover to normal driving",
+    "safe_stop": true,
+    "safe_stop_reason": "roll_exceeds_12.0_deg"
+  },
+  "result": {
+    "status": "COMPLETED",
+    "solver_status": 1,
+    "solver_signalled_end": true,
+    "final_time_s": 8.999999999999508,
+    "configured_stop_s": 9.0,
+    "capped_at_s": null,
+    "reached_configured_stop": true,
+    "rows_written": 1801,
+    "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\corner_module_expert_pothole\\data\\expert_and_dynamics.csv",
+    "error_message": ""
+  },
+  "native_history_files": [
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\corner_module_expert_pothole\\native\\single_wheel_deep_pothole.vs",
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\corner_module_expert_pothole\\native\\single_wheel_deep_pothole.vsb",
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\corner_module_expert_pothole\\native\\single_wheel_deep_pothole_all.par",
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\corner_module_expert_pothole\\native\\single_wheel_deep_pothole_echo.par",
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\corner_module_expert_pothole\\native\\single_wheel_deep_pothole_end.par",
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\corner_module_expert_pothole\\native\\single_wheel_deep_pothole_log.txt"
+  ]
+}

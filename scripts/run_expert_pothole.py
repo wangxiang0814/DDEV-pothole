@@ -36,13 +36,37 @@ DEFAULT_LOG_DECIMATION = 10  # 0.5 ms solver step -> 5 ms CSV
 
 
 def main(argv=None) -> int:
-    argv = list(sys.argv[1:] if argv is None else argv)
-    log_decimation = DEFAULT_LOG_DECIMATION
-    if argv and argv[0].isdigit():
-        log_decimation = int(argv[0])
+    import argparse
 
-    model_dir = ROOT / "models" / "hd_utility_ddev" / "single_wheel_deep_pothole"
-    run_dir = ROOT / "runs" / "hd_utility_ddev_expert_pothole"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--model", default="hd_utility",
+        help="which control object to drive: 'hd_utility' (the original solid-axle "
+             "truck) or 'corner_module' (the corner-module DDEV control object)",
+    )
+    parser.add_argument("--log-decimation", type=int, default=DEFAULT_LOG_DECIMATION)
+    args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    log_decimation = args.log_decimation
+
+    if args.model == "corner_module":
+        base_dir = ROOT / "models" / "corner_module_ddev"
+        model_dir = base_dir / "single_wheel_deep_pothole"
+        run_dir = ROOT / "runs" / "corner_module_expert_pothole"
+        base_run_all = base_dir / "run_all.par"
+        gain_report_path = ROOT / "runs" / "_actuator_gain_corner_module" / "gain_matrix.json"
+        model_label = "Corner Module DDEV (Compact Utility Truck I_I)"
+    else:
+        base_dir = ROOT / "models" / "hd_utility_ddev"
+        model_dir = base_dir / "single_wheel_deep_pothole"
+        run_dir = ROOT / "runs" / "hd_utility_ddev_expert_pothole"
+        base_run_all = base_dir / "run_all.par"
+        gain_report_path = ROOT / "runs" / "_actuator_gain" / "gain_matrix.json"
+        model_label = "HD Utility DDEV 4x4 Active Suspension"
+    if not model_dir.exists():
+        raise SystemExit(
+            "model %s not built; run the matching build script first" % model_dir
+        )
+
     data_dir = run_dir / "data"
     native_dir = run_dir / "native"
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -57,22 +81,17 @@ def main(argv=None) -> int:
     # 1. measured static operating point
     calibration = load_or_measure(
         model_dir / "calibration.json", simfile, IMPORT_NAMES, export_names,
-        model_label="HD Utility DDEV 4x4 Active Suspension",
+        model_label=model_label,
     )
 
     # 2. controller built from the generated model + the measured baseline
-    vehicle = load_vehicle(
-        ROOT / "models" / "hd_utility_ddev" / "run_all.par",
-        static_wheel_load_n=calibration.wheel_load_n,
-    )
+    vehicle = load_vehicle(base_run_all, static_wheel_load_n=calibration.wheel_load_n)
 
     # Use the measured actuator effectiveness matrix when it is available.  Without
-    # it the feedforward assumes a 1:1 actuator, which on this solid-axle vehicle
-    # under-commands by more than an order of magnitude.
+    # it the feedforward assumes a 1:1 actuator, which under-commands badly.
     gain_matrix = None
-    gain_report = ROOT / "runs" / "_actuator_gain" / "gain_matrix.json"
-    if gain_report.exists():
-        payload = json.loads(gain_report.read_text(encoding="utf-8"))
+    if gain_report_path.exists():
+        payload = json.loads(gain_report_path.read_text(encoding="utf-8"))
         table = payload["gain_matrix_command_to_load"]
         gain_matrix = [[table[j][i] for i in ("FL", "FR", "RL", "RR")]
                        for j in ("FL", "FR", "RL", "RR")]
@@ -86,7 +105,8 @@ def main(argv=None) -> int:
         static_deflection_m=calibration.deflection_m,
     )
     if gain_matrix is None:
-        print("WARNING: no measured gain matrix; run scripts\\probe_actuator_gain.py first")
+        print("WARNING: no measured gain matrix for %s; run scripts\\probe_actuator_gain.py"
+              % args.model)
 
     # 3. closed loop through the solver
     result = run_stepwise(
@@ -108,7 +128,7 @@ def main(argv=None) -> int:
 
     manifest = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
-        "model": "HD Utility DDEV 4x4 Active Suspension",
+        "model": model_label,
         "scenario_name": "right single-wheel deep pothole",
         "scenario": {
             "leading_edge_m": scenario.leading_edge_m,

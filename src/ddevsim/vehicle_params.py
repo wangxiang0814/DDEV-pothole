@@ -230,12 +230,17 @@ def load_vehicle(
     else:
         drop_mm = parse_roll_centre_drop_mm(text)
         if drop_mm is None:
-            raise ValueError(
-                "model does not declare a roll-centre height; pass "
-                "roll_centre_drop_override_m"
+            # Not every TruckSim suspension dataset labels a roll-centre offset
+            # (the corner-module Compact Utility Truck does not).  Assuming the roll
+            # centre at axle-centre height is the standard first-order choice and is
+            # recorded as an assumption rather than presented as data.
+            drop_m = 0.0
+            sources["roll_centre_height_m"] = (
+                "assumed:roll centre at axle-centre height (no label in the model)"
             )
-        drop_m = drop_mm / 1000.0
-        sources["roll_centre_height_m"] = "parsed:roll-centre dataset label"
+        else:
+            drop_m = drop_mm / 1000.0
+            sources["roll_centre_height_m"] = "parsed:roll-centre dataset label"
     roll_centre_height_m = tyre_radius_m - drop_m
 
     jounce_mm, rebound_mm = parse_jounce_rebound_travel_mm(text)
