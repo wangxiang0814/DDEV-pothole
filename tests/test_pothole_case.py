@@ -15,6 +15,9 @@ SOURCE = """PARSFILE
 SET_AZIMUTH 150
 SET_ELEVATION 4.5
 SET_DISTANCE 100
+SET_LOOKPOINT_X 0
+SET_LOOKPOINT_Z 0.25
+SET_FIELD_OF_VIEW 10
 M_SU 6500
 M_PL 2000
 ENTER_PARSFILE Procedures\\old.par
@@ -39,19 +42,49 @@ class PotholeCaseTests(unittest.TestCase):
         self.assertIn("102.25, 0, 0, -0.45, -0.45, 0, 0", transformed)
         self.assertIn("LIN(5) -1.3875", transformed)
         self.assertIn("LOUT(5) -0.5875", transformed)
-        self.assertIn("COLOR(5) 0.10 0.10 0.10", transformed)
-        self.assertIn("MATERIAL(5) Dirt", transformed)
+        # the hole must be near-black and clearly darker than the road
+        self.assertIn("COLOR(5) 0.050 0.050 0.050", transformed)
+        self.assertIn("COLOR(1) 0.300 0.300 0.330", transformed)
+        # a flat built-in material, so the rendered colour is exactly this value
+        self.assertIn("MATERIAL(1) No Texture", transformed)
+        self.assertIn("MATERIAL(5) No Texture", transformed)
+        # the road must be wide enough to be visible around the vehicle
+        self.assertIn("LIN(1) -5", transformed)
+        self.assertIn("LOUT(1) 5", transformed)
         self.assertIn("MU_ROAD_CONSTANT 0.7", transformed)
 
     def test_transform_sets_clear_camera_and_keeps_ddev_contract_and_parameters(self):
         transformed = transform_single_wheel_pothole(SOURCE, PotholeScenario())
         self.assertIn("SET_AZIMUTH -45", transformed)
-        self.assertIn("SET_ELEVATION 14", transformed)
-        self.assertIn("SET_DISTANCE 16", transformed)
+        self.assertIn("SET_ELEVATION 16", transformed)
+        self.assertIn("SET_DISTANCE 20", transformed)
+        # look point at mid-body height, not wheel height, and a lens wide enough
+        # to contain the whole vehicle
+        self.assertIn("SET_LOOKPOINT_Z 1", transformed)
+        self.assertIn("SET_FIELD_OF_VIEW 26", transformed)
         self.assertIn("Partly Cloudy Sky", transformed)
         self.assertIn("IMPORT IMP_MYUSM_L1 Add 0.0! 0", transformed)
         self.assertIn("EXPORT AVy_L1", transformed)
         self.assertEqual(parse_protected_parameters(transformed), parse_protected_parameters(SOURCE))
+
+    def test_camera_is_a_scenario_parameter_not_a_constant(self):
+        scenario = PotholeScenario(
+            **{**PotholeScenario().__dict__, "camera_distance_m": 30.0,
+               "camera_field_of_view_deg": 40.0, "camera_look_z_m": 1.6}
+        )
+        transformed = transform_single_wheel_pothole(SOURCE, scenario)
+        self.assertIn("SET_DISTANCE 30", transformed)
+        self.assertIn("SET_FIELD_OF_VIEW 40", transformed)
+        self.assertIn("SET_LOOKPOINT_Z 1.6", transformed)
+
+    def test_optional_camera_directives_may_be_absent(self):
+        # A minimal source without look-point / FOV entries must still transform.
+        stripped = "\n".join(
+            line for line in SOURCE.splitlines()
+            if not line.startswith(("SET_LOOKPOINT_", "SET_FIELD_OF_VIEW"))
+        )
+        transformed = transform_single_wheel_pothole(stripped, PotholeScenario())
+        self.assertIn("SET_AZIMUTH -45", transformed)
 
     def test_builder_gives_pothole_run_its_own_history_files(self):
         with tempfile.TemporaryDirectory() as directory:

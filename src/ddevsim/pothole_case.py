@@ -32,6 +32,29 @@ class PotholeScenario:
     stop_s: float = 9.0
     target_speed_kph: float = 2.8
 
+    # ---- visual scene -----------------------------------------------------
+    # Camera framing is part of the scenario because a bad lens makes the
+    # manoeuvre unreadable in the exported video.  The stock camera dataset for
+    # this model is a 10 deg telephoto aimed at wheel height, which frames only
+    # ~2.8 m at 16 m and therefore shows a single wheel instead of the vehicle.
+    # (A 10 deg lens at distance d covers 2*d*tan(5 deg).)
+    camera_azimuth_deg: float = -45.0
+    camera_elevation_deg: float = 16.0
+    camera_distance_m: float = 20.0
+    camera_look_x_m: float = -2.0
+    camera_look_z_m: float = 1.0
+    camera_field_of_view_deg: float = 26.0
+
+    # ---- road appearance --------------------------------------------------
+    # A dark surface that reads clearly against the light-green background
+    # spheres.  "No Texture" is a built-in flat material, so the rendered colour
+    # is exactly the value given here rather than whatever a texture map happens
+    # to contain.
+    road_half_width_m: float = 5.0
+    road_color: tuple = (0.30, 0.30, 0.33)
+    pothole_color: tuple = (0.05, 0.05, 0.05)
+    road_material: str = "No Texture"
+
     # ------------------------------------------------------------------ geometry
     @property
     def leading_edge_m(self) -> float:
@@ -171,36 +194,36 @@ ENTER_PARSFILE Roads\\Shapes\\DDEV_single_wheel_pothole.par
 NLANES 5
 OPTTHRESHOLD 2
 MIRROR 0
-COLOR(1) 0.48 0.42 0.32
-MATERIAL(1) Dirt
-LIN(1) -3
-LOUT(1) 3
+COLOR(1) {road_rgb}
+MATERIAL(1) {road_mat}
+LIN(1) {road_in}
+LOUT(1) {road_out}
 SSTART(1) 95
 SSTOP(1) {s0}
 DZ(1) 0
-COLOR(2) 0.48 0.42 0.32
-MATERIAL(2) Dirt
-LIN(2) -3
-LOUT(2) 3
+COLOR(2) {road_rgb}
+MATERIAL(2) {road_mat}
+LIN(2) {road_in}
+LOUT(2) {road_out}
 SSTART(2) {s1}
 SSTOP(2) 140
 DZ(2) 0
-COLOR(3) 0.48 0.42 0.32
-MATERIAL(3) Dirt
+COLOR(3) {road_rgb}
+MATERIAL(3) {road_mat}
 LIN(3) {y1}
-LOUT(3) 3
+LOUT(3) {road_out}
 SSTART(3) {s0}
 SSTOP(3) {s1}
 DZ(3) 0
-COLOR(4) 0.48 0.42 0.32
-MATERIAL(4) Dirt
-LIN(4) -3
+COLOR(4) {road_rgb}
+MATERIAL(4) {road_mat}
+LIN(4) {road_in}
 LOUT(4) {y0}
 SSTART(4) {s0}
 SSTOP(4) {s1}
 DZ(4) 0
-COLOR(5) 0.10 0.10 0.10
-MATERIAL(5) Dirt
+COLOR(5) {hole_rgb}
+MATERIAL(5) {road_mat}
 LIN(5) {y0}
 LOUT(5) {y1}
 SSTART(5) {s0}
@@ -287,6 +310,11 @@ EXIT_PARSFILE Procedures\\DDEV_single_wheel_deep_pothole.par""".format(
         s1=_fmt(s1),
         z=_fmt(z),
         friction=_fmt(scenario.friction),
+        road_in=_fmt(-abs(scenario.road_half_width_m)),
+        road_out=_fmt(abs(scenario.road_half_width_m)),
+        road_rgb="%.3f %.3f %.3f" % tuple(scenario.road_color),
+        hole_rgb="%.3f %.3f %.3f" % tuple(scenario.pothole_color),
+        road_mat=scenario.road_material,
     )
 
 
@@ -294,14 +322,48 @@ def transform_single_wheel_pothole(source: str, scenario: PotholeScenario) -> st
     protected_before = parse_protected_parameters(source)
     text = source
     replacements = (
-        (r"(?m)^SET_AZIMUTH\s+[-+0-9.eE]+\s*$", "SET_AZIMUTH -45", "camera azimuth"),
-        (r"(?m)^SET_ELEVATION\s+[-+0-9.eE]+\s*$", "SET_ELEVATION 14", "camera elevation"),
-        (r"(?m)^SET_DISTANCE\s+[-+0-9.eE]+\s*$", "SET_DISTANCE 16", "camera distance"),
+        (
+            r"(?m)^SET_AZIMUTH\s+[-+0-9.eE]+\s*$",
+            "SET_AZIMUTH %s" % _fmt(scenario.camera_azimuth_deg),
+            "camera azimuth", True,
+        ),
+        (
+            r"(?m)^SET_ELEVATION\s+[-+0-9.eE]+\s*$",
+            "SET_ELEVATION %s" % _fmt(scenario.camera_elevation_deg),
+            "camera elevation", True,
+        ),
+        (
+            r"(?m)^SET_DISTANCE\s+[-+0-9.eE]+\s*$",
+            "SET_DISTANCE %s" % _fmt(scenario.camera_distance_m),
+            "camera distance", True,
+        ),
+        # The look point must sit at mid-body height, not wheel height: the stock
+        # value is 0.25 m, which frames the wheels and cuts the vehicle in half.
+        (
+            r"(?m)^SET_LOOKPOINT_X\s+[-+0-9.eE]+\s*$",
+            "SET_LOOKPOINT_X %s" % _fmt(scenario.camera_look_x_m),
+            "camera look point X", False,
+        ),
+        (
+            r"(?m)^SET_LOOKPOINT_Z\s+[-+0-9.eE]+\s*$",
+            "SET_LOOKPOINT_Z %s" % _fmt(scenario.camera_look_z_m),
+            "camera look point Z", False,
+        ),
+        # A 10 deg lens covers only 2*d*tan(5 deg) = 2.8 m at 16 m, which cannot
+        # contain a 5.5 m vehicle; this was why the exported video showed a wheel
+        # instead of the truck.
+        (
+            r"(?m)^SET_FIELD_OF_VIEW\s+[-+0-9.eE]+\s*$",
+            "SET_FIELD_OF_VIEW %s" % _fmt(scenario.camera_field_of_view_deg),
+            "camera field of view", False,
+        ),
     )
-    for pattern, replacement, label in replacements:
+    for pattern, replacement, label, required in replacements:
         text, count = re.subn(pattern, replacement, text, count=1)
-        if count != 1:
+        if required and count != 1:
             raise ValueError("expected exactly one %s" % label)
+        if count > 1:
+            raise ValueError("expected at most one %s, found %d" % (label, count))
     pattern = (
         r"ENTER_PARSFILE\s+Procedures\\[^\r\n]+\r?\n"
         r".*?"

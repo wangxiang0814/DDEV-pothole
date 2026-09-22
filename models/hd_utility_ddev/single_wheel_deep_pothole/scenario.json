@@ -8,5 +8,23 @@
   "friction": 0.7,
   "road_length_m": 40.0,
   "stop_s": 9.0,
-  "target_speed_kph": 2.8
+  "target_speed_kph": 2.8,
+  "camera_azimuth_deg": -45.0,
+  "camera_elevation_deg": 16.0,
+  "camera_distance_m": 20.0,
+  "camera_look_x_m": -2.0,
+  "camera_look_z_m": 1.0,
+  "camera_field_of_view_deg": 26.0,
+  "road_half_width_m": 5.0,
+  "road_color": [
+    0.3,
+    0.3,
+    0.33
+  ],
+  "pothole_color": [
+    0.05,
+    0.05,
+    0.05
+  ],
+  "road_material": "No Texture"
 }
