@@ -15,6 +15,7 @@ Usage
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import sys
@@ -89,14 +90,34 @@ def main(argv=None) -> int:
     # 2. controller built from the generated model + the measured baseline
     vehicle = load_vehicle(base_run_all, static_wheel_load_n=calibration.wheel_load_n)
 
-    # Use the measured actuator effectiveness matrix when it is available.  Without
-    # it the feedforward assumes a 1:1 actuator, which under-commands badly.
+    # Use the measured actuator effectiveness matrix when it is available **and still
+    # valid**.  A gain matrix is a measurement of one particular plant, so it becomes
+    # wrong the moment the model changes: a matrix measured before the front-spring
+    # correction was applied produced a yaw excursion of 70 deg, against 34 deg for the
+    # same controller with no matrix at all.  The probe records the SHA-256 of the
+    # ``run_all.par`` it measured, and this gate refuses anything that does not match
+    # the model about to be simulated.
     gain_matrix = None
     if gain_report_path.exists():
         payload = json.loads(gain_report_path.read_text(encoding="utf-8"))
-        table = payload["gain_matrix_command_to_load"]
-        gain_matrix = [[table[j][i] for i in ("FL", "FR", "RL", "RR")]
-                       for j in ("FL", "FR", "RL", "RR")]
+        measured_sha = payload.get("model_run_all_sha256")
+        current_sha = hashlib.sha256(base_run_all.read_bytes()).hexdigest()
+        if measured_sha is None:
+            print(
+                "WARNING: %s predates the model hash gate and cannot be shown to match "
+                "this model; ignoring it. Re-run scripts\\probe_actuator_gain.py."
+                % gain_report_path.name
+            )
+        elif measured_sha != current_sha:
+            print(
+                "WARNING: %s was measured against a different model "
+                "(recorded %s..., current %s...); ignoring it."
+                % (gain_report_path.name, measured_sha[:12], current_sha[:12])
+            )
+        else:
+            table = payload["gain_matrix_command_to_load"]
+            gain_matrix = [[table[j][i] for i in ("FL", "FR", "RL", "RR")]
+                           for j in ("FL", "FR", "RL", "RR")]
 
     controller = DeepPotholeExpertController(
         scenario=scenario,

@@ -10,6 +10,15 @@
   "stop_s": 9.0,
   "target_speed_kph": 2.8,
   "approach_distance_m": 1.1,
+  "road_lead_in_m": 15.0,
+  "road_run_out_m": 45.0,
+  "offroad_half_width_m": 200.0,
+  "ground_material": "Dirt",
+  "ground_color": [
+    0.45,
+    0.42,
+    0.3
+  ],
   "camera_azimuth_deg": -45.0,
   "camera_elevation_deg": 16.0,
   "camera_distance_m": 16.0,

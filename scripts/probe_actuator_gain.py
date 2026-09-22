@@ -28,6 +28,7 @@ Usage
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import sys
 from datetime import datetime, timezone
@@ -48,7 +49,9 @@ from ddevsim.pothole_case import (  # noqa: E402
 
 CORNERS = ("FL", "FR", "RL", "RR")
 SUFFIX = {"FL": "L1", "FR": "R1", "RL": "L2", "RR": "R2"}
-FORCE_AMPLITUDE_N = 20000.0
+#: The probe amplitude is resolved at run time from the vehicle's settled static corner
+#: load (``--amplitude-n`` overrides it); see the argument help for why the fixed
+#: 20 000 N default was removed.
 HOLD_S = 5.0
 LOG_DECIMATION = 100  # 0.5 ms step -> 50 ms CSV
 
@@ -85,7 +88,19 @@ def main() -> int:
              "hd_pothole keeps the original solid-axle probe",
     )
     parser.add_argument("--hold-s", type=float, default=HOLD_S)
-    parser.add_argument("--amplitude-n", type=float, default=FORCE_AMPLITUDE_N)
+    parser.add_argument(
+        "--amplitude-n", type=float, default=None,
+        help="spring-seat command amplitude.  Default (None) scales it from the "
+             "vehicle's own settled static corner load (see --amplitude-scale), which "
+             "keeps the probe inside the suspension's travel on every model.  The old "
+             "fixed 20000 N default drove the corner-module front suspension straight "
+             "onto its jounce stop and measured a limit cycle instead of a gain.",
+    )
+    parser.add_argument(
+        "--amplitude-scale", type=float, default=1.0,
+        help="multiple of the settled static corner load used when --amplitude-n is "
+             "not given",
+    )
     parser.add_argument("--out-dir", type=Path, default=None)
     args = parser.parse_args()
 
@@ -110,8 +125,9 @@ def main() -> int:
             "build_corner_module_ddev.py)" % base
         )
     probe_model = out_dir / "probe_model"
+    run_all = base / "run_all.par"
     build_single_wheel_pothole_case(
-        base / "run_all.par",
+        run_all,
         base / "simfile.sim",
         probe_model,
         scenario=PotholeScenario(target_speed_kph=0.0, stop_s=args.hold_s + 0.5),
@@ -132,6 +148,20 @@ def main() -> int:
     print("baseline settled: " + " ".join(
         "Fz_%s=%.1f" % (w, base["exp_Fz_" + w]) for w in SUFFIX.values()))
 
+    # Resolve the probe amplitude against the vehicle's own settled static load, so the
+    # same script stays inside the travel of an 8.9 t truck and a 1.36 t corner module.
+    if args.amplitude_n is not None:
+        amplitude = float(args.amplitude_n)
+    else:
+        reference = max(base["exp_Fz_" + w] for w in SUFFIX.values())
+        if not (reference > 0.0):
+            raise RuntimeError(
+                "baseline settled with no wheel load; the probe model is not resting on "
+                "the ground, so no gain can be measured"
+            )
+        amplitude = args.amplitude_scale * reference
+    print("probe amplitude: %.0f N per channel" % amplitude)
+
     gain_matrix: Dict[str, Dict[str, float]] = {c: {} for c in CORNERS}
     deflection_matrix: Dict[str, Dict[str, float]] = {c: {} for c in CORNERS}
     roll_response: Dict[str, float] = {}
@@ -139,7 +169,7 @@ def main() -> int:
     for index, corner in enumerate(CORNERS):
         port = 4 + index  # IMP_FS order is FL, FR, RL, RR
         case = run_stepwise(
-            simfile, _command(port, args.amplitude_n),
+            simfile, _command(port, amplitude),
             out_dir / ("force_%s.csv" % corner),
             IMPORT_NAMES, export_names, log_decimation=LOG_DECIMATION, stop_at_s=args.hold_s,
         )
@@ -151,12 +181,12 @@ def main() -> int:
             wheel = SUFFIX[other]
             delta_load = settled["exp_Fz_" + wheel] - base["exp_Fz_" + wheel]
             delta_defl = settled["exp_CmpS_" + wheel] - base["exp_CmpS_" + wheel]
-            gain_matrix[corner][other] = delta_load / FORCE_AMPLITUDE_N
-            deflection_matrix[corner][other] = delta_defl / FORCE_AMPLITUDE_N
+            gain_matrix[corner][other] = delta_load / amplitude
+            deflection_matrix[corner][other] = delta_defl / amplitude
         roll_response[corner] = settled["exp_Roll_E"] - base["exp_Roll_E"]
 
-        print("+%.0f N at %-3s -> " % (args.amplitude_n, corner) + " ".join(
-            "dFz_%s=%+8.0f" % (o, gain_matrix[corner][o] * args.amplitude_n)
+        print("%+.0f N at %-3s -> " % (amplitude, corner) + " ".join(
+            "dFz_%s=%+8.0f" % (o, gain_matrix[corner][o] * amplitude)
             for o in CORNERS) + "  dRoll=%+.3f deg" % roll_response[corner])
 
         reports.append({"corner": corner, "settled": settled})
@@ -169,7 +199,8 @@ def main() -> int:
     payload = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "simfile": str(simfile),
-        "force_amplitude_n": args.amplitude_n,
+        "model_run_all_sha256": hashlib.sha256(run_all.read_bytes()).hexdigest(),
+        "force_amplitude_n": amplitude,
         "hold_s": args.hold_s,
         "baseline_settled": base,
         "gain_matrix_command_to_load": gain_matrix,

@@ -73,6 +73,9 @@ CHANNEL_UNITS: Dict[str, str] = {
     "Vz_Wc_L1": UNVERIFIED, "Vz_Wc_R1": UNVERIFIED,
     "Vz_Wc_L2": UNVERIFIED, "Vz_Wc_R2": UNVERIFIED,
     "Xo": "m", "Vx": "km/h", "Roll_E": "deg", "Pitch": "deg",
+    # Pose channels added for lateral-sway diagnosis.  ``.vs`` header declares
+    # Yo/Zo in m and Yaw in deg ("Yaw, vehicle").
+    "Yo": "m", "Zo": "m", "Yaw": "deg",
     # --- wheel-centre stations (m) -----------------------------------------
     # Used by the expert controller's support-phase state machine so that no
     # axle-offset constant is hard-coded.  Declared ``m`` in the ``.vs`` header

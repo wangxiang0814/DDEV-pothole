@@ -1,5 +1,5 @@
 {
-  "created_utc": "2026-09-22T16:58:17.514797+00:00",
+  "created_utc": "2026-09-22T17:34:25.074741+00:00",
   "model": "Corner Module DDEV (Compact Utility Truck I_I)",
   "scenario_name": "right single-wheel deep pothole",
   "scenario": {
@@ -44,6 +44,9 @@
     "Vx",
     "Roll_E",
     "Pitch",
+    "Yo",
+    "Zo",
+    "Yaw",
     "X_L1",
     "X_R1",
     "X_L2",
@@ -51,21 +54,21 @@
   ],
   "calibration": {
     "wheel_load_n": {
-      "FL": 3483.6718233333336,
-      "FR": 3482.888043333333,
-      "RL": 3162.5619033333332,
-      "RR": 3162.58216
+      "FL": 5713.320766666667,
+      "FR": 1264.0909266666665,
+      "RL": 952.8804896666667,
+      "RR": 5351.373026666667
     },
     "deflection_m": {
-      "FL": 0.16813308766666668,
-      "FR": 0.16813300533333334,
-      "RL": 0.06661936293333334,
-      "RR": 0.06661928803333333
+      "FL": 0.08309348073333332,
+      "FR": 0.16812790133333336,
+      "RL": 0.06661288309999999,
+      "RR": 0.06662568299999999
     },
     "settle_s": 0.05,
     "source_csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\corner_module_ddev\\single_wheel_deep_pothole\\static_calibration.csv",
     "model": "Corner Module DDEV (Compact Utility Truck I_I)",
-    "total_load_drift_fraction": 0.12337477787921208,
+    "total_load_drift_fraction": 0.1594284516968694,
     "quiet_at_rest": false
   },
   "vehicle": {
@@ -77,15 +80,15 @@
     "tyre_radius_m": 0.263,
     "cg_height_m": 0.7,
     "roll_centre_height_m": 0.263,
-    "cg_to_front_axle_m": 0.9160527789394319,
-    "cg_to_rear_axle_m": 1.0089472210605681,
+    "cg_to_front_axle_m": 0.9137173560216731,
+    "cg_to_rear_axle_m": 1.011282643978327,
     "jounce_limit_m": 0.121,
     "rebound_limit_m": 0.061,
     "static_wheel_load_n": {
-      "FL": 3483.6718233333336,
-      "FR": 3482.888043333333,
-      "RL": 3162.5619033333332,
-      "RR": 3162.58216
+      "FL": 5713.320766666667,
+      "FR": 1264.0909266666665,
+      "RL": 952.8804896666667,
+      "RR": 5351.373026666667
     },
     "sources": {
       "M_SU": "parsed:run_all.par",
@@ -105,8 +108,8 @@
       "cg_to_front_axle_m": "derived:static wheel loads",
       "cg_to_rear_axle_m": "derived:static wheel loads"
     },
-    "weight_residual_n": 45.340070000000196,
-    "weight_residual_fraction": 0.0034111555778537565
+    "weight_residual_n": 55.37879033333229,
+    "weight_residual_fraction": 0.004169566801987034
   },
   "plan": {
     "pothole_span_m": [
@@ -115,29 +118,29 @@
     ],
     "pre_lift_distance_m": 0.25,
     "control_period_s": 0.01,
-    "actuator_gain_matrix_used": true,
+    "actuator_gain_matrix_used": false,
     "required_command_n": {
-      "FR": 76660.22372855795,
-      "RR": 58124.52288790581
+      "FR": 1264.0909266666665,
+      "RR": 5629.310540069905
     },
     "force_limits_n": [
-      -17418.359116666667,
-      17418.359116666667
+      -11426.641533333333,
+      11426.641533333333
     ],
     "support_solutions": {
       "FR": {
         "lifted_corner": "FR",
         "target_load_n": {
-          "FL": 6738.6723789840735,
+          "FL": 6754.852970263429,
           "FR": 0.0,
-          "RL": 517.230646765485,
-          "RR": 6081.14097425044
+          "RL": 501.0500554861305,
+          "RR": 6081.140974250441
         },
         "feedforward_force_n": {
-          "FL": 3239.8871989840736,
-          "FR": -3482.888043333333,
-          "RL": -2645.3312565678484,
-          "RR": 2918.5588142504403
+          "FL": 1023.0726068189842,
+          "FR": -1264.0909266666665,
+          "RL": -451.8304341805362,
+          "RR": 729.767947583774
         },
         "cg_lateral_shift_m": 0.05549206349206348,
         "cg_longitudinal_shift_m": -0.036322077922077915,
@@ -149,21 +152,21 @@
           "RL": -0.08,
           "RR": -0.08
         },
-        "minimal_load_n": 517.230646765485
+        "minimal_load_n": 501.0500554861305
       },
       "RR": {
         "lifted_corner": "RR",
         "target_load_n": {
-          "FL": 657.5314047336329,
-          "FR": 6081.14097425044,
-          "RL": 6598.3716210159255,
+          "FL": 673.7119960129869,
+          "FR": 6081.140974250441,
+          "RL": 6582.191029736572,
           "RR": 0.0
         },
         "feedforward_force_n": {
-          "FL": -2841.253775266367,
-          "FR": 2598.2529309171073,
-          "RL": 3435.8097176825922,
-          "RR": -3162.58216
+          "FL": -5058.068367431458,
+          "FR": 4817.050047583774,
+          "RL": 5629.310540069905,
+          "RR": -5351.373026666667
         },
         "cg_lateral_shift_m": 0.05549206349206348,
         "cg_longitudinal_shift_m": -0.036322077922077915,
@@ -175,25 +178,25 @@
           "RL": 0.08,
           "RR": -0.08
         },
-        "minimal_load_n": 657.5314047336329
+        "minimal_load_n": 673.7119960129869
       }
     },
     "feedforward_commands": {
       "FR": {
-        "FL": 43407.1,
-        "FR": -11516.5,
-        "RL": -76660.2,
-        "RR": 28510.2
+        "FL": 1023.1,
+        "FR": -1264.1,
+        "RL": -451.8,
+        "RR": 729.8
       },
       "RR": {
-        "FL": -21563.6,
-        "FR": 58124.5,
-        "RL": -35663.6,
-        "RR": -22448.2
+        "FL": -5058.1,
+        "FR": 4817.1,
+        "RL": 5629.3,
+        "RR": -5351.4
       }
     },
-    "final_step": 4,
-    "final_step_name": "4 recover to normal driving",
+    "final_step": 5,
+    "final_step_name": "done",
     "safe_stop": false,
     "safe_stop_reason": ""
   },

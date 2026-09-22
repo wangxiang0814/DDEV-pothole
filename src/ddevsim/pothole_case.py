@@ -7,11 +7,14 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Dict
 
-from .hd_ddev_case import parse_protected_parameters
+from .hd_ddev_case import DDEV_EXPORTS, parse_protected_parameters
 
 
 SCENARIO_EXPORTS = (
     "Xo", "Vx", "Roll_E", "Pitch",
+    # Full pose.  Lateral position and yaw are what reveal lateral sway, so they are
+    # exported too, along with the vehicle origin height.
+    "Yo", "Zo", "Yaw",
     # Wheel-centre stations (m).  The expert controller drives its support-phase
     # state machine from these real, solver-reported wheel positions, so no
     # axle-offset constant is hard-coded anywhere in the control path.
@@ -35,6 +38,23 @@ class PotholeScenario:
     #: is derived from it rather than hard-coded, so the scenario stays consistent when
     #: the hole is moved.
     approach_distance_m: float = 1.1
+
+    # ---- road extent -------------------------------------------------------
+    #: Surface shapes and the elevation map are resolved against the road PATH, so the
+    #: path must span every station the scene uses.  The original template declared
+    #: ``SPATH_START 0 / SEGMENT_LENGTH 40`` while the vehicle drove at station 100-107
+    #: and the shapes were declared at 95-140 -- i.e. the whole scene sat outside the
+    #: path, no surface geometry was generated there, and the vehicle appeared to
+    #: float.  These two values now drive every station in the scene.
+    road_lead_in_m: float = 15.0
+    road_run_out_m: float = 45.0
+    #: Lateral extent of the off-road ground either side of the carriageway.  Without
+    #: it the vehicle drives on a 10 m ribbon with nothing beside it, which also reads
+    #: as floating.
+    offroad_half_width_m: float = 200.0
+    #: Material for the off-road ground; must exist in Animator/Road_Materials/road.mtl
+    ground_material: str = "Dirt"
+    ground_color: tuple = (0.45, 0.42, 0.30)
 
     # ---- visual scene -----------------------------------------------------
     # Camera framing is part of the scenario because a bad lens makes the
@@ -104,6 +124,22 @@ class PotholeScenario:
     def wheel_span_m(self) -> float:
         """Distance a wheel must travel from lip entry to lip exit."""
         return self.length_m
+
+    # ------------------------------------------------------------------ road extent
+    @property
+    def road_start_m(self) -> float:
+        """First station at which any surface geometry exists."""
+        return self.leading_edge_m - self.road_lead_in_m
+
+    @property
+    def road_end_m(self) -> float:
+        """Last station at which any surface geometry exists."""
+        return self.trailing_edge_m + self.road_run_out_m
+
+    @property
+    def path_length_m(self) -> float:
+        """Road PATH length; must cover ``[0, road_end_m]`` or nothing renders."""
+        return self.road_end_m
 
 
 
@@ -188,20 +224,20 @@ ENTER_PARSFILE Roads\\3D_Road\\DDEV_single_wheel_pothole.par
 SET_IROAD_FOR_ID 0
 CURRENT_ROAD_ID = ROAD_ID
 set_description road_id DDEV Right Single-Wheel Deep Pothole
-ENTER_PARSFILE Roads\\Builder\\DDEV_straight_40m.par
-#FullDataName Path/Road: Segment Builder (Legacy)`DDEV Straight 40 m`DDEV Research
+ENTER_PARSFILE Roads\\Builder\\DDEV_straight_path.par
+#FullDataName Path/Road: Segment Builder (Legacy)`DDEV Straight Path`DDEV Research
 SET_IPATH_FOR_ID 0
 OPT_PATH_LOOP 0
 OPT_PATH_START 0
 PATH_ID_DM = PATH_ID
-set_description path_id DDEV Straight 40 m
+set_description path_id DDEV Straight Path
 SPATH_START 0
 NSEGMENTS 1
 IPATHSEG 1
 SEGMENT_TYPE 0
-SEGMENT_LENGTH {road_length}
+SEGMENT_LENGTH {path_length}
 LOG_ENTRY DDEV straight path
-EXIT_PARSFILE Roads\\Builder\\DDEV_straight_40m.par
+EXIT_PARSFILE Roads\\Builder\\DDEV_straight_path.par
 
 ROAD_PATH_ID = PATH_ID
 set_description road_path_id DDEV Straight 40 m
@@ -235,20 +271,20 @@ EXIT_PARSFILE Roads\\Friction\\DDEV_dry_dirt_mu_070.par
 
 ENTER_PARSFILE Roads\\Shapes\\DDEV_single_wheel_pothole.par
 #FullDataName Road: Animator Surface Shapes`DDEV Right Single-Wheel Deep Pothole`DDEV Research
-NLANES 5
+NLANES 7
 OPTTHRESHOLD 1
 MIRROR 0
-COLOR(1) {road_rgb}
-MATERIAL(1) {road_mat}
-SPECULAR(1) 1
+COLOR(1) {ground_rgb}
+MATERIAL(1) {ground_mat}
+SPECULAR(1) 0
 SCALE(1) 10
 LTILES(1) 100
-LIN(1) {road_in}
+LIN(1) {offroad_in}
 LINUNITS(1) m
-LOUT(1) {road_out}
+LOUT(1) {road_in}
 LOUTUNITS(1) m
-SSTART(1) 95
-SSTOP(1) {s0}
+SSTART(1) {road_start}
+SSTOP(1) {road_end}
 SINT(1) 10
 DZ(1) 0
 COLOR(2) {road_rgb}
@@ -260,8 +296,8 @@ LIN(2) {road_in}
 LINUNITS(2) m
 LOUT(2) {road_out}
 LOUTUNITS(2) m
-SSTART(2) {s1}
-SSTOP(2) 140
+SSTART(2) {road_start}
+SSTOP(2) {s0}
 SINT(2) 10
 DZ(2) 0
 COLOR(3) {road_rgb}
@@ -269,12 +305,12 @@ MATERIAL(3) {road_mat}
 SPECULAR(3) 1
 SCALE(3) 10
 LTILES(3) 100
-LIN(3) {y1}
+LIN(3) {road_in}
 LINUNITS(3) m
 LOUT(3) {road_out}
 LOUTUNITS(3) m
-SSTART(3) {s0}
-SSTOP(3) {s1}
+SSTART(3) {s1}
+SSTOP(3) {road_end}
 SINT(3) 10
 DZ(3) 0
 COLOR(4) {road_rgb}
@@ -282,27 +318,53 @@ MATERIAL(4) {road_mat}
 SPECULAR(4) 1
 SCALE(4) 10
 LTILES(4) 100
-LIN(4) {road_in}
+LIN(4) {y1}
 LINUNITS(4) m
-LOUT(4) {y0}
+LOUT(4) {road_out}
 LOUTUNITS(4) m
 SSTART(4) {s0}
 SSTOP(4) {s1}
 SINT(4) 10
 DZ(4) 0
-COLOR(5) {hole_rgb}
-MATERIAL(5) {hole_mat}
-SPECULAR(5) 0
+COLOR(5) {road_rgb}
+MATERIAL(5) {road_mat}
+SPECULAR(5) 1
 SCALE(5) 10
 LTILES(5) 100
-LIN(5) {y0}
+LIN(5) {road_in}
 LINUNITS(5) m
-LOUT(5) {y1}
+LOUT(5) {y0}
 LOUTUNITS(5) m
 SSTART(5) {s0}
 SSTOP(5) {s1}
 SINT(5) 10
-DZ(5) {z}
+DZ(5) 0
+COLOR(6) {hole_rgb}
+MATERIAL(6) {hole_mat}
+SPECULAR(6) 0
+SCALE(6) 10
+LTILES(6) 100
+LIN(6) {y0}
+LINUNITS(6) m
+LOUT(6) {y1}
+LOUTUNITS(6) m
+SSTART(6) {s0}
+SSTOP(6) {s1}
+SINT(6) 10
+DZ(6) {z}
+COLOR(7) {ground_rgb}
+MATERIAL(7) {ground_mat}
+SPECULAR(7) 0
+SCALE(7) 10
+LTILES(7) 100
+LIN(7) {road_out}
+LINUNITS(7) m
+LOUT(7) {offroad_out}
+LOUTUNITS(7) m
+SSTART(7) {road_start}
+SSTOP(7) {road_end}
+SINT(7) 10
+DZ(7) 0
 MTL_FILE Animator/Road_Materials/road.mtl
 LOG_ENTRY DDEV visual right-track deep pothole
 EXIT_PARSFILE Roads\\Shapes\\DDEV_single_wheel_pothole.par
@@ -374,7 +436,13 @@ LOG_ENTRY Used Dataset: Procedures; {{ DDEV Research }} HD Utility DDEV - Right 
 EXIT_PARSFILE Procedures\\DDEV_single_wheel_deep_pothole.par""".format(
         stop=_fmt(scenario.stop_s),
         speed=_fmt(scenario.target_speed_kph),
-        road_length=_fmt(scenario.road_length_m),
+        path_length=_fmt(scenario.path_length_m),
+        road_start=_fmt(scenario.road_start_m),
+        road_end=_fmt(scenario.road_end_m),
+        offroad_in=_fmt(-abs(scenario.offroad_half_width_m)),
+        offroad_out=_fmt(abs(scenario.offroad_half_width_m)),
+        ground_rgb="%.3f %.3f %.3f" % tuple(scenario.ground_color),
+        ground_mat=scenario.ground_material,
         y0=_fmt(y0),
         y1=_fmt(y1),
         ye0=_fmt(y0 + scenario.edge_transition_m),
@@ -474,17 +542,30 @@ def build_single_wheel_pothole_case(
 
     source_text = Path(source_run_all).read_text(encoding="utf-8", errors="replace")
     transformed = transform_single_wheel_pothole(source_text, scenario)
+    # Rewrite the WHOLE export block in canonical contract order.
+    #
+    # Appending only the missing names is not enough.  The solver binds the export
+    # array positionally, so if the file's order differs from the order the runner
+    # passes, every channel after the first difference is silently misread -- adding
+    # Yo/Zo/Yaw to the contract while a base case still carried the older list put
+    # them at the end of the file, and the run then reported Yo as a wheel station.
+    # Removing and rewriting guarantees the order matches by construction.
+    already = set(re.findall(r"(?m)^EXPORT\s+(\S+)\s*$", transformed))
+    # DDEV_EXPORTS holds whole lines ("EXPORT AVy_L1"), so compare bare names.
+    ddev_names = [line.split(None, 1)[1] for line in DDEV_EXPORTS]
+    unknown = already - set(ddev_names) - set(SCENARIO_EXPORTS)
+    if unknown:
+        raise ValueError(
+            "source exports channels outside the contract: %s" % sorted(unknown)
+        )
+    transformed = re.sub(r"(?m)^EXPORT\s+\S+[ \t]*\r?\n?", "", transformed)
     final_end = transformed.rfind("\nEND")
     if final_end < 0:
         raise ValueError("scenario run has no final END")
-    # The source may already export some scenario channels (a control object built with
-    # extra_exports does), so append only the ones missing: a duplicate EXPORT is
-    # rejected by the solver's contract.
-    already = set(re.findall(r"(?m)^EXPORT\s+(\S+)\s*$", transformed))
-    missing = [name for name in SCENARIO_EXPORTS if name not in already]
-    if missing:
-        scenario_exports = "\n".join("EXPORT " + name for name in missing)
-        transformed = transformed[:final_end] + "\n" + scenario_exports + transformed[final_end:]
+    contract_exports = "\n".join(
+        "EXPORT " + name for name in ddev_names + list(SCENARIO_EXPORTS)
+    )
+    transformed = transformed[:final_end] + "\n" + contract_exports + transformed[final_end:]
     # A merged parameter file carries one TSTOP per unit block and the solver honours
     # the last, which can override the value written into the Procedures block, so all
     # of them are pinned to the scenario duration.

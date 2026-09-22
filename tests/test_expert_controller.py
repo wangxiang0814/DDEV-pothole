@@ -17,6 +17,7 @@ from ddevsim.expert_controller import (
     STEP_RECOVER_FRONT,
     DeepPotholeExpertController,
     ExpertConfig,
+    derive_roll_regulator_sign,
     feedforward_commands,
     solve_linear,
     three_wheel_support,
@@ -262,9 +263,46 @@ class ScenarioCouplingTests(unittest.TestCase):
         # wheel 4 is still far away even though the vehicle has moved on
         controller(0.02, _exports(X_R1=103.0, X_R2=100.0))
         self.assertEqual(controller.step, STEP_RECOVER_FRONT)
-        # ...and the rear phase is driven by wheel 4's own station
-        controller(0.03, _exports(X_R1=103.5, X_R2=100.90))
+        # ...and, once the front recovery ramp has finished, the rear phase is driven
+        # by wheel 4's own station.  The gap in time here is the whole point: the
+        # handover is time-gated as well as station-gated.
+        controller(
+            0.01 + controller.config.transition_time_s + 1e-6,
+            _exports(X_R1=103.5, X_R2=100.90),
+        )
         self.assertEqual(controller.step, STEP_LIFT_REAR)
+
+    def test_wheel_four_is_not_lifted_until_wheel_two_support_is_restored(self):
+        # The paper's Step 2 restores four-wheel support before Step 3 lifts wheel 4.
+        # The old code advanced on wheel 4's station alone, so the two lift phases
+        # overlapped (measured: 682 N still commanded on the front corner at handover).
+        controller = self._controller()
+        controller(0.0, _exports(X_R1=102.35))
+        controller(0.01, _exports(X_R1=102.35))
+        self.assertEqual(controller.step, STEP_RECOVER_FRONT)
+        # wheel 4 is already inside its pre-lift window, but the ramp is not finished
+        controller(0.02, _exports(X_R1=103.5, X_R2=101.00))
+        self.assertEqual(controller.step, STEP_RECOVER_FRONT)
+        self.assertFalse(controller._recovery_finished(0.02))
+        self.assertTrue(
+            controller._recovery_finished(0.01 + controller.config.transition_time_s)
+        )
+
+    def test_recovery_ramp_is_short_enough_for_this_wheelbase(self):
+        # 0.875 m of travel between "wheel 2 clears the hole" and "wheel 4 reaches its
+        # pre-lift station" at 2.8 km/h is 1.12 s; a longer ramp could never complete
+        # before the rear wheel must be lifted, so the handover gate would deadlock.
+        controller = self._controller()
+        wheelbase = controller.vehicle.wheelbase_m
+        # When wheel 2 reaches the trailing edge, wheel 4 sits one wheelbase behind it.
+        rear_when_front_clears = controller.scenario.trailing_edge_m - wheelbase
+        rear_pre_lift_station = (
+            controller.scenario.leading_edge_m - controller.config.pre_lift_distance_m
+        )
+        gap = rear_pre_lift_station - rear_when_front_clears
+        available_s = gap / (controller.scenario.target_speed_kph / 3.6)
+        self.assertGreater(gap, 0.0)
+        self.assertLess(controller.config.transition_time_s, available_s)
 
     def test_the_same_controller_works_for_a_relocated_pothole(self):
         # No station is hard-coded: shift the hole 5 m and the phases shift with it.
@@ -306,6 +344,90 @@ class ScenarioCouplingTests(unittest.TestCase):
         self.assertFalse(summary["actuator_gain_matrix_used"])
         self.assertIn("FR", summary["required_command_n"])
         self.assertGreater(summary["required_command_n"]["FR"], 0.0)
+
+
+class ActuatorSizingAndRegulatorTests(unittest.TestCase):
+    """Regression tests for three scale defects found in the exported pose data.
+
+    Each of these was a genuine bug that made the vehicle sway, and each is cheap to
+    reintroduce by accident, so they are pinned here.
+    """
+
+    def setUp(self):
+        self.vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
+        self.scenario = PotholeScenario()
+
+    def _controller(self, **config):
+        return DeepPotholeExpertController(
+            scenario=self.scenario,
+            vehicle=self.vehicle,
+            export_names=EXPORTS,
+            config=ExpertConfig(**config),
+        )
+
+    def test_roll_regulator_sign_follows_the_measured_actuator_response(self):
+        # The measured corner-module response to the (+,-,+,-) pattern is +4.67 deg,
+        # i.e. the pattern *increases* roll, so the corrective sign is negative.
+        measured = {"FL": 0.959, "FR": -0.937, "RL": 1.418, "RR": -1.351}
+        self.assertEqual(derive_roll_regulator_sign(measured), -1.0)
+        # An opposing vehicle must get the opposite sign, so this is a measurement and
+        # not a hard-coded constant.
+        flipped = {c: -v for c, v in measured.items()}
+        self.assertEqual(derive_roll_regulator_sign(flipped), 1.0)
+        with self.assertRaises(ValueError):
+            derive_roll_regulator_sign({c: 0.0 for c in CORNERS})
+
+    def test_roll_regulator_cannot_saturate_the_actuators_by_itself(self):
+        controller = self._controller()
+        self.assertLessEqual(controller.roll_limit_n, controller.config.force_max_n)
+        self.assertLessEqual(controller.roll_limit_n, -controller.config.force_min_n)
+
+    def test_travel_guard_fades_to_zero_and_never_inverts_the_command(self):
+        # The old taper went negative past the stop, flipping a compressive command
+        # into an extensional one and then growing it -- the positive feedback that
+        # pinned CmpS_FR at 200 mm and produced a 0 <-> 42 kN load limit cycle.
+        controller = self._controller(force_min_n=-10000.0, force_max_n=10000.0)
+        config = controller.config
+        limit = controller.vehicle.jounce_limit_m
+        guarded, reason = controller._travel_guard("FR", limit * 4.0, -8000.0, config)
+        self.assertEqual(guarded, 0.0)
+        self.assertIsNotNone(reason)
+        for depth in (0.0, 0.5, 0.92, 1.0, 1.5, 3.0):
+            value, _ = controller._travel_guard(
+                "FR", -limit * depth, -8000.0, config
+            )
+            self.assertGreaterEqual(value, -8000.0)
+            self.assertLessEqual(value, 0.0)
+
+    def test_crawl_torque_is_rate_limited_and_stays_near_the_paper_bias(self):
+        # The paper drives the manoeuvre at a near-constant ~8 N*m per wheel.  The old
+        # loop used 80 N*m with a 450 N*m/km/h gain, which banged between the clamps and
+        # swung the speed between 1.2 and 7.9 km/h within 0.4 s.
+        controller = self._controller()
+        dt = controller.config.control_period_s
+        # One step from rest may only move by the slew limit.
+        command = controller._crawl_torque(_exports(Vx=0.0), dt)
+        slew = controller.config.torque_rate_limit_nm_per_s * dt
+        self.assertLessEqual(abs(command), slew)
+        # At the target speed the loop settles on the paper's constant bias.
+        for _ in range(2000):
+            command = controller._crawl_torque(
+                _exports(Vx=self.scenario.target_speed_kph), dt
+            )
+        self.assertAlmostEqual(command, controller.config.torque_bias_nm, delta=1.0)
+        # And even at a standstill it stays an order of magnitude below the old loop,
+        # which demanded 80 + 450 * 2.8 = 1340 N*m and then clamped.
+        for _ in range(2000):
+            command = controller._crawl_torque(_exports(Vx=0.0), dt)
+        self.assertLessEqual(command, controller.config.torque_max_nm)
+        self.assertLess(command, 100.0)
+
+    def test_default_force_limit_suits_a_light_vehicle(self):
+        # 5x a static corner load was 18 kN on this 1.36 t vehicle, far past the ~72 mm
+        # of jounce travel left at its static position.
+        controller = self._controller()
+        static_corner = max(self.vehicle.static_load(c) for c in CORNERS)
+        self.assertLessEqual(controller.config.force_max_n, 2.5 * static_corner)
 
 
 if __name__ == "__main__":

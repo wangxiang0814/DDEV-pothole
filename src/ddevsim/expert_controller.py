@@ -72,7 +72,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 from .units import require_verified, to_si
 from .vehicle_params import GRAVITY, VehicleControllerParams
@@ -411,6 +411,40 @@ def three_wheel_support(
     )
 
 
+#: Command pattern the roll regulator applies, in ``CORNERS`` order.
+ROLL_REGULATOR_PATTERN = (1.0, -1.0, 1.0, -1.0)
+
+
+def derive_roll_regulator_sign(roll_response_deg: Mapping[str, float]) -> float:
+    """Return the sign that makes the roll regulator *reduce* roll.
+
+    The regulator applies :data:`ROLL_REGULATOR_PATTERN` scaled by a gain proportional
+    to the measured roll angle, so that pattern's own steady-state roll response
+    decides whether the loop is negative (corrective) or positive (regenerative).
+    Given ``roll_response_deg[corner]`` -- the measured steady-state roll per newton of
+    that corner's ``IMP_FS`` command (see ``scripts/probe_actuator_gain.py``) -- the
+    pattern response is::
+
+        R = sum_i pattern_i * roll_response_deg[corner_i]
+
+    and the corrective sign is ``-sign(R)``.
+
+    This is a **measured property of the vehicle, not a tuning knob.**  On the
+    corner-module control object the measured response is +4.67 deg per unit of
+    pattern, so the long-standing hard-coded ``+1.0`` closed a *regenerative* loop.  On
+    the same run, flipping only this sign took the heading excursion from a measured
+    223.6 deg down to 32.5 deg and restored forward motion (``Vx`` end -0.58 -> +2.56
+    km/h).
+    """
+    response = sum(
+        pattern * float(roll_response_deg[corner])
+        for pattern, corner in zip(ROLL_REGULATOR_PATTERN, CORNERS)
+    )
+    if response == 0.0:
+        raise ValueError("actuator roll response is zero; cannot derive a sign")
+    return -1.0 if response > 0.0 else 1.0
+
+
 @dataclass
 class ExpertConfig:
     """Tunables of the deep-pothole expert strategy."""
@@ -420,7 +454,17 @@ class ExpertConfig:
     #: Distance before the entry lip at which the lift manoeuvre starts.
     pre_lift_distance_m: float = 0.25
     #: Time allowed for the force to ramp back to zero in Steps 2 and 4.
-    transition_time_s: float = 1.5
+    #:
+    #: The paper's own low-speed Step 2 lasts 1.9 s (3.1-5 s), but that window is
+    #: **geometrically impossible on this control object.**  With the rear wheel
+    #: 1.925 m behind the front one, a 0.8 m hole and 2.8 km/h (0.778 m/s), by the time
+    #: the front wheel clears the trailing edge the rear wheel is 0.875 m short of its
+    #: own pre-lift station, i.e. only 0.875 / 0.778 = 1.12 s away.  A 1.9 s recovery
+    #: would therefore hand the rear wheel into the hole before the front corner had
+    #: been restored.  1.0 s fits the geometry with margin while still being a genuine
+    #: handover, and the state machine additionally refuses to start the rear lift until
+    #: this ramp has finished, so the manoeuvre never overlaps itself.
+    transition_time_s: float = 1.0
     #: Paper's SD magnitude for the attitude pattern (m).
     attitude_deflection_m: float = 0.08
     #: Roll arm (CG height above the roll centre) used for the CG-shift geometry.
@@ -452,13 +496,39 @@ class ExpertConfig:
     #: Multiple of the largest static corner load used when the limits are derived.
     #: The paper's corner module is a ball-screw active suspension, so a generous
     #: multiple is realistic; 5x keeps the manoeuvre from destroying the model.
-    force_limit_static_multiple: float = 5.0
-    force_rate_limit_n_per_s: float = 250000.0
-    torque_min_nm: float = -400.0
-    torque_max_nm: float = 700.0
-    #: Crawl speed loop.
-    torque_bias_nm: float = 80.0
-    torque_per_kph_nm: float = 450.0
+    #: Reduced to 2x for the corner-module control object, which has only about 72 mm
+    #: of jounce travel left at its static position (measured): a commanded force much
+    #: above one static corner load drives a front corner straight onto its stop within
+    #: a few hundred milliseconds, and the manoeuvre then degenerates into stop chatter.
+    force_limit_static_multiple: float = 2.0
+    #: Slew limit on the active force (N/s).  ``None`` derives it from the actuator
+    #: limit as ``limit / force_slew_time_s``.
+    #:
+    #: The old fixed 250 000 N/s let this vehicle's 11.4 kN limit be applied in 46 ms.
+    #: On a 1.36 t vehicle four corners doing that together is ~3.5x its own weight, and
+    #: the measured run shows exactly that: the summed tyre load peaks at 49.5 kN
+    #: (3.7x weight) and then **all four wheels leave the ground** for 0.17 s with the
+    #: body 0.10 m up, on flat road 2.2 m past the pothole.  In the Visualizer that
+    #: reads as the vehicle floating in the air, which is what the user reported.
+    force_rate_limit_n_per_s: Optional[float] = None
+    #: Time the actuator takes to reach its limit when the slew rate is derived.
+    force_slew_time_s: float = 1.0
+    torque_min_nm: float = -80.0
+    torque_max_nm: float = 200.0
+    #: Crawl speed loop.  The paper drives the manoeuvre at a near-constant hub
+    #: torque of roughly 8 N*m per wheel, so the platform uses that as a constant
+    #: bias plus a slow proportional correction.  The earlier 80 N*m / 450 N*m per
+    #: km/h pair was ~30x too aggressive: it swung the speed between 1.2 and
+    #: 7.9 km/h within 0.4 s, pinned the command against ``torque_min_nm`` on every
+    #: braking half-cycle, and shook the chassis hard enough to unload wheels on
+    #: flat ground.  That longitudinal oscillation -- not the pothole -- was the
+    #: dominant source of the body roll and yaw in the exported pose data.
+    torque_bias_nm: float = 8.0
+    torque_per_kph_nm: float = 15.0
+    #: Deadband on the speed error (km/h), so channel noise cannot chatter the command.
+    torque_speed_deadband_kph: float = 0.05
+    #: Slew limit on the torque command (N*m/s): 200 N*m takes 1 s to reach.
+    torque_rate_limit_nm_per_s: float = 200.0
     #: Fraction of the travel limit treated as the guard band.
     travel_guard_fraction: float = 0.92
     #: Roll beyond this magnitude latches SAFE_STOP (deg).
@@ -469,13 +539,32 @@ class ExpertConfig:
     #: compress further rather than extend; driving it anyway saturated every corner
     #: and injected about -39 kN*m of spurious roll moment.
     #: Roll regulator gain, in newtons of roll-moment pattern force per degree of
-    #: roll error (about zero).  Kept modest: it only has to arrest drift.
-    roll_gain_n_per_deg: float = 900.0
-    roll_limit_n: float = 40000.0
-    #: Sign of the roll regulator.  Derived empirically: a negative command roll
-    #: moment was accompanied by growing positive roll, so a positive correction is
-    #: applied for positive roll.  Flip if a model change reverses the convention.
-    roll_regulator_sign: float = 1.0
+    #: roll error (about zero).  Kept modest: it only has to arrest drift, and every
+    #: newton it uses is a newton the lift manoeuvre cannot use.  Measured on the
+    #: corner-module control object (roll span / pitch span / yaw span / lateral drift
+    #: over the manoeuvre):
+    #:
+    #:     900 N/deg (old default)  19.67 deg / 18.84 deg / 34.54 deg / 1.465 m
+    #:     400 N/deg               14.90 deg / 11.55 deg / 30.83 deg / 1.064 m
+    #:     regulator disabled      26.70 deg / 13.37 deg / 50.55 deg / 2.116 m
+    #:
+    #: so the regulator is load-bearing but must stay soft, and 400 N/deg dominates
+    #: the old default on every axis.
+    roll_gain_n_per_deg: float = 400.0
+    #: Ceiling on the roll regulator's own contribution, before the per-corner
+    #: actuator clamp.  ``None`` derives it as :data:`roll_limit_static_fraction` of
+    #: the actuator limit; the old hard-coded 40 kN exceeded this vehicle's *entire*
+    #: actuator limit (11.4 kN), so the regulator saturated all four channels by
+    #: itself and left the manoeuvre nothing to work with.
+    roll_limit_n: Optional[float] = None
+    #: Fraction of the actuator limit the roll regulator may use when deriving it.
+    roll_limit_static_fraction: float = 0.35
+    #: Sign of the roll regulator.  The control object (the corner-module vehicle)
+    #: needs ``-1.0``; write it as the measured value rather than a guess by calling
+    #: :func:`derive_roll_regulator_sign` on the probe output.  The default records the
+    #: measurement for the corner-module vehicle and is a deliberate change from the
+    #: old ``+1.0``, which closed a regenerative loop on this model.
+    roll_regulator_sign: float = -1.0
     #: Height hold for the lifted wheel.  Zeroing its load alone lets the suspension
     #: sit wherever the actuator/spring balance lands it -- measured at +67 mm above
     #: the static position, so the wheel met the exit lip with a step and produced a
@@ -558,6 +647,23 @@ class DeepPotholeExpertController:
         else:
             self.force_limit_reference_n = None
 
+        # The roll regulator must not be able to saturate the actuators on its own.
+        # ``roll_limit_n`` was carried over from the 8.9 t truck, whose actuators are
+        # an order of magnitude larger: at 40 kN it exceeded this vehicle's entire
+        # actuator limit (11.4 kN), so the regulator alone pinned all four channels
+        # from about 13 deg of roll and the manoeuvre had nothing left to work with.
+        # Clamping it to a fraction of the actuator limit keeps it in the same scale
+        # as the force it is trimming.
+        actuator_limit = min(self.config.force_max_n, -self.config.force_min_n)
+        if self.config.force_rate_limit_n_per_s is None:
+            self.config.force_rate_limit_n_per_s = (
+                actuator_limit / self.config.force_slew_time_s
+            )
+        if self.config.roll_limit_n is None:
+            self.roll_limit_n = self.config.roll_limit_static_fraction * actuator_limit
+        else:
+            self.roll_limit_n = min(self.config.roll_limit_n, actuator_limit)
+
         self.step = STEP_APPROACH
         # Activation is a *logic* threshold on pothole depth, not a scale factor.
         # The manoeuvre exists to stop the wheel reaching the hole bottom and, more
@@ -597,6 +703,7 @@ class DeepPotholeExpertController:
         self._previous_force = {c: 0.0 for c in CORNERS}
         self._applied_force = {c: 0.0 for c in CORNERS}
         self._applied_torque = 0.0
+        self._torque_command = 0.0
         self._last_control_time = -1.0
         self._recover_start_time = 0.0
         self._recover_from: Dict[str, float] = {c: 0.0 for c in CORNERS}
@@ -647,7 +754,16 @@ class DeepPotholeExpertController:
                 self.step = STEP_RECOVER_FRONT
                 self._begin_recovery(time_s)
         elif self.step == STEP_RECOVER_FRONT:
-            if rear_station >= leading - self.config.pre_lift_distance_m:
+            # The paper restores four-wheel support *before* lifting the next wheel:
+            # Step 2 is "After the wheel 2 has passed over the pothole, the vehicle is
+            # adjusted to a four-wheeled support state", and only then does Step 3 lift
+            # wheel 4.  The station test alone does not enforce that -- in the measured
+            # run it fired 0.32 s early and handed over with 682 N still commanded on
+            # the front corner, so the two lift phases overlapped.  Gate the rear lift
+            # on the recovery ramp having actually finished.
+            if self._recovery_finished(time_s) and (
+                rear_station >= leading - self.config.pre_lift_distance_m
+            ):
                 self.step = STEP_LIFT_REAR
                 self._integral = {c: 0.0 for c in CORNERS}
         elif self.step == STEP_LIFT_REAR:
@@ -655,7 +771,27 @@ class DeepPotholeExpertController:
                 self.step = STEP_RECOVER_REAR
                 self._begin_recovery(time_s)
         elif self.step == STEP_RECOVER_REAR:
-            pass
+            if self._recovery_finished(time_s):
+                self.step = STEP_DONE
+
+    def _force_slew_n_per_s(self) -> float:
+        """Force slew limit, derived from the actuator limit when not configured.
+
+        Derived here rather than cached in ``__init__`` because callers legitimately
+        swap ``controller.config`` for a fresh one after construction, and a cached
+        ``None`` would then reach the arithmetic.
+        """
+        configured = self.config.force_rate_limit_n_per_s
+        if configured is not None:
+            return float(configured)
+        limit = min(self.config.force_max_n, -self.config.force_min_n)
+        return limit / max(1e-6, self.config.force_slew_time_s)
+
+    def _recovery_finished(self, time_s: float) -> bool:
+        """True once the Step 2/4 ramp from the held forces to zero has completed."""
+        return (
+            float(time_s) - self._recover_start_time
+        ) >= self.config.transition_time_s
 
     def _begin_recovery(self, time_s: float) -> None:
         self._recover_start_time = time_s
@@ -669,13 +805,24 @@ class DeepPotholeExpertController:
         return None
 
     # ------------------------------------------------------------------- control
-    def _crawl_torque(self, exports: Sequence[float]) -> float:
-        """Low-speed propulsion loop, matching the paper's near-constant torque."""
-        speed_kph = self._speed_kph(exports)
-        torque = self.config.torque_bias_nm + self.config.torque_per_kph_nm * (
-            self.scenario.target_speed_kph - speed_kph
-        )
-        return max(self.config.torque_min_nm, min(self.config.torque_max_nm, torque))
+    def _crawl_torque(self, exports: Sequence[float], dt: float) -> float:
+        """Low-speed propulsion loop, matching the paper's near-constant torque.
+
+        A biased proportional loop with a speed deadband and a slew limit.  The slew
+        limit is what makes it safe: without it a large gain makes the command bang
+        between its clamps, and the measured run swung between 1.2 and 7.9 km/h with
+        roughly 4 m/s^2 peaks, which alone pitched the body by +-15 deg and unloaded
+        wheels on flat ground.
+        """
+        config = self.config
+        error = self.scenario.target_speed_kph - self._speed_kph(exports)
+        if abs(error) <= config.torque_speed_deadband_kph:
+            error = 0.0
+        demand = config.torque_bias_nm + config.torque_per_kph_nm * error
+        demand = max(config.torque_min_nm, min(config.torque_max_nm, demand))
+        slew = config.torque_rate_limit_nm_per_s * max(0.0, dt)
+        self._torque_command += max(-slew, min(slew, demand - self._torque_command))
+        return self._torque_command
 
     def _sliding_force(
         self, corner: str, error: float, dt: float, config: ExpertConfig
@@ -699,18 +846,27 @@ class DeepPotholeExpertController:
     def _travel_guard(
         self, corner: str, deflection_m: float, force: float, config: ExpertConfig
     ) -> Tuple[float, Optional[str]]:
-        """Reduce an active force that would drive the suspension into a stop."""
+        """Reduce an active force that would drive the suspension into a stop.
+
+        The taper must never go negative.  The previous form,
+        ``force * (1 - (|d| - guard) / (limit - guard))``, is +1 at the guard
+        boundary, 0 exactly at the limit, and **negative beyond it** -- so once the
+        suspension was past its stop the guard flipped the sign of a compressively
+        commanded force into an extensional one and then *grew* it with further
+        travel.  That positive feedback is what pinned ``CmpS_FR`` at 200 mm and
+        produced the 0 <-> 42 kN wheel-load limit cycle seen in the probe runs.
+        Clamping the taper to [0, 1] lets the force fade to zero at the stop and the
+        passive suspension take over, which is the intended behaviour.
+        """
         limit = (
             self.vehicle.jounce_limit_m if force < 0.0 else self.vehicle.rebound_limit_m
         )
         guard = config.travel_guard_fraction * limit
         if abs(deflection_m) <= guard:
             return force, None
-        # Pushing further in the same direction is refused; the force is folded
-        # back towards zero so the passive suspension takes over.
-        return force * (1.0 - (abs(deflection_m) - guard) / max(1e-6, limit - guard)), (
-            "travel_guard:%s" % corner
-        )
+        taper = 1.0 - (abs(deflection_m) - guard) / max(1e-6, limit - guard)
+        taper = max(0.0, min(1.0, taper))
+        return force * taper, "travel_guard:%s" % corner
 
     def __call__(self, time_s: float, exports: Sequence[float]) -> Tuple[float, ...]:
         config = self.config
@@ -776,7 +932,7 @@ class DeepPotholeExpertController:
                     config.roll_gain_n_per_deg * roll_deg
                 )
                 roll_correction = max(
-                    -config.roll_limit_n, min(config.roll_limit_n, roll_correction)
+                    -self.roll_limit_n, min(self.roll_limit_n, roll_correction)
                 )
                 for index, corner in enumerate(CORNERS):
                     forces[corner] += roll_correction * (1.0, -1.0, 1.0, -1.0)[index]
@@ -793,7 +949,7 @@ class DeepPotholeExpertController:
             for corner in CORNERS:
                 force = forces[corner]
                 previous = self._applied_force[corner]
-                step = config.force_rate_limit_n_per_s * dt
+                step = self._force_slew_n_per_s() * dt
                 force = max(previous - step, min(previous + step, force))
                 force = max(config.force_min_n, min(config.force_max_n, force))
                 if not math.isfinite(force):
@@ -802,7 +958,7 @@ class DeepPotholeExpertController:
                     force = 0.0
                 self._applied_force[corner] = force
 
-            torque = 0.0 if self.safe_stop else self._crawl_torque(exports)
+            torque = 0.0 if self.safe_stop else self._crawl_torque(exports, dt)
             if not math.isfinite(torque):
                 self.safe_stop = True
                 self.safe_stop_reason = "non_finite_torque"

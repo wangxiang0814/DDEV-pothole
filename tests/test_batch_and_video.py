@@ -45,6 +45,7 @@ def _row(**overrides):
         "time_s": 0.0,
         "exp_Vx": 2.8, "exp_AVy_L1": 13.4, "exp_CmpS_L1": 53.6,
         "exp_Xo": 100.0, "exp_Roll_E": 0.0, "exp_Pitch": 0.0,
+        "exp_Yo": 0.0, "exp_Zo": 0.0, "exp_Yaw": 0.0,
         "exp_Vz_Wc_L1": -0.01,
     }
     for corner in CORNERS:

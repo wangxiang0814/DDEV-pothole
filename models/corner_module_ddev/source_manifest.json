@@ -1,9 +1,9 @@
 {
-  "created_utc": "2026-09-22T16:30:01.235232+00:00",
+  "created_utc": "2026-09-22T17:24:55.305099+00:00",
   "source_run_all": "F:\\TruckSim2019\\TruckSim2019.0_Data\\Results\\Run_b20aee53-c150-44b1-a804-20e43bfde604\\run_all.par",
   "source_sha256": "5dec0eeb0fd88a9257203e5cd921360cf5f90976809e7bce47558356bcbaef67",
   "generated_run_all": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\corner_module_ddev\\run_all.par",
-  "generated_sha256": "d17a49cb9841bbdcc7910b9e5c98c546decf06cff338462f5769f18488ea7101",
+  "generated_sha256": "d4de0f7ac14c096d775a663b6e0d5bf92696182269b834e138d175409a4a1172",
   "program_dir": "F:\\TruckSim2019\\TruckSim2019.0_Prog",
   "data_dir": "F:\\TruckSim2019\\TruckSim2019.0_Data",
   "protected_parameters": [
@@ -61,8 +61,8 @@
     "reason": "model-validity correction: the stock front jounce stop ends at 61 mm while the static ride position is 80.03 mm, so the stop force is extrapolated at 7000 N/mm to ~140 kN per corner (~10x vehicle weight) at t=0"
   },
   "steer_spring_rate_n_per_mm": {
-    "applied_value": null,
-    "reason": null
+    "applied_value": 60.0,
+    "reason": "model-validity correction: the stock 30 N/mm front spring leaves the vehicle at ~116-168 mm of static deflection against an ~80 mm suspension kinematic table, so the solver extrapolates the front geometry from t=0 (the shipped source case's own log shows this)"
   },
   "vehicle_code": "I_I",
   "suspension_architecture": {

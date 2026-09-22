@@ -1,3 +1,4 @@
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -40,22 +41,56 @@ class PotholeCaseTests(unittest.TestCase):
         self.assertIn("ROAD_DZ_CARPET 2D_LINEAR", transformed)
         self.assertIn("101.15, 0, 0, -0.45, -0.45, 0, 0", transformed)
         self.assertIn("102.25, 0, 0, -0.45, -0.45, 0, 0", transformed)
-        self.assertIn("LIN(5) -1.3875", transformed)
-        self.assertIn("LOUT(5) -0.5875", transformed)
+        # lane 6 is the hole itself (lane 1 and 7 are off-road ground)
+        self.assertIn("LIN(6) -1.3875", transformed)
+        self.assertIn("LOUT(6) -0.5875", transformed)
         # the hole must be near-black and clearly darker than the road
-        self.assertIn("COLOR(5) 0.300 0.280 0.260", transformed)
-        self.assertIn("COLOR(1) 0.850 0.850 0.870", transformed)
+        self.assertIn("COLOR(6) 0.300 0.280 0.260", transformed)
+        self.assertIn("COLOR(2) 0.850 0.850 0.870", transformed)
         # material names must exist in the library the block loads via MTL_FILE,
         # otherwise the surface has no material and does not render
-        self.assertIn("MATERIAL(1) Road (No Lines)", transformed)
-        self.assertIn("MATERIAL(5) Dirt", transformed)
+        self.assertIn("MATERIAL(2) Road (No Lines)", transformed)
+        self.assertIn("MATERIAL(6) Dirt", transformed)
         self.assertIn("MTL_FILE Animator/Road_Materials/road.mtl", transformed)
-        self.assertIn("LINUNITS(1) m", transformed)
-        self.assertIn("SINT(1) 10", transformed)
-        # the road must be wide enough to be visible around the vehicle
-        self.assertIn("LIN(1) -5", transformed)
-        self.assertIn("LOUT(1) 5", transformed)
+        self.assertIn("LINUNITS(2) m", transformed)
+        self.assertIn("SINT(2) 10", transformed)
+        # the carriageway must be wide enough to be visible around the vehicle
+        self.assertIn("LIN(2) -5", transformed)
+        self.assertIn("LOUT(2) 5", transformed)
         self.assertIn("MU_ROAD_CONSTANT 0.7", transformed)
+
+    def test_road_path_covers_every_station_the_scene_uses(self):
+        # THE floating-vehicle bug: a surface shape is resolved against the road PATH,
+        # and the template declared `SPATH_START 0 / SEGMENT_LENGTH 40` while the
+        # vehicle drove at station 100-107 and the shapes were declared at 95-140. The
+        # whole scene therefore sat outside the path, no surface geometry was generated
+        # there, and the vehicle had no ground under it.
+        scenario = PotholeScenario()
+        transformed = transform_single_wheel_pothole(SOURCE, scenario)
+        path_length = float(
+            re.search(r"(?m)^SEGMENT_LENGTH\s+([-+0-9.eE]+)\s*$", transformed).group(1)
+        )
+        shape_starts = [float(v) for v in re.findall(r"(?m)^SSTART\(\d+\)\s+([-+0-9.eE]+)\s*$", transformed)]
+        shape_stops = [float(v) for v in re.findall(r"(?m)^SSTOP\(\d+\)\s+([-+0-9.eE]+)\s*$", transformed)]
+        self.assertTrue(shape_starts and shape_stops)
+        # the path starts at 0 (SPATH_START 0) so it must reach the furthest station
+        self.assertGreaterEqual(path_length, max(shape_stops))
+        # the vehicle starts at road_lead_in before the lip, inside the path
+        vehicle_start = scenario.leading_edge_m - scenario.approach_distance_m
+        self.assertLessEqual(min(shape_starts), vehicle_start)
+        self.assertLessEqual(vehicle_start, path_length)
+
+    def test_off_road_ground_exists_beside_the_carriageway(self):
+        # Without it the vehicle drives on a 10 m ribbon with nothing beside it, which
+        # also reads as floating.
+        transformed = transform_single_wheel_pothole(SOURCE, PotholeScenario())
+        self.assertIn("NLANES 7", transformed)
+        self.assertIn("LIN(1) -200", transformed)
+        self.assertIn("LOUT(1) -5", transformed)
+        self.assertIn("LIN(7) 5", transformed)
+        self.assertIn("LOUT(7) 200", transformed)
+        self.assertIn("MATERIAL(1) Dirt", transformed)
+        self.assertIn("MATERIAL(7) Dirt", transformed)
 
     def test_transform_sets_clear_camera_and_keeps_ddev_contract_and_parameters(self):
         transformed = transform_single_wheel_pothole(SOURCE, PotholeScenario())
