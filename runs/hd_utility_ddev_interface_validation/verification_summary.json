@@ -1,0 +1,166 @@
+{
+  "status": "PASS",
+  "input_integrity": {
+    "baseline": true,
+    "torque_FL_pos": true,
+    "torque_FL_neg": true,
+    "torque_FR_pos": true,
+    "torque_FR_neg": true,
+    "torque_RL_pos": true,
+    "torque_RL_neg": true,
+    "torque_RR_pos": true,
+    "torque_RR_neg": true,
+    "active_FL_pos": true,
+    "active_FL_neg": true,
+    "active_FR_pos": true,
+    "active_FR_neg": true,
+    "active_RL_pos": true,
+    "active_RL_neg": true,
+    "active_RR_pos": true,
+    "active_RR_neg": true
+  },
+  "torque": {
+    "FL": {
+      "signal": "exp_AVy_L1",
+      "positive_signed_peak": 1.169534200000001,
+      "negative_signed_peak": -1.1573518999999948,
+      "positive_response_matrix": {
+        "FL": 1.169534200000001,
+        "FR": 0.24815730000000258,
+        "RL": 0.24921589999999583,
+        "RR": 0.2473497000000009
+      },
+      "pass": true
+    },
+    "FR": {
+      "signal": "exp_AVy_R1",
+      "positive_signed_peak": 1.1695491000000047,
+      "negative_signed_peak": -1.1574345000000008,
+      "positive_response_matrix": {
+        "FL": 0.24651420000000002,
+        "FR": 1.1695491000000047,
+        "RL": 0.24587569999999914,
+        "RR": 0.246440800000002
+      },
+      "pass": true
+    },
+    "RL": {
+      "signal": "exp_AVy_L2",
+      "positive_signed_peak": 1.1667388000000045,
+      "negative_signed_peak": -1.1615277999999947,
+      "positive_response_matrix": {
+        "FL": 0.24790730000000138,
+        "FR": 0.24576300000000373,
+        "RL": 1.1667388000000045,
+        "RR": 0.24495849999999564
+      },
+      "pass": true
+    },
+    "RR": {
+      "signal": "exp_AVy_R2",
+      "positive_signed_peak": 1.1665733999999972,
+      "negative_signed_peak": -1.1613338000000013,
+      "positive_response_matrix": {
+        "FL": 0.24543839999999761,
+        "FR": 0.2484347999999983,
+        "RL": 0.2447917000000004,
+        "RR": 1.1665733999999972
+      },
+      "pass": true
+    }
+  },
+  "active_suspension": {
+    "FL": {
+      "signals": {
+        "exp_Fz_L1": {
+          "positive_signed_peak": 285.79729999999836,
+          "negative_signed_peak": -283.06510000000344
+        },
+        "exp_CmpS_L1": {
+          "positive_signed_peak": -0.3320046999999988,
+          "negative_signed_peak": 0.3258289999999988
+        },
+        "exp_Vz_Wc_L1": {
+          "positive_signed_peak": 0.12114163759999999,
+          "negative_signed_peak": -0.1215578343
+        }
+      },
+      "positive_fz_response_matrix": {
+        "FL": 285.79729999999836,
+        "FR": -170.92239999999947,
+        "RL": -165.17819999999847,
+        "RR": 198.02130000000034
+      },
+      "pass": true
+    },
+    "FR": {
+      "signals": {
+        "exp_Fz_R1": {
+          "positive_signed_peak": 283.6399999999994,
+          "negative_signed_peak": -284.77230000000054
+        },
+        "exp_CmpS_R1": {
+          "positive_signed_peak": -0.32780450000000627,
+          "negative_signed_peak": 0.329504699999994
+        },
+        "exp_Vz_Wc_R1": {
+          "positive_signed_peak": 0.12142293259999999,
+          "negative_signed_peak": -0.1212599256
+        }
+      },
+      "positive_fz_response_matrix": {
+        "FL": -166.02720000000045,
+        "FR": 283.6399999999994,
+        "RL": 195.3165999999983,
+        "RR": -159.46969999999783
+      },
+      "pass": true
+    },
+    "RL": {
+      "signals": {
+        "exp_Fz_L2": {
+          "positive_signed_peak": 284.3179999999993,
+          "negative_signed_peak": -283.27720000000045
+        },
+        "exp_CmpS_L2": {
+          "positive_signed_peak": -0.33398559999999833,
+          "negative_signed_peak": 0.33265689999999637
+        },
+        "exp_Vz_Wc_L2": {
+          "positive_signed_peak": 0.12252130020000002,
+          "negative_signed_peak": -0.12279003889999998
+        }
+      },
+      "positive_fz_response_matrix": {
+        "FL": -170.05069999999978,
+        "FR": 195.82719999999972,
+        "RL": 284.3179999999993,
+        "RR": -174.549500000001
+      },
+      "pass": true
+    },
+    "RR": {
+      "signals": {
+        "exp_Fz_R2": {
+          "positive_signed_peak": 282.32610000000204,
+          "negative_signed_peak": -285.3817999999992
+        },
+        "exp_CmpS_R2": {
+          "positive_signed_peak": -0.3301785000000024,
+          "negative_signed_peak": 0.33649150000000105
+        },
+        "exp_Vz_Wc_R2": {
+          "positive_signed_peak": 0.1228404786,
+          "negative_signed_peak": -0.1224775684
+        }
+      },
+      "positive_fz_response_matrix": {
+        "FL": 192.929500000002,
+        "FR": -165.15700000000288,
+        "RL": -170.25759999999718,
+        "RR": 282.32610000000204
+      },
+      "pass": true
+    }
+  }
+}

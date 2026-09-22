@@ -1,0 +1,17 @@
+{
+  "wheel_load_n": {
+    "FL": 22413.93804,
+    "FR": 22411.87412,
+    "RL": 21226.73953,
+    "RR": 21227.33125
+  },
+  "deflection_m": {
+    "FL": 0.05359410081,
+    "FR": 0.053585535510000004,
+    "RL": 0.050606197279999994,
+    "RR": 0.05060651283
+  },
+  "settle_s": 0.05,
+  "source_csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\hd_utility_ddev\\single_wheel_deep_pothole\\static_calibration.csv",
+  "model": "HD Utility DDEV 4x4 Active Suspension"
+}

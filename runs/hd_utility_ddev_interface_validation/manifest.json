@@ -1,0 +1,363 @@
+{
+  "created_utc": "2026-09-22T15:17:42.915689+00:00",
+  "simfile": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\hd_utility_ddev\\simfile.sim",
+  "pulse_window_s": [
+    0.25,
+    0.35
+  ],
+  "import_names": [
+    "IMP_MYUSM_L1",
+    "IMP_MYUSM_R1",
+    "IMP_MYUSM_L2",
+    "IMP_MYUSM_R2",
+    "IMP_FS_L1",
+    "IMP_FS_R1",
+    "IMP_FS_L2",
+    "IMP_FS_R2"
+  ],
+  "export_names": [
+    "AVy_L1",
+    "AVy_R1",
+    "AVy_L2",
+    "AVy_R2",
+    "Fz_L1",
+    "Fz_R1",
+    "Fz_L2",
+    "Fz_R2",
+    "CmpS_L1",
+    "CmpS_R1",
+    "CmpS_L2",
+    "CmpS_R2",
+    "Vz_Wc_L1",
+    "Vz_Wc_R1",
+    "Vz_Wc_L2",
+    "Vz_Wc_R2"
+  ],
+  "cases": [
+    {
+      "name": "baseline",
+      "port_index": null,
+      "port_name": null,
+      "polarity": 0,
+      "amplitude": 0.0
+    },
+    {
+      "name": "torque_FL_pos",
+      "port_index": 0,
+      "port_name": "IMP_MYUSM_L1",
+      "polarity": 1,
+      "amplitude": 500.0
+    },
+    {
+      "name": "torque_FL_neg",
+      "port_index": 0,
+      "port_name": "IMP_MYUSM_L1",
+      "polarity": -1,
+      "amplitude": -500.0
+    },
+    {
+      "name": "torque_FR_pos",
+      "port_index": 1,
+      "port_name": "IMP_MYUSM_R1",
+      "polarity": 1,
+      "amplitude": 500.0
+    },
+    {
+      "name": "torque_FR_neg",
+      "port_index": 1,
+      "port_name": "IMP_MYUSM_R1",
+      "polarity": -1,
+      "amplitude": -500.0
+    },
+    {
+      "name": "torque_RL_pos",
+      "port_index": 2,
+      "port_name": "IMP_MYUSM_L2",
+      "polarity": 1,
+      "amplitude": 500.0
+    },
+    {
+      "name": "torque_RL_neg",
+      "port_index": 2,
+      "port_name": "IMP_MYUSM_L2",
+      "polarity": -1,
+      "amplitude": -500.0
+    },
+    {
+      "name": "torque_RR_pos",
+      "port_index": 3,
+      "port_name": "IMP_MYUSM_R2",
+      "polarity": 1,
+      "amplitude": 500.0
+    },
+    {
+      "name": "torque_RR_neg",
+      "port_index": 3,
+      "port_name": "IMP_MYUSM_R2",
+      "polarity": -1,
+      "amplitude": -500.0
+    },
+    {
+      "name": "active_FL_pos",
+      "port_index": 4,
+      "port_name": "IMP_FS_L1",
+      "polarity": 1,
+      "amplitude": 1000.0
+    },
+    {
+      "name": "active_FL_neg",
+      "port_index": 4,
+      "port_name": "IMP_FS_L1",
+      "polarity": -1,
+      "amplitude": -1000.0
+    },
+    {
+      "name": "active_FR_pos",
+      "port_index": 5,
+      "port_name": "IMP_FS_R1",
+      "polarity": 1,
+      "amplitude": 1000.0
+    },
+    {
+      "name": "active_FR_neg",
+      "port_index": 5,
+      "port_name": "IMP_FS_R1",
+      "polarity": -1,
+      "amplitude": -1000.0
+    },
+    {
+      "name": "active_RL_pos",
+      "port_index": 6,
+      "port_name": "IMP_FS_L2",
+      "polarity": 1,
+      "amplitude": 1000.0
+    },
+    {
+      "name": "active_RL_neg",
+      "port_index": 6,
+      "port_name": "IMP_FS_L2",
+      "polarity": -1,
+      "amplitude": -1000.0
+    },
+    {
+      "name": "active_RR_pos",
+      "port_index": 7,
+      "port_name": "IMP_FS_R2",
+      "polarity": 1,
+      "amplitude": 1000.0
+    },
+    {
+      "name": "active_RR_neg",
+      "port_index": 7,
+      "port_name": "IMP_FS_R2",
+      "polarity": -1,
+      "amplitude": -1000.0
+    }
+  ],
+  "results": {
+    "baseline": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\baseline.csv",
+      "error_message": ""
+    },
+    "torque_FL_pos": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\torque_FL_pos.csv",
+      "error_message": ""
+    },
+    "torque_FL_neg": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\torque_FL_neg.csv",
+      "error_message": ""
+    },
+    "torque_FR_pos": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\torque_FR_pos.csv",
+      "error_message": ""
+    },
+    "torque_FR_neg": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\torque_FR_neg.csv",
+      "error_message": ""
+    },
+    "torque_RL_pos": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\torque_RL_pos.csv",
+      "error_message": ""
+    },
+    "torque_RL_neg": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\torque_RL_neg.csv",
+      "error_message": ""
+    },
+    "torque_RR_pos": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\torque_RR_pos.csv",
+      "error_message": ""
+    },
+    "torque_RR_neg": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\torque_RR_neg.csv",
+      "error_message": ""
+    },
+    "active_FL_pos": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\active_FL_pos.csv",
+      "error_message": ""
+    },
+    "active_FL_neg": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\active_FL_neg.csv",
+      "error_message": ""
+    },
+    "active_FR_pos": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\active_FR_pos.csv",
+      "error_message": ""
+    },
+    "active_FR_neg": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\active_FR_neg.csv",
+      "error_message": ""
+    },
+    "active_RL_pos": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\active_RL_pos.csv",
+      "error_message": ""
+    },
+    "active_RL_neg": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\active_RL_neg.csv",
+      "error_message": ""
+    },
+    "active_RR_pos": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\active_RR_pos.csv",
+      "error_message": ""
+    },
+    "active_RR_neg": {
+      "status": "COMPLETED",
+      "solver_status": 1,
+      "solver_signalled_end": true,
+      "final_time_s": 0.9999999999999453,
+      "configured_stop_s": 1.0,
+      "capped_at_s": null,
+      "reached_configured_stop": true,
+      "rows_written": 1001,
+      "csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_interface_validation\\active_RR_neg.csv",
+      "error_message": ""
+    }
+  }
+}

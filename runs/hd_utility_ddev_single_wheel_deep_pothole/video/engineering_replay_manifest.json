@@ -1,0 +1,13 @@
+{
+  "video": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_single_wheel_deep_pothole\\video\\single_wheel_deep_pothole_engineering_replay.mp4",
+  "thumbnail": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_single_wheel_deep_pothole\\video\\single_wheel_deep_pothole_engineering_replay.png",
+  "fps": 30,
+  "resolution": [
+    1280,
+    720
+  ],
+  "frames": 271,
+  "duration_s": 8.9995,
+  "source_csv": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_single_wheel_deep_pothole\\data\\controller_and_dynamics.csv",
+  "kind": "TruckSim engineering data replay; not native VS Visualizer export"
+}

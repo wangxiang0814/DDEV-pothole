@@ -1,0 +1,12 @@
+{
+  "start_station_m": 101.1,
+  "length_m": 1.2,
+  "width_m": 0.8,
+  "depth_m": 0.45,
+  "edge_transition_m": 0.05,
+  "center_y_m": -0.9875,
+  "friction": 0.7,
+  "road_length_m": 40.0,
+  "stop_s": 9.0,
+  "target_speed_kph": 2.8
+}

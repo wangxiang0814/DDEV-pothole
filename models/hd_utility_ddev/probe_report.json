@@ -1,0 +1,14 @@
+{
+  "status": "READY",
+  "reason_code": "NONE",
+  "simfile": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\hd_utility_ddev\\simfile.sim",
+  "dll_path": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Programs\\solvers\\trucksim_64.dll",
+  "error_message": "",
+  "configuration": {
+    "n_import": 8,
+    "n_export": 16,
+    "t_start_s": 0.0,
+    "t_stop_s": 1.0,
+    "t_step_s": 0.0005
+  }
+}

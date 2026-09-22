@@ -1,0 +1,1521 @@
+
+
+========== PAGE 1 ==========
+4480
+IEEE/ASME TRANSACTIONS ON MECHATRONICS, VOL. 29, NO. 6, DECEMBER 2024
+Motion Posture Control of Corner Module
+Architecture Intelligent Electric Vehicle
+on Deep-Potholed Roads
+Shuaishuai Liu
+, Lipeng Zhang
+, Member, IEEE, Yifan Liu
+, Jiantao Wang
+, Chao Yang
+,
+and Junda Zhang
+Abstract—To address the passability issues of a corner
+module architecture intelligent electric vehicle (CAV) on
+deep-potholed roads during emergency rescue operations,
+the motion posture control of the CAV is investigated. First,
+the posture coordinated control ﬂow was designed, and
+the stability mechanism of the vehicle supported by three
+wheels is formulated. Second, a model for three-wheel sup-
+ported vehicle (TWSV) is established, including the tran-
+sition process between TWSV and four-wheel supported
+vehicle. Third, a novel corner module was designed, inte-
+grating in-wheel motor drive system, wheel-side steer-by-
+wire system, brake by-wire system, and active suspension
+system (ASS) into one unit. A coordinated control method
+based on feedforward and feedback is proposed. The feed-
+forward value is calculated based on the vertical load of
+the TWSV, and the feedback controller is designed based
+on Takagi–Sugeno robust sliding mode control. Finally, the
+correctness of the ASS model with ball screw is veriﬁed
+through experiments. The validity of the new dynamics is
+conﬁrmed through comparison with CarSim, and the effec-
+tiveness of the coordinated control strategy is validated
+through hardware-in-the-loop testing. This provides a the-
+oretical foundation for the passability control of CAV on
+deep-potholed roads.
+Index Terms—Active suspension systems (ASS), corner
+module architecture, deep-potholed roads, intelligent elec-
+tric vehicle, motion posture control.
+Manuscript received 13 July 2023; revised 22 January 2024; accepted
+12 March 2024. Date of publication 4 April 2024; date of current ver-
+sion 17 December 2024. Recommended by Technical Editor Q. Ahmed
+and Senior Editor M. Indri. This work was supported in part by the
+National Natural Science Foundation of China under Grant 52272407
+and Grant U20A20332, in part by the S&T Program of Hebei under
+Grant 226Z2202G, in part by Hebei Natural Science Foundation under
+Grant E2020203174, and in part by the Science Research Project of
+Hebei Education Department under Grant ZD2022029. (Corresponding
+author: Lipeng Zhang.)
+The authors are with the School of Vehicle and Energy, Yanshan
+University, Qinhuangdao 066004, China, and also with the Hebei Key
+Laboratory of Special Carrier Equipment, Yanshan University, Qin-
+huangdao 066004, China (e-mail: ss67_liu@163.com; evic2024@163.
+com; 610562638@qq.com; wjt@ysu.edu.cn; 2832680177@qq.com;
+junda1324@163.com).
+Color versions of one or more ﬁgures in this article are available at
+https://doi.org/10.1109/TMECH.2024.3377904.
+Digital Object Identiﬁer 10.1109/TMECH.2024.3377904
+I. INTRODUCTION
+T
+HE corner module architecture intelligent electric vehicle
+(CAV) integrates in-wheel motor drive system, wheel-side
+steer-by-wire system, brake by-wire system, and active suspen-
+sion system (ASS) [1], greatly simplifying the vehicle layout and
+improving drivetrain efﬁciency. The in-wheel motor drive sys-
+temcanindependentlyadjustthetorqueandspeedofeachwheel,
+enabling control of the vehicle dynamics performance [2], [3],
+[4]. The wheel-side steer-by-wire system allows for omnidirec-
+tional steering capabilities [5], [6], [7], [8], whereas the ASS
+improve ride comfort and enable vehicle body posture control
+[9], [10], [11]. Therefore, the CAV possesses handling, trafﬁc
+ability, and stability that conventional vehicles cannot match.
+It can effectively compensate for the negative effects, such as
+degradation in ride comfort, increased costs, and difﬁculties
+in modiﬁcation that arise from matching in-wheel motor drive
+system. The CAV represents an ideal platform for studying op-
+timal vehicle dynamics and holds signiﬁcant market prospects.
+Especially in harsh operating conditions, the advantages of the
+CAV will become even more apparent.
+In the event of natural disasters, such as rain or snow, narrow
+roads may collapse, leading to the formation of deep potholes.
+In such situations, it becomes necessary to conduct rescue op-
+erations through these roads. However, vehicles equipped with
+passive suspension systems are unable to pass over due to the
+depth of the potholes. The performance of vehicles equipped
+with ASS in terms of passability in the aforementioned scenarios
+has not been studied. However, achieving passability poses
+signiﬁcant challenges due to inadequate integration with the
+full vehicle dynamics control system. On the other hand, the
+CAV, with its dynamics advantages, can relatively easily achieve
+good posture control and passability in the mentioned scenarios.
+However, research on the CAV is still in the exploratory stage.
+The concept of the corner module architecture for chassis
+systems emerged in the early 21st century. Volvo designed a pro-
+totype named the Autonomous Corner Module in 2002 and 2008
+[12], [13], but its revolutionary nature prevented it from mass
+production. In 2006, Siemens VDO developed the e-Corner,
+integratingtheentirechassissystemwithinthewheel.Bycoordi-
+nating the control of each corner module, stable driving could be
+achieved [14]. In 2019, Protean Electric introduced the Protean
+360+ and Schaefﬂer developed the e-Corner, both providing
+1083-4435 © 2024 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 2 ==========
+LIU et al.: MOTION POSTURE CONTROL OF CAV ON DEEP-POTHOLED ROADS
+4481
+unrestricted 360° steering capability [15]. This advancement
+facilitates the smooth and efﬁcient transportation of passengers
+and goods in busy urban areas.
+In terms of theoretical research, a corner module system for
+urban vehicles was designed [16], and its geometric shape was
+optimized using a genetic algorithm. A corner module utilizing a
+double four-bar linkage mechanism to generate a virtual kingpin
+axis was designed [17]. A four-wheel independent drive and
+steering autonomous guided vehicle was designed [18]. The
+integration principle of the in-wheel motor and steering system
+was studied, and structural topology design was conducted
+using directional characteristic methods [19]. The suspension
+stiffness, geometric kinematics, and component structure design
+for the corner module were completed and implemented [20].
+However, the primary objectives of these developments are to
+achieve chassis integration and improve vehicle maneuverability
+on well-structured roads. Their drawback is the limited sus-
+pension deﬂection (SD), resulting in insufﬁcient passability,
+making them unsuitable for use on damaged structured roads
+and unstructured roads. This disadvantage becomes particularly
+prominent,especiallyinharshroadconditionsduringemergency
+rescue operations.
+ASS play a pivotal role in adjusting the vehicle’s posture,
+and both domestic and international experts have extensively
+researched this aspect. Although a chassis control system was
+designed to ensure stability during high-speed turns [21], un-
+fortunately, no real vehicle experiments were conducted. A
+sliding mode control strategy, based on a state observer, was
+developed to manage vehicle posture and ensure stability during
+lane-keeping [22]. However, this strategy overlooked the impact
+of wheel slip on the overall control approach. The utilization of
+model predictive control (MPC) for posture control has been
+explored [23], [24], but its practical application may pose chal-
+lengesduetohighhardwarerequirements.Acoordinatedcontrol
+method was proposed to address the roll control issue in vehicles
+with mechanical elastic wheels, effectively adjusting the posture
+[25]. It is evident that the aforementioned studies primarily focus
+on posture control on ﬂat road surfaces, and their applicability
+to the extremely harsh road conditions addressed in this article
+is not suitable.
+Theresearchonposturecontrolinchallengingroadconditions
+can provide valuable insights for the work presented in this
+article. The investigation into roll stability on sloping roads led
+to the development of a priority MPC [26]. However, it assumes
+that the slope angle remains constant, which does not align
+well with real-world conditions. Addressing the critical issue
+of tripping rollovers, a new rollover criterion was introduced,
+and robust control, optimized through genetic algorithms, was
+implemented [27]. Yet, the control of wheel slip was not ef-
+fectively managed. In the pursuit of enhancing off-road capa-
+bility on uneven road surfaces, the studied approach deviates
+signiﬁcantly from CAV [28], [29], raising questions about its
+applicabilitytoCAV.Thedynamiccouplingrelationshipsamong
+in-wheel motors, suspension systems, steering systems, and the
+lateral motion of the vehicle in both longitudinal and lateral
+planes were derived [30], [31]. While this signiﬁcantly enhances
+lateral stability on uneven road surfaces, ASS was not taken
+into consideration. An explicit MPC-based method for vehicle
+body posture control was designed [32], focusing on a 1/4
+ASS. However, the applicability of the algorithm to the full
+vehicle with a high-coupling ASS system might be questionable.
+Posture adjustment based on a slow ASS has been developed
+[33], but the adjustment speed of the suspension is relatively
+slow. The above studies, however, do not speciﬁcally address
+the characteristics of CAV and their motion posture adjustment.
+In addition, the mentioned research is not applicable to CAV
+in such road conditions. There is a gap in research regarding
+the enhancement of drivability on deep-potholed roads through
+motion posture adjustment, especially in the context of emer-
+gency rescue operations. This is a critical issue for ensuring the
+people’s safety.
+This article focuses on CAV and proposes the ASS coordi-
+nated control method to pass over roads with deep potholes.
+The main contributions of this article are as follows.
+1) A coordinated control process for ASS is designed to
+enable the CAV to navigate through deep-potholed roads,
+and a dynamic mechanism for ensuring the safe motion
+posture of the vehicle based on three-wheel support is
+established.
+2) A model for three-wheel supported vehicle (TWSV)
+is established, including the transition process between
+TWSV and four-wheel supported vehicle (FWSV).
+3) Feedforward controller based on the vertical load of the
+TWSV and feedback controller based on Takagi–Sugeno
+robust sliding mode control (T-SRSMC) are designed,
+and the stability of the feedback controller with the feed-
+forward value is proven.
+4) The accuracy of the constructed model was validated by
+CarSim, and the correctness of the overall vehicle control
+method was veriﬁed through hardware-in-the-loop (HIL)
+testing, with a maximum achievable speed of 12.8 km/h.
+The rest of this article is organized as follows. In Section II,
+the coordinated control process is designed, and the optimal
+stability mechanism is analyzed. In Section III, the designed
+corner module structure is introduced, and a model of a vehicle
+supported by three wheels and the ASS using a ball screw are
+built. The coordinated controller is designed in Section IV. The
+experiment is conducted on the ASS with a ball screw, and HIL
+testing is performed in Section V. Finally, Section VI concludes
+this article.
+II. COORDINATED CONTROL FLOW DESIGN AND THE
+OPTIMAL STABILITY MECHANISM ANALYSIS
+A. Coordinated Control Flow
+Assuming a narrow road that can only accommodate one
+vehicle, there is a deep pothole ahead of wheel 2, with the length
+of the pothole being smaller than the vehicle’s wheelbase. To
+pass over this pothole, the speciﬁc process proposed by this
+article is illustrated in Fig. 1.
+Step 0: Detection of a deep pothole ahead of wheel 2, nearby.
+Prepare to control the vehicle.
+Step 1: Suspension control needs to be coordinated to lift
+wheel 2 off the road surface, while the vehicle is supported by
+the other three wheels.
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 3 ==========
+4482
+IEEE/ASME TRANSACTIONS ON MECHATRONICS, VOL. 29, NO. 6, DECEMBER 2024
+Fig. 1
+Coordinated control ﬂow. (a) Step 0. (b) Step 1. (c) Step 2. (d) Step 3. (e) Step 4.
+Fig. 2
+Stabilization mechanism.
+Step 2: After the wheel 2 has passed over the pothole, the
+vehicle is adjusted to a four-wheeled support state.
+Step 3: Through coordinated suspension control, the wheel 4
+is lifted off the road surface.
+Step 4: After the wheel 4 has passed over the pothole, the
+vehicle returns to its normal driving state.
+B. Optimal Stability Mechanism
+The stability of the wheel 2 not contacting the road surface
+is shown in Fig. 2, where 1, 2, 3, and 4 represent the left front,
+right front, left rear, and right rear of the vehicle body, along with
+their corresponding suspensions and wheels. a and b represent
+the distances from the center of gravity (CG) to the front and
+rear axles. Bf
+2 and Br
+2 represent the distances from the CG to the
+left and right wheels. Point O is the initial coordinate of the CG.
+Here, we assume that a = b and Bf = Br . a1 and b1 represent
+the distances from the CG to the front and rear axles after the
+CG moves to point O2. c1 and d1 represent the distances from
+the CG to the left and right wheels after the CG moves to point
+O2. SDi,i = 1,2,3,4 represent the SD for suspensions 1 to 4.
+If the CG is within the triangle 134, wheels 1, 3, and 4 are suf-
+ﬁcient to support the vehicle for it to move without the need for
+wheel 2, and without experiencing instability. However, due to
+limited SD, the movable range of the CG forms a parallelogram
+5678, and the stability region becomes a trapezoid 551818. The
+next question is which point within the trapezoid 551818 is the
+most stable region. It is well known that the CG within a triangle
+is its most stable point. In triangle 134, the most stable point is
+O1, and the coordinates of point O1 are (−b
+3, Bf
+3 ). But in reality,
+the CG cannot reach that point. Therefore, the most stable point
+Fig. 3
+Corner module.
+is the intersection of the line OO1 and the trapezoid 551818,
+namely, O2. It is evident that to make the CG move along OO2,
+we only need to increase the SD1 and SD4 by the same value,
+and decrease the SD3, as shown in Fig. 1(b). When the values of
+the three SD reach their maximum, at this moment, the position
+of the CG is at OO2. The optimal stability mechanism for the
+wheel 4 being off the ground, as shown in Fig. 1(d), is the same
+as that of the right front wheel and will not be described. The
+method for lifting the wheel 4 off the road surface is the same
+as the wheel 2 and will not be described here, and the speciﬁc
+control method will be provided in Section IV.
+III. CORNER MODULE STRUCTURE, TWSV MODELING, AND
+ASS WITH BALL SCREW MODELING
+A. Corner Module Structure
+The speciﬁc components are shown in Fig. 3, which includes
+ASS, steer-by-wire, in-wheel motor, and brake system and the
+maximum steering angle is 100°.
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 4 ==========
+LIU et al.: MOTION POSTURE CONTROL OF CAV ON DEEP-POTHOLED ROADS
+4483
+Fig. 4
+Conversion of SD. (a) Corner module. (b) Structure and speciﬁc
+values (mm). (c) Dynamic schematic diagram.
+Fig. 5
+Full vehicle with ASS diagram.
+In previous studies [11], [22], [23], [24], [25], it is assumed
+that the wheel center and suspension are aligned on the same
+axis, but this differs from the actual situation. There is a consid-
+erable distance between the suspension and the wheel center,
+which cannot be ignored. We assume that the vehicle body
+remains stationary and needs to convert the actual SD (ASD)
+into the SD when the wheel and suspension are aligned on the
+same axis.
+Here, the ASD is expressed in terms of the vertical dis-
+placement of the wheel. The speciﬁc parameters and conversion
+process are shown in Fig. 4(b). In Fig. 4(c), s1, s2, s3, and s4
+are the positions of various points on the suspension when it is
+uncompressed, while s11 and s31 are the positions of s1 and s3 af-
+ter compression. Ls1s4 represents the length between s1and s4,
+Ls1 s4 = Ls11s4, Ls2 s31 = L s2s32, and Ls3s32 represent the
+compression amount of the suspension, and Ls3s32 ≈Ls42s31.
+The triangle s4s31s42 is similar to the triangle s4s11s12; hence,
+the SD when the wheel and suspension are aligned on the same
+axis is Ls11 s12 = Ls31s42
+Ls31s4 Ls11s4.
+B. TWSV Modeling
+First, describe the dynamics model of FWSV. The ASS of
+the full vehicle with four-wheel support for the vehicle body
+is built, as shown in Fig. 5. ms and zs are the sprung mass
+and the vertical motions of the vehicle body. zsi, mui, zui, and
+zri, i = 1, 2, 3, 4 are the displacement of different parts of the
+vehicle body, the unsprung mass, displacement of the unsprung
+Fig. 6
+Calculation of the tire vertical load. (a) CG variation caused by
+roll motion. (b) Vertical load moment balance for the four wheels.
+mass, and road displacement. ksi, kti, and Fai, i = 1, 2, 3, 4
+are the spring stiffening coefﬁcients, stiffness of the wheels, and
+the forces produced by the four ASS. Iϕ and Iθ are the mass
+moment of inertia for the roll and pitch motions. ϕ and θ are the
+roll and pitch angles of the vehicle body.
+The model of the ASS is [34] and [35]
+ms¨zs +
+4
+
+i=1
+ksi (zsi −zui) =
+4
+
+i=1
+Fai, i = 1, 2, 3, 4.
+(1)
+zs1 = zs −aθ + 1
+2Bfϕ, zs2 = zs −aθ −1
+2Bfϕ
+(2)
+zs3 = zs + bθ + 1
+2Brϕ, zs4 = zs + bθ −1
+2Brϕ
+(3)
+Iθ ¨θ −aks1 (zs1 −zu1) −aks2 (zs2 −zu2) + bks3 (zs3 −zu3)
++ bks4 (zs4 −zu4) = −a (Fa1 + Fa2) + b (Fa3 + Fa4)
+(4)
+Bf
+2 [ks1 (zs1 −zu1) −ks2 (zs2 −zu2)] + Br
+2 [ks3 (zs3 −zu3)
+−ks4 (zs4 −zu4)]
++ Iϕ ¨ϕ = Bf
+2 (Fa1 −Fa2) + Br
+2 (Fa3 + Fa4)
+(5)
+muzui−ksi (zsi−zui)+kti (zui−zri)=Fai,
+i=1, 2, 3, 4. (6)
+During the control process from Steps 0 to 4, there will
+be situations where the vehicle is supported by three wheels.
+However, the current dynamics model of the vehicle is based on
+a four-wheel supported conﬁguration, which makes the existing
+dynamics model unsuitable for the proposed control method.
+Therefore, we will proceed to modify the existing model and
+establish the dynamic transitioning model between FWSV and
+TWSV, as well as the steady-state dynamics model of TWSV.
+The calculation of the tire vertical load considers the CG
+transfer due to the roll motion, as shown in Fig. 6(a). Pitch
+and roll motions result in the same effect as CG transfer.
+hrc and hpc represent the distance from the roll and pitch
+center to the CG. So, a1 = a −hpcsinθ, b1 = a + hpcsinθ,
+c1 = Bf/2 + hrcsinϕ,andd1 = Bf/2 −hrcsinϕ.Thevertical
+loadmomentbalanceforthefourwheelsisillustratedinFig.6(b)
+and can be described by the following:
+4
+
+i=1
+Fzi = mg, (Fz1 + Fz2) a1 = (Fz3 + Fz4) b1
+(Fz1 + Fz3) c1 = (Fz2 + Fz4) d1.
+(7)
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 5 ==========
+4484
+IEEE/ASME TRANSACTIONS ON MECHATRONICS, VOL. 29, NO. 6, DECEMBER 2024
+During the process of transitioning between FWSV and
+TWSV, the vertical force on the wheel about to lift off the ground
+isrepresentedby(8),whiletheverticalforcesontheotherwheels
+continue to be represented by (7)
+Fzo = muoauo + muog + SDokso
+(8)
+where auo, Fzo, and muo denote the vertical acceleration, the
+vertical load, and the mass of the wheel to be off the ground,
+respectively. SDo and kso denote the SD and stiffness of the
+suspension corresponding to the wheel to be off the ground.
+By using (7) and (8), the vertical loads on each wheel dur-
+ing the transition process between FWSV and TWSV can be
+determined.
+The analysis of the stable state of a vehicle supported by three
+wheels is as follows. When the wheel loses contact with the
+ground (Fzo = 0), the vertical displacement and speed of the
+corresponding portion of the vehicle body are the same as those
+of the wheel, represented as ˙zso = ˙zuo. Based on the vertical load
+moment balance (9) for the three wheels, we can determine the
+vertical loads by (10) on the remaining wheels when the wheels
+at point 2 are not in contact with the ground
+4
+
+i=1
+Fzi = mg, Fz1a1
+= (Fz3 + Fz4) b1, (Fz1 + Fz3) c1 = Fz4d1
+(9)
+Fz1 = b1
+L mg, Fz4 = c1
+Br
+mg, Fz3 = mg −Fz1 −Fz4.
+(10)
+Similarly, when the wheel at point 4 is off the ground, the
+vertical loads on the remaining three wheels are determined by
+Fz2 = c1
+Br
+mg,
+Fz3 = a1
+L mg,
+Fz1 = mg −Fz2 −Fz3.
+(11)
+The steady-state dynamics analysis of the TWSV is con-
+cluded.
+C. ASS With Ball Screw Modeling
+In Section III-A, it is only a uniﬁed dynamic modeling of
+the ASS, without distinguishing the types of ASS. Below, we
+will establish an accurate model starting from the types of ASS.
+The physical object and model of the ball screw suspension are
+shown in Fig. 7, which is driven by a brushless direct current
+(BLDC) motor through a planetary gear reducer.
+The motion equations for the BLDC motors are [36] and [37]
+TaB −TL −Bmωm = JB
+dωm
+dt , ωm = dθm
+dt
+(12)
+where θm is motor angular position, TL is electromagnetic
+torque, JB is combined inertia of the rotor and load, and Bm is
+combined viscous friction of rotor and load.
+The voltage Em at both ends of the motor is [38]
+Em = um + Lm
+dim
+dt + imRm, um = kmωm
+(13)
+Fig. 7
+Physical object and model of the ball screw suspension.
+Fig. 8
+Control architecture.
+where um is the induced electric potential, Lm is the inductance,
+im is current, Rm is the internal resistance, and km is the reverse
+voltage constant.
+The output torque is
+TaB = ktBim
+(14)
+where ktB is the torque constant.
+The axial thrust of the ball screw is
+FaB = nrηr2πTaBηB/lB
+(15)
+where lB and ηB are the lead and efﬁciency of ball screw, and
+nr and ηr are the reduction ratio and efﬁciency of the reducer,
+respectively. The validation of the model is in Section V.
+IV. COORDINATED CONTROLLER DESIGN
+A. Control Architecture
+The control architecture is shown in Fig. 8, where the co-
+ordinated controller consists of Steps 0–4. Steps 1 and 3 are
+composed of feedback control u and feedforward control uf.
+The sprung mass is subjected to fuzziﬁcation using T-S fuzzy
+technology, and a feedback controller based on T-SRSMC is
+designed to effectively enhance the accuracy and robustness of
+the control. The SD is set using optimal stability theory, and
+the feedforward control force is calculated. The total suspension
+control force us1 (the forces in Step 1) and us3 (the forces in Step
+3) is obtained by adding the feedforward and feedback control
+forces. We refer to Steps 2 and 4 as transitional steps. In these
+two steps, the forces are gradually reduced to 0 within a certain
+period. The forces usA are output to the vehicle through the
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 6 ==========
+LIU et al.: MOTION POSTURE CONTROL OF CAV ON DEEP-POTHOLED ROADS
+4485
+ASS, and the vehicle outputs 16 states to the feedback control,
+forming a closed-loop control.
+B. Feedback Controller Design Based on RSMC
+1) ASS Modeling Based on T-S Fuzzy Technology: The
+state-space equation of the ASS for the full vehicle is
+˙x = Ax + Adxd + Bu + Hω
+(16)
+where matrices x, A, Ad, xd, B, u, H, and ω are given in the
+Appendix.
+The following two types of constraints need to be considered.
+1) Our objective is to achieve TWSV movement by control-
+ling the SD, and implementing feedback control on the
+three suspensions in Steps 1 and 3.
+2) Overshoot may occur during the control process. To
+protect the vehicle’s components from damage, it is
+necessary to restrict the suspension from reaching its
+maximumdynamicdeﬂection, thus meetingthefollowing
+conditions:
+|zsi −zui| ≤zi max,i=1,2,3,4.
+(17)
+where zimax is the maximum SD.
+The constraint system is as follows:
+
+˙x = Ax + Adxd + Bu + Hω
+z1 = C1x, z2 = C2x
+(18)
+where C2 = diag{
+1
+z1max ,
+1
+z2max ,
+1
+z3max ,
+1
+z4max , 01×12}. In step 1,
+C1 = diag{1, 0, 1, 1, 01×12}. In step 3, C1 = diag{1, 1, 1,
+0, 01×12}.
+The state-space equations of the system can be further orga-
+nized by considering uf as the output disturbance
+
+˙x = Ax + B (u + uf) + Hω + Adxd
+z1 = C1x, z2 = C2x.
+(19)
+It should be noted that Hω and Adxd of the state-space
+equation are considered disturbance terms. The sprung mass
+has uncertainty, and by fuzzifying it, we can further improve the
+control robustness and accuracy. We deﬁne
+1
+ms min
+= ms,
+1
+ms max
+= ms,
+ms ∈[ms min, ms max]
+(20)
+where msmin is the minimum value of ms and msmax is the
+maximum value of ms.
+So, one has
+1
+ms
+= O1 (ρs) ms + O2 (ρs) ms, ρs =
+1
+ms
+.
+(21)
+We can get the membership functions
+O1 (ρs) = 1/ms −ms
+ms −ms
+,
+O2 (ρs) = ms −1/ms
+ms −ms
+.
+(22)
+They satisfy
+O1 (ρs) + O2 (ρs) = 1,
+O1 (ρs) ≥0,
+O2 (ρs) ≥0.
+(23)
+Then, system (19) can be further represented using the fol-
+lowing fuzzy model.
+Model Rule 1: IF ρs is small, THEN
+
+˙x = A1x + B1 (u + uf) + Hω + Adxd
+z1 = C11x, z2 = C21x
+(24)
+where system matrices A1and B1 are obtained by replacing
+1/ms with ms.
+Model Rule 2: IF ρs is big, THEN
+ ˙x = A2x + B2 (u + uf) + Hω + Adxd
+z1 = C12x, z2 = C22x
+(25)
+where system matrices A1and B1 are obtained by replacing
+1/ms with ms.
+The fuzzy suspension system can be represented as follows:
+
+˙x = 2
+i=1 Oi (ρs) [Aix + Bi (u + uf) + Hiω + Adxd]
+z1 = 2
+i=1 Oi (ρs)C1ix, z2 = 2
+i=1 Oi (ρs)C2ix.
+(26)
+The fuzzy weighting functions are
+we1 (ρs) = O1 (ρs) ,
+we2 (ρs) = O1 (ρs)
+(27)
+where w1(ρs) ≥0, and we1(ρs) + we2 (ρs) = 1.
+2) Sliding Surface Design: An integral-type sliding-surface
+function as follows:
+s = G
+
+x (t) −
+ T
+0
+Axds
+
+(28)
+where A = 2
+i=1
+2
+i=1 hihj(Ai + BiKj) , G ∈R4×16, and
+GB1 and GB2 are nonsingular. Kj ∈R4×16, where Kj are the
+designed state feedback gain matric.
+When the system reaches the sliding surface, s = 0 and
+˙s = 0. Assuming GHω = 0 and GAd xd = 0, we can obtain
+the control law
+u =
+2
+
+j=1
+OjKjx −uf.
+(29)
+By using (26) and (29), we can obtain
+
+˙x = 2
+i=1
+2
+j=1 OiOj [(Ai + Bi) x + Hiω]
+z1 = 2
+i=1
+2
+j=1 OiOjC1ix, z2 = 2
+i=1
+2
+j=2 OiOjC2ix
+(30)
+where Oi (ρs) = Oi , Oj (ρs) = Oj ω ∈L2[0, ∞), and ∥ω∥≤
+ωmax ≤∞. |{z2}v| ≤1, v = 1, 2, 3, 4.
+3) Stability of Sliding Motion: Next, we will prove the asymp-
+totic stability of the sliding mode system under the H∞perfor-
+mance constraint.
+Theorem 1:
+System (30) is stable, and under the bound
+ωmax = [Λ2 −V (0)]/γ , the H∞performance is minimized with
+the disturbance energy. There exist Pp > 0 and Kpj, if the
+following LMIs are satisﬁed:
+Ξii < 0,
+Ξij + Ξji < 0, i < j
+(31)
+
+−Pp
+∗
+ΛPp {C2i}T
+v
+−I
+
+< 0
+(32)
+where sym(U) is U + UT , Kj = Kpj P −1
+p
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 7 ==========
+4486
+IEEE/ASME TRANSACTIONS ON MECHATRONICS, VOL. 29, NO. 6, DECEMBER 2024
+Ξij =
+⎡
+⎣
+sym(AiPp + BiKpj)
+∗
+∗
+Hi
+−γ2
+∗
+CT
+1iPp
+0
+−I
+⎤
+⎦.
+Proof: Establish the Lyapunov function
+V = xT Px.
+(33)
+Under zero initial conditions, H∞performance in (30) is
+˙V + zT
+1 z1 −γ2ωT ω
+≤
+2
+
+i=1
+2
+
+j=1
+OiOj
+
+xT (P (Ai + BiKj)
++ (Ai + BiKj)T P
+
+x + 2xT PHiω
+
++
+2
+
+i=1
+2
+
+j=1
+OiOj
+
+xT CT
+1iC1ix
+
+−γ2ωT ω
+=
+
+xT
+ωT 
+ 2
+
+i=1
+O2
+iiκii
++
+1
+
+i=1
+2
+
+j=i+1
+OiOj (κij + κji)
+⎤
+⎦
+xT
+ωT T
+(34)
+where ℵ= P(Ai + BiKj) + (Ai + BiKj)T P + CT
+1iC1i
+κij =
+
+ℵ
+∗
+HT
+i P
+−γ2I
+
+.
+By using Schur’s complement, one has that
+κij =
+⎡
+⎣
+ℵ1
+∗
+∗
+HT
+i P
+−γ2
+∗
+CT
+i
+0
+−I
+⎤
+⎦
+(35)
+where ℵ1 = P(Ai + BiKj) + (Ai + BiKj)T P.
+Multiplying diag{P −1, I, I, I}(P =P −1
+p
+, Kj =Kpj P −1
+p )
+from both sides to (35), we can get
+Ξij =
+⎡
+⎣
+sym (AiPp + BiKpj)
+∗
+∗
+Hi
+−γ2
+∗
+CT
+1iPp
+0
+−I
+⎤
+⎦.
+(36)
+Then, for (31), it is derived that
+˙V + zT
+1 z1 −γ2ωT ω < 0.
+(37)
+For all nonzero ω ∈L2[0, ∞). When ω = 0, the derivative
+of V is
+˙V =
+2
+
+i=1
+2
+
+j=1
+OiOj
+
+xT (P (Ai + BiKj)
++ (Ai + BiKj)T P
+
+x
+
+.
+(38)
+Hence, it indicates that system (30) is asymptotically stable
+under Theorem 1.
+Equation (37) satisﬁes ˙V −γ2ωT ω < 0. By integrating both
+sides (37), we get
+V −L (0) < γ2
+ t
+0
+ωT ωdz < γ2 ∥ω∥2
+2 .
+(39)
+From Lyapunov function V , there exist
+˙V < Λ2, Λ2 =
+γ2 ωmax + V (0). We have
+max |{z2}v|2 ≤max
+
+2
+
+i=1
+OixT {C2i}T
+v {C2i}vx
+
+2
+< Λ2Θmax
+ 2
+
+i=1
+OiP −1
+2 {C2i}T
+v {C2i}vP −1
+2
+
+(40)
+where v = 1, 2, 3, 4, and Θmax(·) is the maximal eigenvalue.
+|{z2}v| ≤1 (v = 1, 2, 3, 4) are guaranteed, if
+Λ2Θmax
+ 2
+
+i=1
+OiP −1
+2 {C2i}T
+v {C2i}vP −1
+2 −I
+
+< 0.
+(41)
+It is equivalent to
+
+−P
+∗
+Λ{C2i}v
+−I
+
+< 0,
+v = 1, 2, 3, 4.
+(42)
+Multiplying diag{P −1, I} from both sides to (42), we can get
+(32). Thus, the proof is completed.
+■
+4) Reachability Analysis: Next, we will prove the reachabil-
+ity of the sliding surface. Theorem 2:
+There exists a small
+positive constant ξ and ς > uf such that the state trajectories
+of the system (26) will converge to the sliding surface s = 0
+within a ﬁnite time if
+u =
+2
+
+j=1
+OjKjx −℘sgn (x) −ℏ
+(43)
+where ℘= (ξ + ς∥x∥), and ℏ= ∥Hi∥∥ωmax∥−∥Ad∥∥xd∥.
+Proof: Establish the Lyapunov function
+V = 1
+2sT
+ 2
+
+i=1
+OiGBi
+−1
+s.
+(44)
+Substituting (43) into (28) yields
+˙s = G
+2
+
+i=1
+Oi [Aix + Bi (u + uf) + Hiω + Adxd]
+−G
+2
+
+i=1
+2
+
+j=1
+OiOj [(Ai + BiKj) x]
+≤G
+2
+
+i=1
+OiBi [(−℘sgn (x) + uf)].
+(45)
+Further, one has that
+˙V = sT
+ 2
+
+i=1
+OiGBi
+−1
+˙s
+≤−℘∥s∥+ ς ∥x∥∥s∥
+= −ξ ∥s∥< 0, ∥s∦= 0.
+(46)
+This indicates that the trajectories of the system (26) can
+reach the sliding surface s = 0 within ﬁnite time. The proof is
+completed.
+■
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 8 ==========
+LIU et al.: MOTION POSTURE CONTROL OF CAV ON DEEP-POTHOLED ROADS
+4487
+Fig. 9
+Control ﬂow of the ASS.
+C. Design of Feedforward and Transitional Steps
+Controllers
+In Step 1 of Fig. 1, when the vehicle is supported by three
+wheels, according to (10), the vertical load on the wheel 3 is
+very small. We assume that the vertical load on that wheel is 0.
+Therefore, the feedforward torque for the left front wheel and
+the right rear wheel is ms/2. The maximum absolute value of
+the contraction and extension of SD is 0.1 m [39]. In order to
+prevent SD from reaching its maximum value and damaging
+related components, the right front SD is set to −0.08 m, with
+a margin of 0.02 m to prevent control overshoot. Therefore,
+the feedforward force is −0.02ks2 −mu2g for suspension 2.
+The SD 3 is set to 0.08 m, resulting in a feedforward force of
+−0.08ks4 −0.02ks2 −mu2g for the suspension 3. The SD 1 and
+4 are also set to −0.08 m. In summary, the feedforward values
+uf for each suspension are as follows:
+Faf1 = Faf4= ms/2, Faf2 = −0.02ks2 −mu2g
+Faf3 = −0.08ks4 −0.02ks2 −mu2g.
+(47)
+The analysis method for feedforward forces in Step 3 is the
+same as in Step 1
+Faf2 = Faf3= ms/2, Faf4 = −0.02ks2 −mu2g
+Faf1 = −0.08ks4 −0.02ks2 −mu2g.
+(48)
+Therefore, the overall control forces in Steps 1 and Step of
+the suspensions are given by us1 = us3 = u + uf.
+During
+the
+process
+from
+Step
+1
+to
+Step
+2,
+us2 =
+min{abs(us1 −us1
+t−t2
+Ts1 ), 0}, where Ts1 represents the time re-
+quired for the force to reach 0, t2 is the time at which Step 2
+is entered, and t is the real-time simulation time. During the
+process from Steps 3 to 4, us4 = min{abs(us3 −us3
+t−t4
+Ts2 ), 0},
+where Ts2 represents the time required for the force to reach 0,
+and t4 is the time at which Step 4 is entered.
+V. ASS TESTING AND HIL RESULTS ANALYSIS
+A. ASS Testing Results Analysis
+The control ﬂow of the ASS is shown in Fig. 9. The control
+strategy, along with the ideal ASD, is compiled into dSPACE
+through the host computer. The control strategy here is PID,
+which is sufﬁcient for model validation purposes. The host
+Fig. 10
+Experimental results of ASS.
+TABLE I
+VEHICLE PARAMETERS
+computer inputs the differential signal to the motor controller,
+which generates the current to control the motor. The motor, in
+turn, generates the force to control the ASS. The displacement
+sensor collects the ASD of the ASS and feeds it back to the host
+computer for closed-loop control. The current signal is measured
+by a current sensor.
+The counterweight is 140 kg and the suspension stiffness is
+28 000 N/m. This quarter ASS corresponds to the next section,
+and the experimental results are shown in Fig. 10. The simulated
+and experimental values of the ASD closely follow the ideal
+values, and the simulated and measured current values are nearly
+identical, indicating that the established ASS model is accurate.
+Due to the relatively poor accuracy of the displacement sensor,
+there is a certain ﬂuctuation in the experimental SD.
+B. HIL Results Analysis
+The vehicle parameters are given in Table I. Since there is cur-
+rently no control method available to achieve the functionality
+described in this article, no other control methods were set as a
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 9 ==========
+4488
+IEEE/ASME TRANSACTIONS ON MECHATRONICS, VOL. 29, NO. 6, DECEMBER 2024
+Fig. 11
+HIL control ﬂow.
+comparison. It is important to note that the full vehicle model is
+built upon the foundation of the validated model in the previous
+section.
+TheHILcontrolﬂowisshowninFig.11. Thedynamicsmodel
+of a TWSV is loaded into NI/PXI, and the vehicle states are input
+to dSPACE. All the proposed control strategies in this article
+have been compiled into dSPACE, serving as the controller. The
+control strategy generates Fai, which is then sent to NI/PXI to
+control the vehicle, forming a closed-loop control system. The
+sampling time is set at 10 ms for both dSPACE and NI/PXI, and
+communication between the two is established through CAN
+communication.
+1) Analysis of Low-Speed Results: This section simultane-
+ously validates the correctness of the constructed model and the
+effectiveness of the coordinated control method under low-speed
+conditions. CarSim can realize the TWSV studied in this article,
+but the speciﬁc modeling method has not been systematically
+presented in the existing reference. Therefore, after establishing
+this model, a comparison is made with CarSim to validate the
+correctness of the constructed model.
+In the posture control process, to avoid changes in the vehicle
+body posture caused by acceleration, the vehicle is driven under
+a small torque, and the speed is kept relatively low. The aim is
+to maintain a constant speed as much as possible. At this point,
+the torque is 8 N.m, with an average speed of approximately
+2.8 km/h. The depth of the pothole is 0.8 m, and its length is
+0.8 m. The adhesion coefﬁcient of the road surface is 0.8. The
+potholeislocated1.1minfrontofthewheel2.Assumingthatthe
+pothole has been identiﬁed through the sensors, it is impossible
+for regular vehicles to pass over. The control performance of the
+coordinated controller is shown in Figs. 12 and 13. Note that in
+this section, the SD in Fig. 12(d) refers to the SD when the wheel
+center and suspension are aligned on the same axis. In the CG
+position ﬁgure, colors represent its height, measured in meters.
+In the Simulink results, the time intervals are as follows: 0–1.4
+s for Step 0, 1.4–3.1 s for Step 1, 3.1–5 s for Step 2, 5–6.9 s for
+Step 3, and 6.9–9 s for Step 4. The desired value for the absolute
+value of SD during control is set to 0.08 m. At 1 s, the vehicle
+body posture is altered by the force generated by the ASS. The
+vertical force on the wheel 2 becomes zero at 1.4 s, causing the
+vehicle to be supported by only three wheels. At this moment,
+the longitudinal displacement is 1.05 m, which means that is
+supported by three wheels effectively preventing the wheel 2
+from entering a pothole and causing instability. The SD can
+Fig. 12
+HIL results for full vehicle model and low-speed control vali-
+dation. (a) Forces generated by ASS for Simulink. (b) Vertical load on
+wheels for Simulink. (c) SD for Simulink. (d) Longitudinal speed.
+Fig. 13
+HIL results for full vehicle model and low-speed control val-
+idation. (a) Roll angle. (b) Pitch angle. (c) Vertical load on wheels for
+CarSim (d) SD for CarSim. (e) CG position for Simulink. (f) CG position
+for CarSim.
+reach the desired values, leading to a reduction in both the roll
+angle and the pitch angle. At 3.1 s, the longitudinal displacement
+is 2.02 m, allowing wheel 2 to pass over the pothole. Between 3
+and 4.5 s, the vehicle gradually returns to a state that supported
+by four wheels, and the SD, roll angle, and pitch angle gradually
+return to 0.
+At 4.5 s, the vehicle body posture is changed by the force
+generated by the ASS. The vertical force on the wheel 4 becomes
+zero at 5 s, causing the vehicle to be supported by three wheels.
+At this moment, the longitudinal displacement is 3.61 m, with
+a 0.1 m distance between wheel 4 and the pothole. The SD can
+reach the desired values, and there is a reduction in the roll angle.
+However, the pitch angle shows a certain degree of increase. At
+6.9 s, the wheel 4 contacts the ground, and the vehicle is once
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 10 ==========
+LIU et al.: MOTION POSTURE CONTROL OF CAV ON DEEP-POTHOLED ROADS
+4489
+Fig. 14
+HIL results for maximum speed control validation. (a) Forces
+generated by ASS. (b) Vertical load on wheels (c) SD. (d) Longitudinal
+speed. (e) Longitudinal displacement. (f) CG position.
+again supported by four wheels. At this point, the longitudinal
+displacement is 4.82 m. The wheel 4 has already passed over
+the pothole. The SD, roll angle, and pitch angle gradually return
+to 0, restoring the vehicle to a normal driving state. Since the
+driving torque of each wheel is 8.5 N.m, the speed decreases
+when the vehicle is in a three-wheel supported state.
+The numerical values and trends of CarSim are essentially
+consistent with the constructed model, indicating the correctness
+of the established model.
+2) Analysis of Maximum Speed Results: The depth and
+length of the pothole are both 0.8 m, and the distance from
+the wheel 2 to the pothole is 8.6 m. The average speed is
+approximately 12.8 km/h, and the driving torque of each wheel
+is 12 N.m. The results are shown in Fig. 14.
+Step 0—0–1.42 s, Step 1—1.42–2.64 s, Step 2—2.64–3.09 s,
+Step 3—3.09–4.39 s, Step 4—4.39–6 s: During Step 1, the
+displacement ranged from 5.15 to 9.54 m, while the position
+of the pothole is between 8.6 and 9.4 m, indicating that wheel
+2 can successfully pass over the pothole. In Step 2, the starting
+and ending positions are 9.54 and 11.16 m, respectively.
+Moving into Step 3, the starting and ending positions are
+11.16 and 15.8 m, suggesting that wheel 4 can lift off the
+ground before entering the pothole, ensuring the vehicle’s
+traversability. This also indicates that wheel 4 can safely pass
+over the pothole. Beyond 15.8 m, the vehicle gradually returns
+to a four-wheel supported state. The SD can also be controlled
+to the ideal value, and the reasons for changes in vehicle
+body posture and speed are the same as those observed in
+the low-speed test.
+In Step 2, the maximum displacement limits the vehicle’s
+maximum speed. This displacement, determined by the re-
+sponse speed of the ASS, is critical. The calculation for the
+maximum displacement, where the wheels avoid sinking into
+thepothole,isgivenbyXmax = L −Lp,withLp representing
+the length of the pothole. Consequently, the vehicle’s maxi-
+mumspeedonthedeep-potholedroadiscontingentonfactors,
+such as the response speed of the ASS, wheelbase, and the
+pothole length.
+VI. CONCLUSION
+Based on the excellent dynamics performance of the CAV,
+this article investigates the issue of the posture control and pass-
+ability on deep-potholed roads. The mechanism of the vehicle
+supported by three wheels is analyzed, and a dynamic model for
+TWSV is established, effectively expanding traditional dynamic
+models. Controller design considers the changes in stable states
+and sprung mass, enhancing control precision and robustness.
+The validation conﬁrms that the constructed dynamic model and
+the full vehicle control strategy are correct. With a pothole length
+of 0.8 m, the achievable maximum traversal speed is 12.8 km/h.
+This lays a theoretical foundation for the further development
+of CAV.
+APPENDIX
+Matrices x, A, Ad, xd, B, u, H, and ω are given as follows:
+x is a column vector consisting of
+x1
+to x16, x1 =
+zs1 −zu1 −zd1, x2 = zs2 −zu2 −zd2, x3 = zs3 −zu3 −zd3,
+x4 = zs4 −zu2 −zd4, x5 = zu1 −zr1, x6 = zu2 −zr2, x7 =
+zu3 −zr3, x8 = zu4 −zr4, x9 = ˙zs1 , x10 = ˙zs2 , x11 = ˙zs3 ,
+x12 = ˙zs4 , x13 = ˙zu1 , x14 = ˙zu2 , x15 = ˙zu3 , x16 = ˙zu4 ,
+zdi,i = 1−16 is the desired values of zi, and ˙zid = 0. xd =
+[zd1, zd2, zd3, zd4, 01×12]T
+A =
+⎡
+⎢⎢⎣
+04×4
+04×4
+I4×4
+−I4×4
+04×4
+04×4
+04×4
+I4×4
+−a31
+04×4
+04×4
+04×4
+a41
+−a42
+04×4
+04×4
+⎤
+⎥⎥⎦,
+B =
+⎡
+⎣
+08×4
+as
+−bs
+⎤
+⎦,
+H =
+⎡
+⎣
+04×4
+−I4×4
+08×4
+⎤
+⎦
+u =
+
+Fab1
+Fab2
+Fab3
+Fab4
+T ,
+ω =
+
+˙zr1
+˙zr2
+˙zr3
+˙zr4
+T
+a31 =
+⎡
+⎢⎢⎣
+a1ks1
+a2ks2
+a3ks3
+a4ks4
+a5ks1
+a6ks2
+a7ks3
+a8ks4
+a9ks1
+a10ks2
+a11ks3
+a12ks4
+a13ks1
+a14ks2
+a15ks3
+a16ks4
+⎤
+⎥⎥⎦
+a41 = diag {ks1/mu1, ks2/mu2, ks3/mu3ks4/mu4}
+a42 = diag {kt1/mu1, kt2/mu2, kt3/mu3kt4/mu4}
+a1 =
+1
+ms
++ a2
+Iθ
++
+B2
+f
+4Iϕ
+, a2 =
+1
+ms
++ a2
+Iθ
+−
+B2
+f
+4Iϕ
+a3 =
+1
+ms
+−ab
+Iθ
++ BfBr
+4Iϕ
+, a4 =
+1
+ms
+−ab
+Iθ
+−BfBr
+4Iϕ
+a11 =
+1
+ms
++ b2
+Iθ
++ B2
+r
+4Iϕ
+, a12 =
+1
+ms
++ b2
+Iθ
+−B2
+r
+4Iϕ
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 11 ==========
+4490
+IEEE/ASME TRANSACTIONS ON MECHATRONICS, VOL. 29, NO. 6, DECEMBER 2024
+a5 = a2 , a6 = a1 , a7 = a4 , a8 = a3 , a9 = a3 , a10 = a4 ,
+a13 = a4 , a14 = a3 , a15 = a12 , a16 = a11 ,
+Ad =
+⎡
+⎣
+08×4
+08×12
+−a31
+04×12
+a41
+04×12
+⎤
+⎦, as =
+⎡
+⎢⎢⎣
+a1
+a2
+a3
+a4
+a5
+a6
+a7
+a8
+a9
+a10
+a11
+a12
+a13
+a14
+a15
+a16
+⎤
+⎥⎥⎦,
+and bs = diag {1/mu1, 1/mu2, 1/mu31/mu4} .
+REFERENCES
+[1] Y. Zhang, J. Ni, H. Tian, W. Wu, and J. Hu, “Integrated robust dynamics
+control of all-wheel-independently-actuated unmanned ground vehicle
+in diagonal steering,” Mech. Syst. Signal Proc., vol. 164, Feb. 2022,
+Art. no. 108263.
+[2] J. Guo, J. Wang, Y. Luo, and K. Li, “Takagi–Sugeno fuzzy-based robust
+H integrated lane-keeping and direct yaw moment controller of un-
+manned electric vehicles,” IEEE/ASME Trans. Mechatron., vol. 26, no. 4,
+pp. 2151–2162, Aug. 2021.
+[3] H. Deng, Y. Zhao, A.-T. Nguyen, and C. Huang, “Fault-tolerant predictive
+control with deep-reinforcement-learning-based torque distribution for
+four In-wheel motor drive electric vehicles,” IEEE/ASME Trans. Mecha-
+tron., vol. 28, no. 2, pp. 668–680, Apr. 2023.
+[4] S. Yamada, T. Beauduin, H. Fujimoto, T. Kanou, and E. Katsuyama,
+“Active model-based suppression of secondary ride for electric vehicles
+with In-wheel motors,” IEEE/ASME Trans. Mechatron., vol. 27, no. 6,
+pp. 5637–5646, Dec. 2022.
+[5] W. Zhao, A. Wang, S. Zou, and H. Zhang, “Individual auxiliary and
+fault-tolerant control of steer-by-wire system considering different drivers
+steering characteristics,” IEEE/ASME Trans. Mechatron., vol. 26, no. 3,
+pp. 1558–1569, Jun. 2021,.
+[6] W. Zhao, X. Qin, and C. Wang, “Yaw and lateral stability control for
+four-wheelsteer-by-wiresystem,”IEEE/ASMETrans.Mechatron.,vol.23,
+no. 6, pp. 2628–2637, Dec. 2018, doi: 10.1109/TMECH.2018.2812220.
+[7] Z. Zhang et al., “A novel steering system for a space-saving 4WS4WD
+electric vehicle: Design, modeling, and road tests,” IEEE Trans. Intell.
+Transp. Syst., vol. 18, no. 1, pp. 114–127, Jan. 2017.
+[8] S. Zou, W. Zhao, C. Wang, W. Liang, and F. Chen, “Tracking and syn-
+chronization control strategy of vehicle dual-motor steer-by-wire system
+via active disturbance rejection control,” IEEE/ASME Trans. Mechatron.,
+vol. 28, no. 1, pp. 92–103, Feb. 2023.
+[9] S. A. Chen, M. D. Xue, S. J. Zhang, M. Yao, and J. C. Wang, “Dual
+vibration reduction structured active suspension via bushing spring and
+corresponding nonlinear parameter visual optimization based H2/H
+controller,” IEEE/ASME Trans. Mechatron., vol. 27, no. 6, pp. 5060–5071,
+Dec. 2022.
+[10] M. Yu, C. Cheng, S. A. Evangelou, and D. Dini, “Series active variable
+geometry suspension: Full-car prototyping and road testing,” IEEE/ASME
+Trans. Mechatron., vol. 27, no. 3, pp. 1332–1344, Jun. 2022.
+[11] G. Wang, M. Chadli, and M. V. Basin, “Practical terminal sliding mode
+control of nonlinear uncertain active suspension systems with adaptive
+disturbance observer,” IEEE/ASME Trans. Mechatron., vol. 26, no. 2,
+pp. 789–797, Apr. 2021.
+[12] S. Zetterstrom, “Electromechanical steering, suspension, drive and brake
+modules,” in Proc. IEEE 56th Veh. Technol. Conf., 2002, vol. 3,
+pp. 1856–1863.
+[13] L. M. Ho, R. Roberts, H. Hartmann, and B. Gombert, “The electronic
+wedge brake - EWB,” Proc. 24th Annu. Brake Colloq. Exhib., 2016, vol. 1,
+Art. no. 3196.
+[14] R. D. Castro, M. Tanelli, R. E. Araújo, and S. M. Savaresi, “Design
+of safety-oriented control allocation strategies for overactuated electric
+vehicles,” Veh. Syst. Dyn., vol. 52, no. 8, pp. 1017–1046, May 2014.
+[15] J. Li, J. Liu, C. Sun, and F. Sun, “Review: Research progress for electric
+vehicle hub motor driving technology,” J. Harbin Inst. Technol., vol. 27,
+no. 3, pp. 74–91, Jun. 2020.
+[16] A. Waters and A. Khajepour, “Optimization of novel corner module for
+Urban electric vehicle,” in Proc. ASME Int. Des. Eng. Tech. Conf. Comput.
+Inf. Eng. Conf., 2017, vol. 3.
+[17] M. Rajaie et al., “Development of a novel integrated corner module for
+narrow urban vehicles,” Proc. Inst. Mech. Engineers Part D-J. Automobile
+Eng., vol. 233, no. 3, pp. 548–556, Jan. 2019.
+[18] Y. D. Setiawan, T. H. Nguyen, P. S. Pratama, H. K. Kim, and S. B.
+Kim, “Path tracking controller design of four wheel independent steering
+automatic guided vehicle,” Int. J. Control Autom. Syst., vol. 14, no. 6,
+pp. 1550–1560, Oct. 2016.
+[19] W. Wang and X. Chen, “Design methodology for wheel corner module
+topology based on position and orientation characteristics,” Mech. Mach.
+Theory, vol. 136, pp. 122–140, Jun. 2019.
+[20] M.Tianetal.,“Designofintegratedcornermodulesimultaneouslymeeting
+the requirements of mobility and handling stability,” J. Mech. Eng., vol. 55,
+no. 22, pp. 11–20, Feb. 2019.
+[21] H. Her, Y. Koh, E. Joa, K. Yi, and K. Kim, “An integrated control
+of differential braking, front/rear traction, and active roll moment for
+limit handling performance,” IEEE Trans. Veh. Technol., vol. 65, no. 6,
+pp. 4288–4300, Jun. 2016.
+[22] Z. Hu, Y. Q. Wang, Y. Huang, J. Wang, and R. Wang, “Lane keeping
+control of autonomous vehicles with prescribed performance considering
+the rollover prevention and input saturation,” IEEE Trans. Intell. Transp.
+Syst., vol. 21, no. 7, pp. 3091–3103, Jul. 2020.
+[23] J. Liang et al., “A decentralized cooperative control framework for ac-
+tive steering and active suspension: Multi-agent approach,” IEEE Trans.
+Transport. Electriﬁc., vol. 8, no. 1, pp. 1414–1429, Mar. 2022.
+[24] H. Zhao, X. Lu, H. Chen, Q. Liu, and B. Gao, “Coordinated attitude control
+of longitudinal, lateral and vertical tyre forces for electric vehicles based
+on model predictive control,” IEEE Trans. Veh. Technol., vol. 71, no. 3,
+pp. 2550–2559, Mar. 2022.
+[25] H. Xu, Y. Zhao, W. Pi, Q. Wang, F. Lin, and C. Zhang, “Integrated control
+of active front wheel steering and active suspension based on differential
+ﬂatness and nonlinear disturbance observer,” IEEE Trans. Veh. Technol.,
+vol. 71, no. 5, pp. 4813–4824, May 2022.
+[26] R. Hajiloo, A. Khajepour, A. Kasaiezadeh, S.-K. Chen, and B. Litkouhi,
+“Integratedlateralandrollstabilitycontrolofmulti-actuatedvehiclesusing
+prioritizationmodelpredictivecontrol,”IEEETrans.Veh.Technol.,vol.71,
+no. 8, pp. 8318–8329, Aug. 2022.
+[27] Z. Jin, L. Zhang, J. Zhang, and K. Amir, “Stability and optimised H
+control of tripped and untripped vehicle rollover,” Veh. Syst. Dyn., vol. 50,
+no. 10, pp. 1405–1427, Jul. 2016.
+[28] W. Du, M. Fnadi, and F. Benamar, “Rolling based locomotion on rough
+terrain for a wheeled quadruped using centroidal dynamics,” Mech. Mach.
+Theory, vol. 153, Nov. 2020, Art. no. 103984.
+[29] S. K. Kim and C. K. Ahn, “Variable-performance servo system de-
+sign without actuator current and angle measurement for rover vehi-
+cles,” IEEE Trans. Veh. Technol., vol. 69, no. 11, pp. 12725–12733,
+Nov. 2020.
+[30] L. Zhang, L. Li, and B. Qi, “Rollover prevention control for a four In-wheel
+motors drive electric vehicle on an uneven road,” Sci. China-Technol. Sci.,
+vol. 61, no. 6, pp. 934–948, Jun. 2018.
+[31] S. Liu, L. Zhang, J. Zhang, J. Wang, and C. Ren, “Cooperative con-
+trol of path tracking and driving stability for intelligent vehicles on
+potholed road,” IEEE Trans. Intell. Veh., vol. 9, no. 1, pp. 2499–2508,
+Jan. 2024.
+[32] J. Theunissen et al., “Regionless explicit model predictive control of active
+suspension systems with preview,” IEEE Trans. Ind. Electron., vol. 67,
+no. 6, pp. 4877–4888, Jun. 2020.
+[33] L. Ni, L. Wu, and H. Zhang, “Parameters uncertainty analysis of posture
+control of a four-wheel-legged robot with series slow active suspension
+system,” Mech. Mach. Theory, vol. 175, Sep. 2022, Art. no. 104966.
+[34] J. Na, Y. Huang, Q. Pei, X. Wu, G. Gao, and G. Li, “Active suspension
+control of full-car systems without function approximation,” IEEE/ASME
+Trans. Mechatron., vol. 25, no. 2, pp. 779–791, Apr. 2020.
+[35] X. Zheng, H. Zhang, H. Yan, F. Yang, Z. Wang, and L. Vlacic, “Active
+full-vehicle suspension control via cloud-aided adaptive backstepping
+approach,” IEEE Trans. Cybern., vol. 50, no. 7, pp. 3113–3124, Jul. 2020.
+[36] P. Mishra, A. Banerjee, and M. Ghosh, “FPGA-based real-time implemen-
+tation of quadral-duty digital-PWM-controlled permanent magnet BLDC
+drive,” IEEE/ASME Trans. Mechatron., vol. 25, no. 3, pp. 1456–1467,
+Jun. 2020.
+[37] J. De Viaene, D. Ceulemans, S. Derammelaere, and K. Stockman, “Sen-
+sorless load angle control for energy optimal sinusoidal driven BLDC
+motor applications,” IEEE/ASME Trans. Mechatron., vol. 27, no. 4,
+pp. 2290–2300, Aug. 2022.
+[38] J. Zhang, J. Liu, B. Liu, and M. Li, “Fractional order PID control based
+on ball screw energy regenerative active suspension,” Actuators, vol. 11,
+no. 7, pp. 189–212, Jul. 2022.
+[39] J. Wang and S. Shen, “Integrated vehicle ride and roll control via active
+suspensions,” Veh. Syst. Dyn., vol. 46, no. s1, pp. 495–508, Jan. 2009.
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+========== PAGE 12 ==========
+LIU et al.: MOTION POSTURE CONTROL OF CAV ON DEEP-POTHOLED ROADS
+4491
+Shuaishuai Liu received the master’s degree
+in vehicle engineering from the Shandong Uni-
+versity of Technology, Zibo, China, in 2021. He
+is currently working toward the Ph.D. degree
+in vehicle engineering with Yanshan University,
+Qinhuangdao, China.
+His research interests include vehicle system
+dynamics and intelligent chassis control for in-
+wheel motor drive intelligent vehicles.
+Lipeng Zhang (Member, IEEE) received the
+Ph.D. degree in vehicle engineering from the
+Beijing Institute of Technology, Beijing, China, in
+2011. He is currently a Professor and Doctoral
+Supervisor with the School of Vehicles and En-
+ergy, Yanshan University, Qinhuangdao, China.
+His research interests include theoretical and
+technical research in the ﬁelds of intelligent ve-
+hicle dynamics and control, composite transmis-
+sion of new energy vehicles, driver cognition,
+and driving assistance technology.
+Yifan Liu received the bachelor’s degree in ve-
+hicle engineering in 2021 from Yanshan Univer-
+sity, Qinhuangdao, China, where he is currently
+working toward the master’s degree in vehicle
+engineering.
+His
+research
+interests
+include
+line
+con-
+trol, BLDC motor control, and vehicle system
+dynamics.
+Jiantao Wang received the Ph.D. degree in me-
+chanical design and theory from the School of
+Mechanical Science and Engineering, Jilin Uni-
+versity, China, in 2018.
+He is currently a Postgraduate Tutor and lec-
+turer at Yanshan University. His research inter-
+ests include vehicle system dynamics, control of
+in-wheel motor drive electric vehicles, ﬂuid drive,
+and control of special carrier equipment.
+Chao Yang received the bachelor’s degree
+in vehicle engineering from Xihua University,
+Chengdu, China, in 2021. He is currently work-
+ing toward the master’s degree in vehicle engi-
+neering with Yanshan University, Qinhuangdao,
+China.
+His research interests include road surface
+identiﬁcation and vehicle body posture control.
+Junda Zhang received the master’s degree in
+vehicle engineering from Liaocheng University,
+Liaocheng, China, in 2022. He is currently work-
+ing toward the Ph.D. degree in vehicle engi-
+neering with Yanshan University, Qinhuangdao,
+China. His research interests include vehicle dy-
+namics states estimation, driver-vehicle system
+dynamics, and nonlinear system control.
+Authorized licensed use limited to: University of Melbourne. Downloaded on August 22,2026 at 13:16:25 UTC from IEEE Xplore.  Restrictions apply. 

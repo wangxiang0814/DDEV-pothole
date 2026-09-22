@@ -1,0 +1,61 @@
+{
+  "created_utc": "2026-09-22T15:17:30.030724+00:00",
+  "source_run_all": "F:\\TruckSim2019\\TruckSim2019.0_Data\\Results\\Run_c2c3bc93-4dcf-4714-9285-137101f06551\\run_all.par",
+  "source_sha256": "c3841e7802d7983f7c8e4c83fde301e8ec2a54aa2a91ab9056feca319e54ac6a",
+  "generated_run_all": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\hd_utility_ddev\\run_all.par",
+  "generated_sha256": "c9a5eeae272a01da3eb306b5c309fcc5994ed3dd61e16b5f9f4aecfe011b0a17",
+  "program_dir": "F:\\TruckSim2019\\TruckSim2019.0_Prog",
+  "data_dir": "F:\\TruckSim2019\\TruckSim2019.0_Data",
+  "protected_parameters": [
+    "L_TRACK 1975",
+    "M_US 200",
+    "L_TRACK 1975",
+    "M_US 200",
+    "M_SU 6500",
+    "IXX_SU 846.5",
+    "IYY_SU 5757",
+    "IZZ_SU 5757",
+    "IXZ_SU 0",
+    "M_PL 2000"
+  ],
+  "parameter_values": {
+    "M_SU": [
+      "6500"
+    ],
+    "M_PL": [
+      "2000"
+    ],
+    "M_US": [
+      "200",
+      "200"
+    ],
+    "IXX_SU": [
+      "846.5"
+    ],
+    "IYY_SU": [
+      "5757"
+    ],
+    "IZZ_SU": [
+      "5757"
+    ],
+    "IXZ_SU": [
+      "0"
+    ],
+    "L_AXLE": [],
+    "L_TRACK": [
+      "1975",
+      "1975"
+    ],
+    "TSTEP": [
+      "0.0005"
+    ]
+  },
+  "powertrain": "disabled (OPT_PT 0)",
+  "tyre_load_reference_n": {
+    "source_value": 20000.0,
+    "applied_value": 40000.0,
+    "reason": "model-validity correction: the stock 2000 kg rating (FZ_REF 20000 N) is below this vehicle's 22415 N static corner load, so the solver extrapolates the tyre load axis above ~39.3 kN"
+  },
+  "ports_import": 8,
+  "ports_export": 16
+}

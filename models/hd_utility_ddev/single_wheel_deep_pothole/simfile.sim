@@ -1,0 +1,19 @@
+SIMFILE
+FILEBASE output\single_wheel_deep_pothole
+INPUT run_all.par
+INPUTARCHIVE output\single_wheel_deep_pothole_all.par
+ECHO output\single_wheel_deep_pothole_echo.par
+FINAL output\single_wheel_deep_pothole_end.par
+LOGFILE output\single_wheel_deep_pothole_log.txt
+ERDFILE output\single_wheel_deep_pothole.erd
+PROGDIR F:\TruckSim2019\TruckSim2019.0_Prog\
+DATADIR F:\TruckSim2019\TruckSim2019.0_Data\
+RESOURCEDIR F:\TruckSim2019\TruckSim2019.0_Prog\Resources\
+PRODUCT_ID TruckSim
+PRODUCT_VER 2019.0
+VEHICLE_CODE S_S
+EXT_MODEL_STEP 0.01
+PORTS_IMP 8
+PORTS_EXP 24
+DLLFILE F:\TruckSim2019\TruckSim2019.0_Prog\Programs\solvers\trucksim_64.dll
+END
