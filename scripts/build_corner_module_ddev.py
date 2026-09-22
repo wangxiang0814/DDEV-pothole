@@ -87,9 +87,22 @@ def main(argv=None) -> int:
             "Default 1.0 keeps the stock configuration."
         ),
     )
+    parser.add_argument(
+        "--steer-jounce-stop-mm",
+        type=float,
+        default=121.0,
+        help=(
+            "Front jounce-stop onset travel. The stock table ends at 61 mm but the "
+            "vehicle's static ride position is 80.03 mm, so the stop force is "
+            "extrapolated at 7000 N/mm to ~140 kN per corner (~10x vehicle weight) at "
+            "t=0 -- this is what makes the model ring at rest. Default 121 mm puts the "
+            "stop beyond the static position; 0 keeps the stock value."
+        ),
+    )
     args = parser.parse_args(argv)
 
     rate = args.steer_spring_rate_n_per_mm or None
+    jounce = args.steer_jounce_stop_mm or None
     payload_scale = args.payload_scale if args.payload_scale != 1.0 else None
 
     source_text = args.source.read_text(encoding="utf-8", errors="replace")
@@ -113,6 +126,7 @@ def main(argv=None) -> int:
         extra_exports=SCENARIO_EXPORTS,
         steer_spring_rate_n_per_mm=rate,
         payload_scale=payload_scale,
+        steer_jounce_stop_mm=jounce,
     )
     write_contract(args.target / "interface_contract.json")
 

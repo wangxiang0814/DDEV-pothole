@@ -9,6 +9,8 @@ from ddevsim.hd_ddev_case import (
     build_hd_ddev_case,
     describe_suspension_architecture,
     detect_vehicle_code,
+    extend_steer_jounce_stop,
+    scale_payload,
     parse_protected_parameters,
     transform_hd_ddev_run,
 )
@@ -123,6 +125,35 @@ class HDDdevCaseTests(unittest.TestCase):
             self.assertIn("PORTS_IMP 8", simfile)
             self.assertIn("PORTS_EXP 16", simfile)
             self.assertTrue(artifacts["manifest"].is_file())
+
+    def test_extend_jounce_stop_moves_every_low_onset_table(self):
+        # The corner-module dataset ships a front jounce stop ending at 61 mm while the
+        # vehicle's static ride position is 80.03 mm, so the stop force is extrapolated
+        # at 7000 N/mm to ~140 kN per corner -- about ten times the vehicle weight --
+        # at t=0. Extending the travel is what stops the model ringing at rest.
+        source = (
+            "F_JNC_STOP_TABLE LINEAR\n50, 0\n60, 0\n61, 7000\nENDTABLE\n"
+            "F_JNC_STOP_TABLE LINEAR\n50, 0\n60, 0\n61, 7000\nENDTABLE\n"
+            "F_JNC_STOP_TABLE LINEAR\n60, 0\n100, 0\n101, 7000\nENDTABLE\n"
+            # already beyond the target: must be left untouched
+            "F_JNC_STOP_TABLE LINEAR\n190, 0\n200, 0\n201, 7000\nENDTABLE\n"
+        )
+        extended = extend_steer_jounce_stop(source, 121.0)
+        # every stop whose onset is below the target is moved exactly once
+        self.assertEqual(extended.count("111, 0"), 3)
+        self.assertEqual(extended.count("121, 7000"), 3)
+        self.assertNotIn("61, 7000", extended)
+        self.assertIn("201, 7000", extended)
+        with self.assertRaises(ValueError):
+            extend_steer_jounce_stop("PARSFILE\nEND\n", 121.0)
+
+    def test_scale_payload_multiplies_every_instance(self):
+        scaled = scale_payload("M_PL 200\nM_PL(2) 200\nM_PL(3) 200\n", 0.5)
+        self.assertIn("M_PL 100", scaled)
+        self.assertIn("M_PL(2) 100", scaled)
+        self.assertIn("M_PL(3) 100", scaled)
+        with self.assertRaises(ValueError):
+            scale_payload("PARSFILE\nEND\n", 0.5)
 
     def test_builder_takes_the_vehicle_code_from_the_source(self):
         # The corner-module control object is I_I; the simfile must say so or the

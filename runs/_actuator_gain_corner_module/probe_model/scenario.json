@@ -7,7 +7,7 @@
   "center_y_m": -0.9875,
   "friction": 0.7,
   "road_length_m": 40.0,
-  "stop_s": 6.5,
+  "stop_s": 4.5,
   "target_speed_kph": 0.0,
   "approach_distance_m": 1.1,
   "camera_azimuth_deg": -45.0,

@@ -93,6 +93,52 @@ def scale_payload(source: str, factor: float) -> str:
     return text
 
 
+def extend_steer_jounce_stop(source: str, stop_mm: float) -> str:
+    """Move the steer-axle jounce-stop onset out beyond the static ride position.
+
+    A **model-validity correction, not a tuning knob**, recorded in the manifest.
+
+    TruckSim 2019's ``Compact Utility Truck (I_I)`` ships a front jounce stop whose
+    table ends at 61 mm (``50,0 / 60,0 / 61,7000``), but the vehicle's own static ride
+    position is 80.03 mm.  The table is therefore extrapolated along its last segment
+    (7000 N/mm) and applies roughly::
+
+        7000 + (80.03 - 61) * 7000  =  140 kN
+
+    per front corner -- about ten times the whole vehicle's weight -- at t = 0.  That
+    mis-set, oversized stop is what makes the model ring violently at rest and throw
+    the front wheels off the ground, which in turn makes any controller look broken.
+
+    Extending the travel so the stop sits beyond the static position restores the
+    intended behaviour: no force until the suspension actually bottoms out.
+    """
+    stop = float(stop_mm)
+    if stop <= 0.0:
+        raise ValueError("jounce stop travel must be positive")
+    # A steer axle can carry one stop table per side, so every jounce-stop table whose
+    # onset is below the target is extended rather than just the first one found.
+    pattern = r"(?ms)(^F_JNC_STOP_TABLE[^\n]*\n)(.*?)(^ENDTABLE\s*$)"
+
+    def _onset(body: str) -> float:
+        xs = [
+            float(line.split(",")[0])
+            for line in body.strip().splitlines()
+            if "," in line
+        ]
+        return max(xs) if xs else 0.0
+
+    def _replace(match):
+        if _onset(match.group(2)) >= stop:
+            return match.group(0)
+        body = "%.6g, 0\n%.6g, 0\n%.6g, 7000\n" % (stop - 10.0, stop - 1.0, stop)
+        return match.group(1) + body + match.group(3)
+
+    source, count = re.subn(pattern, _replace, source)
+    if count == 0:
+        raise ValueError("source declares no F_JNC_STOP_TABLE to extend")
+    return source
+
+
 def rescale_steer_spring_rate(source: str, rate_n_per_mm: float) -> str:
     """Set the steer-axle spring rate of an independent-suspension case.
 
@@ -138,6 +184,7 @@ def transform_hd_ddev_run(
     extra_exports: Iterable[str] = (),
     steer_spring_rate_n_per_mm: float | None = None,
     payload_scale: float | None = None,
+    steer_jounce_stop_mm: float | None = None,
 ) -> str:
     """Transform a stock TruckSim run into the 8-actuator DDEV case.
 
@@ -186,6 +233,8 @@ def transform_hd_ddev_run(
         text = rescale_steer_spring_rate(text, float(steer_spring_rate_n_per_mm))
     if payload_scale is not None:
         text = scale_payload(text, float(payload_scale))
+    if steer_jounce_stop_mm is not None:
+        text = extend_steer_jounce_stop(text, float(steer_jounce_stop_mm))
     # A merged parameter file can carry more than one TSTOP: the source case for the
     # corner-module vehicle has one per unit block, and the *last* one is the run
     # control that the solver honours. Replacing only the first left the solver
@@ -320,6 +369,7 @@ def build_hd_ddev_case(
     extra_exports: Iterable[str] = (),
     steer_spring_rate_n_per_mm: float | None = None,
     payload_scale: float | None = None,
+    steer_jounce_stop_mm: float | None = None,
 ) -> Dict[str, Path]:
     source_run_all = Path(source_run_all).resolve()
     target_dir = Path(target_dir).resolve()
@@ -333,6 +383,7 @@ def build_hd_ddev_case(
         extra_exports=extra_exports,
         steer_spring_rate_n_per_mm=steer_spring_rate_n_per_mm,
         payload_scale=payload_scale,
+        steer_jounce_stop_mm=steer_jounce_stop_mm,
     )
     run_all = target_dir / "run_all.par"
     run_all.write_text(transformed, encoding="utf-8")
@@ -377,6 +428,15 @@ def build_hd_ddev_case(
         ),
         "powertrain": "disabled (OPT_PT 0)",
         "payload_scale": payload_scale,
+        "steer_jounce_stop_mm": {
+            "applied_value": steer_jounce_stop_mm,
+            "reason": (
+                "model-validity correction: the stock front jounce stop ends at 61 mm "
+                "while the static ride position is 80.03 mm, so the stop force is "
+                "extrapolated at 7000 N/mm to ~140 kN per corner (~10x vehicle weight) "
+                "at t=0"
+            ) if steer_jounce_stop_mm is not None else None,
+        },
         "steer_spring_rate_n_per_mm": {
             "applied_value": steer_spring_rate_n_per_mm,
             "reason": (

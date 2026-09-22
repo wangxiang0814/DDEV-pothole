@@ -77,10 +77,18 @@ def run_validation_suite(
     start_s: float = 0.25,
     stop_s: float = 0.35,
     log_decimation: int = 2,
+    export_names: Sequence[str] | None = None,
 ) -> Dict[str, Any]:
+    """Run the 17-case pulse matrix.
+
+    ``export_names`` defaults to the 16-channel DDEV contract; pass a longer list for
+    a control object that also exports the scenario channels (pose and wheel stations),
+    otherwise the solver rejects the port-count mismatch.
+    """
     target_dir = Path(target_dir).resolve()
     target_dir.mkdir(parents=True, exist_ok=True)
     results: Dict[str, Any] = {}
+    exports = list(export_names) if export_names is not None else list(EXPORT_NAMES)
     cases = build_validation_cases()
     for case in cases:
         csv_path = target_dir / (case["name"] + ".csv")
@@ -89,7 +97,7 @@ def run_validation_suite(
             command_for_case(case, start_s=start_s, stop_s=stop_s),
             csv_path,
             IMPORT_NAMES,
-            EXPORT_NAMES,
+            exports,
             log_decimation=log_decimation,
         )
     manifest = {
@@ -97,7 +105,7 @@ def run_validation_suite(
         "simfile": str(Path(simfile).resolve()),
         "pulse_window_s": [start_s, stop_s],
         "import_names": list(IMPORT_NAMES),
-        "export_names": list(EXPORT_NAMES),
+        "export_names": exports,
         "cases": cases,
         "results": results,
     }

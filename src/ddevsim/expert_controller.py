@@ -442,14 +442,17 @@ class ExpertConfig:
     boundary_layer: float = 4000.0
     #: Integral anti-windup limit on the accumulated load error (N*s).
     integral_limit: float = 4.0e4
-    #: Actuator limits.  The stock corner-module rating (+-30 kN) is *not* enough
-    #: on this vehicle: lifting a wheel needs about 78 kN at the strongest corner
-    #: because IMP_FS acts at the spring seat with only ~8% own-corner authority,
-    #: so the manoeuvre relies on cross-coupling.  The default is therefore sized
-    #: from the measured gain matrix, and the required rating is recorded in the
-    #: run manifest.  Reduce it if a lower-authority actuator is intended.
-    force_min_n: float = -100000.0
-    force_max_n: float = 100000.0
+    #: Actuator limits.  ``None`` derives them from the vehicle as
+    #: ``force_limit_static_multiple`` times the largest static corner load, which is
+    #: the only scale-free way to size them: the same +-100 kN that is reasonable for
+    #: an 8.9 t truck is 7.5x the entire weight of the 1.36 t corner-module vehicle and
+    #: launches it.  Set explicit values to override.
+    force_min_n: Optional[float] = None
+    force_max_n: Optional[float] = None
+    #: Multiple of the largest static corner load used when the limits are derived.
+    #: The paper's corner module is a ball-screw active suspension, so a generous
+    #: multiple is realistic; 5x keeps the manoeuvre from destroying the model.
+    force_limit_static_multiple: float = 5.0
     force_rate_limit_n_per_s: float = 250000.0
     torque_min_nm: float = -400.0
     torque_max_nm: float = 700.0
@@ -544,6 +547,16 @@ class DeepPotholeExpertController:
             )
             for corner in ("FR", "RR")
         }
+
+        # Size the actuator limits from the vehicle unless the caller set them.
+        if self.config.force_min_n is None or self.config.force_max_n is None:
+            reference = max(vehicle.static_load(c) for c in CORNERS)
+            limit = self.config.force_limit_static_multiple * reference
+            self.config.force_min_n = -limit
+            self.config.force_max_n = limit
+            self.force_limit_reference_n = reference
+        else:
+            self.force_limit_reference_n = None
 
         self.step = STEP_APPROACH
         # Activation is a *logic* threshold on pothole depth, not a scale factor.

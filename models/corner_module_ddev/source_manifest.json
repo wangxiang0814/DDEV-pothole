@@ -1,9 +1,9 @@
 {
-  "created_utc": "2026-09-22T16:26:45.811744+00:00",
+  "created_utc": "2026-09-22T16:30:01.235232+00:00",
   "source_run_all": "F:\\TruckSim2019\\TruckSim2019.0_Data\\Results\\Run_b20aee53-c150-44b1-a804-20e43bfde604\\run_all.par",
   "source_sha256": "5dec0eeb0fd88a9257203e5cd921360cf5f90976809e7bce47558356bcbaef67",
   "generated_run_all": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\corner_module_ddev\\run_all.par",
-  "generated_sha256": "20b6af3102691f643e63724363817cf015e7cb3a9c03ed8cc8ea2dee37aed0cb",
+  "generated_sha256": "d17a49cb9841bbdcc7910b9e5c98c546decf06cff338462f5769f18488ea7101",
   "program_dir": "F:\\TruckSim2019\\TruckSim2019.0_Prog",
   "data_dir": "F:\\TruckSim2019\\TruckSim2019.0_Data",
   "protected_parameters": [
@@ -56,6 +56,10 @@
   },
   "powertrain": "disabled (OPT_PT 0)",
   "payload_scale": null,
+  "steer_jounce_stop_mm": {
+    "applied_value": 121.0,
+    "reason": "model-validity correction: the stock front jounce stop ends at 61 mm while the static ride position is 80.03 mm, so the stop force is extrapolated at 7000 N/mm to ~140 kN per corner (~10x vehicle weight) at t=0"
+  },
   "steer_spring_rate_n_per_mm": {
     "applied_value": null,
     "reason": null
