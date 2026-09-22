@@ -1,0 +1,32 @@
+{
+  "start_station_m": 101.1,
+  "length_m": 1.2,
+  "width_m": 0.8,
+  "depth_m": 0.45,
+  "edge_transition_m": 0.05,
+  "center_y_m": -0.9875,
+  "friction": 0.7,
+  "road_length_m": 40.0,
+  "stop_s": 6.5,
+  "target_speed_kph": 0.0,
+  "approach_distance_m": 1.1,
+  "camera_azimuth_deg": -45.0,
+  "camera_elevation_deg": 16.0,
+  "camera_distance_m": 32.0,
+  "camera_look_x_m": -2.0,
+  "camera_look_z_m": 1.0,
+  "camera_field_of_view_deg": 26.0,
+  "road_half_width_m": 5.0,
+  "road_color": [
+    0.85,
+    0.85,
+    0.87
+  ],
+  "pothole_color": [
+    0.3,
+    0.28,
+    0.26
+  ],
+  "road_material": "Road (No Lines)",
+  "hole_material": "Dirt"
+}

@@ -70,11 +70,50 @@ def _replace_exact_count(pattern: str, replacement: str, text: str, count: int, 
     return updated
 
 
+def rescale_steer_spring_rate(source: str, rate_n_per_mm: float) -> str:
+    """Set the steer-axle spring rate of an independent-suspension case.
+
+    This is a **model-validity correction, not a tuning knob**, and it is recorded in
+    the source manifest.
+
+    TruckSim 2019's ``Compact Utility Truck (I_I)`` dataset is internally
+    inconsistent: its front spring is 30 N/mm while the vehicle's own static corner
+    load is 3483 N, so the suspension settles at roughly 116-168 mm of deflection.
+    The front jounce stop does not engage until 61 mm, and the suspension kinematic
+    tables (``SUSP_X_TABLE``, ``CAMBER_TABLE``, ``SUSP_DIVE_TABLE``, ``TOE_TABLE``)
+    only extend to about 80 mm, so TruckSim extrapolates the front geometry from
+    t = 0 -- the shipped source case's own log reports exactly those warnings.
+
+    A higher-rate front spring lands the static ride height inside those tables.  It
+    is also physically motivated here: a corner-module vehicle carries its static load
+    on the active element, so a stiffer passive spring is the expected configuration
+    rather than a deviation.
+    """
+    rate = float(rate_n_per_mm)
+    if rate <= 0.0:
+        raise ValueError("steer spring rate must be positive")
+    header = (
+        r"#FullDataName Suspension: Independent Compliance, Springs, and Dampers"
+        r"`[^`]*Steer Axle`"
+    )
+    for key in ("FS_COMP_COEFFICIENT", "FS_EXT_COEFFICIENT"):
+        pattern = r"(?ms)(" + header + r".*?)^" + key + r"\s+[-+0-9.eE]+\s*$"
+        source, count = re.subn(
+            pattern, lambda m, k=key: "%s\n%s %.9g" % (m.group(1), k, rate), source
+        )
+        if count != 1:
+            raise ValueError(
+                "expected exactly one steer-axle %s to rescale, found %d" % (key, count)
+            )
+    return source
+
+
 def transform_hd_ddev_run(
     source: str,
     stop_s: float = 1.0,
     tyre_load_reference_n: float | None = None,
     extra_exports: Iterable[str] = (),
+    steer_spring_rate_n_per_mm: float | None = None,
 ) -> str:
     """Transform a stock TruckSim run into the 8-actuator DDEV case.
 
@@ -119,6 +158,8 @@ def transform_hd_ddev_run(
         )
         if reference_count == 0:
             raise ValueError("source declares no FZ_REF entry to rescale")
+    if steer_spring_rate_n_per_mm is not None:
+        text = rescale_steer_spring_rate(text, float(steer_spring_rate_n_per_mm))
     # A merged parameter file can carry more than one TSTOP: the source case for the
     # corner-module vehicle has one per unit block, and the *last* one is the run
     # control that the solver honours. Replacing only the first left the solver
@@ -251,6 +292,7 @@ def build_hd_ddev_case(
     stop_s: float = 1.0,
     tyre_load_reference_n: float | None = None,
     extra_exports: Iterable[str] = (),
+    steer_spring_rate_n_per_mm: float | None = None,
 ) -> Dict[str, Path]:
     source_run_all = Path(source_run_all).resolve()
     target_dir = Path(target_dir).resolve()
@@ -262,6 +304,7 @@ def build_hd_ddev_case(
     transformed = transform_hd_ddev_run(
         source_text, stop_s=stop_s, tyre_load_reference_n=tyre_load_reference_n,
         extra_exports=extra_exports,
+        steer_spring_rate_n_per_mm=steer_spring_rate_n_per_mm,
     )
     run_all = target_dir / "run_all.par"
     run_all.write_text(transformed, encoding="utf-8")
@@ -305,6 +348,15 @@ def build_hd_ddev_case(
             ("M_SU", "M_PL", "M_US", "IXX_SU", "IYY_SU", "IZZ_SU", "IXZ_SU", "L_AXLE", "L_TRACK", "TSTEP"),
         ),
         "powertrain": "disabled (OPT_PT 0)",
+        "steer_spring_rate_n_per_mm": {
+            "applied_value": steer_spring_rate_n_per_mm,
+            "reason": (
+                "model-validity correction: the stock 30 N/mm front spring leaves the "
+                "vehicle at ~116-168 mm of static deflection against an ~80 mm "
+                "suspension kinematic table, so the solver extrapolates the front "
+                "geometry from t=0 (the shipped source case's own log shows this)"
+            ) if steer_spring_rate_n_per_mm is not None else None,
+        },
         "vehicle_code": vehicle_code,
         "suspension_architecture": describe_suspension_architecture(transformed),
         "tyre_load_reference_n": {

@@ -53,6 +53,24 @@ def _first_value(text: str, key: str) -> Optional[float]:
     return None
 
 
+def _sum_values(text: str, key: str) -> Optional[float]:
+    """Sum every numeric value declared for ``key``.
+
+    Payloads are repeated once per payload instance -- the corner-module control
+    object declares ``M_PL 200`` three times, i.e. 600 kg of cargo.  Taking only the
+    first would under-count this vehicle's mass by 42% (960 kg instead of 1360 kg),
+    which silently corrupts the three-wheel support equilibrium the expert strategy
+    is built on.  A single-unit case like the HD truck declares it once, so summing
+    is correct for both.
+    """
+    matches = re.findall(
+        r"(?mi)^\s*%s\s+([-+0-9.eE]+)\s*$" % re.escape(key), text
+    )
+    if not matches:
+        return None
+    return float(sum(float(value) for value in matches))
+
+
 def parse_wheelbase_mm(text: str) -> float:
     """Parse the wheelbase from the vehicle assembly ``x_length`` entry.
 
@@ -134,6 +152,12 @@ class VehicleControllerParams:
     #: Provenance so a reviewer can separate measured from parsed values.
     sources: Dict[str, str] = field(default_factory=dict)
 
+    #: ``parsed_mass*g - measured_static_weight``, filled in by :func:`load_vehicle`.
+    weight_residual_n: float = 0.0
+    #: ``|weight_residual_n| / measured_static_weight``; a large value means the
+    #: parameter parse disagrees with the model's own static loads.
+    weight_residual_fraction: float = 0.0
+
     # ------------------------------------------------------------------ mass
     @property
     def total_mass_kg(self) -> float:
@@ -207,11 +231,19 @@ def load_vehicle(
     sources: Dict[str, str] = {}
     values: Dict[str, float] = {}
     for key in _PARAM_KEYS:
-        value = _first_value(text, key)
+        # Payload is declared once per payload instance, so it must be summed; every
+        # other parameter appears once per unit or axle.
+        if key == "M_PL":
+            value = _sum_values(text, key)
+        else:
+            value = _first_value(text, key)
         if value is None:
             raise ValueError("model %s does not declare %s" % (run_all_par, key))
         values[key] = value
         sources[key] = "parsed:%s" % Path(run_all_par).name
+    payload_instances = len(re.findall(r"(?mi)^\s*M_PL\s+[-+0-9.eE]+\s*$", text))
+    if payload_instances > 1:
+        sources["M_PL"] = "parsed:sum of %d payload instances" % payload_instances
 
     if wheelbase_override_m is not None:
         wheelbase_m = float(wheelbase_override_m)
@@ -261,7 +293,7 @@ def load_vehicle(
     sources["cg_to_front_axle_m"] = "derived:static wheel loads"
     sources["cg_to_rear_axle_m"] = "derived:static wheel loads"
 
-    return VehicleControllerParams(
+    vehicle = VehicleControllerParams(
         sprung_mass_kg=values["M_SU"],
         payload_mass_kg=values["M_PL"],
         unsprung_mass_per_axle_kg=values["M_US"],
@@ -277,3 +309,13 @@ def load_vehicle(
         static_wheel_load_n={k: float(v) for k, v in static_wheel_load_n.items()},
         sources=sources,
     )
+    # Cross-check the parsed mass against the measured static wheel loads.  A large
+    # residual means a parameter was mis-parsed -- payload instances not summed, for
+    # example -- which would silently corrupt the three-wheel support equilibrium the
+    # whole strategy rests on.  Reported here rather than left for the user to find.
+    measured_weight = vehicle.measured_static_weight_n()
+    vehicle.weight_residual_n = vehicle.total_weight_n - measured_weight
+    vehicle.weight_residual_fraction = (
+        abs(vehicle.weight_residual_n) / measured_weight if measured_weight else 0.0
+    )
+    return vehicle

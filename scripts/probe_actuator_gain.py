@@ -94,26 +94,29 @@ def main() -> int:
     out_dir = (args.out_dir or (ROOT / "runs" / "_actuator_gain")).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Both vehicles need a purpose-built STATIONARY case.  Using the vehicle's own
+    # rolling scenario (as the first corner-module attempt did) leaves the settle
+    # window inside a transient: the measured static loads summed to 13.7 kN against
+    # a 9.4 kN vehicle, so the "gain" was measuring dynamics, not the actuator.
+    # Holding the vehicle at zero speed on the flat approach keeps every sample in
+    # static equilibrium.
     if args.model == "hd_pothole":
-        # The HD case needs a purpose-built stationary model, because its own pothole
-        # model would put the settle window inside the hole.
-        probe_model = out_dir / "probe_model"
-        build_single_wheel_pothole_case(
-            ROOT / "models" / "hd_utility_ddev" / "run_all.par",
-            ROOT / "models" / "hd_utility_ddev" / "simfile.sim",
-            probe_model,
-            scenario=PotholeScenario(target_speed_kph=0.0, stop_s=args.hold_s + 0.5),
-        )
-        simfile = probe_model / "simfile.sim"
+        base = ROOT / "models" / "hd_utility_ddev"
     else:
-        # The corner-module case is used directly: with zero commands it stands
-        # still, so the measurement is a genuine static gain on its own road.
-        simfile = ROOT / "models" / "corner_module_ddev" / "simfile.sim"
-        if not simfile.exists():
-            raise SystemExit(
-                "corner-module model missing; run scripts\\build_corner_module_ddev.py "
-                "with --stop-s %.1f first" % (args.hold_s + 0.5)
-            )
+        base = ROOT / "models" / "corner_module_ddev"
+    if not (base / "simfile.sim").exists():
+        raise SystemExit(
+            "model %s is missing; build it first (build_hd_utility_ddev.py or "
+            "build_corner_module_ddev.py)" % base
+        )
+    probe_model = out_dir / "probe_model"
+    build_single_wheel_pothole_case(
+        base / "run_all.par",
+        base / "simfile.sim",
+        probe_model,
+        scenario=PotholeScenario(target_speed_kph=0.0, stop_s=args.hold_s + 0.5),
+    )
+    simfile = probe_model / "simfile.sim"
 
     export_names = list(EXPORT_NAMES) + list(SCENARIO_EXPORTS)
     reports: List[Dict[str, object]] = []

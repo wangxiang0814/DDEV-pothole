@@ -38,6 +38,11 @@ class StaticCalibration:
     settle_s: float
     source_csv: str
     model: str = ""
+    #: Relative change in total vertical load between the initial state and the end of
+    #: the settle window.  Large values mean the model is not actually at rest.
+    total_load_drift_fraction: float = 0.0
+    #: True when the drift is small enough that the baseline can be trusted.
+    quiet_at_rest: bool = True
 
     def load(self, corner: str) -> float:
         return float(self.wheel_load_n[corner])
@@ -89,17 +94,36 @@ def measure_static_state(
     if not rows:
         raise RuntimeError("static calibration produced no samples")
 
-    # Average the tail of the settle window so a residual transient cannot bias it.
-    tail = rows[-max(1, len(rows) // 10):]
+    def _mean_of(subset, column: str) -> float:
+        return sum(float(row[column]) for row in subset) / len(subset)
 
-    def mean(column: str) -> float:
-        return sum(float(row[column]) for row in tail) / len(tail)
+    def _values(column: str):
+        return [float(row[column]) for row in rows]
 
-    wheel_load = {c: mean("exp_Fz_%s" % _suffix(c)) for c in CORNERS}
+    # The static operating point is the *initial* state, not the tail.
+    #
+    # TruckSim initialises every run by solving for static equilibrium, so sample 0
+    # already satisfies sum(Fz) == m*g.  For a model whose suspension rings at rest
+    # the tail is a transient and averaging it gives nonsense: on the corner-module
+    # control object the tail reads 6488 N against a 13337 N vehicle because the
+    # front wheels have lifted by t = 50 ms.  Using the head keeps the measured
+    # baseline equal to the solver's own equilibrium.
+    head = rows[: max(1, min(3, len(rows)))]
+    settled = rows[-max(1, len(rows) // 10):]
+
+    wheel_load = {c: _mean_of(head, "exp_Fz_%s" % _suffix(c)) for c in CORNERS}
     deflection = {
-        c: to_si("CmpS_%s" % _suffix(c), mean("exp_CmpS_%s" % _suffix(c)))
+        c: to_si("CmpS_%s" % _suffix(c), _mean_of(head, "exp_CmpS_%s" % _suffix(c)))
         for c in CORNERS
     }
+
+    # Flag a rest state that is not actually at rest: if the total vertical load
+    # drifts materially across the settle window the model is ringing or the
+    # suspension is outside its tables, and the caller should know before trusting
+    # the baseline.
+    total_head = sum(wheel_load.values())
+    total_tail = sum(_mean_of(settled, "exp_Fz_%s" % _suffix(c)) for c in CORNERS)
+    drift = abs(total_tail - total_head) / total_head if total_head else 0.0
 
     elapsed = float(rows[-1]["time_s"])
     if elapsed < settle_s * 0.5:
@@ -114,6 +138,8 @@ def measure_static_state(
         settle_s=elapsed,
         source_csv=str(csv_path),
         model=model_label,
+        total_load_drift_fraction=drift,
+        quiet_at_rest=drift < 0.05,
     )
 
 

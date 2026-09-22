@@ -63,7 +63,22 @@ def main(argv=None) -> int:
              "load. The Compact Utility Truck's 4100 N rating already exceeds its "
              "~2354 N static corner load, so the default leaves it unchanged.",
     )
+    parser.add_argument(
+        "--steer-spring-rate-n-per-mm",
+        type=float,
+        default=0.0,
+        help=(
+            "Front spring rate. The stock dataset uses 30 N/mm while this vehicle's "
+            "static front corner load is ~3483 N, leaving it at ~116-168 mm of "
+            "deflection against an ~80 mm suspension kinematic table, so the solver "
+            "extrapolates the front geometry from t=0 (the shipped source case's own "
+            "log reports it). 70 N/mm puts the static ride height inside the tables. "
+            "Pass 0 (the default) to keep the stock rate."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    rate = args.steer_spring_rate_n_per_mm or None
 
     source_text = args.source.read_text(encoding="utf-8", errors="replace")
     code = detect_vehicle_code(source_text)
@@ -84,6 +99,7 @@ def main(argv=None) -> int:
         # stations, and the QA gates need roll/pitch, so the control object exports
         # the scenario channels alongside the 16 DDEV feedback channels.
         extra_exports=SCENARIO_EXPORTS,
+        steer_spring_rate_n_per_mm=rate,
     )
     write_contract(args.target / "interface_contract.json")
 
