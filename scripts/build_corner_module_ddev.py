@@ -76,9 +76,21 @@ def main(argv=None) -> int:
             "Pass 0 (the default) to keep the stock rate."
         ),
     )
+    parser.add_argument(
+        "--payload-scale",
+        type=float,
+        default=1.0,
+        help=(
+            "Multiply the payload masses. The stock vehicle attaches three 200 kg "
+            "payloads (1360 kg total) which over-compress its front spring beyond the "
+            "suspension kinematic tables; 0.3333 leaves one payload, 0 removes cargo. "
+            "Default 1.0 keeps the stock configuration."
+        ),
+    )
     args = parser.parse_args(argv)
 
     rate = args.steer_spring_rate_n_per_mm or None
+    payload_scale = args.payload_scale if args.payload_scale != 1.0 else None
 
     source_text = args.source.read_text(encoding="utf-8", errors="replace")
     code = detect_vehicle_code(source_text)
@@ -100,6 +112,7 @@ def main(argv=None) -> int:
         # the scenario channels alongside the 16 DDEV feedback channels.
         extra_exports=SCENARIO_EXPORTS,
         steer_spring_rate_n_per_mm=rate,
+        payload_scale=payload_scale,
     )
     write_contract(args.target / "interface_contract.json")
 

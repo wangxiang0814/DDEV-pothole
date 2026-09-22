@@ -76,7 +76,10 @@ def measure_static_state(
     for channel in ("Fz_L1", "CmpS_L1"):
         require_verified(channel)
 
-    target_dir = Path(target_dir)
+    # Must be absolute: run_stepwise changes into the simfile's directory, so a
+    # relative output path would be resolved against the wrong place and the CSV open
+    # would fail.
+    target_dir = Path(target_dir).resolve()
     target_dir.mkdir(parents=True, exist_ok=True)
     csv_path = target_dir / "static_calibration.csv"
 

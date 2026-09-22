@@ -70,6 +70,29 @@ def _replace_exact_count(pattern: str, replacement: str, text: str, count: int, 
     return updated
 
 
+def scale_payload(source: str, factor: float) -> str:
+    """Multiply every ``M_PL`` payload mass by ``factor``.
+
+    A model-validity lever, recorded in the source manifest.  TruckSim 2019's
+    ``Compact Utility Truck (I_I)`` attaches three 200 kg payloads, and the resulting
+    1360 kg vehicle over-compresses its own front spring (30 N/mm against a 3483 N
+    static corner load) beyond the suspension's kinematic tables.  Reducing the cargo
+    is the physical way to bring the vehicle back inside its valid range, and an
+    unladen commercial vehicle is a legitimate configuration to study.
+    """
+    factor = float(factor)
+    if factor < 0.0:
+        raise ValueError("payload scale must not be negative")
+    text, count = re.subn(
+        r"(?mi)^(\s*M_PL(?:\s*\(\s*\d+\s*\))?\s+)([-+0-9.eE]+)(\s*)$",
+        lambda m: "%s%.9g%s" % (m.group(1), float(m.group(2)) * factor, m.group(3)),
+        source,
+    )
+    if count == 0:
+        raise ValueError("source declares no M_PL entry to scale")
+    return text
+
+
 def rescale_steer_spring_rate(source: str, rate_n_per_mm: float) -> str:
     """Set the steer-axle spring rate of an independent-suspension case.
 
@@ -114,6 +137,7 @@ def transform_hd_ddev_run(
     tyre_load_reference_n: float | None = None,
     extra_exports: Iterable[str] = (),
     steer_spring_rate_n_per_mm: float | None = None,
+    payload_scale: float | None = None,
 ) -> str:
     """Transform a stock TruckSim run into the 8-actuator DDEV case.
 
@@ -160,6 +184,8 @@ def transform_hd_ddev_run(
             raise ValueError("source declares no FZ_REF entry to rescale")
     if steer_spring_rate_n_per_mm is not None:
         text = rescale_steer_spring_rate(text, float(steer_spring_rate_n_per_mm))
+    if payload_scale is not None:
+        text = scale_payload(text, float(payload_scale))
     # A merged parameter file can carry more than one TSTOP: the source case for the
     # corner-module vehicle has one per unit block, and the *last* one is the run
     # control that the solver honours. Replacing only the first left the solver
@@ -293,6 +319,7 @@ def build_hd_ddev_case(
     tyre_load_reference_n: float | None = None,
     extra_exports: Iterable[str] = (),
     steer_spring_rate_n_per_mm: float | None = None,
+    payload_scale: float | None = None,
 ) -> Dict[str, Path]:
     source_run_all = Path(source_run_all).resolve()
     target_dir = Path(target_dir).resolve()
@@ -305,6 +332,7 @@ def build_hd_ddev_case(
         source_text, stop_s=stop_s, tyre_load_reference_n=tyre_load_reference_n,
         extra_exports=extra_exports,
         steer_spring_rate_n_per_mm=steer_spring_rate_n_per_mm,
+        payload_scale=payload_scale,
     )
     run_all = target_dir / "run_all.par"
     run_all.write_text(transformed, encoding="utf-8")
@@ -348,6 +376,7 @@ def build_hd_ddev_case(
             ("M_SU", "M_PL", "M_US", "IXX_SU", "IYY_SU", "IZZ_SU", "IXZ_SU", "L_AXLE", "L_TRACK", "TSTEP"),
         ),
         "powertrain": "disabled (OPT_PT 0)",
+        "payload_scale": payload_scale,
         "steer_spring_rate_n_per_mm": {
             "applied_value": steer_spring_rate_n_per_mm,
             "reason": (

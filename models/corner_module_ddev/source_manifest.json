@@ -1,5 +1,5 @@
 {
-  "created_utc": "2026-09-22T16:20:13.904692+00:00",
+  "created_utc": "2026-09-22T16:26:45.811744+00:00",
   "source_run_all": "F:\\TruckSim2019\\TruckSim2019.0_Data\\Results\\Run_b20aee53-c150-44b1-a804-20e43bfde604\\run_all.par",
   "source_sha256": "5dec0eeb0fd88a9257203e5cd921360cf5f90976809e7bce47558356bcbaef67",
   "generated_run_all": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\corner_module_ddev\\run_all.par",
@@ -55,6 +55,7 @@
     ]
   },
   "powertrain": "disabled (OPT_PT 0)",
+  "payload_scale": null,
   "steer_spring_rate_n_per_mm": {
     "applied_value": null,
     "reason": null
