@@ -74,18 +74,21 @@ def transform_hd_ddev_run(
     source: str,
     stop_s: float = 1.0,
     tyre_load_reference_n: float | None = None,
+    extra_exports: Iterable[str] = (),
 ) -> str:
     """Transform a stock TruckSim run into the 8-actuator DDEV case.
 
+    The transformation is vehicle-agnostic: it works for any 2-axle TruckSim lead
+    unit, including solid-axle ones (``s_s``) and corner-module ones with
+    independent suspension at both axles (``i_i``).
+
     ``tyre_load_reference_n`` rescales the tyre dataset's load rating (``FZ_REF``).
     This is a **model-validity correction, not a tuning knob**, and it is recorded in
-    the source manifest.  The stock model labels its tyre ``2000 kg Rating`` with
-    ``FZ_REF 20000``, but this vehicle's own static corner load is 22 415 N
-    (8900 kg / 4 = 2.2 t per corner), so the tyre is under-rated at standstill and
-    the solver extrapolates its load axis from about 1.96 x FZ_REF = 39.3 kN
-    upwards.  Every dynamic load transfer then leaves the table, which is what made
-    the first deep-pothole runs unusable.  Raising the rating makes the model valid
-    across the real operating range; set it to ``None`` to keep the stock value.
+    the source manifest.  It is only needed when the stock rating sits below the
+    vehicle's own static corner load, which is the case for the HD Utility Vehicle
+    (``FZ_REF 20000`` N against a 22 415 N static corner load) but *not* for the
+    Compact Utility Truck (``FZ_REF 4100`` N against a ~2 354 N corner load), so the
+    default is to leave the rating alone unless asked.
     """
     if stop_s <= 0.0:
         raise ValueError("stop_s must be positive")
@@ -95,7 +98,18 @@ def transform_hd_ddev_run(
         raise ValueError("source already contains EXPORT entries")
 
     protected_before = parse_protected_parameters(source)
-    text = _replace_exact_count(r"^OPT_PT\s+3\s*$", "OPT_PT 0", source, 2, "OPT_PT 3")
+
+    # The mechanical powertrain must not drive the wheels.  Stock cases declare
+    # OPT_PT 3 once per unit; a case that is already a DDEV declares OPT_PT 0.
+    shipped = len(re.findall(r"(?m)^OPT_PT\s+3\s*$", source))
+    already = len(re.findall(r"(?m)^OPT_PT\s+0\s*$", source))
+    if shipped:
+        text = _replace_exact_count(r"^OPT_PT\s+3\s*$", "OPT_PT 0", source, shipped, "OPT_PT 3")
+    elif already:
+        text = source
+    else:
+        raise ValueError("source declares neither OPT_PT 3 nor OPT_PT 0")
+
     if tyre_load_reference_n is not None:
         value = float(tyre_load_reference_n)
         if value <= 0.0:
@@ -105,27 +119,54 @@ def transform_hd_ddev_run(
         )
         if reference_count == 0:
             raise ValueError("source declares no FZ_REF entry to rescale")
+    # A merged parameter file can carry more than one TSTOP: the source case for the
+    # corner-module vehicle has one per unit block, and the *last* one is the run
+    # control that the solver honours. Replacing only the first left the solver
+    # integrating 20 s per interface pulse instead of 1 s.
     text, tstop_count = re.subn(
-        r"^TSTOP\s+[-+0-9.eE]+\s*$",
+        r"(?m)^TSTOP\s+[-+0-9.eE]+\s*$",
         "TSTOP %.9g" % float(stop_s),
         text,
-        count=1,
-        flags=re.MULTILINE,
     )
-    if tstop_count not in (0, 1):
-        raise ValueError("expected at most one TSTOP entry")
+    if tstop_count == 0:
+        raise ValueError("source run declares no TSTOP entry")
 
     final_end = text.rfind("\nEND")
     if final_end < 0:
         raise ValueError("source run has no final END")
     interface_block = "\n".join(TORQUE_IMPORTS + ACTIVE_FORCE_IMPORTS + DDEV_EXPORTS)
+    # Scenario channels (vehicle pose and wheel-centre stations) are needed by the
+    # expert controller's support-phase state machine and by the QA gates, so a case
+    # that will be driven by the controller must export them as well.
+    extra = "\n".join("EXPORT " + name for name in extra_exports)
+    if extra:
+        interface_block = interface_block + "\n" + extra
     transformed = text[:final_end] + "\n\n! HD Utility DDEV external actuator contract\n" + interface_block + text[final_end:]
     if parse_protected_parameters(transformed) != protected_before:
         raise ValueError("protected vehicle parameters changed during DDEV transformation")
     return transformed
 
 
-def _simfile_text(program_dir: Path, data_dir: Path) -> str:
+def detect_vehicle_code(source: str) -> str:
+    """Return the upper-case TruckSim vehicle code, e.g. ``S_S`` or ``I_I``.
+
+    ``S`` = solid axle, ``I`` = independent.  The code is the first letter pair, so
+    ``i_i__s`` (independent lead unit towing a solid-axle trailer) yields ``I_I``,
+    which is what the solver's ``VEHICLE_CODE`` entry expects.
+    """
+    match = re.search(r"(?mi)^VEHICLE_CODE\s+(\S+)\s*$", source)
+    if not match:
+        raise ValueError("source declares no VEHICLE_CODE")
+    token = match.group(1).lower()
+    parts = token.split("__")[0].split("_")
+    if len(parts) < 2 or not all(part in ("s", "i") for part in parts[:2]):
+        raise ValueError("unrecognised VEHICLE_CODE %r" % match.group(1))
+    return "_".join(part.upper() for part in parts[:2])
+
+
+def _simfile_text(
+    program_dir: Path, data_dir: Path, vehicle_code: str = "S_S", ports_export: int = 16
+) -> str:
     program_dir = Path(program_dir).resolve()
     data_dir = Path(data_dir).resolve()
     dll_path = program_dir / "Programs" / "solvers" / "trucksim_64.dll"
@@ -142,10 +183,10 @@ DATADIR {data}\\
 RESOURCEDIR {resources}\\
 PRODUCT_ID TruckSim
 PRODUCT_VER 2019.0
-VEHICLE_CODE S_S
+VEHICLE_CODE {vehicle_code}
 EXT_MODEL_STEP 0.01
 PORTS_IMP 8
-PORTS_EXP 16
+PORTS_EXP {ports_export}
 DLLFILE {dll}
 END
 """.format(
@@ -153,7 +194,44 @@ END
         data=str(data_dir),
         resources=str(program_dir / "Resources"),
         dll=str(dll_path),
+        vehicle_code=vehicle_code,
+        ports_export=ports_export,
     )
+
+
+def describe_suspension_architecture(source: str) -> Dict[str, object]:
+    """Describe each axle's suspension type straight from the merged parameters.
+
+    This is the authoritative record of whether the corners are mechanically
+    independent, and it is written into the source manifest so a reviewer never has
+    to infer the architecture from a vehicle name.
+    """
+    independent = sorted(set(re.findall(
+        r"(?mi)^#FullDataName Suspension: Independent System Kinematics`([^`]+)`", source
+    )))
+    solid = sorted(set(re.findall(
+        r"(?mi)^#FullDataName Suspension: Solid Axle System Kinematics`([^`]+)`", source
+    )))
+    per_corner_springs = sorted(set(re.findall(
+        r"(?mi)^#FullDataName Suspension: (?:Independent|Solid) Compliance, Springs, and Dampers`([^`]+)`",
+        source,
+    )))
+    code = detect_vehicle_code(source)
+    parts = code.split("_")
+    return {
+        "vehicle_code": code,
+        "front_axle": "independent" if parts[0] == "I" else "solid",
+        "rear_axle": "independent" if parts[1] == "I" else "solid",
+        "corners_mechanically_independent": parts[0] == "I" and parts[1] == "I",
+        "independent_kinematics_datasets": independent,
+        "solid_axle_kinematics_datasets": solid,
+        "compliance_datasets": per_corner_springs,
+        "note": (
+            "Independent at both axles means each corner has its own spring, damper and "
+            "kinematics, so a force at one spring seat acts on that corner alone and the "
+            "four corners can be raised independently."
+        ),
+    }
 
 
 def _extract_parameter_values(text: str, names: Iterable[str]) -> Dict[str, list]:
@@ -172,6 +250,7 @@ def build_hd_ddev_case(
     data_dir: Path,
     stop_s: float = 1.0,
     tyre_load_reference_n: float | None = None,
+    extra_exports: Iterable[str] = (),
 ) -> Dict[str, Path]:
     source_run_all = Path(source_run_all).resolve()
     target_dir = Path(target_dir).resolve()
@@ -181,12 +260,18 @@ def build_hd_ddev_case(
 
     source_text = source_run_all.read_text(encoding="utf-8", errors="replace")
     transformed = transform_hd_ddev_run(
-        source_text, stop_s=stop_s, tyre_load_reference_n=tyre_load_reference_n
+        source_text, stop_s=stop_s, tyre_load_reference_n=tyre_load_reference_n,
+        extra_exports=extra_exports,
     )
     run_all = target_dir / "run_all.par"
     run_all.write_text(transformed, encoding="utf-8")
+    vehicle_code = detect_vehicle_code(transformed)
     simfile = target_dir / "simfile.sim"
-    simfile.write_text(_simfile_text(program_dir, data_dir), encoding="ascii")
+    simfile.write_text(
+        _simfile_text(program_dir, data_dir, vehicle_code=vehicle_code,
+                      ports_export=len(DDEV_EXPORTS) + len(tuple(extra_exports))),
+        encoding="ascii",
+    )
 
     original_reference = re.search(
         r"(?m)^FZ_REF\s+([-+0-9.eE]+)\s*$", source_text
@@ -196,6 +281,7 @@ def build_hd_ddev_case(
     contract = {
         "schema_version": "2.0",
         "vehicle": "HD Utility DDEV 4x4 Active Suspension",
+        "vehicle_code": vehicle_code,
         "wheel_order": ["FL", "FR", "RL", "RR"],
         "imports": [line.split()[1] for line in TORQUE_IMPORTS + ACTIVE_FORCE_IMPORTS],
         "import_units": ["N-m"] * 4 + ["N"] * 4,
@@ -219,6 +305,8 @@ def build_hd_ddev_case(
             ("M_SU", "M_PL", "M_US", "IXX_SU", "IYY_SU", "IZZ_SU", "IXZ_SU", "L_AXLE", "L_TRACK", "TSTEP"),
         ),
         "powertrain": "disabled (OPT_PT 0)",
+        "vehicle_code": vehicle_code,
+        "suspension_architecture": describe_suspension_architecture(transformed),
         "tyre_load_reference_n": {
             "source_value": float(original_reference.group(1)) if original_reference else None,
             "applied_value": float(applied_reference.group(1)) if applied_reference else None,

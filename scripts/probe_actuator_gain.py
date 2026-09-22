@@ -76,22 +76,44 @@ def _settled_tail(csv_path: Path, fraction: float = 0.2) -> Dict[str, float]:
 
 
 def main() -> int:
-    out_dir = ROOT / "runs" / "_actuator_gain"
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--model", choices=("corner_module", "hd_pothole"), default="corner_module",
+        help="corner_module measures the corner-module DDEV control object; "
+             "hd_pothole keeps the original solid-axle probe",
+    )
+    parser.add_argument("--hold-s", type=float, default=HOLD_S)
+    parser.add_argument("--amplitude-n", type=float, default=FORCE_AMPLITUDE_N)
+    parser.add_argument("--out-dir", type=Path, default=None)
+    args = parser.parse_args()
+
+    # Must be absolute: run_stepwise changes into the simfile's directory, so a
+    # relative output path would be resolved against the wrong place mid-run.
+    out_dir = (args.out_dir or (ROOT / "runs" / "_actuator_gain")).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # The probe must measure the actuator, not road geometry: if the vehicle were
-    # rolling it would reach the pothole during the settle window (as it did on the
-    # first attempt, which put the "baseline" inside the hole and unbalanced the
-    # rear axle).  Holding the vehicle stationary at the default pothole station
-    # keeps every sample on flat ground and gives a true static gain.
-    probe_model = out_dir / "probe_model"
-    build_single_wheel_pothole_case(
-        ROOT / "models" / "hd_utility_ddev" / "run_all.par",
-        ROOT / "models" / "hd_utility_ddev" / "simfile.sim",
-        probe_model,
-        scenario=PotholeScenario(target_speed_kph=0.0, stop_s=HOLD_S + 0.5),
-    )
-    simfile = probe_model / "simfile.sim"
+    if args.model == "hd_pothole":
+        # The HD case needs a purpose-built stationary model, because its own pothole
+        # model would put the settle window inside the hole.
+        probe_model = out_dir / "probe_model"
+        build_single_wheel_pothole_case(
+            ROOT / "models" / "hd_utility_ddev" / "run_all.par",
+            ROOT / "models" / "hd_utility_ddev" / "simfile.sim",
+            probe_model,
+            scenario=PotholeScenario(target_speed_kph=0.0, stop_s=args.hold_s + 0.5),
+        )
+        simfile = probe_model / "simfile.sim"
+    else:
+        # The corner-module case is used directly: with zero commands it stands
+        # still, so the measurement is a genuine static gain on its own road.
+        simfile = ROOT / "models" / "corner_module_ddev" / "simfile.sim"
+        if not simfile.exists():
+            raise SystemExit(
+                "corner-module model missing; run scripts\\build_corner_module_ddev.py "
+                "with --stop-s %.1f first" % (args.hold_s + 0.5)
+            )
 
     export_names = list(EXPORT_NAMES) + list(SCENARIO_EXPORTS)
     reports: List[Dict[str, object]] = []
@@ -99,7 +121,7 @@ def main() -> int:
     # Baseline: identical run with all eight channels at zero.
     baseline = run_stepwise(
         simfile, _command(0, 0.0), out_dir / "baseline.csv",
-        IMPORT_NAMES, export_names, log_decimation=LOG_DECIMATION, stop_at_s=HOLD_S,
+        IMPORT_NAMES, export_names, log_decimation=LOG_DECIMATION, stop_at_s=args.hold_s,
     )
     if baseline["status"] != "COMPLETED":
         raise RuntimeError("baseline run failed: %s" % baseline.get("error_message"))
@@ -114,9 +136,9 @@ def main() -> int:
     for index, corner in enumerate(CORNERS):
         port = 4 + index  # IMP_FS order is FL, FR, RL, RR
         case = run_stepwise(
-            simfile, _command(port, FORCE_AMPLITUDE_N),
+            simfile, _command(port, args.amplitude_n),
             out_dir / ("force_%s.csv" % corner),
-            IMPORT_NAMES, export_names, log_decimation=LOG_DECIMATION, stop_at_s=HOLD_S,
+            IMPORT_NAMES, export_names, log_decimation=LOG_DECIMATION, stop_at_s=args.hold_s,
         )
         if case["status"] != "COMPLETED":
             raise RuntimeError("%s run failed: %s" % (corner, case.get("error_message")))
@@ -130,8 +152,8 @@ def main() -> int:
             deflection_matrix[corner][other] = delta_defl / FORCE_AMPLITUDE_N
         roll_response[corner] = settled["exp_Roll_E"] - base["exp_Roll_E"]
 
-        print("+%.0f N at %-3s -> " % (FORCE_AMPLITUDE_N, corner) + " ".join(
-            "dFz_%s=%+8.0f" % (o, gain_matrix[corner][o] * FORCE_AMPLITUDE_N)
+        print("+%.0f N at %-3s -> " % (args.amplitude_n, corner) + " ".join(
+            "dFz_%s=%+8.0f" % (o, gain_matrix[corner][o] * args.amplitude_n)
             for o in CORNERS) + "  dRoll=%+.3f deg" % roll_response[corner])
 
         reports.append({"corner": corner, "settled": settled})
@@ -144,8 +166,8 @@ def main() -> int:
     payload = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "simfile": str(simfile),
-        "force_amplitude_n": FORCE_AMPLITUDE_N,
-        "hold_s": HOLD_S,
+        "force_amplitude_n": args.amplitude_n,
+        "hold_s": args.hold_s,
         "baseline_settled": base,
         "gain_matrix_command_to_load": gain_matrix,
         "deflection_matrix_command_to_cmps_mm_per_n": deflection_matrix,

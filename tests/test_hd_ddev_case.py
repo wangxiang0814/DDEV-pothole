@@ -7,6 +7,8 @@ from ddevsim.hd_ddev_case import (
     DDEV_EXPORTS,
     TORQUE_IMPORTS,
     build_hd_ddev_case,
+    describe_suspension_architecture,
+    detect_vehicle_code,
     parse_protected_parameters,
     transform_hd_ddev_run,
 )
@@ -49,12 +51,60 @@ class HDDdevCaseTests(unittest.TestCase):
         after = parse_protected_parameters(transform_hd_ddev_run(MINIMAL_SOURCE, stop_s=1.0))
         self.assertEqual(after, before)
 
-    def test_transform_is_deterministic_and_rejects_unexpected_powertrain_count(self):
+    def test_transform_is_deterministic_and_enforces_a_disabled_powertrain(self):
         first = transform_hd_ddev_run(MINIMAL_SOURCE, stop_s=1.0)
         second = transform_hd_ddev_run(MINIMAL_SOURCE, stop_s=1.0)
         self.assertEqual(second, first)
-        with self.assertRaisesRegex(ValueError, "OPT_PT 3"):
-            transform_hd_ddev_run(MINIMAL_SOURCE.replace("OPT_PT 3\n", "", 1), stop_s=1.0)
+
+        # The invariant is that no *active* powertrain option survives, not that the
+        # source had a particular number of them: a solid-axle case ships OPT_PT 3
+        # once per unit, while a corner-module case is already OPT_PT 0.
+        self.assertNotIn("OPT_PT 3", first)
+        single = transform_hd_ddev_run(MINIMAL_SOURCE.replace("OPT_PT 3\n", "", 1), stop_s=1.0)
+        self.assertNotIn("OPT_PT 3", single)
+        already_disabled = transform_hd_ddev_run(
+            MINIMAL_SOURCE.replace("OPT_PT 3", "OPT_PT 0"), stop_s=1.0
+        )
+        self.assertNotIn("OPT_PT 3", already_disabled)
+
+        # A source declaring neither option cannot be shown to be a DDEV at all.
+        with self.assertRaisesRegex(ValueError, "OPT_PT"):
+            transform_hd_ddev_run(MINIMAL_SOURCE.replace("OPT_PT 3\n", ""), stop_s=1.0)
+
+    def test_every_tstop_is_set_because_the_last_one_is_the_run_control(self):
+        # A merged file can carry one TSTOP per unit block and the solver honours the
+        # last; replacing only the first silently left a 20 s integration.
+        two_units = MINIMAL_SOURCE.replace("TSTOP 15", "TSTOP 20\nTSTOP 20")
+        transformed = transform_hd_ddev_run(two_units, stop_s=1.0)
+        self.assertNotIn("TSTOP 20", transformed)
+        self.assertEqual(transformed.count("TSTOP 1"), 2)
+        with self.assertRaisesRegex(ValueError, "TSTOP"):
+            transform_hd_ddev_run(MINIMAL_SOURCE.replace("TSTOP 15\n", ""), stop_s=1.0)
+
+    def test_detects_vehicle_code_and_suspension_architecture(self):
+        self.assertEqual(detect_vehicle_code(MINIMAL_SOURCE), "S_S")
+        # a lead unit towing a solid-axle trailer still reports the lead unit's code
+        self.assertEqual(detect_vehicle_code("VEHICLE_CODE i_i__s\nEND\n"), "I_I")
+        self.assertEqual(detect_vehicle_code("VEHICLE_CODE i_i\nEND\n"), "I_I")
+        with self.assertRaises(ValueError):
+            detect_vehicle_code("PARSFILE\nEND\n")
+
+        corner_module = (
+            "VEHICLE_CODE i_i\n"
+            "#FullDataName Suspension: Independent System Kinematics`Steer Axle`x\n"
+            "#FullDataName Suspension: Independent System Kinematics`Drive Axle`x\n"
+            "#FullDataName Suspension: Independent Compliance, Springs, and Dampers`A`x\n"
+            "#FullDataName Suspension: Independent Compliance, Springs, and Dampers`B`x\n"
+        )
+        arch = describe_suspension_architecture(corner_module)
+        self.assertTrue(arch["corners_mechanically_independent"])
+        self.assertEqual(arch["front_axle"], "independent")
+        self.assertEqual(arch["rear_axle"], "independent")
+        self.assertEqual(len(arch["independent_kinematics_datasets"]), 2)
+
+        arch_solid = describe_suspension_architecture(MINIMAL_SOURCE)
+        self.assertFalse(arch_solid["corners_mechanically_independent"])
+        self.assertEqual(arch_solid["front_axle"], "solid")
 
     def test_builder_writes_eight_by_sixteen_solver_contract(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -73,6 +123,26 @@ class HDDdevCaseTests(unittest.TestCase):
             self.assertIn("PORTS_IMP 8", simfile)
             self.assertIn("PORTS_EXP 16", simfile)
             self.assertTrue(artifacts["manifest"].is_file())
+
+    def test_builder_takes_the_vehicle_code_from_the_source(self):
+        # The corner-module control object is I_I; the simfile must say so or the
+        # solver loads the wrong structure.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.par"
+            source.write_text(
+                MINIMAL_SOURCE.replace("VEHICLE_CODE s_s", "VEHICLE_CODE i_i"), encoding="utf-8"
+            )
+            artifacts = build_hd_ddev_case(
+                source,
+                root / "model",
+                program_dir=Path(r"F:\TruckSim2019\TruckSim2019.0_Prog"),
+                data_dir=Path(r"F:\TruckSim2019\TruckSim2019.0_Data"),
+                stop_s=1.0,
+            )
+            simfile = artifacts["simfile"].read_text(encoding="ascii")
+            self.assertIn("VEHICLE_CODE I_I", simfile)
+            self.assertNotIn("VEHICLE_CODE S_S", simfile)
 
 
 if __name__ == "__main__":

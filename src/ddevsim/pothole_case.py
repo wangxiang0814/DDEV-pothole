@@ -40,20 +40,25 @@ class PotholeScenario:
     # (A 10 deg lens at distance d covers 2*d*tan(5 deg).)
     camera_azimuth_deg: float = -45.0
     camera_elevation_deg: float = 16.0
-    camera_distance_m: float = 20.0
+    #: 32 m at a 26 deg lens frames 2*32*tan(13) = 14.8 m, so the whole vehicle plus
+    #: a good stretch of road fits with margin -- a presentation shot rather than a
+    #: close-up.
+    camera_distance_m: float = 32.0
     camera_look_x_m: float = -2.0
     camera_look_z_m: float = 1.0
     camera_field_of_view_deg: float = 26.0
 
     # ---- road appearance --------------------------------------------------
-    # A dark surface that reads clearly against the light-green background
-    # spheres.  "No Texture" is a built-in flat material, so the rendered colour
-    # is exactly the value given here rather than whatever a texture map happens
-    # to contain.
+    # Material names must exist in Animator/Road_Materials/road.mtl, which the block
+    # loads via MTL_FILE.  The previous "No Texture" is NOT defined in that library,
+    # so the surface had no usable material and the vehicle appeared to float over
+    # nothing.  "Road (No Lines)" is the asphalt material and "Dirt" is used, tinted
+    # dark, for the hole.
     road_half_width_m: float = 5.0
-    road_color: tuple = (0.30, 0.30, 0.33)
-    pothole_color: tuple = (0.05, 0.05, 0.05)
-    road_material: str = "No Texture"
+    road_color: tuple = (0.85, 0.85, 0.87)
+    pothole_color: tuple = (0.30, 0.28, 0.26)
+    road_material: str = "Road (No Lines)"
+    hole_material: str = "Dirt"
 
     # ------------------------------------------------------------------ geometry
     @property
@@ -192,43 +197,74 @@ EXIT_PARSFILE Roads\\Friction\\DDEV_dry_dirt_mu_070.par
 ENTER_PARSFILE Roads\\Shapes\\DDEV_single_wheel_pothole.par
 #FullDataName Road: Animator Surface Shapes`DDEV Right Single-Wheel Deep Pothole`DDEV Research
 NLANES 5
-OPTTHRESHOLD 2
+OPTTHRESHOLD 1
 MIRROR 0
 COLOR(1) {road_rgb}
 MATERIAL(1) {road_mat}
+SPECULAR(1) 1
+SCALE(1) 10
+LTILES(1) 100
 LIN(1) {road_in}
+LINUNITS(1) m
 LOUT(1) {road_out}
+LOUTUNITS(1) m
 SSTART(1) 95
 SSTOP(1) {s0}
+SINT(1) 10
 DZ(1) 0
 COLOR(2) {road_rgb}
 MATERIAL(2) {road_mat}
+SPECULAR(2) 1
+SCALE(2) 10
+LTILES(2) 100
 LIN(2) {road_in}
+LINUNITS(2) m
 LOUT(2) {road_out}
+LOUTUNITS(2) m
 SSTART(2) {s1}
 SSTOP(2) 140
+SINT(2) 10
 DZ(2) 0
 COLOR(3) {road_rgb}
 MATERIAL(3) {road_mat}
+SPECULAR(3) 1
+SCALE(3) 10
+LTILES(3) 100
 LIN(3) {y1}
+LINUNITS(3) m
 LOUT(3) {road_out}
+LOUTUNITS(3) m
 SSTART(3) {s0}
 SSTOP(3) {s1}
+SINT(3) 10
 DZ(3) 0
 COLOR(4) {road_rgb}
 MATERIAL(4) {road_mat}
+SPECULAR(4) 1
+SCALE(4) 10
+LTILES(4) 100
 LIN(4) {road_in}
+LINUNITS(4) m
 LOUT(4) {y0}
+LOUTUNITS(4) m
 SSTART(4) {s0}
 SSTOP(4) {s1}
+SINT(4) 10
 DZ(4) 0
 COLOR(5) {hole_rgb}
-MATERIAL(5) {road_mat}
+MATERIAL(5) {hole_mat}
+SPECULAR(5) 0
+SCALE(5) 10
+LTILES(5) 100
 LIN(5) {y0}
+LINUNITS(5) m
 LOUT(5) {y1}
+LOUTUNITS(5) m
 SSTART(5) {s0}
 SSTOP(5) {s1}
+SINT(5) 10
 DZ(5) {z}
+MTL_FILE Animator/Road_Materials/road.mtl
 LOG_ENTRY DDEV visual right-track deep pothole
 EXIT_PARSFILE Roads\\Shapes\\DDEV_single_wheel_pothole.par
 
@@ -315,6 +351,7 @@ EXIT_PARSFILE Procedures\\DDEV_single_wheel_deep_pothole.par""".format(
         road_rgb="%.3f %.3f %.3f" % tuple(scenario.road_color),
         hole_rgb="%.3f %.3f %.3f" % tuple(scenario.pothole_color),
         road_mat=scenario.road_material,
+        hole_mat=scenario.hole_material,
     )
 
 

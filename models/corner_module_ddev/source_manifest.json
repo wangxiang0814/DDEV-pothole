@@ -1,0 +1,82 @@
+{
+  "created_utc": "2026-09-22T16:08:48.583339+00:00",
+  "source_run_all": "F:\\TruckSim2019\\TruckSim2019.0_Data\\Results\\Run_b20aee53-c150-44b1-a804-20e43bfde604\\run_all.par",
+  "source_sha256": "5dec0eeb0fd88a9257203e5cd921360cf5f90976809e7bce47558356bcbaef67",
+  "generated_run_all": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\models\\corner_module_ddev\\run_all.par",
+  "generated_sha256": "20b6af3102691f643e63724363817cf015e7cb3a9c03ed8cc8ea2dee37aed0cb",
+  "program_dir": "F:\\TruckSim2019\\TruckSim2019.0_Prog",
+  "data_dir": "F:\\TruckSim2019\\TruckSim2019.0_Data",
+  "protected_parameters": [
+    "L_TRACK 1260",
+    "M_US 80",
+    "L_TRACK 1260",
+    "M_US 80",
+    "M_SU 600",
+    "IXX_SU 384.0",
+    "IYY_SU 624.2",
+    "IZZ_SU 686.9",
+    "IXZ_SU 0",
+    "M_PL 200",
+    "M_PL 200",
+    "M_PL 200"
+  ],
+  "parameter_values": {
+    "M_SU": [
+      "600"
+    ],
+    "M_PL": [
+      "200",
+      "200",
+      "200"
+    ],
+    "M_US": [
+      "80",
+      "80"
+    ],
+    "IXX_SU": [
+      "384.0"
+    ],
+    "IYY_SU": [
+      "624.2"
+    ],
+    "IZZ_SU": [
+      "686.9"
+    ],
+    "IXZ_SU": [
+      "0"
+    ],
+    "L_AXLE": [],
+    "L_TRACK": [
+      "1260",
+      "1260"
+    ],
+    "TSTEP": [
+      "0.0005"
+    ]
+  },
+  "powertrain": "disabled (OPT_PT 0)",
+  "vehicle_code": "I_I",
+  "suspension_architecture": {
+    "vehicle_code": "I_I",
+    "front_axle": "independent",
+    "rear_axle": "independent",
+    "corners_mechanically_independent": true,
+    "independent_kinematics_datasets": [
+      "Compact Utility Truck - Drive Axle",
+      "Compact Utility Truck - Steer Axle"
+    ],
+    "solid_axle_kinematics_datasets": [],
+    "compliance_datasets": [
+      "Compact Utility Truck - Drive Axle",
+      "Compact Utility Truck - Steer Axle"
+    ],
+    "note": "Independent at both axles means each corner has its own spring, damper and kinematics, so a force at one spring seat acts on that corner alone and the four corners can be raised independently."
+  },
+  "tyre_load_reference_n": {
+    "source_value": 4100.0,
+    "applied_value": 4100.0,
+    "reason": "model-validity correction: the stock 2000 kg rating (FZ_REF 20000 N) is below this vehicle's 22415 N static corner load, so the solver extrapolates the tyre load axis above ~39.3 kN"
+  },
+  "ports_import": 8,
+  "ports_export": 16
+}

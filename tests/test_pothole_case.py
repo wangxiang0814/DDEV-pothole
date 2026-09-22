@@ -43,11 +43,15 @@ class PotholeCaseTests(unittest.TestCase):
         self.assertIn("LIN(5) -1.3875", transformed)
         self.assertIn("LOUT(5) -0.5875", transformed)
         # the hole must be near-black and clearly darker than the road
-        self.assertIn("COLOR(5) 0.050 0.050 0.050", transformed)
-        self.assertIn("COLOR(1) 0.300 0.300 0.330", transformed)
-        # a flat built-in material, so the rendered colour is exactly this value
-        self.assertIn("MATERIAL(1) No Texture", transformed)
-        self.assertIn("MATERIAL(5) No Texture", transformed)
+        self.assertIn("COLOR(5) 0.300 0.280 0.260", transformed)
+        self.assertIn("COLOR(1) 0.850 0.850 0.870", transformed)
+        # material names must exist in the library the block loads via MTL_FILE,
+        # otherwise the surface has no material and does not render
+        self.assertIn("MATERIAL(1) Road (No Lines)", transformed)
+        self.assertIn("MATERIAL(5) Dirt", transformed)
+        self.assertIn("MTL_FILE Animator/Road_Materials/road.mtl", transformed)
+        self.assertIn("LINUNITS(1) m", transformed)
+        self.assertIn("SINT(1) 10", transformed)
         # the road must be wide enough to be visible around the vehicle
         self.assertIn("LIN(1) -5", transformed)
         self.assertIn("LOUT(1) 5", transformed)
@@ -57,7 +61,7 @@ class PotholeCaseTests(unittest.TestCase):
         transformed = transform_single_wheel_pothole(SOURCE, PotholeScenario())
         self.assertIn("SET_AZIMUTH -45", transformed)
         self.assertIn("SET_ELEVATION 16", transformed)
-        self.assertIn("SET_DISTANCE 20", transformed)
+        self.assertIn("SET_DISTANCE 32", transformed)
         # look point at mid-body height, not wheel height, and a lens wide enough
         # to contain the whole vehicle
         self.assertIn("SET_LOOKPOINT_Z 1", transformed)
