@@ -1,0 +1,66 @@
+{
+  "source_history": {
+    "basename": "single_wheel_deep_pothole",
+    "vs": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_expert_pothole\\native\\single_wheel_deep_pothole.vs",
+    "vsb": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_expert_pothole\\native\\single_wheel_deep_pothole.vsb",
+    "par": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\hd_utility_ddev_expert_pothole\\native\\single_wheel_deep_pothole_all.par",
+    "channels": 41,
+    "samples": 360,
+    "time_step_s": 0.025,
+    "duration_s": 8.975
+  },
+  "history": {
+    "basename": "single_wheel_deep_pothole",
+    "vs": "runs\\hd_utility_ddev_expert_pothole\\native\\native_video\\single_wheel_deep_pothole.vs",
+    "vsb": "runs\\hd_utility_ddev_expert_pothole\\native\\native_video\\single_wheel_deep_pothole.vsb",
+    "par": "runs\\hd_utility_ddev_expert_pothole\\native\\native_video\\single_wheel_deep_pothole_all.par",
+    "channels": 41,
+    "samples": 360,
+    "time_step_s": 0.025,
+    "duration_s": 8.975
+  },
+  "animator_par": "runs\\hd_utility_ddev_expert_pothole\\native\\native_video\\animator.par",
+  "stage_dir": "runs\\hd_utility_ddev_expert_pothole\\native\\native_video",
+  "stage_dir_relocated_for_ascii": false,
+  "video_export_is_gui_only": true,
+  "cli_options_verified": {
+    "-vsrap": "Create VSRAP with the specified name from the Parsfile, then exit.",
+    "-vsrapoverwrite": "Overwrite VSRAP if it exists. Use with \"-vsrap\".",
+    "-res": "Resolution of render window in pixels.",
+    "-nosound": "Disable all sound processing."
+  },
+  "vsrap": {
+    "created": false,
+    "vsrap": "runs\\hd_utility_ddev_expert_pothole\\native\\native_video\\single_wheel_deep_pothole.vsrap",
+    "size_bytes": 0,
+    "return_code": 4294967295,
+    "timed_out": false,
+    "command": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Programs\\VsVisualizer\\VsVisualizer64\\VsVisualizer.exe -vsrap runs\\hd_utility_ddev_expert_pothole\\native\\native_video\\single_wheel_deep_pothole.vsrap -vsrapoverwrite runs\\hd_utility_ddev_expert_pothole\\native\\native_video\\animator.par",
+    "stdout": "",
+    "stderr": "",
+    "note": "Best-effort. VS Visualizer returns a non-zero code even on success, and it may block on a GUI window; the file existence/size check is the authoritative result. The animator.par launch path does not need this."
+  },
+  "launch": {
+    "launched": true,
+    "pid": 21640,
+    "command": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Programs\\VsVisualizer\\VsVisualizer64\\VsVisualizer.exe -i DDEV_Pothole -fs 0 -res 1280 720 -tb 1 -nosound runs\\hd_utility_ddev_expert_pothole\\native\\native_video\\animator.par",
+    "cwd": "F:\\TruckSim2019\\TruckSim2019.0_Data"
+  },
+  "manual_steps": [
+    "The remaining step is the only one TruckSim does not expose on the command line: the AVI writer is behind VS Visualizer's Export Video dialog.",
+    "",
+    "1. VS Visualizer should now be open showing the TruckSim 3D scene for 'single_wheel_deep_pothole'.",
+    "2. If it is not open, run the launch command printed above (or double-click the .vsrap).",
+    "3. Confirm the replay covers the whole run: the history is 8.975 s long (360 frames at 0.0250 s).",
+    "4. Set the camera before exporting: use the Animator camera controls, or the dataset camera already embedded in the run (this platform sets azimuth -45 deg, elevation 14 deg, distance 16 m for the pothole case).",
+    "5. Menu: File > Export Video...",
+    "6. In the dialog set the time range to 0 to 8.975 s and the frame rate to 30 fps (269 frames).",
+    "7. Choose the output file name with an .avi extension.",
+    "8. Choose a compressor. 'Microsoft Video 1' is universally available; 'Full Frames (Uncompressed)' is lossless but produces a very large file. H.264 is only offered if a suitable VFW codec is installed on the machine.",
+    "9. Click OK/Save and wait for the export; it renders in real time, so a 9.0 s run takes roughly 9.0 s plus encoding time.",
+    "10. Optional: convert the AVI to MP4 for a paper figure, e.g. ffmpeg -i native.avi -c:v libx264 -pix_fmt yuv420p -crf 18 native.mp4",
+    "",
+    "Output resolution is controlled by the -res flag on launch (currently 1280 x 720).",
+    "Staged files for this export are in: runs\\hd_utility_ddev_expert_pothole\\native\\native_video"
+  ]
+}

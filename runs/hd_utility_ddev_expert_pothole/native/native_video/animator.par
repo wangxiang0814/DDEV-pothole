@@ -1,0 +1,5 @@
+PARSFILE
+SET_RUN_SLOT 0
+DATASET F:\1tongji\1 分布式电驱\Research\TruckSim仿真\runs\hd_utility_ddev_expert_pothole\native\native_video\single_wheel_deep_pothole.vs
+PARSFILE F:\1tongji\1 分布式电驱\Research\TruckSim仿真\runs\hd_utility_ddev_expert_pothole\native\native_video\single_wheel_deep_pothole_all.par
+END

@@ -264,6 +264,35 @@ class NativeVideoTests(unittest.TestCase):
         self.assertFalse(moved)
         self.assertEqual(keep, Path(r"C:\temp\stage"))
 
+    def test_ascii_check_uses_the_absolute_path(self):
+        # A relative path can look ASCII while its absolute form is not, and it is
+        # the absolute form that reaches VS Visualizer on the command line. Missing
+        # this let the export hand it a mangled path it then failed to open.
+        relative = Path("runs") / "batch_x" / "native_video"
+        self.assertEqual(str(relative).encode("ascii").decode("ascii"), str(relative))
+        self.assertEqual(is_ascii_path(relative), is_ascii_path(relative.resolve()))
+
+    def test_animator_par_uses_absolute_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _write_history(root, "case_f", self.CHANNELS, samples=8, step=0.1)
+            history = find_history(root)
+            self.assertTrue(history.vs.is_absolute())
+            self.assertTrue(history.par.is_absolute())
+            par = write_animator_par(root / "stage", history)
+            for line in par.read_text(encoding="mbcs").splitlines():
+                if line.startswith(("DATASET", "PARSFILE ")) and "animator" not in line:
+                    self.assertTrue(Path(line.split(None, 1)[1]).is_absolute(), line)
+
+    def test_launch_flags_are_not_mutually_exclusive(self):
+        # CREATE_NEW_CONSOLE (0x10) and DETACHED_PROCESS (0x08) cannot be combined;
+        # doing so made CreateProcess fail with WinError 87 and no window appeared.
+        source = (
+            Path(__file__).resolve().parents[1] / "src" / "ddevsim" / "native_video.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("creation = 0x00000008", source)
+        self.assertNotIn("0x00000010 | 0x00000008", source)
+
 
 if __name__ == "__main__":
     unittest.main()

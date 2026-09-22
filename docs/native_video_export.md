@@ -42,15 +42,25 @@ run.`、`Export AVI File` 等字符串，并导入 `AVIFIL32.dll` 的
 `AVISaveOptions` 就是 Windows VfW 的“视频压缩”压缩器选择对话框，**按设计就是模态的**，
 二进制里不存在静默选压缩器的代码路径。所以最后一步无法脚本化。
 
-**还有一个必须知道的环境限制**（我在受限沙箱里实测到的）：VS Visualizer 启动时要写
-`%LOCALAPPDATA%\VS Visualizer\2019\{Config,View}\`，如果该目录不可写，它会连续弹
-`can't open user configuration file.` / `Failed to create a temporary file name (error 5:
-Access is denied.)` 然后退出（退出码 −1）。**这个错误在零参数启动时也会复现**，所以它与
-`.vs`/`.vsb`/`.par` 输入无关。
+**另一个必须知道的坑（已实测确认）**：VS Visualizer **会把命令行参数里的非 ASCII 字符
+替换成下划线**。传入
+`F:\1tongji\1 分布式电驱\...\animator.par` 时，它自己的日志记录：
 
-> **因此：请在你自己正常登录的 Windows 桌面会话里运行本文的命令**，不要在受限的自动化
-> 沙箱/受管会话里跑 —— 否则界面根本起不来。另外注意 `-1` 不是 VS Visualizer 的失败判据：
-> 本机那次成功生成 `.vsrap` 的运行也返回 −1。
+```
+Error: Unable to open parsfile file:
+"F:\1tongji\1 _____\Research\TruckSim__\runs\...\animator.par"
+```
+
+中文字符变成了 `_____`，导致 parsfile 打不开、场景根本不会加载。
+**所以必须把历史暂存到纯 ASCII 路径**（脚本默认就这么做，落在
+`%TEMP%\ddev_native_video\`）。注意路径必须按**绝对路径**判断 ASCII 可表示性 ——
+相对路径 `runs\batch_x\native_video` 看起来是 ASCII，但它拼出来的绝对路径不是。
+
+> **本平台已实测通过的完整链路**（TruckSim 2019.0，本机）：
+> 校验历史 → 暂存到 ASCII 路径 → 写 `animator.par` → VS Visualizer 成功启动并
+> `Loading Dataset: "...single_wheel_deep_pothole.vs"`（无报错）→ 3D 形状资源加载
+> （无警告）→ 命令行生成 `.vsrap` 成功（**52 793 字节**）。
+> 唯一残留的、必须人工完成的只有最后写 AVI 的那一步。
 
 > 顺带说明：本平台早期那个“工程回放 MP4”是用 `src/ddevsim/replay_video.py` 以 NumPy
 > 软件投影自绘的示意图，**不是** TruckSim 3D 场景，不要用于论文插图。原生视频必须走
@@ -136,19 +146,25 @@ python scripts\export_native_video.py <路径> --vsrap
 
 ---
 
-## 4. 关于 `.vsrap`（可选）
+## 4. 关于 `.vsrap`（已实测可用）
 
-`.vsrap` 是 VS Visualizer 的“快速动画包”，把 `.vs`/`.vsb`/`animator.par` 打包成单文件，
-双击即可播放，便于归档和给别人。
+`.vsrap` 是 VS Visualizer 的“快速动画包”，把 `.vs`/`.vsb`/`parsfile` 打包成单文件，
+双击即可播放，便于归档和给别人。命令行开关 `-vsrap` 官方支持且会 `then exit`。
 
-命令行开关 `-vsrap` 是官方支持的、且会 `then exit`，所以理论上可脚本化。本机保留的那次
-成功运行里也确实存在一个 52673 字节的 `.vsrap`。但我实测时它表现不稳定：VS Visualizer
-是 GUI 程序，`-vsrap` 调用可能挂起等待窗口（我的一次试验因此超时），并且即使成功也会返回
-非零退出码。所以脚本里把它做成**可选**（`--vsrap`），失败或超时只记录不抛错：
-判据是**文件是否出现且非空**，而不是退出码。
+**本平台已实测成功**：在 ASCII 暂存目录下执行
 
-**视频导出本身并不需要 `.vsrap`** —— 直接用 `animator.par` 启动就够了。若你想要单文件
-归档，更稳的做法是导出视频后，在 GUI 里用 VS Visualizer 自己的打包功能。
+```
+VsVisualizer.exe -vsrap <out.vsrap> -vsrapoverwrite <animator.par>
+```
+
+生成了 **52 793 字节**的有效 `.vsrap`（退出码仍是 −1，**不要用退出码判断成败**，看文件
+是否存在且非空）。脚本里用 `--vsrap` 启用，失败或超时会记录而不抛错。
+
+> 注意参数顺序：`-vsrap` 把**紧随其后的参数**当作输出文件名，所以 `-vsrapoverwrite`
+> 不能插在 `-vsrap` 和文件名之间。
+
+**视频导出本身并不需要 `.vsrap`** —— 直接用 `animator.par` 启动就够了。`.vsrap` 的用处是
+归档和分发。
 
 ---
 
@@ -176,11 +192,10 @@ python scripts\export_native_video.py runs\batch_sweep_a\cases\depth_010\model\o
 
 | 现象 | 原因与处理 |
 |---|---|
+| 日志里 `Unable to open parsfile file: "...\1 _____\..."` | **命令行非 ASCII 字符被替换成下划线**。必须用 ASCII 暂存路径（脚本默认已做）；不要加 `--no-ascii-stage`，除非整条绝对路径本来就是 ASCII。 |
 | `incomplete history: ... is missing` | 该目录缺少 `.vs`、`.vsb` 或 `_all.par` 三者之一。注意 `_all.par` 是求解器归档出来的合并参数文件，不是模型的 `run_all.par`。 |
 | `contains several histories` | 目录里有多个 `.vs`。直接指向具体 `.vs` 文件即可。 |
 | `.vsb payload ... is not a whole number of frames` | 历史文件被截断（仿真中途被杀）。重新跑该工况。 |
-| 界面打开了但场景是空的 / 报 parsfle 找不到 | 通常是 parsfle 编码问题。确认用的是脚本生成的 `animator.par`（ANSI/cp936）；若路径含中文且仍失败，加 `--ascii-stage` 重试。 |
-| 界面根本没起来，连续弹 `can't open user configuration file.` / `Failed to create a temporary file name (error 5)` | VS Visualizer 无法写 `%LOCALAPPDATA%\VS Visualizer\2019\`。**这是权限/沙箱问题，与输入文件无关**（零参数启动也会复现）。请在正常交互式桌面会话中运行本脚本，不要在受限的自动化会话里跑。 |
-| `-vsrap` 卡住 | 同上；若界面起不来，`-vsrap` 也会因反复弹错误框而挂住。去掉 `--vsrap`，它不影响视频导出。 |
+| 界面起不来，弹 `can't open user configuration file.` | VS Visualizer 无法写 `%LOCALAPPDATA%\VS Visualizer\<版本>\`。属权限问题，与输入文件无关（零参数启动也复现）。换到有写权限的桌面会话即可。 |
+| 提示实体形状资源缺失（`Unable to load asset file`） | 资源按工作目录解析；脚本已用 TruckSim `_Data` 目录作为工作目录。若仍缺失可试 `-altresource <TruckSim2019.0_Data>`。 |
 | 退出码是 −1（4294967295） | TruckSim 2019 的常态，**不能**作为失败判据；看产物文件是否存在且非空。 |
-| 上一步本来能成功生成 `.vsrap`，现在不行了 | 已确认本机历史上成功过一次（52673 字节），其命令行是把 `_all.par` 作为 Parsfile 传入、并用了 32 位 exe。可照此形式手工重试。 |

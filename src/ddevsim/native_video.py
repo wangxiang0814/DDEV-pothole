@@ -101,9 +101,12 @@ def find_history(source: Path) -> HistorySet:
     else:
         raise FileNotFoundError("no such history source: %s" % source)
 
-    vs = directory / (basename + ".vs")
-    vsb = directory / (basename + ".vsb")
-    par = directory / (basename + "_all.par")
+    # Absolute paths are required: VS Visualizer is launched with a different
+    # working directory (the TruckSim data folder), so a relative DATASET entry in
+    # the parsfle would not resolve.
+    vs = (directory / (basename + ".vs")).resolve()
+    vsb = (directory / (basename + ".vsb")).resolve()
+    par = (directory / (basename + "_all.par")).resolve()
     for path in (vs, vsb, par):
         if not path.exists():
             raise FileNotFoundError(
@@ -154,10 +157,17 @@ def describe_history(vs: Path, vsb: Path, par: Path) -> HistorySet:
 
 # ------------------------------------------------------------------------ staging
 def is_ascii_path(path: Path) -> bool:
+    """True when the *absolute* path can be expressed in ASCII.
+
+    The path must be resolved first: a relative path such as
+    ``runs\\batch_x\\native_video`` is ASCII on its own but its absolute form under
+    a Chinese project directory is not, and it is the absolute form that reaches
+    VS Visualizer on the command line.
+    """
     try:
-        str(path).encode("ascii")
+        str(Path(path).resolve()).encode("ascii")
         return True
-    except UnicodeEncodeError:
+    except (UnicodeEncodeError, OSError):
         return False
 
 
@@ -219,7 +229,8 @@ def write_animator_par(
         "SET_RUN_SLOT %d\n"
         "DATASET %s\n"
         "PARSFILE %s\n"
-        "END\n" % (run_slot, history.vs, history.par)
+        "END\n"
+        % (run_slot, Path(history.vs).resolve(), Path(history.par).resolve())
     )
     try:
         par.write_text(text, encoding="mbcs")
@@ -321,7 +332,9 @@ def launch_visualizer(
         arguments += list(extra_args)
     arguments.append(str(animator_par))
 
-    creation = 0x00000010 | 0x00000008  # NEW_CONSOLE | DETACHED_PROCESS
+    # DETACHED_PROCESS alone: it must not be combined with CREATE_NEW_CONSOLE,
+    # which is mutually exclusive and makes CreateProcess fail with WinError 87.
+    creation = 0x00000008  # DETACHED_PROCESS
     process = subprocess.Popen(
         [str(visualizer)] + arguments,
         cwd=str(workdir),
@@ -383,14 +396,23 @@ def export_native_video(
     create_vsrap_package: bool = False,
     launch: bool = True,
     workdir: Path = DEFAULT_TRUCKSIM_DATA,
-    ascii_stage: bool = False,
+    ascii_stage: bool = True,
 ) -> Dict[str, object]:
     """Run the automatable part of the native video export for one history.
 
     ``create_vsrap_package`` is opt-in because the ``-vsrap`` switch drives a GUI
-    binary.  On a sandboxed session VS Visualizer cannot even start (it needs to
-    write ``%LOCALAPPDATA%\\VS Visualizer\\<version>\\``), so check the returned
-    report rather than assuming success.
+    binary.
+
+    ``ascii_stage`` defaults to **True and must normally stay True**: VS Visualizer
+    mangles non-ASCII command-line arguments.  Verified from its own log -- passed
+    ``F:\\1tongji\\1 分布式电驱\\...\\animator.par`` and it reported::
+
+        Error: Unable to open parsfile file:
+        "F:\\1tongji\\1 _____\\Research\\TruckSim__\\runs\\...\\animator.par"
+
+    The Chinese characters were replaced with underscores, so the animator file
+    could not be opened and no scene ever loaded.  Staging the history under an
+    ASCII path is therefore required, not merely a convenience.
     """
     history = find_history(source)
     stage_dir = Path(stage_dir)

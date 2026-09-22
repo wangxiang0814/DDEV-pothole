@@ -53,9 +53,10 @@ def main(argv=None) -> int:
     parser.add_argument("--vsrap", action="store_true",
                         help="also attempt non-interactive .vsrap creation "
                              "(best-effort; drives a GUI binary that may block)")
-    parser.add_argument("--ascii-stage", action="store_true",
-                        help="stage the history under an ASCII path in the system "
-                             "temp directory instead of next to the run")
+    parser.add_argument("--no-ascii-stage", action="store_true",
+                        help="stage next to the run instead of an ASCII temp path. "
+                             "Only works if the whole path is already ASCII: VS "
+                             "Visualizer mangles non-ASCII command-line arguments")
     args = parser.parse_args(argv)
 
     source = args.source if args.source.is_absolute() else (ROOT / args.source)
@@ -69,7 +70,7 @@ def main(argv=None) -> int:
         create_vsrap_package=args.vsrap,
         launch=not args.no_launch,
         workdir=default_workdir(),
-        ascii_stage=args.ascii_stage,
+        ascii_stage=not args.no_ascii_stage,
     )
 
     history = report["history"]
