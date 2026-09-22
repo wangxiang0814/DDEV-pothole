@@ -107,6 +107,41 @@ class PotholeScenario:
 
 
 
+def corner_module_scenario(**overrides) -> PotholeScenario:
+    """Pothole scenario scaled for the corner-module control object.
+
+    The truck's hole (1.2 x 0.8 x 0.45 m at track centre -0.9875 m) is sized for an
+    8.9 t vehicle on 565 mm-radius tyres.  This control object is a 1360 kg light
+    commercial utility truck with a 1.260 m track and a 263 mm tyre radius, so:
+
+    * the hole must sit under the right wheel at ``-track/2 = -0.630 m``;
+    * 0.45 m would be deeper than this vehicle's entire tyre radius and would swallow
+      the wheel completely, so the depth is brought to 0.20 m -- still well beyond its
+      0.061 m rebound travel, so the lift strategy remains the required response and
+      the depth-threshold activation still triggers;
+    * the camera stands off 16 m rather than 32 m because the vehicle is only ~3.5 m
+      long.
+    """
+    base = dict(
+        start_station_m=101.1,
+        length_m=0.8,
+        width_m=0.6,
+        depth_m=0.20,
+        edge_transition_m=0.05,
+        center_y_m=-0.63,
+        friction=0.7,
+        road_length_m=40.0,
+        stop_s=9.0,
+        target_speed_kph=2.8,
+        camera_distance_m=16.0,
+        camera_field_of_view_deg=30.0,
+        camera_elevation_deg=16.0,
+        camera_look_z_m=0.6,
+    )
+    base.update(overrides)
+    return PotholeScenario(**base)
+
+
 def _fmt(value: float) -> str:
     text = ("%.6f" % float(value)).rstrip("0").rstrip(".")
     return "0" if text in ("-0", "") else text

@@ -78,13 +78,18 @@ class BatchCase:
         return config
 
 
-def default_cases() -> List[BatchCase]:
+def default_cases(base: PotholeScenario | None = None) -> List[BatchCase]:
     """The single-wheel deep-pothole family the platform currently supports.
 
     Only one scenario class is in scope (right-track single-wheel pothole), so this
     sweeps the pothole depth and the crawl speed around the retained baseline.
+
+    ``base`` must be the scenario that matches the control object's geometry; it
+    defaults to the retained truck case for backwards compatibility.  Use
+    :func:`ddevsim.pothole_case.corner_module_scenario` for the corner-module
+    control object.
     """
-    base = PotholeScenario()
+    base = base or PotholeScenario()
     cases = [BatchCase(name="baseline", scenario=base)]
     for depth in (0.10, 0.20, 0.30):
         cases.append(

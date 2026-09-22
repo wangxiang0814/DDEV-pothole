@@ -40,9 +40,11 @@ def main(argv=None) -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--model", default="hd_utility",
-        help="which control object to drive: 'hd_utility' (the original solid-axle "
-             "truck) or 'corner_module' (the corner-module DDEV control object)",
+        "--model", default="corner_module",
+        help="which control object to drive. Default 'corner_module' is the platform's "
+             "control object: Vehicle: Loaded Combination `Compact Utility Truck (I_I)`, "
+             "vehicle code i_i, independent suspension at BOTH axles. 'hd_utility' "
+             "selects the retained solid-axle truck (s_s), for comparison only.",
     )
     parser.add_argument("--log-decimation", type=int, default=DEFAULT_LOG_DECIMATION)
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)

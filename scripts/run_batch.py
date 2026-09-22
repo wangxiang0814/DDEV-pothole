@@ -24,6 +24,7 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
 from ddevsim.batch import BatchCase, default_cases, run_batch  # noqa: E402
+from ddevsim.pothole_case import corner_module_scenario, PotholeScenario  # noqa: E402
 from ddevsim.calibration import load_or_measure  # noqa: E402
 from ddevsim.interface_validation import EXPORT_NAMES, IMPORT_NAMES  # noqa: E402
 from ddevsim.pothole_case import SCENARIO_EXPORTS  # noqa: E402
@@ -67,27 +68,45 @@ def main(argv=None) -> int:
                         help="include channels whose unit is not established (not advised)")
     parser.add_argument("--baseline-only", action="store_true",
                         help="run just the retained baseline scenario")
+    parser.add_argument(
+        "--model", default="corner_module", choices=("corner_module", "hd_utility"),
+        help="control object. Default 'corner_module' is the platform's control object "
+             "(Compact Utility Truck (I_I), independent suspension at both axles); "
+             "'hd_utility' is the retained solid-axle truck, for comparison only.",
+    )
     args = parser.parse_args(argv)
 
-    base_model = ROOT / "models" / "hd_utility_ddev"
+    if args.model == "corner_module":
+        base_model = ROOT / "models" / "corner_module_ddev"
+        model_dir = base_model / "single_wheel_deep_pothole"
+        gain_path = ROOT / "runs" / "_actuator_gain_corner_module" / "gain_matrix.json"
+        model_label = "Corner Module DDEV (Compact Utility Truck I_I)"
+    else:
+        base_model = ROOT / "models" / "hd_utility_ddev"
+        model_dir = base_model / "single_wheel_deep_pothole"
+        gain_path = ROOT / "runs" / "_actuator_gain" / "gain_matrix.json"
+        model_label = "HD Utility DDEV 4x4 Active Suspension"
     base_run_all = base_model / "run_all.par"
     base_simfile = base_model / "simfile.sim"
-    model_dir = ROOT / "models" / "hd_utility_ddev" / "single_wheel_deep_pothole"
     export_names = list(EXPORT_NAMES) + list(SCENARIO_EXPORTS)
 
     calibration = load_or_measure(
         model_dir / "calibration.json", model_dir / "simfile.sim",
         IMPORT_NAMES, export_names,
-        model_label="HD Utility DDEV 4x4 Active Suspension",
+        model_label=model_label,
     )
     vehicle = load_vehicle(base_run_all, static_wheel_load_n=calibration.wheel_load_n)
-    gain_matrix = load_gain_matrix(ROOT / "runs" / "_actuator_gain" / "gain_matrix.json")
+    gain_matrix = load_gain_matrix(gain_path)
     if gain_matrix is None:
-        print("WARNING: no measured gain matrix; run scripts\\probe_actuator_gain.py first")
+        print("WARNING: no measured gain matrix for %s; run scripts\\probe_actuator_gain.py"
+              % args.model)
 
-    cases = [BatchCase(name="baseline", scenario=default_cases()[0].scenario)]
-    if not args.baseline_only:
-        cases = default_cases()
+    base_scenario = (
+        corner_module_scenario() if args.model == "corner_module" else PotholeScenario()
+    )
+    cases = default_cases(base_scenario)
+    if args.baseline_only:
+        cases = cases[:1]
 
     tyre_reference_load_n = read_tyre_reference_load_n(base_run_all)
     print("tyre load reference (FZ_REF) = %.0f N" % tyre_reference_load_n)
