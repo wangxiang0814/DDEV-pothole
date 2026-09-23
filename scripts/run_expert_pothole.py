@@ -98,6 +98,7 @@ def main(argv=None) -> int:
     # ``run_all.par`` it measured, and this gate refuses anything that does not match
     # the model about to be simulated.
     gain_matrix = None
+    travel_gain_matrix = None
     if gain_report_path.exists():
         payload = json.loads(gain_report_path.read_text(encoding="utf-8"))
         measured_sha = payload.get("model_run_all_sha256")
@@ -118,13 +119,25 @@ def main(argv=None) -> int:
             table = payload["gain_matrix_command_to_load"]
             gain_matrix = [[table[j][i] for i in ("FL", "FR", "RL", "RR")]
                            for j in ("FL", "FR", "RL", "RR")]
+            travel_table = payload.get("jounce_matrix_command_to_jnc_mm_per_n")
+            if travel_table is not None:
+                travel_gain_matrix = [
+                    [travel_table[j][i] for i in ("FL", "FR", "RL", "RR")]
+                    for j in ("FL", "FR", "RL", "RR")
+                ]
 
     controller = DeepPotholeExpertController(
         scenario=scenario,
         vehicle=vehicle,
         export_names=export_names,
-        config=ExpertConfig(),
+        # The published paper supplies the sequential three-wheel support targets but
+        # not the numerical T-SRSMC gains.  The primary law is SD (suspension-deflection)
+        # tracking, which is bounded by the travel envelope and cannot collapse a support
+        # corner the way the measured load-matrix allocator can.  The measured matrices
+        # are still loaded and are available to the controller as a secondary path.
+        config=ExpertConfig(sd_tracking=True),
         gain_matrix=gain_matrix,
+        travel_gain_matrix=travel_gain_matrix,
         static_deflection_m=calibration.deflection_m,
     )
     if gain_matrix is None:

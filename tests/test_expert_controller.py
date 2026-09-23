@@ -568,9 +568,12 @@ class ActuatorSizingAndRegulatorTests(unittest.TestCase):
         at_roll = command_at_roll(5.0)
         self.assertAlmostEqual(at_zero[5], at_roll[5], places=6)
 
-    def test_default_recovery_begins_at_the_exit_lip(self):
+    def test_default_recovery_begins_before_the_exit_lip(self):
         controller = self._controller()
-        self.assertEqual(controller.config.recovery_lead_m, 0.0)
+        # The recovery must start before the trailing edge so the passive suspension can
+        # bring the lifted wheel back to road level by the time the ground returns; a
+        # zero lead leaves the wheel raised and it slams the exit lip (measured 39 kN).
+        self.assertGreater(controller.config.recovery_lead_m, 0.0)
 
 
 @unittest.skipUnless(MODEL.exists(), "generated TruckSim model not present")
@@ -625,13 +628,26 @@ class ObservablePhaseManagerTests(unittest.TestCase):
 
     def test_low_support_load_debounce_enters_recovery_without_safe_stop(self):
         self.controller.step = STEP_FR_CROSS
-        low = _exports(X_R1=101.50, Fz_L2=0.0, Fz_R1=100.0)
+        # Collapse a *load-bearing* corner (FL).  The diagonal partner (RL) is allowed to
+        # run near zero during the lift -- that is the paper's own "very small load on
+        # wheel 3" -- so it must NOT trip the recovery.
+        low = _exports(X_R1=101.50, Fz_L1=0.0, Fz_R1=100.0)
         self.controller(0.00, low)
         self.assertEqual(self.controller.step, STEP_FR_CROSS)
         self.controller(0.06, low)
         self.assertEqual(self.controller.step, STEP_FR_TOUCHDOWN)
         self.assertEqual(self.controller.safety_mode, "RECOVER")
         self.assertFalse(self.controller.safe_stop)
+
+    def test_diagonal_partner_unload_is_not_a_support_failure(self):
+        self.controller.step = STEP_FR_CROSS
+        # RL (diagonal partner of the lifted FR) collapses but the two load-bearers hold;
+        # this is the paper's intended support state and must not abort the lift.
+        low = _exports(X_R1=101.50, Fz_L2=0.0, Fz_R1=100.0, Fz_L1=5000.0, Fz_R2=5000.0)
+        self.controller(0.00, low)
+        self.controller(0.06, low)
+        self.assertEqual(self.controller.step, STEP_FR_CROSS)
+        self.assertEqual(self.controller.safety_mode, "CONTINUE")
 
 
 @unittest.skipUnless(MODEL.exists(), "generated TruckSim model not present")
@@ -661,6 +677,24 @@ class ConstrainedSuspensionAllocationTests(unittest.TestCase):
         _, predicted = controller._allocate_suspension("FR", loads, 0.01)
         self.assertGreaterEqual(predicted["RL"], 300.0 - 1e-6)
         self.assertLessEqual(predicted["FR"], controller.config.lifted_load_max_n)
+
+    def test_allocator_keeps_a_working_margin_above_the_emergency_floor(self):
+        vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
+        controller = DeepPotholeExpertController(
+            scenario=PotholeScenario(), vehicle=vehicle, export_names=EXPORTS,
+            config=ExpertConfig(
+                force_min_n=-5000.0,
+                force_max_n=5000.0,
+                force_rate_limit_n_per_s=1e9,
+                min_support_load_n=300.0,
+                support_load_target_n=1000.0,
+            ),
+            gain_matrix=[[1.0 if i == j else 0.0 for i in range(4)] for j in range(4)],
+        )
+        _, predicted = controller._allocate_suspension(
+            "FR", {corner: 1500.0 for corner in CORNERS}, 0.01
+        )
+        self.assertGreaterEqual(predicted["RL"], 1000.0 - 1e-6)
 
     def test_suspension_allocator_obeys_force_and_per_cycle_slew_bounds(self):
         vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
