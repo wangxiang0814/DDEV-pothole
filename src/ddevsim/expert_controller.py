@@ -501,7 +501,20 @@ class ExpertConfig:
     #: been restored.  1.0 s fits the geometry with margin while still being a genuine
     #: handover, and the state machine additionally refuses to start the rear lift until
     #: this ramp has finished, so the manoeuvre never overlaps itself.
-    transition_time_s: float = 1.0
+    transition_time_s: float = 0.5
+    #: Distance *before* the trailing edge at which the Step 2/4 recovery starts.
+    #:
+    #: A vehicle-specific adaptation, and a necessary one.  The paper recovers only after
+    #: the wheel has passed the hole, which works because its corner module can hold the
+    #: lifted wheel at road level.  This vehicle cannot: its rebound travel is about
+    #: 100 mm, so an unloaded wheel necessarily hangs roughly that far below road level
+    #: while it is over the hole (measured: the crossing wheel's centre sat 244-403 mm
+    #: above the ground, i.e. its contact point 19-140 mm *below* road level).  It then
+    #: meets the exit lip as a step, which is the measured 33-36 kN landing and the
+    #: dominant source of body disturbance.  Starting the ramp this far early lets the
+    #: passive suspension bring the wheel back to road level exactly as the ground
+    #: returns, so the lip is a gentle touch instead of an impact.
+    recovery_lead_m: float = 0.45
     #: Paper's SD magnitude for the attitude pattern (m).
     attitude_deflection_m: float = 0.08
     #: Roll arm (CG height above the roll centre) used for the CG-shift geometry.
@@ -574,7 +587,7 @@ class ExpertConfig:
     #: paper's 8 N*m suits its own much heavier vehicle; applied here it would nearly
     #: double the speed over the 9 s run.
     crawl_mode: str = "constant"
-    torque_bias_nm: float = 4.0
+    torque_bias_nm: float = 8.0
     torque_per_kph_nm: float = 15.0
     #: Deadband on the speed error (km/h), so channel noise cannot chatter the command.
     torque_speed_deadband_kph: float = 0.05
@@ -601,7 +614,7 @@ class ExpertConfig:
     #:
     #: so the regulator is load-bearing but must stay soft, and 400 N/deg dominates
     #: the old default on every axis.
-    roll_gain_n_per_deg: float = 400.0
+    roll_gain_n_per_deg: float = 200.0
     #: Ceiling on the roll regulator's own contribution, before the per-corner
     #: actuator clamp.  ``None`` derives it as :data:`roll_limit_static_fraction` of
     #: the actuator limit; the old hard-coded 40 kN exceeded this vehicle's *entire*
@@ -649,6 +662,19 @@ class ExpertConfig:
     sd_stiffness_n_per_m: Optional[float] = None
     #: Fraction of the actuator limit a full-magnitude SD error may command.
     sd_authority_fraction: float = 0.6
+    #: Multiple of the corner's unsprung weight that the *lifted* corner may command.
+    #:
+    #: The lifted wheel is the one corner where a stiff deflection loop is actively
+    #: harmful.  Once it is off the ground its strut runs to the rebound stop, so pulling
+    #: harder cannot raise the wheel any further -- the reaction simply drags the **body**
+    #: down instead.  Measured on the previous revision: the loop commanded -3783 N
+    #: (about 10x the unsprung weight) and the body sank 200 mm across the hole, leaving
+    #: the wheel resting on the hole floor.
+    #:
+    #: The paper's own feedforward for this corner is just the unsprung weight
+    #: (``Faf = -0.02ks - mu*g``), which carries the wheel without disturbing the body.
+    #: That is what this bounds the command to.
+    lift_force_unsprung_multiple: float = 1.0
     #: Weight on keeping the command set's net roll moment small.  Larger values
     #: trade load-tracking accuracy for a body that does not roll away.
     roll_moment_weight: float = 1.0e-5
@@ -860,7 +886,7 @@ class DeepPotholeExpertController:
             if front_station >= leading - self.config.pre_lift_distance_m:
                 self.step = STEP_LIFT_FRONT
         elif self.step == STEP_LIFT_FRONT:
-            if front_station >= trailing:
+            if front_station >= trailing - self.config.recovery_lead_m:
                 self.step = STEP_RECOVER_FRONT
                 self._begin_recovery(time_s)
         elif self.step == STEP_RECOVER_FRONT:
@@ -877,7 +903,7 @@ class DeepPotholeExpertController:
                 self.step = STEP_LIFT_REAR
                 self._integral = {c: 0.0 for c in CORNERS}
         elif self.step == STEP_LIFT_REAR:
-            if rear_station >= trailing:
+            if rear_station >= trailing - self.config.recovery_lead_m:
                 self.step = STEP_RECOVER_REAR
                 self._begin_recovery(time_s)
         elif self.step == STEP_RECOVER_REAR:
@@ -935,6 +961,14 @@ class DeepPotholeExpertController:
         excess travel is ``+k * (travel - target)``.
         """
         scale = self.sd_magnitude_m / max(1e-9, config.attitude_deflection_m)
+        # Force available on the lifted corner: enough to carry its unsprung mass, and no
+        # more.  See ``lift_force_unsprung_multiple`` for why a stiff loop here drags the
+        # body into the hole instead of raising the wheel.
+        unsprung_n = (
+            self.vehicle.unsprung_mass_per_corner_kg
+            * GRAVITY
+            * config.lift_force_unsprung_multiple
+        )
         forces: Dict[str, float] = {}
         for corner in CORNERS:
             reference = 0.0 if self.static_deflection_m is None else (
@@ -942,7 +976,12 @@ class DeepPotholeExpertController:
             )
             target = reference + scale * support.deflection_target_m[corner]
             error = deflections[corner] - target
-            forces[corner] = self.sd_stiffness_n_per_m * error
+            force = self.sd_stiffness_n_per_m * error
+            if corner == support.lifted_corner:
+                # One-sided and bounded: pull the wheel up at most by its own weight, and
+                # never push down on a corner that has no tyre load to react against.
+                force = min(0.0, max(-unsprung_n, force))
+            forces[corner] = force
         return forces
 
     def _crawl_torque(self, exports: Sequence[float], dt: float) -> float:
