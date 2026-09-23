@@ -1,42 +1,46 @@
 {
   "start_station_m": 101.1,
   "length_m": 0.8,
-  "width_m": 0.6,
+  "width_m": 0.9,
   "depth_m": 0.2,
   "edge_transition_m": 0.05,
   "center_y_m": -0.63,
   "friction": 0.7,
   "road_length_m": 40.0,
-  "stop_s": 9.0,
+  "stop_s": 11.0,
   "target_speed_kph": 2.8,
-  "approach_distance_m": 1.1,
+  "approach_distance_m": 2.0,
   "road_lead_in_m": 15.0,
   "road_run_out_m": 45.0,
   "offroad_half_width_m": 200.0,
-  "ground_material": "Dirt",
+  "ground_material": "Grass (Dark)",
   "ground_color": [
-    0.45,
-    0.42,
-    0.3
+    0.25,
+    0.55,
+    0.2
   ],
-  "camera_azimuth_deg": -75.0,
-  "camera_elevation_deg": 20.0,
-  "camera_distance_m": 15.0,
-  "camera_look_x_m": 0.0,
-  "camera_look_y_m": -3.0,
+  "camera_azimuth_deg": -55.0,
+  "camera_elevation_deg": 18.0,
+  "camera_distance_m": 13.0,
+  "camera_look_x_m": -0.5,
+  "camera_look_y_m": 0.0,
   "camera_look_z_m": 0.7,
-  "camera_field_of_view_deg": 52.0,
+  "camera_field_of_view_deg": 42.0,
   "road_half_width_m": 5.0,
   "road_color": [
-    0.85,
-    0.85,
-    0.87
+    0.18,
+    0.2,
+    0.22
   ],
   "pothole_color": [
-    0.3,
-    0.28,
-    0.26
+    0.46,
+    0.38,
+    0.27
   ],
-  "road_material": "Road (No Lines)",
-  "hole_material": "Dirt"
+  "road_material": "Asphalt (Fine)",
+  "hole_material": "Dirt (Light)",
+  "ground_visual_offset_m": 0.01,
+  "road_visual_offset_m": 0.02,
+  "road_mesh_interval_m": 0.5,
+  "pothole_mesh_interval_m": 0.05
 }

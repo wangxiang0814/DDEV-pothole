@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict
 
 from .hd_ddev_case import DDEV_EXPORTS, parse_protected_parameters
+from .visual_mesh import write_visual_mesh
 
 
 SCENARIO_EXPORTS = (
@@ -48,7 +49,7 @@ class PotholeScenario:
     #: Distance from the vehicle's start station to the entry lip.  The start station
     #: is derived from it rather than hard-coded, so the scenario stays consistent when
     #: the hole is moved.
-    approach_distance_m: float = 1.1
+    approach_distance_m: float = 2.0
 
     # ---- road extent -------------------------------------------------------
     #: Surface shapes and the elevation map are resolved against the road PATH, so the
@@ -64,8 +65,8 @@ class PotholeScenario:
     #: as floating.
     offroad_half_width_m: float = 200.0
     #: Material for the off-road ground; must exist in Animator/Road_Materials/road.mtl
-    ground_material: str = "Dirt"
-    ground_color: tuple = (0.45, 0.42, 0.30)
+    ground_material: str = "Grass (Dark)"
+    ground_color: tuple = (0.25, 0.55, 0.20)
 
     # ---- visual scene -----------------------------------------------------
     # Camera framing is part of the scenario because a bad lens makes the
@@ -91,10 +92,16 @@ class PotholeScenario:
     # nothing.  "Road (No Lines)" is the asphalt material and "Dirt" is used, tinted
     # dark, for the hole.
     road_half_width_m: float = 5.0
-    road_color: tuple = (0.85, 0.85, 0.87)
-    pothole_color: tuple = (0.30, 0.28, 0.26)
-    road_material: str = "Road (No Lines)"
-    hole_material: str = "Dirt"
+    road_color: tuple = (0.18, 0.20, 0.22)
+    pothole_color: tuple = (0.46, 0.38, 0.27)
+    road_material: str = "Asphalt (Fine)"
+    hole_material: str = "Dirt (Light)"
+    #: Animator-only offsets.  The physical dZ map is unchanged; these separate the
+    #: road mesh from the horizon bowl and prevent depth-buffer occlusion.
+    ground_visual_offset_m: float = 0.01
+    road_visual_offset_m: float = 0.02
+    road_mesh_interval_m: float = 0.5
+    pothole_mesh_interval_m: float = 0.05
 
     # ------------------------------------------------------------------ geometry
     @property
@@ -150,7 +157,7 @@ class PotholeScenario:
 
     @property
     def path_length_m(self) -> float:
-        """Road PATH length; must cover ``[0, road_end_m]`` or nothing renders."""
+        """Road PATH length from station zero through the run-out."""
         return self.road_end_m
 
 
@@ -173,25 +180,28 @@ def corner_module_scenario(**overrides) -> PotholeScenario:
     base = dict(
         start_station_m=101.1,
         length_m=0.8,
-        width_m=0.6,
+        # A 0.90 m lateral span makes the pit visually and dynamically credible
+        # while remaining well clear of the left tyre footprint (0.72 m margin).
+        width_m=0.9,
         depth_m=0.20,
         edge_transition_m=0.05,
         center_y_m=-0.63,
         friction=0.7,
         road_length_m=40.0,
-        stop_s=9.0,
+        stop_s=11.0,
         target_speed_kph=2.8,
+        approach_distance_m=2.0,
         # Camera framing, set from screen-capture feedback rather than guessed.  The
         # stock -45 deg azimuth with a 16 m stand-off leaves the vehicle near the edge of
         # the frame; a roughly three-quarter rear-left view at a wider field of view keeps
         # the whole vehicle, the carriageway and the hole in shot together, which is what
         # the exported video has to show.
-        camera_azimuth_deg=-75.0,
-        camera_distance_m=15.0,
-        camera_field_of_view_deg=52.0,
-        camera_elevation_deg=20.0,
-        camera_look_x_m=0.0,
-        camera_look_y_m=-3.0,
+        camera_azimuth_deg=-55.0,
+        camera_distance_m=13.0,
+        camera_field_of_view_deg=42.0,
+        camera_elevation_deg=18.0,
+        camera_look_x_m=-0.5,
+        camera_look_y_m=0.0,
         camera_look_z_m=0.7,
     )
     base.update(overrides)
@@ -212,7 +222,7 @@ def _procedure_block(scenario: PotholeScenario) -> str:
     se1 = s1 - scenario.edge_transition_m
     z = -scenario.depth_m
     return """ENTER_PARSFILE Procedures\\DDEV_single_wheel_deep_pothole.par
-#FullDataName Procedures`HD Utility DDEV - Right Single-Wheel Deep Pothole`DDEV Research
+#FullDataName Procedures`Corner Module DDEV - Right Single-Wheel Deep Pothole`DDEV Research
 OPT_STOP 0
 TSTART 0
 SSTART 100
@@ -228,7 +238,7 @@ SPEED_TARGET_ID = ISPEED
 SPEED_ID_SC = ISPEED
 SPEED_TARGET_COMBINE ADD
 SPEED_TARGET_S_CONSTANT 0
-set_description SPEED_TARGET_ID HD Utility DDEV crawl reference
+set_description SPEED_TARGET_ID Corner Module DDEV crawl reference
 SPEED_TARGET_CONSTANT {speed}
 OPT_SC_ENGINE_BRAKING 0
 ENTER_PARSFILE Control\\Steer\\DDEV_zero_steer.par
@@ -271,12 +281,12 @@ set_description RD_DZ_ID DDEV Right Single-Wheel Deep Pothole
 set_description ROAD_DZ_ID DDEV Right Single-Wheel Deep Pothole
 ROAD_DZ_CARPET 2D_LINEAR
 0, -10, {y0}, {ye0}, {ye1}, {y1}, 10
-100, 0, 0, 0, 0, 0, 0
+{road_start}, 0, 0, 0, 0, 0, 0
 {s0}, 0, 0, 0, 0, 0, 0
 {se0}, 0, 0, {z}, {z}, 0, 0
 {se1}, 0, 0, {z}, {z}, 0, 0
 {s1}, 0, 0, 0, 0, 0, 0
-140, 0, 0, 0, 0, 0, 0
+{road_end}, 0, 0, 0, 0, 0, 0
 ENDTABLE
 LOG_ENTRY DDEV physical right-track deep pothole
 EXIT_PARSFILE Roads\\dZ_Map\\DDEV_single_wheel_pothole.par
@@ -305,8 +315,10 @@ LOUT(1) {road_in}
 LOUTUNITS(1) m
 SSTART(1) {road_start}
 SSTOP(1) {road_end}
-SINT(1) 10
-DZ(1) 0
+SINT(1) {road_sint}
+DZ(1) {ground_dz}
+LDIV(1) 5
+AUTODETAIL(1) Foliage
 COLOR(2) {road_rgb}
 MATERIAL(2) {road_mat}
 SPECULAR(2) 1
@@ -318,8 +330,10 @@ LOUT(2) {road_out}
 LOUTUNITS(2) m
 SSTART(2) {road_start}
 SSTOP(2) {s0}
-SINT(2) 10
-DZ(2) 0
+SINT(2) {road_sint}
+DZ(2) {road_dz}
+LDIV(2) 5
+AUTODETAIL(2) Road
 COLOR(3) {road_rgb}
 MATERIAL(3) {road_mat}
 SPECULAR(3) 1
@@ -331,8 +345,10 @@ LOUT(3) {road_out}
 LOUTUNITS(3) m
 SSTART(3) {s1}
 SSTOP(3) {road_end}
-SINT(3) 10
-DZ(3) 0
+SINT(3) {road_sint}
+DZ(3) {road_dz}
+LDIV(3) 5
+AUTODETAIL(3) Road
 COLOR(4) {road_rgb}
 MATERIAL(4) {road_mat}
 SPECULAR(4) 1
@@ -344,8 +360,10 @@ LOUT(4) {road_out}
 LOUTUNITS(4) m
 SSTART(4) {s0}
 SSTOP(4) {s1}
-SINT(4) 10
-DZ(4) 0
+SINT(4) {hole_sint}
+DZ(4) {road_dz}
+LDIV(4) 2
+AUTODETAIL(4) Road
 COLOR(5) {road_rgb}
 MATERIAL(5) {road_mat}
 SPECULAR(5) 1
@@ -357,8 +375,10 @@ LOUT(5) {y0}
 LOUTUNITS(5) m
 SSTART(5) {s0}
 SSTOP(5) {s1}
-SINT(5) 10
-DZ(5) 0
+SINT(5) {hole_sint}
+DZ(5) {road_dz}
+LDIV(5) 2
+AUTODETAIL(5) Road
 COLOR(6) {hole_rgb}
 MATERIAL(6) {hole_mat}
 SPECULAR(6) 0
@@ -370,8 +390,10 @@ LOUT(6) {y1}
 LOUTUNITS(6) m
 SSTART(6) {s0}
 SSTOP(6) {s1}
-SINT(6) 10
-DZ(6) {z}
+SINT(6) {hole_sint}
+DZ(6) {hole_visual_z}
+LDIV(6) 2
+AUTODETAIL(6) Road
 COLOR(7) {ground_rgb}
 MATERIAL(7) {ground_mat}
 SPECULAR(7) 0
@@ -383,19 +405,86 @@ LOUT(7) {offroad_out}
 LOUTUNITS(7) m
 SSTART(7) {road_start}
 SSTOP(7) {road_end}
-SINT(7) 10
-DZ(7) 0
+SINT(7) {road_sint}
+DZ(7) {ground_dz}
+LDIV(7) 5
+AUTODETAIL(7) Foliage
 MTL_FILE Animator/Road_Materials/road.mtl
 LOG_ENTRY DDEV visual right-track deep pothole
 EXIT_PARSFILE Roads\\Shapes\\DDEV_single_wheel_pothole.par
 
+# TruckSim Solver consumes the dZ map above, but hand-authored Surface Shapes are not
+# compiled into the .obj/.ani road pair during an API-only run.  Load the matching
+# explicit fine mesh so Visualizer always renders the road, pit and external ground.
+add_reference_frame DDEV_Explicit_Pothole_Surface
+reference_frame_ghosts off
+ENTER_PARSFILE Animator\\STL\\DDEV_pothole_scene.par
+add_obj Animator\\3D_Shape_Files\\DDEV\\DDEV_pothole_scene.obj
+SET_COLOR 1 1 1
+set_lighting on
+set_fogging on
+show_front on
+show_back on
+compute_normals on
+EXIT_PARSFILE Animator\\STL\\DDEV_pothole_scene.par
+
+add_reference_frame DDEV_Cone_Entry_Left
+reference_frame_ghosts off
+set_offset_var_x {cone_entry}
+set_offset_var_y 2.2
+set_offset_var_z 0.02
+ENTER_PARSFILE Animator\\STL\\DDEV_traffic_cone.par
+add_obj Animator\\3D_Shape_Files\\Environment\\Props\\Traffic_Cone\\Traffic_Cone_Small.obj
+SET_COLOR 1 1 1
+set_lighting on
+set_fogging on
+vsv_enable_shadows_recursive
+EXIT_PARSFILE Animator\\STL\\DDEV_traffic_cone.par
+
+add_reference_frame DDEV_Cone_Entry_Right
+reference_frame_ghosts off
+set_offset_var_x {cone_entry}
+set_offset_var_y -2.2
+set_offset_var_z 0.02
+ENTER_PARSFILE Animator\\STL\\DDEV_traffic_cone.par
+add_obj Animator\\3D_Shape_Files\\Environment\\Props\\Traffic_Cone\\Traffic_Cone_Small.obj
+SET_COLOR 1 1 1
+set_lighting on
+set_fogging on
+vsv_enable_shadows_recursive
+EXIT_PARSFILE Animator\\STL\\DDEV_traffic_cone.par
+
+add_reference_frame DDEV_Cone_Exit_Left
+reference_frame_ghosts off
+set_offset_var_x {cone_exit}
+set_offset_var_y 2.2
+set_offset_var_z 0.02
+ENTER_PARSFILE Animator\\STL\\DDEV_traffic_cone.par
+add_obj Animator\\3D_Shape_Files\\Environment\\Props\\Traffic_Cone\\Traffic_Cone_Small.obj
+SET_COLOR 1 1 1
+set_lighting on
+set_fogging on
+vsv_enable_shadows_recursive
+EXIT_PARSFILE Animator\\STL\\DDEV_traffic_cone.par
+
+add_reference_frame DDEV_Cone_Exit_Right
+reference_frame_ghosts off
+set_offset_var_x {cone_exit}
+set_offset_var_y -2.2
+set_offset_var_z 0.02
+ENTER_PARSFILE Animator\\STL\\DDEV_traffic_cone.par
+add_obj Animator\\3D_Shape_Files\\Environment\\Props\\Traffic_Cone\\Traffic_Cone_Small.obj
+SET_COLOR 1 1 1
+set_lighting on
+set_fogging on
+vsv_enable_shadows_recursive
+EXIT_PARSFILE Animator\\STL\\DDEV_traffic_cone.par
+
 RR_SURF 1.0
 L_CAMERA_FRONT 0.5
 L_CAMERA_REAR 0.5
-add_reference_frame DDEV_Sky_and_Background
-reference_frame_ghosts off
-ENTER_PARSFILE Animator\\Groups\\DDEV_clear_sky_light_grass.par
-#FullDataName Animator: Group`Partly Cloudy Sky with Light Grass`Environment Spheres
+ENTER_PARSFILE Animator\\Groups\\DDEV_clear_sky.par
+#FullDataName Animator: Group`Partly Cloudy Sky (No Land Bowl)`Environment Spheres
 ENTER_PARSFILE Animator\\Frames\\DDEV_skybox_vehicle_xyz.par
 #FullDataName Animator: Reference Frame`Skybox (Vehicle X-Y-Z)`Tracking: Vehicle
 ADD_REFERENCE_FRAME DDEV_skybox_vehicle_xyz
@@ -423,7 +512,7 @@ SET_ANGLE_Z 180
 set_lighting off
 set_fogging off
 SUN_POSITION 250 -250 600
-cam_global_ambient .65 .65 .65 1
+cam_global_ambient .6 .6 .6 1
 cam_global_diffuse .9 .9 .9 1
 cam_global_specular .7 .7 .7 1
 ENV_MAP_XPOS Animator\\3D_Shape_Files\\Environment\\Sky_Boxes\\Partly_Cloudy_Sky\\cubeXPos.tga
@@ -434,25 +523,13 @@ ENV_MAP_ZPOS Animator\\3D_Shape_Files\\Environment\\Sky_Boxes\\Partly_Cloudy_Sky
 ENV_MAP_ZNEG Animator\\3D_Shape_Files\\Environment\\Sky_Boxes\\Partly_Cloudy_Sky\\cubeZNeg.tga
 LOG_ENTRY DDEV partly cloudy sky
 EXIT_PARSFILE Animator\\STL\\DDEV_partly_cloudy_sky.par
-
-ENTER_PARSFILE Animator\\STL\\DDEV_light_grass_background.par
-#FullDataName Animator: Shape File Link`Light Grass`Environment: Land Bowls
-add_obj Animator\\3D_Shape_Files\\Environment\\Land_Bowls\\Light_Grass\\Land_Bowl_Light_Grass.obj
-SET_COLOR 0.82 0.88 0.78
-SET_SCALE_X 15
-SET_SCALE_Y 15
-SET_SCALE_Z 1
-set_lighting off
-set_fogging on
-LOG_ENTRY DDEV light grass background
-EXIT_PARSFILE Animator\\STL\\DDEV_light_grass_background.par
-LOG_ENTRY Used Dataset: Animator: Group; {{ Environment Spheres }} Partly Cloudy Sky with Light Grass
-EXIT_PARSFILE Animator\\Groups\\DDEV_clear_sky_light_grass.par
+LOG_ENTRY Used Dataset: Animator: Group; {{ Environment Spheres }} Partly Cloudy Sky (No Land Bowl)
+EXIT_PARSFILE Animator\\Groups\\DDEV_clear_sky.par
 
 LOG_ENTRY Used Dataset: Road: 3D Surface (All Properties); {{ DDEV Research }} Right Single-Wheel Deep Pothole
 EXIT_PARSFILE Roads\\3D_Road\\DDEV_single_wheel_pothole.par
 
-LOG_ENTRY Used Dataset: Procedures; {{ DDEV Research }} HD Utility DDEV - Right Single-Wheel Deep Pothole
+LOG_ENTRY Used Dataset: Procedures; {{ DDEV Research }} Corner Module DDEV - Right Single-Wheel Deep Pothole
 EXIT_PARSFILE Procedures\\DDEV_single_wheel_deep_pothole.par""".format(
         stop=_fmt(scenario.stop_s),
         speed=_fmt(scenario.target_speed_kph),
@@ -479,6 +556,13 @@ EXIT_PARSFILE Procedures\\DDEV_single_wheel_deep_pothole.par""".format(
         hole_rgb="%.3f %.3f %.3f" % tuple(scenario.pothole_color),
         road_mat=scenario.road_material,
         hole_mat=scenario.hole_material,
+        ground_dz=_fmt(scenario.ground_visual_offset_m),
+        road_dz=_fmt(scenario.road_visual_offset_m),
+        hole_visual_z=_fmt(scenario.road_visual_offset_m - scenario.depth_m),
+        road_sint=_fmt(scenario.road_mesh_interval_m),
+        hole_sint=_fmt(scenario.pothole_mesh_interval_m),
+        cone_entry=_fmt(scenario.leading_edge_m - 0.4),
+        cone_exit=_fmt(scenario.trailing_edge_m + 0.4),
     )
 
 
@@ -627,9 +711,12 @@ def build_single_wheel_pothole_case(
     simfile.write_text(simfile_text, encoding="ascii")
     scenario_path = target_dir / "scenario.json"
     scenario_path.write_text(json.dumps(asdict(scenario), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    visual_obj, visual_mtl = write_visual_mesh(target_dir / "visual_assets", scenario)
     return {
         "run_all": run_all,
         "simfile": simfile,
         "scenario": scenario_path,
         "output_dir": output_dir,
+        "visual_obj": visual_obj,
+        "visual_mtl": visual_mtl,
     }
