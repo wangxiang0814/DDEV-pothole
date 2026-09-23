@@ -79,20 +79,34 @@ from .vehicle_params import GRAVITY, VehicleControllerParams
 
 CORNERS: Tuple[str, ...] = ("FL", "FR", "RL", "RR")
 
-#: Paper Fig. 1 support-phase numbering.
+#: Observable engineering phases refining the paper's five support steps.
 STEP_APPROACH = 0
-STEP_LIFT_FRONT = 1
-STEP_RECOVER_FRONT = 2
-STEP_LIFT_REAR = 3
-STEP_RECOVER_REAR = 4
-STEP_DONE = 5
+STEP_FR_PRELOAD = 1
+STEP_FR_LIFT = 2
+STEP_FR_CROSS = 3
+STEP_FR_TOUCHDOWN = 4
+STEP_RR_PRELOAD = 5
+STEP_RR_LIFT = 6
+STEP_RR_CROSS = 7
+STEP_RR_TOUCHDOWN = 8
+STEP_DONE = 9
+
+# Backwards-compatible coarse names used by existing analysis scripts.
+STEP_LIFT_FRONT = STEP_FR_PRELOAD
+STEP_RECOVER_FRONT = STEP_FR_TOUCHDOWN
+STEP_LIFT_REAR = STEP_RR_PRELOAD
+STEP_RECOVER_REAR = STEP_RR_TOUCHDOWN
 
 STEP_NAMES = {
     STEP_APPROACH: "0 approach",
-    STEP_LIFT_FRONT: "1 lift wheel 2 (FR)",
-    STEP_RECOVER_FRONT: "2 recover to four-wheel support",
-    STEP_LIFT_REAR: "3 lift wheel 4 (RR)",
-    STEP_RECOVER_REAR: "4 recover to normal driving",
+    STEP_FR_PRELOAD: "1a preload wheel 2 support triangle",
+    STEP_FR_LIFT: "1b unload wheel 2 (FR)",
+    STEP_FR_CROSS: "1c wheel 2 crossing",
+    STEP_FR_TOUCHDOWN: "2 restore wheel 2 and four-wheel support",
+    STEP_RR_PRELOAD: "3a preload wheel 4 support triangle",
+    STEP_RR_LIFT: "3b unload wheel 4 (RR)",
+    STEP_RR_CROSS: "3c wheel 4 crossing",
+    STEP_RR_TOUCHDOWN: "4 restore wheel 4 and normal driving",
     STEP_DONE: "done",
 }
 
@@ -477,6 +491,22 @@ class ExpertConfig:
 
     #: Paper used 10 ms for both controller and plant.
     control_period_s: float = 0.01
+    #: Let the imported TruckSim initial condition settle before changing support.
+    #: The original run began unloading FR at 0.64 s while the passive suspension
+    #: was still ringing, so the controller amplified an initial-condition transient.
+    settle_time_s: float = 1.0
+    #: Minimum time spent building a feasible support posture before unloading.
+    preload_time_s: float = 0.25
+    #: Observable wheel-load band used to declare a target corner lifted.
+    lifted_load_max_n: float = 150.0
+    #: Hard floor for every non-target support corner during three-wheel support.
+    min_support_load_n: float = 300.0
+    #: A transient below the floor must persist this long before recovery is entered.
+    support_load_debounce_s: float = 0.05
+    #: Path gates used before handing over from front recovery to rear preload.
+    handover_yaw_max_deg: float = 2.0
+    handover_yaw_rate_max_deg_s: float = 5.0
+    handover_lateral_max_m: float = 0.15
     #: Distance before the entry lip at which the lift manoeuvre starts.
     #:
     #: This is a *timing* parameter and was far too small.  The actuator needs
@@ -501,7 +531,7 @@ class ExpertConfig:
     #: been restored.  1.0 s fits the geometry with margin while still being a genuine
     #: handover, and the state machine additionally refuses to start the rear lift until
     #: this ramp has finished, so the manoeuvre never overlaps itself.
-    transition_time_s: float = 0.5
+    transition_time_s: float = 0.6
     #: Distance *before* the trailing edge at which the Step 2/4 recovery starts.
     #:
     #: A vehicle-specific adaptation, and a necessary one.  The paper recovers only after
@@ -514,7 +544,7 @@ class ExpertConfig:
     #: dominant source of body disturbance.  Starting the ramp this far early lets the
     #: passive suspension bring the wheel back to road level exactly as the ground
     #: returns, so the lip is a gentle touch instead of an impact.
-    recovery_lead_m: float = 0.45
+    recovery_lead_m: float = 0.0
     #: Paper's SD magnitude for the attitude pattern (m).
     attitude_deflection_m: float = 0.08
     #: Roll arm (CG height above the roll centre) used for the CG-shift geometry.
@@ -569,8 +599,8 @@ class ExpertConfig:
     #: previously launched the vehicle, because that one was driving a 11.4 kN saturated
     #: load-tracking command.
     force_slew_time_s: float = 0.4
-    torque_min_nm: float = -80.0
-    torque_max_nm: float = 200.0
+    torque_min_nm: float = 0.0
+    torque_max_nm: float = 25.0
     #: Crawl speed loop.  The paper drives the manoeuvre at a near-constant hub torque
     #: (8 N*m, or 8.5 N*m while three-wheel supported) and explicitly reports that "the
     #: speed decreases when the vehicle is in a three-wheel supported state".  A speed
@@ -586,13 +616,26 @@ class ExpertConfig:
     #: resistance, so holding 2.8 km/h needs 60 * 0.263 / 4 = 3.9 N*m per wheel.  The
     #: paper's 8 N*m suits its own much heavier vehicle; applied here it would nearly
     #: double the speed over the 9 s run.
-    crawl_mode: str = "constant"
-    torque_bias_nm: float = 8.0
-    torque_per_kph_nm: float = 15.0
+    crawl_mode: str = "regulated"
+    torque_bias_nm: float = 4.0
+    torque_per_kph_nm: float = 6.0
     #: Deadband on the speed error (km/h), so channel noise cannot chatter the command.
     torque_speed_deadband_kph: float = 0.05
     #: Slew limit on the torque command (N*m/s): 200 N*m takes 1 s to reach.
     torque_rate_limit_nm_per_s: float = 200.0
+    #: Traction-control envelope for TruckSim's dimensionless longitudinal slip.
+    #: Torque fades linearly from ``slip_soft_limit`` to zero at the hard limit.
+    slip_soft_limit: float = 0.10
+    slip_hard_limit: float = 0.30
+    #: Low-speed DDEV straight-line stabiliser.  Positive torque on the right side
+    #: produced positive yaw in the measured flat-road pulse test, so a negative yaw
+    #: error shifts this many N*m/deg from left to right while preserving total effort.
+    yaw_torque_gain_nm_per_deg: float = 1.0
+    yaw_torque_deadband_deg: float = 0.25
+    #: A wheel below this load is treated as unsupported and receives no drive torque.
+    torque_contact_load_n: float = 200.0
+    #: Step 2 is complete only when all four tyres have recovered this much load.
+    min_recovered_load_n: float = 200.0
     #: Fraction of the travel limit treated as the guard band.
     travel_guard_fraction: float = 0.92
     #: Roll beyond this magnitude latches SAFE_STOP (deg).
@@ -656,6 +699,15 @@ class ExpertConfig:
     #: is therefore *derived from the model* rather than copied from the paper, which is
     #: the parameter change the differing vehicle parameters require.
     sd_travel_fraction: float = 0.55
+    #: Vehicle-adapted version of the paper's (+,+,-,+) Jnc pattern for a lifted
+    #: front-right corner (the negative entry moves to the diagonal partner for the
+    #: rear lift).  The crossing wheel uses at most 35 mm; the other two extended
+    #: corners use 57%, and the diagonal corner uses -29%.  This preserves the
+    #: paper's stabilising attitude direction without demanding its full +-80 mm from
+    #: a vehicle with a different travel envelope.
+    lift_jounce_max_m: float = 0.035
+    support_jounce_fraction: float = 0.57
+    diagonal_jounce_fraction: float = -0.29
     #: Deflection-loop stiffness (N of active force per metre of travel error).  ``None``
     #: derives it so that a full-SD error uses :data:`sd_authority_fraction` of the
     #: actuator limit.
@@ -674,7 +726,11 @@ class ExpertConfig:
     #: The paper's own feedforward for this corner is just the unsprung weight
     #: (``Faf = -0.02ks - mu*g``), which carries the wheel without disturbing the body.
     #: That is what this bounds the command to.
-    lift_force_unsprung_multiple: float = 1.0
+    lift_force_unsprung_multiple: float = 12.0
+    #: Independent ceiling expressed on the actual actuator scale.  The unsprung
+    #: weight alone does not include the passive spring force that must be overcome
+    #: to jounce the corner module upward.
+    lift_force_limit_fraction: float = 0.65
     #: Weight on keeping the command set's net roll moment small.  Larger values
     #: trade load-tracking accuracy for a body that does not roll away.
     roll_moment_weight: float = 1.0e-5
@@ -686,11 +742,17 @@ class ExpertConfig:
 
 
 class DeepPotholeExpertController:
-    """Feedforward + integral sliding-mode expert for one right-track pothole.
+    """Paper-informed classical expert controller for one right-track pothole.
 
     The controller resolves every exported channel by *name* through
     ``export_names``; no positional index is hard-coded, and every channel used
     must have a measured unit (see :mod:`ddevsim.units`).
+
+    The paper's public five-step support sequence and suspension-deflection targets
+    are reproduced.  Its numerical T-S robust-sliding-mode matrices are not public,
+    so the executable lower layer uses bounded deflection feedback, load/contact
+    gates, classic slip control and independent wheel-torque allocation instead of
+    claiming an unreproducible exact controller.
     """
 
     def __init__(
@@ -700,6 +762,7 @@ class DeepPotholeExpertController:
         export_names: Sequence[str],
         config: Optional[ExpertConfig] = None,
         gain_matrix: Optional[Sequence[Sequence[float]]] = None,
+        travel_gain_matrix: Optional[Sequence[Sequence[float]]] = None,
         static_deflection_m: Optional[Dict[str, float]] = None,
     ) -> None:
         self.scenario = scenario
@@ -707,6 +770,10 @@ class DeepPotholeExpertController:
         self.config = config or ExpertConfig()
         self.gain_matrix = (
             [list(row) for row in gain_matrix] if gain_matrix is not None else None
+        )
+        self.travel_gain_matrix = (
+            [list(row) for row in travel_gain_matrix]
+            if travel_gain_matrix is not None else None
         )
         # Measured static corner deflection, needed to turn the paper's relative
         # deflection pattern into absolute compression targets.
@@ -809,6 +876,7 @@ class DeepPotholeExpertController:
         self.feedforward_command: Dict[str, Dict[str, float]] = {}
         self.required_command_n: Dict[str, float] = {}
         self.command_roll_moment_nm: Dict[str, float] = {}
+        self.isolated_lift_feedforward: Dict[str, Dict[str, float]] = {}
         half_track = self.vehicle.track_m / 2.0
         for corner in ("FR", "RR"):
             delta = [self.support[corner].feedforward_force_n[c] for c in CORNERS]
@@ -821,14 +889,46 @@ class DeepPotholeExpertController:
             self.required_command_n[corner] = max(abs(value) for value in command)
             self.command_roll_moment_nm[corner] = roll_moment_of(command, half_track)
 
+            if self.travel_gain_matrix is not None:
+                # Probe units are mm/N.  Raise only the crossing wheel relative to the
+                # body and hold the other three wheel-jounce changes at zero.  This is
+                # the MIMO form of a single-corner lift with a stable three-corner
+                # support, and explicitly accounts for TruckSim's measured coupling.
+                lift_m = min(self.sd_magnitude_m, self.config.lift_jounce_max_m)
+                desired_mm = [
+                    lift_m * self.config.support_jounce_fraction * 1000.0
+                    for _ in CORNERS
+                ]
+                desired_mm[CORNERS.index(corner)] = lift_m * 1000.0
+                desired_mm[CORNERS.index(_diagonal_partner(corner))] = (
+                    lift_m * self.config.diagonal_jounce_fraction * 1000.0
+                )
+                lift_command = allocate_commands(
+                    self.travel_gain_matrix,
+                    desired_mm,
+                    half_track,
+                    load_weight=1.0,
+                    roll_moment_weight=0.0,
+                    effort_weight=1.0e-12,
+                )
+                self.isolated_lift_feedforward[corner] = dict(
+                    zip(CORNERS, lift_command)
+                )
+
         self.safe_stop = False
         self.safe_stop_reason = ""
+        self.safety_mode = "CONTINUE"
+        self.transition_reason = "initialised"
+        self._phase_enter_time = 0.0
+        self._pit_seen = {"FR": False, "RR": False}
+        self._support_low_since: Optional[float] = None
         self._integral = {c: 0.0 for c in CORNERS}
         self._previous_error = {c: 0.0 for c in CORNERS}
         self._previous_force = {c: 0.0 for c in CORNERS}
         self._applied_force = {c: 0.0 for c in CORNERS}
         self._applied_torque = 0.0
         self._torque_command = 0.0
+        self._applied_torques = {c: 0.0 for c in CORNERS}
         self._last_control_time = -1.0
         self._recover_start_time = 0.0
         self._recover_from: Dict[str, float] = {c: 0.0 for c in CORNERS}
@@ -846,6 +946,14 @@ class DeepPotholeExpertController:
 
     def _loads(self, exports: Sequence[float]) -> Dict[str, float]:
         return {c: self._channel(exports, "Fz_%s" % _suffix(c)) for c in CORNERS}
+
+    def _slips(self, exports: Sequence[float]) -> Dict[str, float]:
+        """Return per-wheel longitudinal slip when the channels are exported."""
+        return {
+            c: self._channel(exports, "Kappa_%si" % _suffix(c))
+            if "Kappa_%si" % _suffix(c) in self.export_index else 0.0
+            for c in CORNERS
+        }
 
     def _deflections(self, exports: Sequence[float]) -> Dict[str, float]:
         """Suspension travel per corner, in metres.
@@ -868,6 +976,36 @@ class DeepPotholeExpertController:
     def _speed_kph(self, exports: Sequence[float]) -> float:
         return self._channel(exports, "Vx")
 
+    def _lateral(self, exports: Sequence[float], corner: str) -> float:
+        name = "Y_%s" % _suffix(corner)
+        if name in self.export_index:
+            return to_si(name, self._channel(exports, name))
+        # Older datasets did not export wheel lateral position.  The road preview's
+        # track centre is the conservative fallback; new runs always export Y_*.
+        return float(self.scenario.center_y_m)
+
+    def _path_recovered(self, exports: Sequence[float]) -> bool:
+        yaw = abs(self._channel(exports, "Yaw")) if "Yaw" in self.export_index else 0.0
+        yaw_rate = abs(self._channel(exports, "AVz")) if "AVz" in self.export_index else 0.0
+        lateral = abs(self._channel(exports, "Yo")) if "Yo" in self.export_index else 0.0
+        return (
+            yaw <= self.config.handover_yaw_max_deg
+            and yaw_rate <= self.config.handover_yaw_rate_max_deg_s
+            and lateral <= self.config.handover_lateral_max_m
+        )
+
+    def _support_is_feasible(self, exports: Sequence[float], lifted: str) -> bool:
+        loads = self._loads(exports)
+        return all(
+            loads[corner] >= self.config.min_support_load_n
+            for corner in CORNERS if corner != lifted
+        )
+
+    def _set_step(self, step: int, time_s: float, reason: str) -> None:
+        self.step = step
+        self._phase_enter_time = float(time_s)
+        self.transition_reason = reason
+
     # ------------------------------------------------------------- state machine
     def _advance_step(self, time_s: float, exports: Sequence[float]) -> None:
         scenario = self.scenario
@@ -875,6 +1013,10 @@ class DeepPotholeExpertController:
         trailing = scenario.trailing_edge_m
         front_station = self._station(exports, "X_R1")   # wheel 2 = FR
         rear_station = self._station(exports, "X_R2")    # wheel 4 = RR
+
+        if time_s < self.config.settle_time_s:
+            self.step = STEP_APPROACH
+            return
 
         # A hole shallower than the rebound travel never needs the manoeuvre: the
         # wheel simply follows the road.  Depth is a gate, not a gain.
@@ -884,12 +1026,36 @@ class DeepPotholeExpertController:
 
         if self.step == STEP_APPROACH:
             if front_station >= leading - self.config.pre_lift_distance_m:
-                self.step = STEP_LIFT_FRONT
-        elif self.step == STEP_LIFT_FRONT:
-            if front_station >= trailing - self.config.recovery_lead_m:
-                self.step = STEP_RECOVER_FRONT
+                self._set_step(STEP_FR_PRELOAD, time_s, "front_pre_lift_station")
+        elif self.step == STEP_FR_PRELOAD:
+            if (
+                time_s - self._phase_enter_time >= self.config.preload_time_s
+                and self._support_is_feasible(exports, "FR")
+                and self._path_recovered(exports)
+            ):
+                self._set_step(STEP_FR_LIFT, time_s, "front_support_feasible")
+        elif self.step == STEP_FR_LIFT:
+            inside = scenario.covers_point(front_station, self._lateral(exports, "FR"))
+            self._pit_seen["FR"] = self._pit_seen["FR"] or inside
+            if self._loads(exports)["FR"] <= self.config.lifted_load_max_n and inside:
+                self._set_step(STEP_FR_CROSS, time_s, "front_unloaded_over_pit")
+        elif self.step == STEP_FR_CROSS:
+            inside = scenario.covers_point(front_station, self._lateral(exports, "FR"))
+            self._pit_seen["FR"] = self._pit_seen["FR"] or inside
+            if self._support_is_feasible(exports, "FR"):
+                self._support_low_since = None
+            elif self._support_low_since is None:
+                self._support_low_since = float(time_s)
+            elif time_s - self._support_low_since >= self.config.support_load_debounce_s:
+                self.safety_mode = "RECOVER"
+                self._set_step(STEP_FR_TOUCHDOWN, time_s, "front_support_load_floor")
                 self._begin_recovery(time_s)
-        elif self.step == STEP_RECOVER_FRONT:
+                return
+            if self._pit_seen["FR"] and front_station >= trailing:
+                self.safety_mode = "CONTINUE"
+                self._set_step(STEP_FR_TOUCHDOWN, time_s, "front_cleared_pit")
+                self._begin_recovery(time_s)
+        elif self.step == STEP_FR_TOUCHDOWN:
             # The paper restores four-wheel support *before* lifting the next wheel:
             # Step 2 is "After the wheel 2 has passed over the pothole, the vehicle is
             # adjusted to a four-wheeled support state", and only then does Step 3 lift
@@ -897,18 +1063,43 @@ class DeepPotholeExpertController:
             # run it fired 0.32 s early and handed over with 682 N still commanded on
             # the front corner, so the two lift phases overlapped.  Gate the rear lift
             # on the recovery ramp having actually finished.
-            if self._recovery_finished(time_s) and (
+            if self._recovery_finished(time_s) and self._four_wheel_recovered(exports) and self._path_recovered(exports) and (
                 rear_station >= leading - self.config.pre_lift_distance_m
             ):
-                self.step = STEP_LIFT_REAR
+                self.safety_mode = "CONTINUE"
+                self._set_step(STEP_RR_PRELOAD, time_s, "front_recovered_rear_station")
                 self._integral = {c: 0.0 for c in CORNERS}
-        elif self.step == STEP_LIFT_REAR:
-            if rear_station >= trailing - self.config.recovery_lead_m:
-                self.step = STEP_RECOVER_REAR
+        elif self.step == STEP_RR_PRELOAD:
+            if (
+                time_s - self._phase_enter_time >= self.config.preload_time_s
+                and self._support_is_feasible(exports, "RR")
+                and self._path_recovered(exports)
+            ):
+                self._set_step(STEP_RR_LIFT, time_s, "rear_support_feasible")
+        elif self.step == STEP_RR_LIFT:
+            inside = scenario.covers_point(rear_station, self._lateral(exports, "RR"))
+            self._pit_seen["RR"] = self._pit_seen["RR"] or inside
+            if self._loads(exports)["RR"] <= self.config.lifted_load_max_n and inside:
+                self._set_step(STEP_RR_CROSS, time_s, "rear_unloaded_over_pit")
+        elif self.step == STEP_RR_CROSS:
+            inside = scenario.covers_point(rear_station, self._lateral(exports, "RR"))
+            self._pit_seen["RR"] = self._pit_seen["RR"] or inside
+            if self._support_is_feasible(exports, "RR"):
+                self._support_low_since = None
+            elif self._support_low_since is None:
+                self._support_low_since = float(time_s)
+            elif time_s - self._support_low_since >= self.config.support_load_debounce_s:
+                self.safety_mode = "RECOVER"
+                self._set_step(STEP_RR_TOUCHDOWN, time_s, "rear_support_load_floor")
                 self._begin_recovery(time_s)
-        elif self.step == STEP_RECOVER_REAR:
-            if self._recovery_finished(time_s):
-                self.step = STEP_DONE
+                return
+            if self._pit_seen["RR"] and rear_station >= trailing:
+                self.safety_mode = "CONTINUE"
+                self._set_step(STEP_RR_TOUCHDOWN, time_s, "rear_cleared_pit")
+                self._begin_recovery(time_s)
+        elif self.step == STEP_RR_TOUCHDOWN:
+            if self._recovery_finished(time_s) and self._four_wheel_recovered(exports):
+                self._set_step(STEP_DONE, time_s, "rear_recovered")
 
     def _force_slew_n_per_s(self) -> float:
         """Force slew limit, derived from the actuator limit when not configured.
@@ -929,14 +1120,18 @@ class DeepPotholeExpertController:
             float(time_s) - self._recover_start_time
         ) >= self.config.transition_time_s
 
+    def _four_wheel_recovered(self, exports: Sequence[float]) -> bool:
+        loads = self._loads(exports)
+        return all(loads[c] >= self.config.min_recovered_load_n for c in CORNERS)
+
     def _begin_recovery(self, time_s: float) -> None:
         self._recover_start_time = time_s
         self._recover_from = dict(self._applied_force)
 
     def _active_support(self) -> Optional[ThreeWheelSupport]:
-        if self.step == STEP_LIFT_FRONT:
+        if self.step in (STEP_FR_PRELOAD, STEP_FR_LIFT, STEP_FR_CROSS):
             return self.support["FR"]
-        if self.step == STEP_LIFT_REAR:
+        if self.step in (STEP_RR_PRELOAD, STEP_RR_LIFT, STEP_RR_CROSS):
             return self.support["RR"]
         return None
 
@@ -949,10 +1144,10 @@ class DeepPotholeExpertController:
     ) -> Dict[str, float]:
         """Active forces from the paper's SD pattern, tracked by deflection feedback.
 
-        The pattern itself is the paper's, reused directly from
-        :func:`three_wheel_support` (extend the lifted wheel and the two remaining
-        contacts, compress the diagonal partner), scaled from the paper's +-0.08 m to
-        whatever this vehicle's travel envelope actually allows.
+        The pattern itself is the paper's and is scaled from +-0.08 m to this
+        vehicle's travel envelope.  Liu et al. define SD with the opposite sign to
+        TruckSim ``Jnc``: negative paper SD raises the wheel, whereas positive Jnc is
+        wheel jounce.  The target is therefore sign-inverted at this interface.
 
         Sign convention, fixed by measurement rather than assumption: a positive
         ``IMP_FS`` command *extends* the suspension, i.e. it reduces the measured travel
@@ -969,18 +1164,20 @@ class DeepPotholeExpertController:
             * GRAVITY
             * config.lift_force_unsprung_multiple
         )
+        actuator_n = min(config.force_max_n, -config.force_min_n)
+        lift_limit_n = min(unsprung_n, config.lift_force_limit_fraction * actuator_n)
         forces: Dict[str, float] = {}
         for corner in CORNERS:
             reference = 0.0 if self.static_deflection_m is None else (
                 self.static_deflection_m[corner]
             )
-            target = reference + scale * support.deflection_target_m[corner]
+            target = reference - scale * support.deflection_target_m[corner]
             error = deflections[corner] - target
             force = self.sd_stiffness_n_per_m * error
             if corner == support.lifted_corner:
                 # One-sided and bounded: pull the wheel up at most by its own weight, and
                 # never push down on a corner that has no tyre load to react against.
-                force = min(0.0, max(-unsprung_n, force))
+                force = min(0.0, max(-lift_limit_n, force))
             forces[corner] = force
         return forces
 
@@ -1003,6 +1200,72 @@ class DeepPotholeExpertController:
         slew = config.torque_rate_limit_nm_per_s * max(0.0, dt)
         self._torque_command += max(-slew, min(slew, target - self._torque_command))
         return self._torque_command
+
+    def _wheel_torques(
+        self, exports: Sequence[float], dt: float, lifted_corner: Optional[str]
+    ) -> Dict[str, float]:
+        """Allocate crawl torque only to supported, non-slipping wheels.
+
+        The reference paper prescribes the support sequence, not a DDEV traction
+        allocator.  This deterministic lower layer is therefore kept separate: it
+        preserves the requested total crawl effort, weights it by measured normal
+        load, removes torque from the deliberately lifted wheel, and fades torque on
+        a slipping contact.  It is a classic traction-control allocation, not a
+        learned policy.
+        """
+        config = self.config
+        per_wheel = self._crawl_torque(exports, dt)
+        total_request = 4.0 * max(0.0, per_wheel)
+        loads = self._loads(exports)
+        slips = self._slips(exports)
+        eligible = [
+            c for c in CORNERS
+            if c != lifted_corner and loads[c] >= config.torque_contact_load_n
+        ]
+        targets = {c: 0.0 for c in CORNERS}
+        load_sum = sum(max(0.0, loads[c]) for c in eligible)
+        if eligible and load_sum > 0.0:
+            for corner in eligible:
+                target = total_request * max(0.0, loads[corner]) / load_sum
+                slip = abs(slips[corner])
+                if slip > config.slip_soft_limit:
+                    span = max(1e-9, config.slip_hard_limit - config.slip_soft_limit)
+                    target *= max(0.0, min(1.0, (config.slip_hard_limit - slip) / span))
+                targets[corner] = max(
+                    config.torque_min_nm, min(config.torque_max_nm, target)
+                )
+
+            yaw_deg = (
+                self._channel(exports, "Yaw") if "Yaw" in self.export_index else 0.0
+            )
+            if abs(yaw_deg) > config.yaw_torque_deadband_deg:
+                # Probe result: +right torque -> +Yaw, +left torque -> -Yaw.
+                # Therefore -Yaw is the signed amount to shift toward the right.
+                shift = -yaw_deg * config.yaw_torque_gain_nm_per_deg
+                left = [c for c in eligible if c in ("FL", "RL")]
+                right = [c for c in eligible if c in ("FR", "RR")]
+                if left and right:
+                    for corner in right:
+                        targets[corner] += shift / len(right)
+                    for corner in left:
+                        targets[corner] -= shift / len(left)
+                    for corner in eligible:
+                        targets[corner] = max(
+                            config.torque_min_nm,
+                            min(config.torque_max_nm, targets[corner]),
+                        )
+
+        slew = config.torque_rate_limit_nm_per_s * max(0.0, dt)
+        for corner in CORNERS:
+            if corner == lifted_corner or loads[corner] < config.torque_contact_load_n:
+                self._applied_torques[corner] = 0.0
+                continue
+            previous = self._applied_torques[corner]
+            target = targets[corner]
+            self._applied_torques[corner] = previous + max(
+                -slew, min(slew, target - previous)
+            )
+        return dict(self._applied_torques)
 
     def _sliding_force(
         self, corner: str, error: float, dt: float, config: ExpertConfig
@@ -1071,6 +1334,40 @@ class DeepPotholeExpertController:
             support = self._active_support()
             if self.safe_stop:
                 forces = {c: 0.0 for c in CORNERS}
+            elif support is not None and self.travel_gain_matrix is not None:
+                # Vehicle-identified MIMO wheel-lift allocation.  The full command
+                # vector raises only the crossing wheel's Jnc while holding the other
+                # three at their static relative positions.  Do not superimpose the
+                # old per-corner roll pattern here: that would undo the coupled
+                # allocation which already contains the required counter-forces.
+                forces = dict(
+                    self.isolated_lift_feedforward[support.lifted_corner]
+                )
+                # The support polygon loses one corner, so the static MIMO lift alone
+                # cannot arrest body roll once the tyre is airborne.  Close the
+                # measured-sign roll loop across all four spring-seat actuators.  In
+                # this branch the lift command was allocated from the full matrix, so
+                # the crossing corner retains enough authority after this correction.
+                correction = min(
+                    self.roll_limit_n,
+                    config.roll_gain_n_per_deg * abs(roll_deg),
+                )
+                if correction > 0.0:
+                    # Positive IMP_FS at a right corner gives a negative roll response
+                    # on this identified plant; a left corner gives a positive one.
+                    # Pick the most heavily loaded eligible contact and add force only.
+                    # The earlier (+,-,+,-) pattern corrected roll by *unloading* RL,
+                    # repeatedly destroying the third point of the support triangle.
+                    wants_right = (roll_deg * config.roll_regulator_sign) < 0.0
+                    side = ("FR", "RR") if wants_right else ("FL", "RL")
+                    candidates = [
+                        c for c in side
+                        if c != support.lifted_corner
+                        and loads[c] >= config.torque_contact_load_n
+                    ]
+                    if candidates:
+                        chosen = max(candidates, key=lambda c: loads[c])
+                        forces[chosen] += correction
             elif support is not None and config.sd_tracking:
                 # The paper's own control variable: track the SD pattern.
                 forces = self._sd_forces(support, deflections, config)
@@ -1081,6 +1378,8 @@ class DeepPotholeExpertController:
                     -self.roll_limit_n, min(self.roll_limit_n, roll_correction)
                 )
                 for index, corner in enumerate(CORNERS):
+                    if corner == support.lifted_corner:
+                        continue
                     forces[corner] += roll_correction * (1.0, -1.0, 1.0, -1.0)[index]
             elif support is not None:
                 forces = {}
@@ -1126,8 +1425,10 @@ class DeepPotholeExpertController:
                     -self.roll_limit_n, min(self.roll_limit_n, roll_correction)
                 )
                 for index, corner in enumerate(CORNERS):
+                    if corner == support.lifted_corner:
+                        continue
                     forces[corner] += roll_correction * (1.0, -1.0, 1.0, -1.0)[index]
-            elif self.step in (STEP_RECOVER_FRONT, STEP_RECOVER_REAR):
+            elif self.step in (STEP_FR_TOUCHDOWN, STEP_RR_TOUCHDOWN):
                 elapsed = float(time_s) - self._recover_start_time
                 blend = 1.0 - min(1.0, elapsed / max(1e-6, config.transition_time_s))
                 forces = {c: self._recover_from[c] * blend for c in CORNERS}
@@ -1149,12 +1450,17 @@ class DeepPotholeExpertController:
                     force = 0.0
                 self._applied_force[corner] = force
 
-            torque = 0.0 if self.safe_stop else self._crawl_torque(exports, dt)
-            if not math.isfinite(torque):
+            lifted_corner = support.lifted_corner if support is not None else None
+            torques = (
+                {c: 0.0 for c in CORNERS}
+                if self.safe_stop else self._wheel_torques(exports, dt, lifted_corner)
+            )
+            if not all(math.isfinite(value) for value in torques.values()):
                 self.safe_stop = True
                 self.safe_stop_reason = "non_finite_torque"
-                torque = 0.0
-            self._applied_torque = torque
+                torques = {c: 0.0 for c in CORNERS}
+            self._applied_torques = dict(torques)
+            self._applied_torque = sum(torques.values()) / 4.0
 
             self.trace.append(
                 {
@@ -1167,13 +1473,16 @@ class DeepPotholeExpertController:
                     "force_FR": self._applied_force["FR"],
                     "force_RL": self._applied_force["RL"],
                     "force_RR": self._applied_force["RR"],
-                    "torque_nm": self._applied_torque,
+                    "torque_FL_nm": torques["FL"],
+                    "torque_FR_nm": torques["FR"],
+                    "torque_RL_nm": torques["RL"],
+                    "torque_RR_nm": torques["RR"],
                 }
             )
 
         return (
-            self._applied_torque, self._applied_torque,
-            self._applied_torque, self._applied_torque,
+            self._applied_torques["FL"], self._applied_torques["FR"],
+            self._applied_torques["RL"], self._applied_torques["RR"],
             self._applied_force["FL"], self._applied_force["FR"],
             self._applied_force["RL"], self._applied_force["RR"],
         )
@@ -1182,6 +1491,10 @@ class DeepPotholeExpertController:
     def step_summary(self) -> Dict[str, object]:
         """Describe the support-phase plan the controller derived."""
         return {
+            "controller_fidelity": (
+                "Liu et al. five-step support sequence and SD targets; reproducible "
+                "bounded classical feedback (paper T-SRSMC gains not published)"
+            ),
             "pothole_span_m": list(self.scenario.station_span()),
             "pre_lift_distance_m": self.config.pre_lift_distance_m,
             "control_period_s": self.config.control_period_s,
@@ -1199,6 +1512,9 @@ class DeepPotholeExpertController:
             "final_step_name": STEP_NAMES.get(self.step, "unknown"),
             "safe_stop": self.safe_stop,
             "safe_stop_reason": self.safe_stop_reason,
+            "safety_mode": self.safety_mode,
+            "transition_reason": self.transition_reason,
+            "pit_seen": dict(self._pit_seen),
         }
 
 

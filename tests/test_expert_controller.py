@@ -12,8 +12,14 @@ from pathlib import Path
 from ddevsim.expert_controller import (
     CORNERS,
     STEP_APPROACH,
+    STEP_FR_CROSS,
+    STEP_FR_LIFT,
+    STEP_FR_PRELOAD,
+    STEP_FR_TOUCHDOWN,
     STEP_LIFT_FRONT,
     STEP_LIFT_REAR,
+    STEP_RR_LIFT,
+    STEP_RR_PRELOAD,
     STEP_RECOVER_FRONT,
     DeepPotholeExpertController,
     ExpertConfig,
@@ -47,6 +53,8 @@ EXPORTS = (
     "Vz_Wc_L1", "Vz_Wc_R1", "Vz_Wc_L2", "Vz_Wc_R2",
     "Xo", "Vx", "Roll_E", "Pitch",
     "X_L1", "X_R1", "X_L2", "X_R2",
+    "Kappa_L1i", "Kappa_R1i", "Kappa_L2i", "Kappa_R2i",
+    "Yaw", "AVz", "Yo", "Y_R1", "Y_R2",
 )
 
 
@@ -58,6 +66,7 @@ def _exports(**overrides):
         "CmpS_L1": 53.6, "CmpS_R1": 53.6, "CmpS_L2": 50.6, "CmpS_R2": 50.6,
         "Xo": 100.0, "Vx": 2.8, "Roll_E": 0.0, "Pitch": 0.0,
         "X_L1": 100.0, "X_R1": 100.0, "X_L2": 96.1, "X_R2": 96.1,
+        "Yo": 0.0, "Y_R1": -0.63, "Y_R2": -0.63,
     })
     values.update(overrides)
     return tuple(float(values[name]) for name in EXPORTS)
@@ -223,6 +232,8 @@ class ScenarioCouplingTests(unittest.TestCase):
         self.scenario = PotholeScenario()
 
     def _controller(self, scenario=None, **config):
+        config.setdefault("settle_time_s", 0.0)
+        config.setdefault("preload_time_s", 0.0)
         return DeepPotholeExpertController(
             scenario=scenario or self.scenario,
             vehicle=self.vehicle,
@@ -233,6 +244,18 @@ class ScenarioCouplingTests(unittest.TestCase):
     def test_starts_in_the_approach_phase(self):
         controller = self._controller()
         self.assertEqual(controller.step, STEP_APPROACH)
+
+    def test_default_controller_waits_for_the_initial_settle_window(self):
+        controller = DeepPotholeExpertController(
+            scenario=self.scenario,
+            vehicle=self.vehicle,
+            export_names=EXPORTS,
+            config=ExpertConfig(settle_time_s=1.0),
+        )
+        controller(0.5, _exports(X_R1=101.0))
+        self.assertEqual(controller.step, STEP_APPROACH)
+        controller(1.01, _exports(X_R1=101.0))
+        self.assertEqual(controller.step, STEP_LIFT_FRONT)
         controller(0.0, _exports())
         self.assertEqual(controller.step, STEP_APPROACH)
 
@@ -249,7 +272,9 @@ class ScenarioCouplingTests(unittest.TestCase):
         controller = self._controller()
         controller(0.0, _exports(X_R1=101.5))
         self.assertEqual(controller.step, STEP_LIFT_FRONT)
-        controller(0.01, _exports(X_R1=102.35))
+        controller(0.01, _exports(X_R1=101.5))
+        controller(0.02, _exports(X_R1=101.5, Fz_R1=100.0))
+        controller(0.03, _exports(X_R1=102.35, Fz_R1=100.0))
         self.assertEqual(controller.step, STEP_RECOVER_FRONT)
 
     def test_rear_phase_waits_for_wheel_four_and_uses_its_own_station(self):
@@ -258,7 +283,9 @@ class ScenarioCouplingTests(unittest.TestCase):
         # the same station on the next update is already past the trailing edge.
         controller(0.0, _exports(X_R1=102.35))
         self.assertEqual(controller.step, STEP_LIFT_FRONT)
-        controller(0.01, _exports(X_R1=102.35))
+        controller(0.01, _exports(X_R1=102.0))
+        controller(0.02, _exports(X_R1=102.0, Fz_R1=100.0))
+        controller(0.03, _exports(X_R1=102.35, Fz_R1=100.0))
         self.assertEqual(controller.step, STEP_RECOVER_FRONT)
         # wheel 4 is still far away even though the vehicle has moved on
         controller(0.02, _exports(X_R1=103.0, X_R2=100.0))
@@ -267,7 +294,7 @@ class ScenarioCouplingTests(unittest.TestCase):
         # by wheel 4's own station.  The gap in time here is the whole point: the
         # handover is time-gated as well as station-gated.
         controller(
-            0.01 + controller.config.transition_time_s + 1e-6,
+            0.03 + controller.config.transition_time_s + 1e-6,
             _exports(X_R1=103.5, X_R2=100.90),
         )
         self.assertEqual(controller.step, STEP_LIFT_REAR)
@@ -278,15 +305,68 @@ class ScenarioCouplingTests(unittest.TestCase):
         # overlapped (measured: 682 N still commanded on the front corner at handover).
         controller = self._controller()
         controller(0.0, _exports(X_R1=102.35))
-        controller(0.01, _exports(X_R1=102.35))
+        controller(0.01, _exports(X_R1=102.0))
+        controller(0.02, _exports(X_R1=102.0, Fz_R1=100.0))
+        controller(0.03, _exports(X_R1=102.35, Fz_R1=100.0))
         self.assertEqual(controller.step, STEP_RECOVER_FRONT)
         # wheel 4 is already inside its pre-lift window, but the ramp is not finished
         controller(0.02, _exports(X_R1=103.5, X_R2=101.00))
         self.assertEqual(controller.step, STEP_RECOVER_FRONT)
-        self.assertFalse(controller._recovery_finished(0.02))
+        self.assertFalse(controller._recovery_finished(0.04))
         self.assertTrue(
-            controller._recovery_finished(0.01 + controller.config.transition_time_s)
+            controller._recovery_finished(0.03 + controller.config.transition_time_s)
         )
+
+    def test_rear_lift_waits_for_four_wheel_contact_not_only_for_time(self):
+        controller = self._controller(min_recovered_load_n=200.0)
+        controller(0.0, _exports(X_R1=102.35))
+        controller(0.01, _exports(X_R1=102.0))
+        controller(0.02, _exports(X_R1=102.0, Fz_R1=100.0))
+        controller(0.03, _exports(X_R1=102.35, Fz_R1=100.0))
+        ready_time = 0.03 + controller.config.transition_time_s + 0.01
+        controller(
+            ready_time,
+            _exports(X_R1=103.5, X_R2=100.9, Fz_R1=0.0),
+        )
+        self.assertEqual(controller.step, STEP_RECOVER_FRONT)
+        controller(
+            ready_time + 0.01,
+            _exports(X_R1=103.5, X_R2=100.9, Fz_R1=1000.0),
+        )
+        self.assertEqual(controller.step, STEP_LIFT_REAR)
+
+    def test_lifted_wheel_gets_zero_torque_and_contact_wheels_share_drive(self):
+        controller = self._controller(torque_bias_nm=4.0, torque_rate_limit_nm_per_s=1e6)
+        command = controller(0.0, _exports(X_R1=101.0))
+        self.assertEqual(command[1], 0.0)
+        self.assertGreater(command[0], 0.0)
+        self.assertGreater(command[2], 0.0)
+        self.assertGreater(command[3], 0.0)
+
+    def test_slip_controller_reduces_only_the_slipping_contact_wheel(self):
+        controller = self._controller(
+            torque_bias_nm=4.0,
+            torque_rate_limit_nm_per_s=1e6,
+            slip_soft_limit=0.10,
+            slip_hard_limit=0.30,
+        )
+        command = controller(
+            0.0,
+            _exports(X_R1=101.0, Kappa_L1i=0.25),
+        )
+        self.assertLess(command[0], command[2])
+        self.assertEqual(command[1], 0.0)
+
+    def test_negative_yaw_shifts_drive_torque_to_the_right_side(self):
+        controller = self._controller(
+            torque_bias_nm=4.0,
+            torque_rate_limit_nm_per_s=1e6,
+            yaw_torque_gain_nm_per_deg=1.0,
+        )
+        torques = controller._wheel_torques(
+            _exports(Yaw=-5.0), controller.config.control_period_s, None
+        )
+        self.assertGreater(torques["FR"] + torques["RR"], torques["FL"] + torques["RL"])
 
     def test_recovery_ramp_is_short_enough_for_this_wheelbase(self):
         # 0.875 m of travel between "wheel 2 clears the hole" and "wheel 4 reaches its
@@ -377,6 +457,30 @@ class ActuatorSizingAndRegulatorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             derive_roll_regulator_sign({c: 0.0 for c in CORNERS})
 
+    def test_measured_travel_matrix_allocates_the_scaled_paper_pattern(self):
+        # Matrix convention is [command corner][measured Jnc corner], in mm/N.
+        # With four uncoupled -0.01 mm/N channels, the lifted FR and the two ordinary
+        # support corners require negative commands, while the paper's diagonal
+        # attitude corner (RL) requires the opposite sign.
+        matrix = [
+            [-0.01, 0.0, 0.0, 0.0],
+            [0.0, -0.01, 0.0, 0.0],
+            [0.0, 0.0, -0.01, 0.0],
+            [0.0, 0.0, 0.0, -0.01],
+        ]
+        controller = DeepPotholeExpertController(
+            scenario=self.scenario,
+            vehicle=self.vehicle,
+            export_names=EXPORTS,
+            config=ExpertConfig(),
+            travel_gain_matrix=matrix,
+        )
+        command = controller.isolated_lift_feedforward["FR"]
+        self.assertLess(command["FR"], -1000.0)
+        self.assertLess(command["FL"], 0.0)
+        self.assertGreater(command["RL"], 0.0)
+        self.assertLess(command["RR"], 0.0)
+
     def test_roll_regulator_cannot_saturate_the_actuators_by_itself(self):
         controller = self._controller()
         self.assertLessEqual(controller.roll_limit_n, controller.config.force_max_n)
@@ -428,6 +532,106 @@ class ActuatorSizingAndRegulatorTests(unittest.TestCase):
         controller = self._controller()
         static_corner = max(self.vehicle.static_load(c) for c in CORNERS)
         self.assertLessEqual(controller.config.force_max_n, 2.5 * static_corner)
+
+    def test_paper_sd_sign_is_converted_to_trucksim_jounce_for_the_lifted_wheel(self):
+        static = {corner: 0.03 for corner in CORNERS}
+        controller = DeepPotholeExpertController(
+            scenario=self.scenario,
+            vehicle=self.vehicle,
+            export_names=EXPORTS,
+            config=ExpertConfig(settle_time_s=0.0),
+            static_deflection_m=static,
+        )
+        # Positive TruckSim Jnc is wheel jounce (wheel moves upward relative to the
+        # body).  The paper's negative SD convention therefore has to be inverted.
+        forces = controller._sd_forces(controller.support["FR"], static, controller.config)
+        self.assertLess(forces["FR"], 0.0)
+
+    def test_roll_regulator_does_not_cancel_the_lifted_corner_command(self):
+        static = {corner: 0.03 for corner in CORNERS}
+
+        def command_at_roll(roll_deg):
+            controller = DeepPotholeExpertController(
+                scenario=self.scenario,
+                vehicle=self.vehicle,
+                export_names=EXPORTS,
+                config=ExpertConfig(
+                    settle_time_s=0.0,
+                    force_rate_limit_n_per_s=1e9,
+                    torque_rate_limit_nm_per_s=1e9,
+                ),
+                static_deflection_m=static,
+            )
+            return controller(0.0, _exports(X_R1=101.0, Roll_E=roll_deg))
+
+        at_zero = command_at_roll(0.0)
+        at_roll = command_at_roll(5.0)
+        self.assertAlmostEqual(at_zero[5], at_roll[5], places=6)
+
+    def test_default_recovery_begins_at_the_exit_lip(self):
+        controller = self._controller()
+        self.assertEqual(controller.config.recovery_lead_m, 0.0)
+
+
+@unittest.skipUnless(MODEL.exists(), "generated TruckSim model not present")
+class ObservablePhaseManagerTests(unittest.TestCase):
+    def setUp(self):
+        self.vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
+        self.scenario = PotholeScenario(
+            **{**PotholeScenario().__dict__, "center_y_m": -0.63, "width_m": 0.90}
+        )
+        self.controller = DeepPotholeExpertController(
+            scenario=self.scenario,
+            vehicle=self.vehicle,
+            export_names=EXPORTS,
+            config=ExpertConfig(settle_time_s=0.0, preload_time_s=0.0),
+        )
+
+    def test_front_sequence_advances_one_observable_phase_per_call(self):
+        self.controller(0.00, _exports(X_R1=100.60))
+        self.assertEqual(self.controller.step, STEP_FR_PRELOAD)
+
+        self.controller(0.01, _exports(X_R1=100.70))
+        self.assertEqual(self.controller.step, STEP_FR_LIFT)
+
+        self.controller(0.02, _exports(X_R1=101.20, Fz_R1=100.0))
+        self.assertEqual(self.controller.step, STEP_FR_CROSS)
+
+        self.controller(0.03, _exports(X_R1=102.40, Fz_R1=100.0))
+        self.assertEqual(self.controller.step, STEP_FR_TOUCHDOWN)
+
+    def test_station_alone_cannot_claim_crossing_when_wheel_misses_pit_laterally(self):
+        self.controller(0.00, _exports(X_R1=100.60, Y_R1=-1.50))
+        self.controller(0.01, _exports(X_R1=100.70, Y_R1=-1.50))
+        self.controller(0.02, _exports(X_R1=101.20, Y_R1=-1.50, Fz_R1=100.0))
+        self.assertEqual(self.controller.step, STEP_FR_LIFT)
+        self.controller(0.03, _exports(X_R1=102.40, Y_R1=-1.50, Fz_R1=100.0))
+        self.assertNotEqual(self.controller.step, STEP_FR_TOUCHDOWN)
+
+    def test_rear_preload_waits_for_front_contact_and_path_recovery(self):
+        self.controller.step = STEP_FR_TOUCHDOWN
+        self.controller._recover_start_time = 0.0
+        ready = self.controller.config.transition_time_s + 0.01
+        self.controller(
+            ready,
+            _exports(X_R2=100.60, Fz_R1=1000.0, Yaw=3.0, AVz=0.0),
+        )
+        self.assertEqual(self.controller.step, STEP_FR_TOUCHDOWN)
+        self.controller(
+            ready + 0.01,
+            _exports(X_R2=100.60, Fz_R1=1000.0, Yaw=0.0, AVz=0.0),
+        )
+        self.assertEqual(self.controller.step, STEP_RR_PRELOAD)
+
+    def test_low_support_load_debounce_enters_recovery_without_safe_stop(self):
+        self.controller.step = STEP_FR_CROSS
+        low = _exports(X_R1=101.50, Fz_L2=0.0, Fz_R1=100.0)
+        self.controller(0.00, low)
+        self.assertEqual(self.controller.step, STEP_FR_CROSS)
+        self.controller(0.06, low)
+        self.assertEqual(self.controller.step, STEP_FR_TOUCHDOWN)
+        self.assertEqual(self.controller.safety_mode, "RECOVER")
+        self.assertFalse(self.controller.safe_stop)
 
 
 if __name__ == "__main__":
