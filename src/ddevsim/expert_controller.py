@@ -602,6 +602,10 @@ class ExpertConfig:
     force_slew_time_s: float = 0.4
     torque_min_nm: float = 0.0
     torque_max_nm: float = 25.0
+    #: Regenerative/braking authority reserved for path/yaw control on grounded wheels.
+    regen_torque_min_nm: float = -12.0
+    #: Fraction of the instantaneous mu*Fz*R envelope available to the allocator.
+    traction_utilization: float = 0.80
     #: Crawl speed loop.  The paper drives the manoeuvre at a near-constant hub torque
     #: (8 N*m, or 8.5 N*m while three-wheel supported) and explicitly reports that "the
     #: speed decreases when the vehicle is in a three-wheel supported state".  A speed
@@ -632,6 +636,9 @@ class ExpertConfig:
     #: produced positive yaw in the measured flat-road pulse test, so a negative yaw
     #: error shifts this many N*m/deg from left to right while preserving total effort.
     yaw_torque_gain_nm_per_deg: float = 1.0
+    yaw_rate_torque_gain_nm_per_deg_s: float = 0.25
+    lateral_torque_gain_nm_per_m: float = 8.0
+    lateral_velocity_torque_gain_nm_per_m_s: float = 1.0
     yaw_torque_deadband_deg: float = 0.25
     #: A wheel below this load is treated as unsupported and receives no drive torque.
     torque_contact_load_n: float = 200.0
@@ -1307,53 +1314,69 @@ class DeepPotholeExpertController:
         total_request = 4.0 * max(0.0, per_wheel)
         loads = self._loads(exports)
         slips = self._slips(exports)
-        eligible = [
-            c for c in CORNERS
-            if c != lifted_corner and loads[c] >= config.torque_contact_load_n
-        ]
-        targets = {c: 0.0 for c in CORNERS}
-        load_sum = sum(max(0.0, loads[c]) for c in eligible)
-        if eligible and load_sum > 0.0:
-            for corner in eligible:
-                target = total_request * max(0.0, loads[corner]) / load_sum
-                slip = abs(slips[corner])
-                if slip > config.slip_soft_limit:
-                    span = max(1e-9, config.slip_hard_limit - config.slip_soft_limit)
-                    target *= max(0.0, min(1.0, (config.slip_hard_limit - slip) / span))
-                targets[corner] = max(
-                    config.torque_min_nm, min(config.torque_max_nm, target)
-                )
-
-            yaw_deg = (
-                self._channel(exports, "Yaw") if "Yaw" in self.export_index else 0.0
-            )
-            if abs(yaw_deg) > config.yaw_torque_deadband_deg:
-                # Probe result: +right torque -> +Yaw, +left torque -> -Yaw.
-                # Therefore -Yaw is the signed amount to shift toward the right.
-                shift = -yaw_deg * config.yaw_torque_gain_nm_per_deg
-                left = [c for c in eligible if c in ("FL", "RL")]
-                right = [c for c in eligible if c in ("FR", "RR")]
-                if left and right:
-                    for corner in right:
-                        targets[corner] += shift / len(right)
-                    for corner in left:
-                        targets[corner] -= shift / len(left)
-                    for corner in eligible:
-                        targets[corner] = max(
-                            config.torque_min_nm,
-                            min(config.torque_max_nm, targets[corner]),
-                        )
+        yaw_deg = self._channel(exports, "Yaw") if "Yaw" in self.export_index else 0.0
+        yaw_rate = self._channel(exports, "AVz") if "AVz" in self.export_index else 0.0
+        lateral = self._channel(exports, "Yo") if "Yo" in self.export_index else 0.0
+        lateral_velocity = (
+            self._channel(exports, "Vy") if "Vy" in self.export_index else 0.0
+        )
+        if abs(yaw_deg) <= config.yaw_torque_deadband_deg:
+            yaw_deg = 0.0
+        yaw_request = -(
+            config.yaw_torque_gain_nm_per_deg * yaw_deg
+            + config.yaw_rate_torque_gain_nm_per_deg_s * yaw_rate
+            + config.lateral_torque_gain_nm_per_m * lateral
+            + config.lateral_velocity_torque_gain_nm_per_m_s * lateral_velocity
+        )
 
         slew = config.torque_rate_limit_nm_per_s * max(0.0, dt)
+        lower = []
+        upper = []
         for corner in CORNERS:
             if corner == lifted_corner or loads[corner] < config.torque_contact_load_n:
-                self._applied_torques[corner] = 0.0
+                lower.append(0.0)
+                upper.append(0.0)
                 continue
-            previous = self._applied_torques[corner]
-            target = targets[corner]
-            self._applied_torques[corner] = previous + max(
-                -slew, min(slew, target - previous)
+            capacity = (
+                config.traction_utilization
+                * float(self.scenario.friction)
+                * max(0.0, loads[corner])
+                * self.vehicle.tyre_radius_m
             )
+            slip = abs(slips[corner])
+            drive_scale = 1.0
+            if slip > config.slip_soft_limit:
+                span = max(1e-9, config.slip_hard_limit - config.slip_soft_limit)
+                drive_scale = max(
+                    0.0, min(1.0, (config.slip_hard_limit - slip) / span)
+                )
+            previous = self._applied_torques[corner]
+            lo = max(config.regen_torque_min_nm, -capacity, previous - slew)
+            drive_limit = capacity * drive_scale
+            if slip > config.slip_soft_limit:
+                # Traction control must reduce the requested drive even when the
+                # friction envelope is much larger than the crawl command.
+                drive_limit = min(drive_limit, max(0.0, per_wheel) * drive_scale)
+            hi = min(config.torque_max_nm, drive_limit, previous + slew)
+            if lo > hi:
+                # A sudden contact/load loss is a safety bound and may override slew.
+                safe = min(max(0.0, -capacity), capacity * drive_scale)
+                lo = hi = safe
+            lower.append(lo)
+            upper.append(hi)
+
+        targets = bounded_weighted_least_squares(
+            [
+                [1.0, 1.0, 1.0, 1.0],
+                [-1.0, 1.0, -1.0, 1.0],
+            ],
+            [total_request, yaw_request],
+            lower,
+            upper,
+            effort_weight=1e-6,
+        )
+        for corner, target in zip(CORNERS, targets):
+            self._applied_torques[corner] = 0.0 if corner == lifted_corner else target
         return dict(self._applied_torques)
 
     def _sliding_force(

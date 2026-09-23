@@ -679,5 +679,64 @@ class ConstrainedSuspensionAllocationTests(unittest.TestCase):
         self.assertTrue(all(-20.0 <= value <= 20.0 for value in commands.values()))
 
 
+@unittest.skipUnless(MODEL.exists(), "generated TruckSim model not present")
+class BidirectionalTorqueAllocationTests(unittest.TestCase):
+    def _controller(self, **config):
+        vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
+        return DeepPotholeExpertController(
+            scenario=PotholeScenario(), vehicle=vehicle, export_names=EXPORTS,
+            config=ExpertConfig(torque_rate_limit_nm_per_s=1e9, **config),
+        )
+
+    def test_positive_yaw_can_command_right_regen_and_left_drive(self):
+        controller = self._controller(
+            torque_bias_nm=0.0,
+            torque_per_kph_nm=0.0,
+            yaw_torque_gain_nm_per_deg=4.0,
+            regen_torque_min_nm=-20.0,
+        )
+        torques = controller._wheel_torques(_exports(Yaw=5.0), 0.01, None)
+        self.assertLess(torques["FR"] + torques["RR"], 0.0)
+        self.assertGreater(torques["FL"] + torques["RL"], 0.0)
+
+    def test_yaw_rate_and_lateral_error_contribute_to_path_correction(self):
+        controller = self._controller(
+            torque_bias_nm=0.0,
+            torque_per_kph_nm=0.0,
+            yaw_torque_gain_nm_per_deg=0.0,
+            yaw_rate_torque_gain_nm_per_deg_s=2.0,
+            lateral_torque_gain_nm_per_m=10.0,
+            regen_torque_min_nm=-20.0,
+        )
+        torques = controller._wheel_torques(
+            _exports(AVz=2.0, Yo=0.2), 0.01, None
+        )
+        self.assertGreater(
+            torques["FL"] + torques["RL"], torques["FR"] + torques["RR"]
+        )
+
+    def test_torque_is_bounded_by_each_tyres_measured_friction_capacity(self):
+        controller = self._controller(
+            torque_bias_nm=100.0,
+            torque_per_kph_nm=0.0,
+            torque_max_nm=1000.0,
+            traction_utilization=0.8,
+        )
+        exports = _exports(Fz_L1=100.0, Fz_R1=200.0, Fz_L2=300.0, Fz_R2=400.0)
+        torques = controller._wheel_torques(exports, 0.01, None)
+        for corner, load in zip(CORNERS, (100.0, 200.0, 300.0, 400.0)):
+            cap = 0.8 * controller.scenario.friction * load * controller.vehicle.tyre_radius_m
+            self.assertLessEqual(abs(torques[corner]), cap + 1e-6)
+
+    def test_lifted_corner_remains_exactly_zero_during_bidirectional_allocation(self):
+        controller = self._controller(
+            torque_bias_nm=10.0,
+            yaw_torque_gain_nm_per_deg=10.0,
+            regen_torque_min_nm=-20.0,
+        )
+        torques = controller._wheel_torques(_exports(Yaw=5.0), 0.01, "FR")
+        self.assertEqual(torques["FR"], 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()
