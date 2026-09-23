@@ -107,6 +107,10 @@ CHANNEL_UNITS: Dict[str, str] = {
     "CmpT_L1i": "mm", "CmpT_R1i": "mm", "CmpT_L2i": "mm", "CmpT_R2i": "mm",
     "RRE_L1i": "mm", "RRE_R1i": "mm", "RRE_L2i": "mm", "RRE_R2i": "mm",
     "MuX_L1i": "-", "MuX_R1i": "-", "MuX_L2i": "-", "MuX_R2i": "-",
+    # Tire aligning moment (N*m), needed to close the yaw-moment budget: the force-based
+    # decomposition (Fx/Fy x arms) leaves a large residual that the self-aligning torque
+    # absorbs.
+    "Mz_L1i": "N-m", "Mz_R1i": "N-m", "Mz_L2i": "N-m", "Mz_R2i": "N-m",
     # Ground height under each tyre (m): the pothole as the tyre experiences it.
     "Zgnd_L1i": "m", "Zgnd_R1i": "m", "Zgnd_L2i": "m", "Zgnd_R2i": "m",
     # --- suspension --------------------------------------------------------

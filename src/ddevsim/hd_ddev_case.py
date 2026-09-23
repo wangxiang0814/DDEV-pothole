@@ -91,6 +91,7 @@ DDEV_EXPORTS: Tuple[str, ...] = tuple(
         + _per_wheel("RRE_", TYRE_SUFFIX)
         + _per_wheel("Zgnd_", TYRE_SUFFIX)
         + _per_wheel("MuX_", TYRE_SUFFIX)
+        + _per_wheel("Mz_", TYRE_SUFFIX)
     )
 )
 

@@ -662,9 +662,14 @@ class ExpertConfig:
     #: produced positive yaw in the measured flat-road pulse test, so a negative yaw
     #: error shifts this many N*m/deg from left to right while preserving total effort.
     yaw_torque_gain_nm_per_deg: float = 1.0
-    yaw_rate_torque_gain_nm_per_deg_s: float = 0.25
+    yaw_rate_torque_gain_nm_per_deg_s: float = 0.6
     lateral_torque_gain_nm_per_m: float = 8.0
     lateral_velocity_torque_gain_nm_per_m_s: float = 1.0
+    #: Cap on the differential yaw request (N*m).  Without it the proportional term at a
+    #: ~15 deg yaw equals the whole crawl budget, and the differential torque becomes the
+    #: dominant -- and, measured, the *overshooting* -- moment in the manoeuvre
+    #: (-260 N.m.s after touchdown).
+    yaw_torque_limit_nm: float = 10.0
     yaw_torque_deadband_deg: float = 0.25
     #: A wheel below this load is treated as unsupported and receives no drive torque.
     torque_contact_load_n: float = 200.0
@@ -733,7 +738,7 @@ class ExpertConfig:
     #: jounce stop and a -61 mm rebound stop, i.e. roughly 90 mm each way.  The magnitude
     #: is therefore *derived from the model* rather than copied from the paper, which is
     #: the parameter change the differing vehicle parameters require.
-    sd_travel_fraction: float = 0.55
+    sd_travel_fraction: float = 0.45
     #: Vehicle-adapted version of the paper's (+,+,-,+) Jnc pattern for a lifted
     #: front-right corner (the negative entry moves to the diagonal partner for the
     #: rear lift).  The crossing wheel uses at most 35 mm; the other two extended
@@ -1380,6 +1385,10 @@ class DeepPotholeExpertController:
             + config.yaw_rate_torque_gain_nm_per_deg_s * yaw_rate
             + config.lateral_torque_gain_nm_per_m * lateral
             + config.lateral_velocity_torque_gain_nm_per_m_s * lateral_velocity
+        )
+        yaw_request = max(
+            -config.yaw_torque_limit_nm,
+            min(config.yaw_torque_limit_nm, yaw_request),
         )
 
         slew = config.torque_rate_limit_nm_per_s * max(0.0, dt)
