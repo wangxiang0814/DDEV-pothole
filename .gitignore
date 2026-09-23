@@ -11,6 +11,8 @@ __pycache__/
 *.erd
 *.avi
 *.mp4
+# The recorded 3D traverse video is a deliverable, not a regenerated artefact.
+!runs/**/video/*.mp4
 *_all.par
 *_echo.par
 *_end.par
