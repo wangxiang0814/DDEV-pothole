@@ -76,6 +76,7 @@ from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 from .units import require_verified, to_si
 from .vehicle_params import GRAVITY, VehicleControllerParams
+from .bounded_allocation import bounded_weighted_least_squares
 
 CORNERS: Tuple[str, ...] = ("FL", "FR", "RL", "RR")
 
@@ -922,6 +923,10 @@ class DeepPotholeExpertController:
         self._phase_enter_time = 0.0
         self._pit_seen = {"FR": False, "RR": False}
         self._support_low_since: Optional[float] = None
+        self.last_predicted_load_n = {
+            corner: self.vehicle.static_load(corner) for corner in CORNERS
+        }
+        self.last_support_margin_n = math.inf
         self._integral = {c: 0.0 for c in CORNERS}
         self._previous_error = {c: 0.0 for c in CORNERS}
         self._previous_force = {c: 0.0 for c in CORNERS}
@@ -1135,6 +1140,90 @@ class DeepPotholeExpertController:
             return self.support["RR"]
         return None
 
+    def _allocate_suspension(
+        self, lifted_corner: str, loads: Mapping[str, float], dt: float
+    ) -> Tuple[Dict[str, float], Dict[str, float]]:
+        """Allocate absolute spring-seat forces and preserve support-load floors.
+
+        The identified matrix is local, so prediction is incremental around the
+        command and tyre loads measured at the previous control instant.  If a
+        coupled solution would unload a support wheel, the increment is scaled back
+        along the feasible line from the previous command; current measured loads
+        are therefore always the trusted side of the constraint.
+        """
+        support = self.support[lifted_corner]
+        previous = [self._applied_force[corner] for corner in CORNERS]
+        slew = self._force_slew_n_per_s() * max(0.0, float(dt))
+        lower = [max(self.config.force_min_n, value - slew) for value in previous]
+        upper = [min(self.config.force_max_n, value + slew) for value in previous]
+        if self.gain_matrix is None:
+            gain = max(1e-6, abs(self.config.force_to_load_gain))
+            matrix = [[gain if i == j else 0.0 for j in range(4)] for i in range(4)]
+        else:
+            # Probe convention is gain_matrix[command][measured load].
+            matrix = [
+                [float(self.gain_matrix[command][load]) for command in range(4)]
+                for load in range(4)
+            ]
+
+        desired = []
+        for corner in CORNERS:
+            if corner == lifted_corner:
+                desired.append(self.config.lifted_load_max_n * 0.5)
+            else:
+                desired.append(max(
+                    self.config.min_support_load_n,
+                    support.target_load_n[corner],
+                ))
+        current = [float(loads[corner]) for corner in CORNERS]
+        previous_effect = [
+            sum(matrix[row][column] * previous[column] for column in range(4))
+            for row in range(4)
+        ]
+        rhs = [desired[i] - current[i] + previous_effect[i] for i in range(4)]
+        candidate = bounded_weighted_least_squares(
+            matrix, rhs, lower, upper, effort_weight=self.config.effort_weight
+        )
+        predicted = [
+            current[row] + sum(
+                matrix[row][column] * (candidate[column] - previous[column])
+                for column in range(4)
+            )
+            for row in range(4)
+        ]
+
+        # Hard support-floor filter.  A line search is sufficient because the
+        # previous measured point is feasible and the local model is affine.
+        alpha = 1.0
+        for index, corner in enumerate(CORNERS):
+            if corner == lifted_corner:
+                continue
+            delta = predicted[index] - current[index]
+            if delta < 0.0:
+                alpha = min(
+                    alpha,
+                    max(0.0, (current[index] - self.config.min_support_load_n) / -delta),
+                )
+        if alpha < 1.0:
+            candidate = [
+                previous[i] + alpha * (candidate[i] - previous[i]) for i in range(4)
+            ]
+            predicted = [
+                current[row] + sum(
+                    matrix[row][column] * (candidate[column] - previous[column])
+                    for column in range(4)
+                )
+                for row in range(4)
+            ]
+        commands = dict(zip(CORNERS, candidate))
+        predicted_map = dict(zip(CORNERS, predicted))
+        self.last_predicted_load_n = predicted_map
+        self.last_support_margin_n = min(
+            predicted_map[corner] - self.config.min_support_load_n
+            for corner in CORNERS if corner != lifted_corner
+        )
+        return commands, predicted_map
+
     # ------------------------------------------------------------------- control
     def _sd_forces(
         self,
@@ -1334,6 +1423,18 @@ class DeepPotholeExpertController:
             support = self._active_support()
             if self.safe_stop:
                 forces = {c: 0.0 for c in CORNERS}
+            elif support is not None and self.gain_matrix is not None:
+                # Re-close the loop at every 10 ms sample.  The old implementation
+                # inverted the static matrix once and held that command through a
+                # contact change; here the current tyre loads anchor the local model,
+                # and the allocator protects every non-target support corner.
+                forces, _ = self._allocate_suspension(
+                    support.lifted_corner, loads, dt
+                )
+                for corner in CORNERS:
+                    forces[corner], _ = self._travel_guard(
+                        corner, deflections[corner], forces[corner], config
+                    )
             elif support is not None and self.travel_gain_matrix is not None:
                 # Vehicle-identified MIMO wheel-lift allocation.  The full command
                 # vector raises only the crossing wheel's Jnc while holding the other
@@ -1515,6 +1616,8 @@ class DeepPotholeExpertController:
             "safety_mode": self.safety_mode,
             "transition_reason": self.transition_reason,
             "pit_seen": dict(self._pit_seen),
+            "predicted_wheel_load_n": dict(self.last_predicted_load_n),
+            "support_margin_n": self.last_support_margin_n,
         }
 
 

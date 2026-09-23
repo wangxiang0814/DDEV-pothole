@@ -634,5 +634,50 @@ class ObservablePhaseManagerTests(unittest.TestCase):
         self.assertFalse(self.controller.safe_stop)
 
 
+@unittest.skipUnless(MODEL.exists(), "generated TruckSim model not present")
+class ConstrainedSuspensionAllocationTests(unittest.TestCase):
+    def test_coupled_unload_preserves_support_wheel_floor(self):
+        vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
+        # Matrix convention is [command][load].  A negative FR command unloads FR,
+        # but also unloads RL equally; a safe allocator must stop at RL's floor.
+        gain = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+        controller = DeepPotholeExpertController(
+            scenario=PotholeScenario(), vehicle=vehicle, export_names=EXPORTS,
+            config=ExpertConfig(
+                settle_time_s=0.0,
+                force_min_n=-5000.0,
+                force_max_n=5000.0,
+                force_rate_limit_n_per_s=1e9,
+                min_support_load_n=300.0,
+            ),
+            gain_matrix=gain,
+        )
+        loads = {corner: 1000.0 for corner in CORNERS}
+        _, predicted = controller._allocate_suspension("FR", loads, 0.01)
+        self.assertGreaterEqual(predicted["RL"], 300.0 - 1e-6)
+        self.assertLessEqual(predicted["FR"], controller.config.lifted_load_max_n)
+
+    def test_suspension_allocator_obeys_force_and_per_cycle_slew_bounds(self):
+        vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
+        controller = DeepPotholeExpertController(
+            scenario=PotholeScenario(), vehicle=vehicle, export_names=EXPORTS,
+            config=ExpertConfig(
+                force_min_n=-1000.0,
+                force_max_n=1000.0,
+                force_rate_limit_n_per_s=2000.0,
+            ),
+            gain_matrix=[[1.0 if i == j else 0.0 for i in range(4)] for j in range(4)],
+        )
+        commands, _ = controller._allocate_suspension(
+            "FR", {corner: 1000.0 for corner in CORNERS}, 0.01
+        )
+        self.assertTrue(all(-20.0 <= value <= 20.0 for value in commands.values()))
+
+
 if __name__ == "__main__":
     unittest.main()
