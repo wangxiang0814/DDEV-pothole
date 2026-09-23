@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Sequence, Tuple
 
 from .cosim import run_stepwise
+from .hd_ddev_case import DDEV_EXPORTS
 
 
 WHEEL_ORDER = ("FL", "FR", "RL", "RR")
@@ -14,12 +15,11 @@ IMPORT_NAMES = (
     "IMP_MYUSM_L1", "IMP_MYUSM_R1", "IMP_MYUSM_L2", "IMP_MYUSM_R2",
     "IMP_FS_L1", "IMP_FS_R1", "IMP_FS_L2", "IMP_FS_R2",
 )
-EXPORT_NAMES = (
-    "AVy_L1", "AVy_R1", "AVy_L2", "AVy_R2",
-    "Fz_L1", "Fz_R1", "Fz_L2", "Fz_R2",
-    "CmpS_L1", "CmpS_R1", "CmpS_L2", "CmpS_R2",
-    "Vz_Wc_L1", "Vz_Wc_R1", "Vz_Wc_L2", "Vz_Wc_R2",
-)
+#: Derived from the builder's own contract rather than repeated here.  The solver
+#: binds exports *positionally*, so a list that drifts from the file silently
+#: misreads every channel after the first difference -- which is exactly the bug this
+#: indirection removes.
+EXPORT_NAMES = tuple(line.split(None, 1)[1] for line in DDEV_EXPORTS)
 TORQUE_AMPLITUDE_NM = 500.0
 ACTIVE_AMPLITUDE_N = 1000.0
 

@@ -123,7 +123,7 @@ class HDDdevCaseTests(unittest.TestCase):
             simfile = artifacts["simfile"].read_text(encoding="ascii")
             self.assertIn("VEHICLE_CODE S_S", simfile)
             self.assertIn("PORTS_IMP 8", simfile)
-            self.assertIn("PORTS_EXP 16", simfile)
+            self.assertIn("PORTS_EXP 96", simfile)
             self.assertTrue(artifacts["manifest"].is_file())
 
     def test_extend_jounce_stop_moves_every_low_onset_table(self):

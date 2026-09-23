@@ -8,7 +8,9 @@ been established cannot be used numerically.
 
 import math
 import unittest
+from unittest import mock
 
+from ddevsim import units
 from ddevsim.units import (
     CHANNEL_UNITS,
     CONTROL_ORDER,
@@ -57,17 +59,28 @@ class UnitContractTests(unittest.TestCase):
         self.assertAlmostEqual(to_si("Xo", 101.1), 101.1, places=12)
 
     def test_unverified_channel_is_refused_numerically(self):
-        # Vz_Wc tracks wheel-centre vertical velocity (r up to 0.996) but its scale
-        # could not be pinned, so it must not reach a controller or a dataset.
-        self.assertEqual(unit_of("Vz_Wc_R1"), UNVERIFIED)
-        for call in (
-            lambda: require_verified("Vz_Wc_R1"),
-            lambda: si_factor("Vz_Wc_R1"),
-            lambda: to_si("Vz_Wc_R1", 1.0),
-            lambda: si_vector({"Vz_Wc_R1": 1.0}),
+        # Vz_Wc is now a *verified* channel: TruckSim's own output catalogue declares
+        # Vz_WC_* in km/h ("Vz at wheel center L1"), which is exactly the ~3.6 factor the
+        # platform had measured but declined to pin.
+        self.assertEqual(unit_of("Vz_Wc_R1"), "km/h")
+        self.assertAlmostEqual(si_factor("Vz_Wc_R1"), 1.0 / 3.6, places=12)
+        self.assertAlmostEqual(to_si("Vz_Wc_R1", 36.0), 10.0, places=9)
+
+    def test_an_unregistered_unit_is_refused_numerically(self):
+        # The sentinel path must still refuse a channel whose unit is not established.
+        # No live channel is UNVERIFIED any more, so exercise the guard directly rather
+        # than relying on one happening to be unverified.
+        with mock.patch.dict(
+            units.CHANNEL_UNITS, {"Probe_Only": units.UNVERIFIED}, clear=False
         ):
-            with self.assertRaises(UnverifiedUnitError):
-                call()
+            for call in (
+                lambda: require_verified("Probe_Only"),
+                lambda: si_factor("Probe_Only"),
+                lambda: to_si("Probe_Only", 1.0),
+                lambda: si_vector({"Probe_Only": 1.0}),
+            ):
+                with self.assertRaises(UnverifiedUnitError):
+                    call()
 
     def test_unknown_channel_reports_how_to_register_it(self):
         with self.assertRaises(KeyError) as context:
@@ -84,7 +97,7 @@ class UnitContractTests(unittest.TestCase):
         table = contract_table()
         self.assertEqual(table["Vx"]["status"], "measured")
         self.assertEqual(table["Vx"]["si_unit"], "m/s")
-        self.assertEqual(table["Vz_Wc_L1"]["status"], "unverified")
+        self.assertEqual(table["Vz_Wc_L1"]["status"], "measured")
 
     def test_control_order_matches_the_trucksim_import_order(self):
         self.assertEqual(

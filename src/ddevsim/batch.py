@@ -184,7 +184,12 @@ def quality_gates(
     all_airborne = sum(
         1 for i in range(samples) if all(loads[c][i] < 500.0 for c in CORNERS)
     ) / samples
-    travel = vehicle.jounce_limit_m * 1000.0
+    # Jounce and rebound travel are different limits (this vehicle: 121 mm of jounce
+    # against 61 mm of rebound), so each bound must be tested against its own limit.
+    # Comparing both against the jounce limit -- as this gate did -- let a corner run to
+    # twice its rebound travel before failing.
+    jounce = vehicle.jounce_limit_m * 1000.0
+    rebound = vehicle.rebound_limit_m * 1000.0
     peak_deflection = max(max(values) for values in deflections.values())
     min_deflection = min(min(values) for values in deflections.values())
 
@@ -195,8 +200,10 @@ def quality_gates(
         failures.append("tyre_or_suspension_table_extrapolated")
     if peak_load > 3.0 * tyre_reference_load_n:
         failures.append("wheel_load_above_3x_tyre_reference")
-    if peak_deflection > travel * 1.02 or abs(min_deflection) > travel * 1.02:
-        failures.append("suspension_travel_exceeded")
+    if peak_deflection > jounce * 1.02:
+        failures.append("jounce_travel_exceeded")
+    if abs(min_deflection) > abs(rebound) * 1.02:
+        failures.append("rebound_travel_exceeded")
     if controller.safe_stop:
         failures.append("controller_safe_stop:%s" % controller.safe_stop_reason)
     if all_airborne > 0.001:
@@ -214,7 +221,8 @@ def quality_gates(
         "peak_roll_deg": max(abs(value) for value in roll),
         "peak_deflection_mm": peak_deflection,
         "min_deflection_mm": min_deflection,
-        "travel_limit_mm": travel,
+        "jounce_limit_mm": jounce,
+        "rebound_limit_mm": rebound,
         "extrapolation_functions": log.get("extrapolation_functions", []),
         "solver_stopped_reason": log.get("stopped_reason", ""),
         "final_step_name": controller.step_summary()["final_step_name"],

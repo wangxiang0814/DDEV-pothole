@@ -70,21 +70,65 @@ CHANNEL_UNITS: Dict[str, str] = {
     "AVy_L1": "rpm", "AVy_R1": "rpm", "AVy_L2": "rpm", "AVy_R2": "rpm",
     "Fz_L1": "N", "Fz_R1": "N", "Fz_L2": "N", "Fz_R2": "N",
     "CmpS_L1": "mm", "CmpS_R1": "mm", "CmpS_L2": "mm", "CmpS_R2": "mm",
-    "Vz_Wc_L1": UNVERIFIED, "Vz_Wc_R1": UNVERIFIED,
-    "Vz_Wc_L2": UNVERIFIED, "Vz_Wc_R2": UNVERIFIED,
+    "Vz_Wc_L1": "km/h", "Vz_Wc_R1": "km/h",
+    "Vz_Wc_L2": "km/h", "Vz_Wc_R2": "km/h",
     "Xo": "m", "Vx": "km/h", "Roll_E": "deg", "Pitch": "deg",
     # Pose channels added for lateral-sway diagnosis.  ``.vs`` header declares
     # Yo/Zo in m and Yaw in deg ("Yaw, vehicle").
     "Yo": "m", "Zo": "m", "Yaw": "deg",
+    # --- body acceleration, rates and road-relative attitude ----------------
+    # TruckSim's own output catalogue (``Results\Run_*\Run_out_tab.txt``) declares
+    # Ax/Ay/Az/Az_SM in **g** (not m/s^2) and AVx/AVy/AVz in deg/s, described as
+    # "Roll/Pitch/Yaw rate, vehicle" in the body-fixed frame.
+    "Ax": "g", "Ay": "g", "Az": "g", "Az_SM": "g",
+    "AVx": "deg/s", "AVy": "deg/s", "AVz": "deg/s",
+    "Roll_Rd": "deg", "Sta_Road": "m",
     # --- wheel-centre stations (m) -----------------------------------------
     # Used by the expert controller's support-phase state machine so that no
     # axle-offset constant is hard-coded.  Declared ``m`` in the ``.vs`` header
     # ("X coordinate, wheel center L1"), and validated by the pothole lip: the
     # front-right wheel load collapses when X_R1 reaches the lip station 101.1 m.
     "X_L1": "m", "X_R1": "m", "X_L2": "m", "X_R2": "m",
+    # --- per-wheel kinematics ----------------------------------------------
+    "Y_L1": "m", "Y_R1": "m", "Y_L2": "m", "Y_R2": "m",
+    "Z_L1": "m", "Z_R1": "m", "Z_L2": "m", "Z_R2": "m",
+    # Wheel spin acceleration, rad/s^2 per the catalogue.
+    "AAy_L1": "rad/s2", "AAy_R1": "rad/s2",
+    "AAy_L2": "rad/s2", "AAy_R2": "rad/s2",
+    # --- tyre forces, slips and contact ------------------------------------
+    "Fx_L1": "N", "Fx_R1": "N", "Fx_L2": "N", "Fx_R2": "N",
+    "Fy_L1": "N", "Fy_R1": "N", "Fy_L2": "N", "Fy_R2": "N",
+    "Kappa_L1i": "-", "Kappa_R1i": "-", "Kappa_L2i": "-", "Kappa_R2i": "-",
+    "Alpha_L1i": "deg", "Alpha_R1i": "deg",
+    "Alpha_L2i": "deg", "Alpha_R2i": "deg",
+    # Tyre vertical deflection: the most robust contact indicator available, since
+    # TruckSim exports no boolean contact channel (the solver keeps SV_CONTACT_*
+    # internal and no SV_ name is exportable).
+    "CmpT_L1i": "mm", "CmpT_R1i": "mm", "CmpT_L2i": "mm", "CmpT_R2i": "mm",
+    "RRE_L1i": "mm", "RRE_R1i": "mm", "RRE_L2i": "mm", "RRE_R2i": "mm",
+    "MuX_L1i": "-", "MuX_R1i": "-", "MuX_L2i": "-", "MuX_R2i": "-",
+    # Ground height under each tyre (m): the pothole as the tyre experiences it.
+    "Zgnd_L1i": "m", "Zgnd_R1i": "m", "Zgnd_L2i": "m", "Zgnd_R2i": "m",
+    # --- suspension --------------------------------------------------------
+    # Total jounce travel, which is a different quantity from the ride-spring
+    # compression CmpS_* the platform previously used as a proxy.
+    "Jnc_L1": "mm", "Jnc_R1": "mm", "Jnc_L2": "mm", "Jnc_R2": "mm",
+    "JncR_L1": "mm/s", "JncR_R1": "mm/s", "JncR_L2": "mm/s", "JncR_R2": "mm/s",
+    "Fs_L1": "N", "Fs_R1": "N", "Fs_L2": "N", "Fs_R2": "N",
+    "Fd_L1": "N", "Fd_R1": "N", "Fd_L2": "N", "Fd_R2": "N",
+    # The *realised* external (active) spring force, i.e. what the solver applied in
+    # response to IMP_FS_*.  Command-vs-realised error and saturation duty need it.
+    "FsExt_L1": "N", "FsExt_R1": "N", "FsExt_L2": "N", "FsExt_R2": "N",
+    # Stop compressions: what a bottoming / topping-out metric needs.  Note these
+    # names carry no underscore before the wheel token, unlike FJSt_L1.
+    "CmpJStL1": "mm", "CmpJStR1": "mm", "CmpJStL2": "mm", "CmpJStR2": "mm",
+    "CmpRStL1": "mm", "CmpRStR1": "mm", "CmpRStL2": "mm", "CmpRStR2": "mm",
+    # --- realised drive torque ---------------------------------------------
+    # The external moment the solver applied to each wheel, i.e. the realised
+    # IMP_MYUSM_*.  The imp_ columns only carry the command.
+    "My_US_L1": "N-m", "My_US_R1": "N-m", "My_US_L2": "N-m", "My_US_R2": "N-m",
     # --- probe-only channels (unit probes and diagnostics) -----------------
     "Rot_L1": "rev", "Rot_R1": "rev", "Rot_L2": "rev", "Rot_R2": "rev",
-    "Z_L1": "m", "Z_R1": "m", "Z_L2": "m", "Z_R2": "m",
 }
 
 #: Factor that converts a value in ``unit`` into SI.
@@ -94,9 +138,14 @@ _TO_SI: Dict[str, float] = {
     "rpm": 2.0 * math.pi / 60.0,   # rpm -> rad/s
     "km/h": 1.0 / 3.6,             # km/h -> m/s
     "mm": 1.0e-3,                  # mm -> m
+    "mm/s": 1.0e-3,                # mm/s -> m/s
     "m": 1.0,
     "deg": math.pi / 180.0,        # deg -> rad
+    "deg/s": math.pi / 180.0,      # deg/s -> rad/s
     "rev": 2.0 * math.pi,          # revolutions -> rad
+    "g": 9.80665,                  # standard gravity -> m/s^2
+    "rad/s2": 1.0,                 # already SI
+    "-": 1.0,                      # dimensionless (slip, friction, slope)
 }
 
 #: Human-readable SI target for each source unit.
@@ -106,9 +155,14 @@ _SI_NAME: Dict[str, str] = {
     "rpm": "rad/s",
     "km/h": "m/s",
     "mm": "m",
+    "mm/s": "m/s",
     "m": "m",
     "deg": "rad",
+    "deg/s": "rad/s",
     "rev": "rad",
+    "g": "m/s^2",
+    "rad/s2": "rad/s^2",
+    "-": "-",
 }
 
 WHEEL_ORDER = ("FL", "FR", "RL", "RR")

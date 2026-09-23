@@ -13,6 +13,9 @@ from ddevsim.batch import (
     parse_solver_log,
     quality_gates,
 )
+from ddevsim.interface_validation import EXPORT_NAMES
+from ddevsim.units import require_verified
+from ddevsim.pothole_case import SCENARIO_EXPORTS
 from ddevsim.native_video import (
     describe_history,
     find_history,
@@ -41,13 +44,21 @@ class _FakeController:
 
 
 def _row(**overrides):
-    row = {
-        "time_s": 0.0,
+    """A synthetic log row carrying *every* channel in the export contract.
+
+    Built from the contract itself rather than a hand-written subset, so expanding the
+    export list cannot silently break these tests: any newly exported channel gets a
+    finite default here instead of a KeyError.
+    """
+    row = {"time_s": 0.0}
+    for name in list(EXPORT_NAMES) + list(SCENARIO_EXPORTS):
+        row["exp_" + name] = 0.0
+    row.update({
         "exp_Vx": 2.8, "exp_AVy_L1": 13.4, "exp_CmpS_L1": 53.6,
         "exp_Xo": 100.0, "exp_Roll_E": 0.0, "exp_Pitch": 0.0,
         "exp_Yo": 0.0, "exp_Zo": 0.0, "exp_Yaw": 0.0,
         "exp_Vz_Wc_L1": -0.01,
-    }
+    })
     for corner in CORNERS:
         suffix = SUFFIX[corner]
         row["exp_Fz_" + suffix] = 21800.0
@@ -55,7 +66,7 @@ def _row(**overrides):
         row["exp_AVy_" + suffix] = 13.4
         row["exp_Vz_Wc_" + suffix] = -0.01
     for name in ("L1", "R1", "L2", "R2"):
-        row.setdefault("exp_X_" + name, 100.0)
+        row["exp_X_" + name] = 100.0
     row.update(overrides)
     return row
 
@@ -125,10 +136,19 @@ class QualityGateTests(unittest.TestCase):
         self.assertAlmostEqual(gates["peak_load_over_tyre_reference"], 4.0, places=3)
 
     def test_suspension_travel_violation_is_detected(self):
+        # Jounce and rebound have different limits (121 mm vs 61 mm on this vehicle), so
+        # each bound must be reported against its own limit rather than both against the
+        # jounce travel.
         rows = [_row() for _ in range(10)]
-        rows[3]["exp_CmpS_R1"] = 249.0  # beyond the +151 mm jounce stop
+        rows[3]["exp_CmpS_R1"] = 200.0  # beyond the +121 mm jounce stop
         gates = self._gates(rows)
-        self.assertIn("suspension_travel_exceeded", gates["failures"])
+        self.assertIn("jounce_travel_exceeded", gates["failures"])
+
+    def test_rebound_travel_violation_is_detected(self):
+        rows = [_row() for _ in range(10)]
+        rows[3]["exp_CmpS_R1"] = -200.0  # beyond the -151 mm rebound stop
+        gates = self._gates(rows)
+        self.assertIn("rebound_travel_exceeded", gates["failures"])
 
     def test_whole_vehicle_airborne_is_detected(self):
         rows = [_row() for _ in range(10)]
@@ -150,12 +170,21 @@ class QualityGateTests(unittest.TestCase):
 
 
 class ObservationTests(unittest.TestCase):
-    def test_unverified_channels_are_excluded_from_the_observation_vector(self):
+    def test_only_verified_channels_reach_the_observation_vector(self):
         rows = [_row()]
         names, matrix = observations_in_si(rows)
+        # Every channel in the vector must carry a verified unit, and none of the
+        # excluded set may appear.
         for excluded in DEFAULT_EXCLUDED_CHANNELS:
             self.assertNotIn(excluded, names)
-        self.assertNotIn("Vz_Wc_R1", names)
+        for name in names:
+            require_verified(name)
+        # Vz_Wc_* used to be the excluded channel; it is now verified (TruckSim's own
+        # catalogue declares it in km/h) so it must be present and converted.
+        self.assertIn("Vz_Wc_R1", names)
+        self.assertAlmostEqual(
+            matrix[0][names.index("Vz_Wc_R1")], -0.01 / 3.6, places=12
+        )
         self.assertEqual(len(names), len(matrix[0]))
 
     def test_observations_are_converted_into_si(self):

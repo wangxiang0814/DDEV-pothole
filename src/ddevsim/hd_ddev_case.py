@@ -22,13 +22,75 @@ ACTIVE_FORCE_IMPORTS: Tuple[str, ...] = (
     "IMPORT IMP_FS_R2 Add 0.0! 0",
 )
 
+#: TruckSim wheel tokens, in this platform's ``FL, FR, RL, RR`` order.
+WHEEL_TOKENS: Tuple[str, ...] = ("L1", "R1", "L2", "R2")
+
+#: Single-tyre suffix.  Both axles declare ``L_DUAL 0`` and ``itire 1``, so each
+#: wheel carries exactly one tyre and the per-tyre channels take the ``i`` suffix
+#: (the ``o`` "outer of dual" variants do not exist on this model).
+TYRE_SUFFIX = "i"
+
+
+def _per_wheel(prefix: str, suffix: str = "") -> Tuple[str, ...]:
+    """Expand one channel name over the four wheels, keeping the corpus order.
+
+    ``prefix`` is the literal channel-name stem including its trailing underscore
+    when TruckSim has one (``"CmpJSt"`` deliberately has none, matching the
+    solver's own spelling ``CmpJStL1``).  ``suffix`` carries the single-tyre ``i``
+    for the per-tyre channels.
+
+    Every channel group is emitted wheel-major so the exported layout is easy to
+    read and each group's offset can be computed without a lookup table.
+    """
+    return tuple(prefix + token + suffix for token in WHEEL_TOKENS)
+
+
+#: Channels exported by every DDEV case, appended to the standard export contract.
+#:
+#: Groups and their role in the dataset this platform exists to produce:
+#:
+#: * actuators and the *realised* versions of them -- ``FsExt_*`` and ``My_US_*``
+#:   are what the solver actually applied, so the command-vs-realised tracking
+#:   error, the saturation duty and the true per-corner action are all recoverable.
+#:   ``imp_*`` alone only gives the command.
+#: * wheel and tyre state -- spin, spin acceleration, slip ratio, slip angle,
+#:   tyre force and tyre deflection.  ``CmpT_*`` is the most robust contact
+#:   indicator available (TruckSim exposes no boolean contact channel: the solver
+#:   keeps ``SV_CONTACT_*`` internal, and no ``SV_`` name is exportable).
+#: * suspension state -- total jounce travel ``Jnc_*`` (distinct from the ride
+#:   spring compression ``CmpS_*`` the platform used as a proxy), jounce rate,
+#:   spring/damper/external force, and the two stop compressions, which are what
+#:   a bottoming or topping-out metric needs.
+#: * terrain -- ``Zgnd_*`` is the ground height under each tyre, i.e. the pothole
+#:   itself as the tyre experiences it.  Without it the terrain is only a constant
+#:   in ``scenario.json`` and no drop/penetration metric is computable.
 DDEV_EXPORTS: Tuple[str, ...] = tuple(
     "EXPORT " + name
     for name in (
-        "AVy_L1", "AVy_R1", "AVy_L2", "AVy_R2",
-        "Fz_L1", "Fz_R1", "Fz_L2", "Fz_R2",
-        "CmpS_L1", "CmpS_R1", "CmpS_L2", "CmpS_R2",
-        "Vz_Wc_L1", "Vz_Wc_R1", "Vz_Wc_L2", "Vz_Wc_R2",
+        _per_wheel("AVy_")
+        + _per_wheel("AAy_")
+        + _per_wheel("Fz_")
+        + _per_wheel("CmpS_")
+        + _per_wheel("Vz_Wc_")
+        + _per_wheel("X_")
+        + _per_wheel("Y_")
+        + _per_wheel("Z_")
+        + _per_wheel("Fx_")
+        + _per_wheel("Fy_")
+        + _per_wheel("My_US_")
+        + _per_wheel("Jnc_")
+        + _per_wheel("JncR_")
+        + _per_wheel("Fs_")
+        + _per_wheel("Fd_")
+        + _per_wheel("FsExt_")
+        + _per_wheel("CmpJSt")
+        + _per_wheel("CmpRSt")
+        + _per_wheel("Kappa_", TYRE_SUFFIX)
+        + _per_wheel("Alpha_", TYRE_SUFFIX)
+        + _per_wheel("CmpT_", TYRE_SUFFIX)
+        + _per_wheel("RRE_", TYRE_SUFFIX)
+        + _per_wheel("Zgnd_", TYRE_SUFFIX)
+        + _per_wheel("MuX_", TYRE_SUFFIX)
     )
 )
 

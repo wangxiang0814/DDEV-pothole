@@ -15,10 +15,21 @@ SCENARIO_EXPORTS = (
     # Full pose.  Lateral position and yaw are what reveal lateral sway, so they are
     # exported too, along with the vehicle origin height.
     "Yo", "Zo", "Yaw",
-    # Wheel-centre stations (m).  The expert controller drives its support-phase
-    # state machine from these real, solver-reported wheel positions, so no
-    # axle-offset constant is hard-coded anywhere in the control path.
-    "X_L1", "X_R1", "X_L2", "X_R2",
+    # Body acceleration (g).  ``Az_SM`` is the *sprung mass* vertical acceleration --
+    # the quantity a body-mounted accelerometer measures and the one ride/impact
+    # metrics are defined on; ``Az`` is the instant-CG value and differs whenever the
+    # unsprung masses accelerate hard, which is exactly this manoeuvre.
+    "Ax", "Ay", "Az", "Az_SM",
+    # Body-fixed attitude rates (deg/s).  Without these the controller and any
+    # downstream model have to differentiate the exported angles, which aliases badly
+    # at the 5 ms log rate.  Note ``AVy`` here is the *body pitch rate*, which is a
+    # different quantity from ``AVy_L1`` (wheel spin, rpm) -- never strip the suffix.
+    "AVx", "AVy", "AVz",
+    # Body roll measured relative to the road, so body roll can be separated from the
+    # road's own attitude.
+    "Roll_Rd",
+    # Road station of the vehicle origin: the phase variable for this scenario.
+    "Sta_Road",
 )
 
 
@@ -69,6 +80,7 @@ class PotholeScenario:
     #: close-up.
     camera_distance_m: float = 32.0
     camera_look_x_m: float = -2.0
+    camera_look_y_m: float = 0.0
     camera_look_z_m: float = 1.0
     camera_field_of_view_deg: float = 26.0
 
@@ -169,10 +181,18 @@ def corner_module_scenario(**overrides) -> PotholeScenario:
         road_length_m=40.0,
         stop_s=9.0,
         target_speed_kph=2.8,
-        camera_distance_m=16.0,
-        camera_field_of_view_deg=30.0,
-        camera_elevation_deg=16.0,
-        camera_look_z_m=0.6,
+        # Camera framing, set from screen-capture feedback rather than guessed.  The
+        # stock -45 deg azimuth with a 16 m stand-off leaves the vehicle near the edge of
+        # the frame; a roughly three-quarter rear-left view at a wider field of view keeps
+        # the whole vehicle, the carriageway and the hole in shot together, which is what
+        # the exported video has to show.
+        camera_azimuth_deg=-75.0,
+        camera_distance_m=15.0,
+        camera_field_of_view_deg=52.0,
+        camera_elevation_deg=20.0,
+        camera_look_x_m=0.0,
+        camera_look_y_m=-3.0,
+        camera_look_z_m=0.7,
     )
     base.update(overrides)
     return PotholeScenario(**base)
@@ -487,6 +507,11 @@ def transform_single_wheel_pothole(source: str, scenario: PotholeScenario) -> st
             r"(?m)^SET_LOOKPOINT_X\s+[-+0-9.eE]+\s*$",
             "SET_LOOKPOINT_X %s" % _fmt(scenario.camera_look_x_m),
             "camera look point X", False,
+        ),
+        (
+            r"(?m)^SET_LOOKPOINT_Y\s+[-+0-9.eE]+\s*$",
+            "SET_LOOKPOINT_Y %s" % _fmt(scenario.camera_look_y_m),
+            "camera look point Y", False,
         ),
         (
             r"(?m)^SET_LOOKPOINT_Z\s+[-+0-9.eE]+\s*$",

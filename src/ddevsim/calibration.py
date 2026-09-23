@@ -68,12 +68,22 @@ def measure_static_state(
     import_names: Sequence[str],
     export_names: Sequence[str],
     target_dir: Path,
-    settle_s: float = 0.05,
+    settle_s: float = 1.0,
     model_label: str = "",
 ) -> StaticCalibration:
-    """Run the model with zero input and return its settled static state."""
+    """Run the model with zero input and return its settled static state.
+
+    ``settle_s`` must be long enough for the suspension to actually reach
+    equilibrium.  It was 0.05 s, which is shorter than the initial transient on this
+    model (the body starts with a ~0.9 deg roll and the load distribution takes about
+    0.25 s to settle), so the "static" reference was really the *initial condition*:
+    measured corner loads came out 5713 / 1264 / 953 / 5351 N -- an 83 % / 17 %
+    diagonal warp -- with CmpS_FR at 168 mm while the jounce stop is at 121 mm and that
+    corner carried the smallest load.  Mutually inconsistent, and it propagated into the
+    controller, which holds the lifted wheel at ``static_deflection_m``.
+    """
     simfile = Path(simfile)
-    for channel in ("Fz_L1", "CmpS_L1"):
+    for channel in ("Fz_L1", "Jnc_L1"):
         require_verified(channel)
 
     # Must be absolute: run_stepwise changes into the simfile's directory, so a
@@ -111,22 +121,52 @@ def measure_static_state(
     # control object the tail reads 6488 N against a 13337 N vehicle because the
     # front wheels have lifted by t = 50 ms.  Using the head keeps the measured
     # baseline equal to the solver's own equilibrium.
-    head = rows[: max(1, min(3, len(rows)))]
-    settled = rows[-max(1, len(rows) // 10):]
+    # Sample the *settled* part of the run, and only after establishing that it is
+    # genuinely settled.
+    #
+    # The previous revision sampled the head on the reasoning that "TruckSim initialises
+    # every run by solving for static equilibrium, so sample 0 already satisfies
+    # sum(Fz) == m*g".  That is not true for this case: the vehicle starts rolling at
+    # 2.8 km/h, and the measured head sums to the weight while being *warped* (83 % of the
+    # load on one diagonal) and decaying -- a state that is not an equilibrium at all.
+    # A settled tail is the physically meaningful reference, so the question is only
+    # whether the run is long enough to reach it, which ``quiet_at_rest`` now answers by
+    # measuring the variation *inside* the sampled window.
+    tail_count = max(1, len(rows) // 5)
+    window = rows[-tail_count:]
 
-    wheel_load = {c: _mean_of(head, "exp_Fz_%s" % _suffix(c)) for c in CORNERS}
+    wheel_load = {c: _mean_of(window, "exp_Fz_%s" % _suffix(c)) for c in CORNERS}
+    # Measure the *travel* (Jnc), not the ride-spring compression (CmpS).  The jounce and
+    # rebound limits are travel limits, so a static reference expressed in CmpS units is
+    # not commensurate with them: on this model the front corner shows 168 mm of spring
+    # compression for 80 mm of wheel travel, so a CmpS-based deflection compared against
+    # the 121 mm jounce stop makes the corner look permanently bottomed.
+    travel = "Jnc_%s" if ("exp_Jnc_L1" in rows[0]) else "CmpS_%s"
     deflection = {
-        c: to_si("CmpS_%s" % _suffix(c), _mean_of(head, "exp_CmpS_%s" % _suffix(c)))
+        c: to_si(
+            travel % _suffix(c),
+            _mean_of(window, "exp_" + travel % _suffix(c)),
+        )
         for c in CORNERS
     }
 
-    # Flag a rest state that is not actually at rest: if the total vertical load
-    # drifts materially across the settle window the model is ringing or the
-    # suspension is outside its tables, and the caller should know before trusting
-    # the baseline.
-    total_head = sum(wheel_load.values())
-    total_tail = sum(_mean_of(settled, "exp_Fz_%s" % _suffix(c)) for c in CORNERS)
-    drift = abs(total_tail - total_head) / total_head if total_head else 0.0
+    # Quietness of the sampled window: how much the total vertical load moves across it.
+    # A resting vehicle has a constant total load, so any residual movement means the
+    # state is still transient and the baseline must not be trusted.
+    window_totals = [
+        sum(float(row["exp_Fz_%s" % _suffix(c)]) for c in CORNERS) for row in window
+    ]
+    mean_total = sum(window_totals) / len(window_totals)
+    within = (
+        (max(window_totals) - min(window_totals)) / mean_total if mean_total else 0.0
+    )
+
+    # Separately record how far the initial condition was from the settled state, so a
+    # caller can see that the run's own IC is not an equilibrium.
+    head_total = sum(
+        float(rows[0]["exp_Fz_%s" % _suffix(c)]) for c in CORNERS
+    )
+    drift = abs(mean_total - head_total) / head_total if head_total else 0.0
 
     elapsed = float(rows[-1]["time_s"])
     if elapsed < settle_s * 0.5:
@@ -142,7 +182,7 @@ def measure_static_state(
         source_csv=str(csv_path),
         model=model_label,
         total_load_drift_fraction=drift,
-        quiet_at_rest=drift < 0.05,
+        quiet_at_rest=within < 0.05,
     )
 
 

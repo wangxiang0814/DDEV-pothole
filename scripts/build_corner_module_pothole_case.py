@@ -34,28 +34,17 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
-from ddevsim.pothole_case import PotholeScenario, build_single_wheel_pothole_case  # noqa: E402
-
-#: Grid of pothole geometry for this vehicle class.
-CORNER_MODULE_SCENARIO = PotholeScenario(
-    start_station_m=101.1,
-    length_m=0.8,
-    width_m=0.6,
-    depth_m=0.20,
-    edge_transition_m=0.05,
-    # right-wheel track centre: -L_TRACK/2 = -0.630 m
-    center_y_m=-0.63,
-    friction=0.7,
-    road_length_m=40.0,
-    stop_s=9.0,
-    target_speed_kph=2.8,
-    # Camera framing scaled to a 1.9 m wheelbase vehicle: a 3.5 m vehicle at a 26 deg
-    # lens needs far less than the truck's 32 m stand-off to fill a third of frame.
-    camera_distance_m=16.0,
-    camera_field_of_view_deg=30.0,
-    camera_elevation_deg=16.0,
-    camera_look_z_m=0.6,
+from ddevsim.pothole_case import (  # noqa: E402
+    PotholeScenario,
+    build_single_wheel_pothole_case,
+    corner_module_scenario,
 )
+
+#: Scenario for this vehicle class.  Built from the library's own factory rather than
+#: repeated here: the inline copy this file used to carry had already drifted from
+#: ``corner_module_scenario`` (it silently ignored a camera-framing change made there),
+#: which is exactly the kind of duplication that makes a build disagree with its source.
+CORNER_MODULE_SCENARIO = corner_module_scenario()
 
 
 def main() -> int:

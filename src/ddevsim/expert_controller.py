@@ -330,21 +330,47 @@ def three_wheel_support(
     axle_length = vehicle.wheelbase_m
     track = vehicle.track_m
 
-    # The paper's attitude pattern for a lifted wheel `o`:
-    #   extend `o` and its diagonal partner, compress the cross-side wheel.
-    # Extending means the body rises at that corner, i.e. a negative deflection.
-    diagonal = _diagonal_partner(lifted_corner)
-    cross = _cross_side(lifted_corner)
+    # The paper's attitude pattern for a lifted wheel `o`: extend `o` and its
+    # **diagonal** partner... no -- compress the *diagonal* partner.  The paper is
+    # explicit (Sec. IV, and its own numbers): for a lifted wheel 2 it sets
+    # SD1 = SD2 = SD4 = -0.08 m and **SD3 = +0.08 m**, so the odd corner is wheel 3 =
+    # left rear = the diagonal partner of the lifted wheel.
+    #
+    # This matters physically, not cosmetically.  The CG must move inside the triangle
+    # of the three remaining contacts; for a lifted front-right wheel those are FL, RL,
+    # RR, whose inward normal across the FL-RR diagonal points rearward and left.  The
+    # CG follows the *low* end of the body, so the body must sit low at the diagonal
+    # partner.  Compressing the cross-side corner instead (the previous behaviour) puts
+    # no roll on the body at all and leaves the third contact carrying a **negative**
+    # load: solving the three-wheel equilibrium gives F_RL = -589.6 N for a lifted front
+    # wheel on this vehicle, i.e. the model is asked to tip over.  With the paper's
+    # pattern the same solve gives F_RL = +501.1 N.
+    odd = _diagonal_partner(lifted_corner)
     deflection = {c: -attitude_deflection_m for c in CORNERS}
-    deflection[cross] = attitude_deflection_m
-    deflection[lifted_corner] = -attitude_deflection_m
+    deflection[odd] = attitude_deflection_m
 
-    # Body attitude implied by that pattern.  With FL/RR raised and the cross-side
-    # wheel lowered by the same amount, the rigid body plane gives
-    #   roll  phi   = -2h / B      (raising the wheel side lifts that side)
-    #   pitch theta =  2h / L
-    roll_angle = -2.0 * attitude_deflection_m / track
-    pitch_angle = 2.0 * attitude_deflection_m / axle_length
+    # Body attitude is the plane through the three **grounded** corners -- a lifted
+    # wheel is not a contact, so its command says nothing about the body plane.  With
+    # d > 0 meaning compression (the body sits low at that corner), and phi > 0 = left
+    # side up, theta > 0 = nose up:
+    #
+    #     lifted FR (grounded FL, RL, RR):  phi = (d_RR - d_RL)/B   theta = (d_RL - d_FL)/L
+    #     lifted RR (grounded FL, FR, RL):  phi = (d_FR - d_FL)/B   theta = (d_RL - d_FL)/L
+    #
+    # which for the paper's pattern evaluates to phi = -2h/B in both lift cases but
+    # theta = **+2h/L for a lifted front wheel and -2h/L for a lifted rear wheel**.  The
+    # old code hard-coded +2h/L for both, so the rear-lift target loads were solved for
+    # a CG shift of the wrong sign -- and -2h/B was accidentally the right roll only
+    # because it was derived for the paper's pattern rather than the one being built.
+    grounded = [c for c in CORNERS if c != lifted_corner]
+    rear_pair = [c for c in grounded if c in ("RL", "RR")]
+    front_pair = [c for c in grounded if c in ("FL", "FR")]
+    if len(front_pair) == 2:          # lifted wheel is at the rear
+        roll_angle = (deflection["FR"] - deflection["FL"]) / track
+    else:                             # lifted wheel is at the front
+        roll_angle = (deflection["RR"] - deflection["RL"]) / track
+    _ = rear_pair  # documented above; the roll pair is the one that is fully grounded
+    pitch_angle = (deflection["RL"] - deflection["FL"]) / axle_length
 
     # CG translation caused by that attitude.  The CG sits above the roll/pitch
     # centres, so a rotation moves its horizontal projection.
@@ -452,7 +478,18 @@ class ExpertConfig:
     #: Paper used 10 ms for both controller and plant.
     control_period_s: float = 0.01
     #: Distance before the entry lip at which the lift manoeuvre starts.
-    pre_lift_distance_m: float = 0.25
+    #:
+    #: This is a *timing* parameter and was far too small.  The actuator needs
+    #: ``force_slew_time_s`` to reach the SD force, and at 2.8 km/h (0.78 m/s) the old
+    #: 0.25 m gave only 0.32 s of lead -- less than half the time the force takes to
+    #: build -- so the wheel was **still hanging at road level when it reached the hole**.
+    #: It then drooped into the hole and met the exit lip as a ~200 mm step, which is the
+    #: measured 33-36 kN landing that throws the vehicle.  0.6 m gives 0.77 s, comfortably
+    #: more than the rise time, so the wheel is already lifted clear before the lip.
+    #:
+    #: The paper's own timings agree: its ASS force starts at 1 s and the wheel is
+    #: unloaded at 1.4 s, i.e. it allows 0.4 s of lead at a similar speed.
+    pre_lift_distance_m: float = 0.6
     #: Time allowed for the force to ramp back to zero in Steps 2 and 4.
     #:
     #: The paper's own low-speed Step 2 lasts 1.9 s (3.1-5 s), but that window is
@@ -512,18 +549,32 @@ class ExpertConfig:
     #: reads as the vehicle floating in the air, which is what the user reported.
     force_rate_limit_n_per_s: Optional[float] = None
     #: Time the actuator takes to reach its limit when the slew rate is derived.
-    force_slew_time_s: float = 1.0
+    #:
+    #: 0.4 s rather than 1.0 s: with the SD loop the largest force actually commanded is
+    #: about 4.4 kN (60 % of the limit), so this rises in ~0.25 s -- fast enough to be
+    #: lifted before the entry lip, and far gentler than the 250 000 N/s slew that
+    #: previously launched the vehicle, because that one was driving a 11.4 kN saturated
+    #: load-tracking command.
+    force_slew_time_s: float = 0.4
     torque_min_nm: float = -80.0
     torque_max_nm: float = 200.0
-    #: Crawl speed loop.  The paper drives the manoeuvre at a near-constant hub
-    #: torque of roughly 8 N*m per wheel, so the platform uses that as a constant
-    #: bias plus a slow proportional correction.  The earlier 80 N*m / 450 N*m per
-    #: km/h pair was ~30x too aggressive: it swung the speed between 1.2 and
-    #: 7.9 km/h within 0.4 s, pinned the command against ``torque_min_nm`` on every
-    #: braking half-cycle, and shook the chassis hard enough to unload wheels on
-    #: flat ground.  That longitudinal oscillation -- not the pothole -- was the
-    #: dominant source of the body roll and yaw in the exported pose data.
-    torque_bias_nm: float = 8.0
+    #: Crawl speed loop.  The paper drives the manoeuvre at a near-constant hub torque
+    #: (8 N*m, or 8.5 N*m while three-wheel supported) and explicitly reports that "the
+    #: speed decreases when the vehicle is in a three-wheel supported state".  A speed
+    #: *regulator* is therefore contrary to the reference strategy: it fights that drop
+    #: and closes a feedback path from the wheel-lift dynamics straight into the
+    #: longitudinal loop.  ``crawl_mode="constant"`` (the default) applies
+    #: ``torque_bias_nm`` to every wheel and leaves the speed free, which is what the
+    #: paper does; ``"regulated"`` restores the speed hold for cases that need a
+    #: repeatable speed.
+    #:
+    #: ``torque_bias_nm`` is sized for *this* vehicle rather than copied from the
+    #: paper: measured coast-down is 2.80 -> 2.64 km/h in 1.0 s, i.e. 60 N of rolling
+    #: resistance, so holding 2.8 km/h needs 60 * 0.263 / 4 = 3.9 N*m per wheel.  The
+    #: paper's 8 N*m suits its own much heavier vehicle; applied here it would nearly
+    #: double the speed over the 9 s run.
+    crawl_mode: str = "constant"
+    torque_bias_nm: float = 4.0
     torque_per_kph_nm: float = 15.0
     #: Deadband on the speed error (km/h), so channel noise cannot chatter the command.
     torque_speed_deadband_kph: float = 0.05
@@ -572,6 +623,32 @@ class ExpertConfig:
     #: static value, i.e. keeps the wheel at road level.  Newton per metre of error.
     lift_height_gain_n_per_m: float = 250000.0
     lift_height_limit_n: float = 25000.0
+    #: Control the paper's own variable -- the suspension deflection (SD) -- instead of
+    #: chasing wheel-load targets.
+    #:
+    #: This is the single most important stability decision in the controller.  A load
+    #: target is not achievable on this vehicle: the three-wheel support solution asks a
+    #: front corner for ~6.7 kN when its whole static share is 3.6 kN, so the sliding-mode
+    #: trim sits permanently saturated, and four saturated corners press the vehicle into
+    #: the road -- measured, the summed tyre load reaches **4x the vehicle weight** and the
+    #: sprung mass sees 10 g.  Deflection feedback cannot do that: the command is
+    #: proportional to a *displacement* error bounded by the travel envelope, so it is
+    #: bounded by construction.  It is also literally what the paper controls ("the desired
+    #: value for the absolute value of SD during control is set to 0.08 m").
+    sd_tracking: bool = True
+    #: SD magnitude actually commanded, as a fraction of the travel available either side
+    #: of the static position.  The paper's own +-0.08 m sits inside its +-0.1 m limit,
+    #: but this vehicle has far less room: its static travel is 21-38 mm against a 121 mm
+    #: jounce stop and a -61 mm rebound stop, i.e. roughly 90 mm each way.  The magnitude
+    #: is therefore *derived from the model* rather than copied from the paper, which is
+    #: the parameter change the differing vehicle parameters require.
+    sd_travel_fraction: float = 0.55
+    #: Deflection-loop stiffness (N of active force per metre of travel error).  ``None``
+    #: derives it so that a full-SD error uses :data:`sd_authority_fraction` of the
+    #: actuator limit.
+    sd_stiffness_n_per_m: Optional[float] = None
+    #: Fraction of the actuator limit a full-magnitude SD error may command.
+    sd_authority_fraction: float = 0.6
     #: Weight on keeping the command set's net roll moment small.  Larger values
     #: trade load-tracking accuracy for a body that does not roll away.
     roll_moment_weight: float = 1.0e-5
@@ -655,6 +732,28 @@ class DeepPotholeExpertController:
         # Clamping it to a fraction of the actuator limit keeps it in the same scale
         # as the force it is trimming.
         actuator_limit = min(self.config.force_max_n, -self.config.force_min_n)
+        # SD magnitude and loop stiffness, both derived from the model rather than copied
+        # from the paper, because this vehicle's travel envelope is much smaller.
+        if self.static_deflection_m is not None:
+            # Room to compress further, and room to extend further, measured from the
+            # *static* travel position.  The rebound limit is negative (travel can go down
+            # to -rebound_limit), so the extension room is static + |rebound_limit|.
+            jounce_room = self.vehicle.jounce_limit_m - max(
+                self.static_deflection_m.values()
+            )
+            rebound_room = min(self.static_deflection_m.values()) + abs(
+                self.vehicle.rebound_limit_m
+            )
+            room = max(1e-4, min(jounce_room, rebound_room))
+        else:
+            room = min(self.vehicle.jounce_limit_m, abs(self.vehicle.rebound_limit_m))
+        self.sd_magnitude_m = self.config.sd_travel_fraction * room
+        if self.config.sd_stiffness_n_per_m is None:
+            self.sd_stiffness_n_per_m = (
+                self.config.sd_authority_fraction * actuator_limit / self.sd_magnitude_m
+            )
+        else:
+            self.sd_stiffness_n_per_m = float(self.config.sd_stiffness_n_per_m)
         if self.config.force_rate_limit_n_per_s is None:
             self.config.force_rate_limit_n_per_s = (
                 actuator_limit / self.config.force_slew_time_s
@@ -723,9 +822,20 @@ class DeepPotholeExpertController:
         return {c: self._channel(exports, "Fz_%s" % _suffix(c)) for c in CORNERS}
 
     def _deflections(self, exports: Sequence[float]) -> Dict[str, float]:
-        """Corner suspension deflection in metres (``CmpS`` is declared in mm)."""
+        """Suspension travel per corner, in metres.
+
+        ``Jnc_*`` -- total wheel jounce travel -- is the quantity the jounce/rebound
+        limits are expressed in, so it is what the travel guard must compare against.
+        ``CmpS_*`` is the **ride-spring compression**, a different quantity with a
+        different scale (on this model the front spring compresses 168 mm while the wheel
+        travels 80 mm), and the guard used to be fed that value against travel limits:
+        the static front corner already read 168 mm against a 121 mm jounce stop, so the
+        guard believed the corner was permanently bottomed and could never act
+        meaningfully.  ``CmpS`` remains the fallback for models without ``Jnc``.
+        """
+        channel = "Jnc_%s" if "Jnc_L1" in self.export_index else "CmpS_%s"
         return {
-            c: to_si("CmpS_%s" % _suffix(c), self._channel(exports, "CmpS_%s" % _suffix(c)))
+            c: to_si(channel % _suffix(c), self._channel(exports, channel % _suffix(c)))
             for c in CORNERS
         }
 
@@ -805,23 +915,54 @@ class DeepPotholeExpertController:
         return None
 
     # ------------------------------------------------------------------- control
-    def _crawl_torque(self, exports: Sequence[float], dt: float) -> float:
-        """Low-speed propulsion loop, matching the paper's near-constant torque.
+    def _sd_forces(
+        self,
+        support: ThreeWheelSupport,
+        deflections: Mapping[str, float],
+        config: ExpertConfig,
+    ) -> Dict[str, float]:
+        """Active forces from the paper's SD pattern, tracked by deflection feedback.
 
-        A biased proportional loop with a speed deadband and a slew limit.  The slew
-        limit is what makes it safe: without it a large gain makes the command bang
-        between its clamps, and the measured run swung between 1.2 and 7.9 km/h with
-        roughly 4 m/s^2 peaks, which alone pitched the body by +-15 deg and unloaded
-        wheels on flat ground.
+        The pattern itself is the paper's, reused directly from
+        :func:`three_wheel_support` (extend the lifted wheel and the two remaining
+        contacts, compress the diagonal partner), scaled from the paper's +-0.08 m to
+        whatever this vehicle's travel envelope actually allows.
+
+        Sign convention, fixed by measurement rather than assumption: a positive
+        ``IMP_FS`` command *extends* the suspension, i.e. it reduces the measured travel
+        (verified on this model -- a +4000 N command drives the front ride-spring
+        compression down while a negative one drives it up).  So the force that opposes
+        excess travel is ``+k * (travel - target)``.
         """
+        scale = self.sd_magnitude_m / max(1e-9, config.attitude_deflection_m)
+        forces: Dict[str, float] = {}
+        for corner in CORNERS:
+            reference = 0.0 if self.static_deflection_m is None else (
+                self.static_deflection_m[corner]
+            )
+            target = reference + scale * support.deflection_target_m[corner]
+            error = deflections[corner] - target
+            forces[corner] = self.sd_stiffness_n_per_m * error
+        return forces
+
+    def _crawl_torque(self, exports: Sequence[float], dt: float) -> float:
         config = self.config
-        error = self.scenario.target_speed_kph - self._speed_kph(exports)
-        if abs(error) <= config.torque_speed_deadband_kph:
-            error = 0.0
-        demand = config.torque_bias_nm + config.torque_per_kph_nm * error
-        demand = max(config.torque_min_nm, min(config.torque_max_nm, demand))
+        if config.crawl_mode == "constant":
+            # The paper's own strategy: the same small torque on every wheel, with the
+            # speed free to fall while three-wheel supported.  There is no speed feedback
+            # at all, so the wheel-lift dynamics cannot couple into this loop.
+            target = max(
+                config.torque_min_nm, min(config.torque_max_nm, config.torque_bias_nm)
+            )
+        else:
+            error = self.scenario.target_speed_kph - self._speed_kph(exports)
+            if abs(error) <= config.torque_speed_deadband_kph:
+                error = 0.0
+            target = config.torque_bias_nm + config.torque_per_kph_nm * error
+            target = max(config.torque_min_nm, min(config.torque_max_nm, target))
+        # Ramping rather than stepping keeps the first samples free of a torque impulse.
         slew = config.torque_rate_limit_nm_per_s * max(0.0, dt)
-        self._torque_command += max(-slew, min(slew, demand - self._torque_command))
+        self._torque_command += max(-slew, min(slew, target - self._torque_command))
         return self._torque_command
 
     def _sliding_force(
@@ -891,6 +1032,17 @@ class DeepPotholeExpertController:
             support = self._active_support()
             if self.safe_stop:
                 forces = {c: 0.0 for c in CORNERS}
+            elif support is not None and config.sd_tracking:
+                # The paper's own control variable: track the SD pattern.
+                forces = self._sd_forces(support, deflections, config)
+                roll_correction = config.roll_regulator_sign * (
+                    config.roll_gain_n_per_deg * roll_deg
+                )
+                roll_correction = max(
+                    -self.roll_limit_n, min(self.roll_limit_n, roll_correction)
+                )
+                for index, corner in enumerate(CORNERS):
+                    forces[corner] += roll_correction * (1.0, -1.0, 1.0, -1.0)[index]
             elif support is not None:
                 forces = {}
                 feedforward_table = self.feedforward_command[support.lifted_corner]
