@@ -658,6 +658,10 @@ class ExpertConfig:
     #: Torque fades linearly from ``slip_soft_limit`` to zero at the hard limit.
     slip_soft_limit: float = 0.10
     slip_hard_limit: float = 0.30
+    #: Below this speed the slip ratio is numerically unreliable (Vx -> 0), so the
+    #: slip-based traction reduction is disabled.  Prevents a post-landing bounce from
+    #: reading as huge slip and stalling the crawl.
+    slip_control_min_speed_kph: float = 1.0
     #: Low-speed DDEV straight-line stabiliser.  Positive torque on the right side
     #: produced positive yaw in the measured flat-road pulse test, so a negative yaw
     #: error shifts this many N*m/deg from left to right while preserving total effort.
@@ -821,6 +825,16 @@ class DeepPotholeExpertController:
             if static_deflection_m
             else None
         )
+        # Effective wheel rate per corner (N/m of jounce), used for the SD force
+        # feedforward.  The paper's feedforward is the equilibrium force that holds each
+        # suspension at its SD target against the passive spring; on this plant the rate is
+        # the static corner load divided by the static travel.
+        self.wheel_rate_n_per_m = {
+            c: (
+                float(vehicle.static_load(c)) / max(1e-4, float(static_deflection_m[c]))
+            )
+            for c in CORNERS
+        } if static_deflection_m else {c: 1.0e5 for c in CORNERS}
         self.export_index: Dict[str, int] = {
             name: index for index, name in enumerate(export_names)
         }
@@ -1327,7 +1341,17 @@ class DeepPotholeExpertController:
             sd = support.deflection_target_m[corner]
             target = reference + scale * sd
             error = deflections[corner] - target
-            force = self.sd_stiffness_n_per_m * error
+            # Paper-faithful feedforward + proportional trim.  The feedforward is the
+            # equilibrium force that holds the suspension at its SD target against the
+            # passive spring: the passive spring changes force by k_wheel * delta when the
+            # travel moves by delta, so the actuator must apply -k_wheel * delta to hold it
+            # there.  Without this term the P-loop alone must sit at a non-zero error to
+            # produce the holding force, which is exactly the steady-state offset and the
+            # roll oscillation that then drives the roll-steer -> lateral-force -> yaw
+            # chain the paper's mechanism is designed to avoid.
+            delta = target - reference
+            feedforward = -self.wheel_rate_n_per_m[corner] * delta
+            force = feedforward + self.sd_stiffness_n_per_m * error
             if corner == support.lifted_corner:
                 # One-sided and bounded: pull the wheel up at most by its own weight, and
                 # never push down on a corner that has no tyre load to react against.
@@ -1407,7 +1431,12 @@ class DeepPotholeExpertController:
             )
             slip = abs(slips[corner])
             drive_scale = 1.0
-            if slip > config.slip_soft_limit:
+            # Below a minimum speed the longitudinal slip ratio diverges numerically
+            # (the denominator Vx -> 0), so a wheel that is merely bouncing off a landing
+            # reads as Kappa of hundreds or thousands and the traction control wrongly
+            # cuts all drive, stalling the vehicle.  Gate the slip reduction on speed:
+            # it is only meaningful when the vehicle is actually rolling.
+            if self._speed_kph(exports) >= config.slip_control_min_speed_kph and slip > config.slip_soft_limit:
                 span = max(1e-9, config.slip_hard_limit - config.slip_soft_limit)
                 drive_scale = max(
                     0.0, min(1.0, (config.slip_hard_limit - slip) / span)
