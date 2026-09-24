@@ -6,6 +6,7 @@ from ddevsim.interface_validation import (
     TORQUE_AMPLITUDE_NM,
     build_validation_cases,
     command_for_case,
+    pulse_window_rows,
     signed_peak_delta,
 )
 
@@ -43,6 +44,23 @@ class InterfaceValidationTests(unittest.TestCase):
     def test_signed_peak_delta_preserves_the_direction_of_largest_response(self):
         self.assertEqual(signed_peak_delta([10.0, 10.0, 10.0], [10.2, 7.0, 12.0]), -3.0)
         self.assertEqual(signed_peak_delta([0.0, 0.0], [0.25, -0.2]), 0.25)
+
+    def test_polarity_window_excludes_post_pulse_rebound(self):
+        baseline = [
+            {"time_s": 0.20, "rpm": 0.0},
+            {"time_s": 0.30, "rpm": 0.0},
+            {"time_s": 0.80, "rpm": 0.0},
+        ]
+        commanded = [
+            {"time_s": 0.20, "rpm": 0.0},
+            {"time_s": 0.30, "rpm": 5.0},
+            {"time_s": 0.80, "rpm": -20.0},
+        ]
+        observed = signed_peak_delta(
+            [row["rpm"] for row in pulse_window_rows(baseline, 0.25, 0.35)],
+            [row["rpm"] for row in pulse_window_rows(commanded, 0.25, 0.35)],
+        )
+        self.assertEqual(observed, 5.0)
 
 
 if __name__ == "__main__":

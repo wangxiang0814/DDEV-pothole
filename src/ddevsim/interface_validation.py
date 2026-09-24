@@ -132,12 +132,29 @@ def _input_integrity(rows: Sequence[Dict[str, float]], port_index: int | None) -
     return nonzero_seen
 
 
+def pulse_window_rows(
+    rows: Sequence[Dict[str, float]], start_s: float, stop_s: float
+) -> List[Dict[str, float]]:
+    """Use only applied-command samples when judging actuator polarity.
+
+    Full-run peak deltas can select a larger *post-pulse* rebound and reverse
+    the apparent sign even when the motor or suspension port acted correctly.
+    """
+    if not 0.0 <= start_s < stop_s:
+        raise ValueError("invalid pulse window")
+    selected = [row for row in rows if start_s <= row["time_s"] < stop_s]
+    if not selected:
+        raise ValueError("pulse window contains no sampled rows")
+    return selected
+
+
 def analyze_validation_directory(target_dir: Path) -> Dict[str, Any]:
     target_dir = Path(target_dir).resolve()
     baseline = _read_csv(target_dir / "baseline.csv")
-    baseline_fields = {key: [row[key] for row in baseline] for key in baseline[0]}
     cases = build_validation_cases()
     case_rows = {case["name"]: _read_csv(target_dir / (case["name"] + ".csv")) for case in cases}
+    manifest = json.loads((target_dir / "manifest.json").read_text(encoding="utf-8"))
+    start_s, stop_s = (float(value) for value in manifest["pulse_window_s"])
 
     result: Dict[str, Any] = {
         "status": "PASS",
@@ -147,6 +164,13 @@ def analyze_validation_directory(target_dir: Path) -> Dict[str, Any]:
     }
     for case in cases:
         result["input_integrity"][case["name"]] = _input_integrity(case_rows[case["name"]], case["port_index"])
+
+    baseline_window = pulse_window_rows(baseline, start_s, stop_s)
+    baseline_fields = {key: [row[key] for row in baseline_window] for key in baseline_window[0]}
+    case_rows = {
+        name: pulse_window_rows(rows, start_s, stop_s)
+        for name, rows in case_rows.items()
+    }
 
     response_floor = 1e-6
     for index, corner in enumerate(WHEEL_ORDER):
@@ -204,9 +228,9 @@ def analyze_validation_directory(target_dir: Path) -> Dict[str, Any]:
     summary_path = target_dir / "verification_summary.json"
     summary_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     lines = [
-        "# HD Utility DDEV 八执行器接口验证",
+        "# DDEV 八执行器接口验证",
         "",
-        "结论：**%s**。全部结果来自同一 `HD Utility Vehicle` 生成模型和同一 8 输入合同。" % result["status"],
+        "结论：**%s**。全部结果来自同一车辆模型和同一 8 输入合同；极性仅在脉冲施加窗口评价。" % result["status"],
         "",
         "## 四轮轮端转矩",
         "",
