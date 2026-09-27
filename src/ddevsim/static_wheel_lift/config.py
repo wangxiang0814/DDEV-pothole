@@ -163,3 +163,53 @@ class LiftProbeConfig:
 
 
 LIFT_PROBE = LiftProbeConfig()
+
+
+@dataclass(frozen=True)
+class ClosedLoopRunConfig:
+    control_period_s: float = 0.02
+    preload_feedback_start_s: float = 7.0
+    ready_dwell_s: float = 0.5
+    three_wheel_hold_s: float = 5.0
+    lift_ramp_s: float = 4.0
+    support_ramp_s: float = 2.0
+    lower_ramp_s: float = 4.0
+    return_ramp_s: float = 12.0
+    fr_lift_force_n: float = -100.0
+    rl_support_force_n: float = -4500.0
+    fr_feedback_limit_n: float = 300.0
+    support_feedback_limit_n: float = 300.0
+    support_floor_n: float = 500.0
+    lambda_target: float = 0.05
+    lambda_abort: float = 0.015
+    fr_ready_load_n: float = 100.0
+    fr_swing_load_n: float = 100.0
+    lift_clearance_m: float = 0.01
+    lip_clearance_m: float = 0.005
+    attitude_limit_deg: float = 8.0
+    rebound_guard_mm: float = -95.0
+    rebound_abort_mm: float = -99.0
+    moving_rebound_guard_mm: float = -140.0
+    moving_rebound_abort_mm: float = -149.0
+    jounce_abort_mm: float = 155.0
+    crawl_speed_kph: float = 2.2
+    crawl_min_speed_kph: float = 2.0
+    crawl_max_speed_kph: float = 8.0
+    crawl_max_lateral_error_m: float = 0.1
+    crawl_max_yaw_error_deg: float = 2.0
+    crossing_clearance_m: float = 0.30
+    stop_speed_kph: float = 0.1
+    stop_dwell_s: float = 1.0
+    stop_ramp_s: float = 1.8
+    stop_max_brake_nm: float = 80.0
+    torque_release_s: float = 1.0
+    max_crawl_s: float = 40.0
+    tyre_low_speed_slip_m_s: float = 0.2
+    tyre_radius_m: float = 0.263
+    tyre_half_track_m: float = 0.625
+    reference_hold_s: float = 56.0
+    init_max_vx_kph: float = 0.1
+    ready_attitude_limit_deg: float = 5.0
+
+
+CLOSED_LOOP_RUN = ClosedLoopRunConfig()

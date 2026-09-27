@@ -1,0 +1,12 @@
+{
+  "vehicle": "I_I corner_module_ddev",
+  "model_sha256": "496f280f0ef547b8c42ffb4e632184e511a007a8799ccd84b1ae02a8c20b52ce",
+  "method": "250 N positive/negative settled swing pulses, central difference",
+  "wheel_order": ["FL", "RL", "RR"],
+  "gain_fz_per_command": [
+    [-0.12098602, 0.00436775, -0.00015691],
+    [0.17286721, -0.01510612, 0.01871598],
+    [-0.05369851, 0.01069393, -0.01862604]
+  ],
+  "note": "Local three-contact gain; limited correction only, not a global inverse."
+}
