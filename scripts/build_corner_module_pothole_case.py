@@ -39,6 +39,7 @@ from ddevsim.pothole_case import (  # noqa: E402
     build_single_wheel_pothole_case,
     corner_module_scenario,
 )
+from ddevsim.visual_mesh import write_visual_mesh  # noqa: E402
 
 #: Scenario for this vehicle class.  Built from the library's own factory rather than
 #: repeated here: the inline copy this file used to carry had already drifted from
@@ -56,6 +57,17 @@ def main() -> int:
         target,
         scenario=CORNER_MODULE_SCENARIO,
     )
+    # Visualizer resolves add_obj paths from TruckSim's Resources directory.  Keep a
+    # source copy in the model folder (returned above) and install the same deterministic
+    # mesh into a dedicated, reversible DDEV resource directory.
+    resource_assets = Path(
+        r"F:\TruckSim2019\TruckSim2019.0_Prog\Resources\Animator\3D_Shape_Files\DDEV"
+    )
+    installed_obj, installed_mtl = write_visual_mesh(
+        resource_assets, CORNER_MODULE_SCENARIO
+    )
+    artifacts["installed_visual_obj"] = installed_obj
+    artifacts["installed_visual_mtl"] = installed_mtl
     print(json.dumps({key: str(value) for key, value in artifacts.items()}, ensure_ascii=False, indent=2))
     print()
     print("scenario:")

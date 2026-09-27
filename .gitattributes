@@ -1,0 +1,4 @@
+# TruckSim model hashes are checked byte for byte when replaying evidence.
+**/run_all.par binary
+*.csv.gz binary
+*.png binary

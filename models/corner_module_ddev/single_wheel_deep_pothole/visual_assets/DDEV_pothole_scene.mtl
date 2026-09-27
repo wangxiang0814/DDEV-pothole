@@ -1,0 +1,32 @@
+# DDEV textured scene materials (textures shipped with TruckSim 2019)
+newmtl DDEV_Grass
+Ka 0.65 0.72 0.60
+Kd 0.82 0.90 0.78
+Ks 0.02 0.02 0.02
+Ns 4
+illum 2
+map_Kd Animator/Road_Materials/Grass/grass_dark_di.dds
+
+newmtl DDEV_Road
+Ka 0.38 0.40 0.42
+Kd 0.56 0.58 0.60
+Ks 0.08 0.08 0.08
+Ns 12
+illum 2
+map_Kd Animator/Road_Materials/Road_Surfaces/Asphalt_Fine_di.dds
+
+newmtl DDEV_Pit
+Ka 0.55 0.48 0.37
+Kd 0.72 0.64 0.50
+Ks 0.00 0.00 0.00
+Ns 2
+illum 2
+map_Kd Animator/Road_Materials/Dirt/Dirt_Ground_B_di.dds
+
+newmtl DDEV_Sky
+Ka 1.00 1.00 1.00
+Kd 1.00 1.00 1.00
+Ks 0.00 0.00 0.00
+Ns 1
+illum 1
+map_Kd Animator/3D_Shape_Files/Environment/Sky_Boxes/Partly_Cloudy_Sky/Sky_Partly_Cloudy_di.dds

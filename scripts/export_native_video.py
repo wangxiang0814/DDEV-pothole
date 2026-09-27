@@ -15,7 +15,7 @@ pick a compressor.  Everything else here is automated.  See
 Usage
 -----
     # a batch case, a run directory, or the .vs file itself all work
-    python scripts\\export_native_video.py runs\\hd_utility_ddev_expert_pothole\\native
+    python scripts\\export_native_video.py runs\\corner_module_ddev_expert_pothole\\native
     python scripts\\export_native_video.py runs\\batch_sweep\\cases\\baseline\\model\\output\\baseline.vs
     python scripts\\export_native_video.py <source> --no-launch     # just validate+stage
     python scripts\\export_native_video.py <source> --resolution 1920 1080

@@ -26,7 +26,7 @@ Usage::
 
     $env:PYTHONPATH='src'
     python scripts\\record_pothole_video.py                # 11 s at 10 fps
-    python scripts\\record_pothole_video.py --seconds 11 --fps 10 --model truck
+    python scripts\\record_pothole_video.py --seconds 11 --fps 10 --model corner_module
 """
 
 from __future__ import annotations
@@ -53,7 +53,6 @@ HISTORY = "single_wheel_deep_pothole"
 
 RUNS = {
     "corner_module": ("runs/corner_module_expert_pothole", "Corner Module DDEV"),
-    "truck": ("runs/hd_utility_ddev_expert_pothole", "HD Utility DDEV (solid axle)"),
 }
 
 #: Crop to the visualizer window in *physical* framebuffer pixels, measured on this

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Sequence, Tuple
 
 from .cosim import run_stepwise
-from .hd_ddev_case import DDEV_EXPORTS
+from .vehicle_case import DDEV_EXPORTS
 
 
 WHEEL_ORDER = ("FL", "FR", "RL", "RR")
@@ -263,7 +263,7 @@ def analyze_validation_directory(target_dir: Path) -> Dict[str, Any]:
     lines.extend(
         [
             "",
-            "输入独立性判据为：每个试验 CSV 仅目标输入列出现非零值；物理响应允许通过刚性桥、车身和地面耦合传播到其他角点。",
+            "输入独立性判据为：每个试验 CSV 仅目标输入列出现非零值；物理响应允许通过车身和地面耦合传播到其他角点。",
             "",
         ]
     )

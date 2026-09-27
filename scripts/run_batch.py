@@ -69,23 +69,15 @@ def main(argv=None) -> int:
     parser.add_argument("--baseline-only", action="store_true",
                         help="run just the retained baseline scenario")
     parser.add_argument(
-        "--model", default="corner_module", choices=("corner_module", "hd_utility"),
-        help="control object. Default 'corner_module' is the platform's control object "
-             "(Compact Utility Truck (I_I), independent suspension at both axles); "
-             "'hd_utility' is the retained solid-axle truck, for comparison only.",
+        "--model", default="corner_module", choices=("corner_module",),
+        help="I_I Compact Utility Truck with independent suspension.",
     )
     args = parser.parse_args(argv)
 
-    if args.model == "corner_module":
-        base_model = ROOT / "models" / "corner_module_ddev"
-        model_dir = base_model / "single_wheel_deep_pothole"
-        gain_path = ROOT / "runs" / "_actuator_gain_corner_module" / "gain_matrix.json"
-        model_label = "Corner Module DDEV (Compact Utility Truck I_I)"
-    else:
-        base_model = ROOT / "models" / "hd_utility_ddev"
-        model_dir = base_model / "single_wheel_deep_pothole"
-        gain_path = ROOT / "runs" / "_actuator_gain" / "gain_matrix.json"
-        model_label = "HD Utility DDEV 4x4 Active Suspension"
+    base_model = ROOT / "models" / "corner_module_ddev"
+    model_dir = base_model / "single_wheel_deep_pothole"
+    gain_path = ROOT / "runs" / "_actuator_gain_corner_module" / "gain_matrix.json"
+    model_label = "Corner Module DDEV (Compact Utility Truck I_I)"
     base_run_all = base_model / "run_all.par"
     base_simfile = base_model / "simfile.sim"
     export_names = list(EXPORT_NAMES) + list(SCENARIO_EXPORTS)

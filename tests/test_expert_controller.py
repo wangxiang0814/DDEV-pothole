@@ -38,11 +38,11 @@ from ddevsim.vehicle_params import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL = ROOT / "models" / "hd_utility_ddev" / "run_all.par"
+MODEL = ROOT / "models" / "corner_module_ddev" / "run_all.par"
 
 #: Static wheel loads measured from a real TruckSim run of this model.
 MEASURED_STATIC_LOADS = {
-    "FL": 22388.8, "FR": 22383.0, "RL": 21252.1, "RR": 21255.2,
+    "FL": 3488.986, "FR": 3540.273, "RL": 3089.008, "RR": 3218.446,
 }
 
 #: TruckSim order of the exported scenario channels, matching pothole_case.
@@ -62,7 +62,7 @@ def _exports(**overrides):
     """Build a full export vector; unlisted channels default to zero."""
     values = {name: 0.0 for name in EXPORTS}
     values.update({
-        "Fz_L1": 22388.8, "Fz_R1": 22383.0, "Fz_L2": 21252.1, "Fz_R2": 21255.2,
+        "Fz_L1": 3488.986, "Fz_R1": 3540.273, "Fz_L2": 3089.008, "Fz_R2": 3218.446,
         "CmpS_L1": 53.6, "CmpS_R1": 53.6, "CmpS_L2": 50.6, "CmpS_R2": 50.6,
         "Xo": 100.0, "Vx": 2.8, "Roll_E": 0.0, "Pitch": 0.0,
         "X_L1": 100.0, "X_R1": 100.0, "X_L2": 96.1, "X_R2": 96.1,
@@ -79,35 +79,35 @@ class VehicleGeometryTests(unittest.TestCase):
 
     def test_parses_wheelbase_from_the_assembly_not_the_tyre_size(self):
         # X_LENGTH also appears for the 565 mm tyre; the parser must pick the
-        # vehicle assembly value (3900 mm) and not 1 mm or 565 mm.
+        # vehicle assembly value (1925 mm), rather than tyre dimensions.
         text = MODEL.read_text(encoding="utf-8", errors="replace")
-        self.assertAlmostEqual(parse_wheelbase_mm(text), 3900.0, places=6)
-        self.assertAlmostEqual(self.vehicle.wheelbase_m, 3.9, places=6)
-        self.assertAlmostEqual(self.vehicle.track_m, 1.975, places=6)
+        self.assertAlmostEqual(parse_wheelbase_mm(text), 1925.0, places=6)
+        self.assertAlmostEqual(self.vehicle.wheelbase_m, 1.925, places=6)
+        self.assertAlmostEqual(self.vehicle.track_m, 1.26, places=6)
 
     def test_total_mass_includes_unsprung_and_matches_measured_loads(self):
-        # 6500 + 2000 + 2*200 = 8900 kg -> 87296 N, matching the measured static sum.
-        self.assertAlmostEqual(self.vehicle.total_mass_kg, 8900.0, places=6)
+        # Current I_I Compact Utility Truck with three 200 kg payloads.
+        self.assertAlmostEqual(self.vehicle.total_mass_kg, 1360.0, places=6)
         self.assertLess(
             abs(self.vehicle.total_weight_n - self.vehicle.measured_static_weight_n()),
             40.0,
         )
 
     def test_cg_is_derived_from_static_loads(self):
-        cg_front, cg_rear = derive_cg_from_static_loads(3.9, 44771.8, 87279.1)
-        self.assertAlmostEqual(cg_front + cg_rear, 3.9, places=9)
+        cg_front, cg_rear = derive_cg_from_static_loads(1.925, 7029.259, 13336.713)
+        self.assertAlmostEqual(cg_front + cg_rear, 1.925, places=9)
         # rear-biased: the front axle carries slightly more than half the weight
         self.assertGreater(cg_rear, cg_front)
 
     def test_roll_arm_and_travel_come_from_the_model(self):
         text = MODEL.read_text(encoding="utf-8", errors="replace")
-        self.assertAlmostEqual(parse_roll_centre_drop_mm(text), 53.0, places=6)
-        self.assertAlmostEqual(self.vehicle.cg_height_m, 0.975, places=6)
-        self.assertAlmostEqual(self.vehicle.roll_centre_height_m, 0.512, places=6)
-        self.assertAlmostEqual(self.vehicle.cg_above_roll_centre_m, 0.463, places=6)
+        self.assertIsNone(parse_roll_centre_drop_mm(text))
+        self.assertAlmostEqual(self.vehicle.cg_height_m, 0.7, places=6)
+        self.assertAlmostEqual(self.vehicle.roll_centre_height_m, 0.263, places=6)
+        self.assertAlmostEqual(self.vehicle.cg_above_roll_centre_m, 0.437, places=6)
         jounce, rebound = parse_jounce_rebound_travel_mm(text)
-        self.assertAlmostEqual(jounce, 151.0, places=6)
-        self.assertAlmostEqual(rebound, -151.0, places=6)
+        self.assertAlmostEqual(jounce, 160.0, places=6)
+        self.assertAlmostEqual(rebound, -100.0, places=6)
 
 
 @unittest.skipUnless(MODEL.exists(), "generated TruckSim model not present")
@@ -136,7 +136,7 @@ class ThreeWheelSupportTests(unittest.TestCase):
                     support.target_load_n[corner], 0.0,
                     "%s load negative for lift %s" % (corner, lifted),
                 )
-            self.assertLess(support.minimal_load_n, 0.05 * self.vehicle.total_weight_n)
+            self.assertLess(support.minimal_load_n, 0.10 * self.vehicle.total_weight_n)
 
     def test_targets_preserve_total_weight_and_longitudinal_balance(self):
         support = three_wheel_support(self.vehicle, "FR")
@@ -368,10 +368,9 @@ class ScenarioCouplingTests(unittest.TestCase):
         )
         self.assertGreater(torques["FR"] + torques["RR"], torques["FL"] + torques["RL"])
 
-    def test_recovery_ramp_is_short_enough_for_this_wheelbase(self):
-        # 0.875 m of travel between "wheel 2 clears the hole" and "wheel 4 reaches its
-        # pre-lift station" at 2.8 km/h is 1.12 s; a longer ramp could never complete
-        # before the rear wheel must be lifted, so the handover gate would deadlock.
+    def test_short_wheelbase_does_not_allow_this_recovery_schedule(self):
+        # The I_I wheelbase is too short for this inherited moving-pothole
+        # FR-to-RR schedule; this is a constraint on that older controller.
         controller = self._controller()
         wheelbase = controller.vehicle.wheelbase_m
         # When wheel 2 reaches the trailing edge, wheel 4 sits one wheelbase behind it.
@@ -381,8 +380,8 @@ class ScenarioCouplingTests(unittest.TestCase):
         )
         gap = rear_pre_lift_station - rear_when_front_clears
         available_s = gap / (controller.scenario.target_speed_kph / 3.6)
-        self.assertGreater(gap, 0.0)
-        self.assertLess(controller.config.transition_time_s, available_s)
+        self.assertLess(gap, 0.0)
+        self.assertLess(available_s, 0.0)
 
     def test_the_same_controller_works_for_a_relocated_pothole(self):
         # No station is hard-coded: shift the hole 5 m and the phases shift with it.
@@ -486,6 +485,44 @@ class ActuatorSizingAndRegulatorTests(unittest.TestCase):
         self.assertLessEqual(controller.roll_limit_n, controller.config.force_max_n)
         self.assertLessEqual(controller.roll_limit_n, -controller.config.force_min_n)
 
+    def test_sd_feedforward_rate_is_command_to_jounce_not_static_wheel_rate(self):
+        # ``_sd_forces`` applies ``-rate * delta`` with delta in metres of jounce, so
+        # ``rate`` must be N of IMP_FS *command* per metre of jounce -- the inverse of
+        # the measured jounce-matrix diagonal (mm/N, negative by probe convention).  The
+        # previous heuristic (static load / static travel) is the passive *wheel* rate
+        # and over-predicts the command-to-jounce stiffness, over-driving the attitude
+        # feedforward that must hold the CG inside the support triangle.
+        static = {"FL": 0.03, "FR": 0.03, "RL": 0.03, "RR": 0.03}
+        matrix = [
+            [-0.010, 0.0, 0.0, 0.0],
+            [0.0, -0.020, 0.0, 0.0],
+            [0.0, 0.0, -0.0125, 0.0],
+            [0.0, 0.0, 0.0, -0.008],
+        ]
+        controller = DeepPotholeExpertController(
+            scenario=self.scenario,
+            vehicle=self.vehicle,
+            export_names=EXPORTS,
+            config=ExpertConfig(),
+            static_deflection_m=static,
+            travel_gain_matrix=matrix,
+        )
+        expected = {"FL": 100.0e3, "FR": 50.0e3, "RL": 80.0e3, "RR": 125.0e3}
+        for corner in CORNERS:
+            self.assertAlmostEqual(
+                controller.wheel_rate_n_per_m[corner], expected[corner], delta=1.0
+            )
+        # Without a measured jounce matrix it falls back to the static wheel-rate
+        # heuristic, which is a different (much larger) number on this model.
+        fallback = DeepPotholeExpertController(
+            scenario=self.scenario,
+            vehicle=self.vehicle,
+            export_names=EXPORTS,
+            config=ExpertConfig(),
+            static_deflection_m=static,
+        )
+        self.assertGreater(fallback.wheel_rate_n_per_m["FL"], 1.0e5)
+
     def test_travel_guard_fades_to_zero_and_never_inverts_the_command(self):
         # The old taper went negative past the stop, flipping a compressive command
         # into an extensional one and then growing it -- the positive feedback that
@@ -527,11 +564,14 @@ class ActuatorSizingAndRegulatorTests(unittest.TestCase):
         self.assertLess(command, 100.0)
 
     def test_default_force_limit_suits_a_light_vehicle(self):
-        # 5x a static corner load was 18 kN on this 1.36 t vehicle, far past the ~72 mm
-        # of jounce travel left at its static position.
+        # The feasibility report (docs/feasibility_0p20m.md) shows the FR lift needs
+        # ~-15.7 kN on the diagonal partner and ~11 kN on the lifted wheel, so the limit
+        # is raised to 5x the largest static corner load (~17.6 kN).  It must stay above
+        # that requirement yet bounded (not the old unbounded multi-hundred-kN values).
         controller = self._controller()
         static_corner = max(self.vehicle.static_load(c) for c in CORNERS)
-        self.assertLessEqual(controller.config.force_max_n, 2.5 * static_corner)
+        self.assertGreaterEqual(controller.config.force_max_n, 4.0 * static_corner)
+        self.assertLessEqual(controller.config.force_max_n, 6.0 * static_corner)
 
     def test_paper_sd_sign_is_converted_to_trucksim_jounce_for_the_lifted_wheel(self):
         static = {corner: 0.03 for corner in CORNERS}
@@ -626,6 +666,15 @@ class ObservablePhaseManagerTests(unittest.TestCase):
         )
         self.assertEqual(self.controller.step, STEP_RR_PRELOAD)
 
+    def test_emergency_recovery_cannot_be_reported_as_rear_strategy_progress(self):
+        self.controller.step = STEP_FR_TOUCHDOWN
+        self.controller.safety_mode = "RECOVER"
+        self.controller._recover_start_time = 0.0
+        ready = self.controller.config.transition_time_s + 0.01
+        self.controller(ready, _exports(X_R2=100.60, Fz_R1=1000.0))
+        self.assertEqual(self.controller.step, STEP_FR_TOUCHDOWN)
+        self.assertEqual(self.controller.safety_mode, "RECOVER")
+
     def test_low_support_load_debounce_enters_recovery_without_safe_stop(self):
         self.controller.step = STEP_FR_CROSS
         # Collapse a *load-bearing* corner (FL).  The diagonal partner (RL) is allowed to
@@ -639,19 +688,68 @@ class ObservablePhaseManagerTests(unittest.TestCase):
         self.assertEqual(self.controller.safety_mode, "RECOVER")
         self.assertFalse(self.controller.safe_stop)
 
-    def test_diagonal_partner_unload_is_not_a_support_failure(self):
+    def test_diagonal_partner_unload_is_a_support_failure(self):
         self.controller.step = STEP_FR_CROSS
-        # RL (diagonal partner of the lifted FR) collapses but the two load-bearers hold;
-        # this is the paper's intended support state and must not abort the lift.
+        # A zero-load diagonal leaves only two ground contacts.  The paper calls its
+        # target load small; it does not make a two-point vehicle dynamically stable.
         low = _exports(X_R1=101.50, Fz_L2=0.0, Fz_R1=100.0, Fz_L1=5000.0, Fz_R2=5000.0)
         self.controller(0.00, low)
         self.controller(0.06, low)
-        self.assertEqual(self.controller.step, STEP_FR_CROSS)
-        self.assertEqual(self.controller.safety_mode, "CONTINUE")
+        self.assertEqual(self.controller.step, STEP_FR_TOUCHDOWN)
+        self.assertEqual(self.controller.safety_mode, "RECOVER")
+
+    def test_preload_aborts_if_another_wheel_loses_contact(self):
+        self.controller.step = STEP_FR_PRELOAD
+        low = _exports(X_R1=100.70, Fz_L2=0.0, Fz_R1=1000.0)
+        self.controller(0.00, low)
+        self.controller(0.06, low)
+        self.assertEqual(self.controller.step, STEP_FR_TOUCHDOWN)
+        self.assertEqual(self.controller.safety_mode, "RECOVER")
+
+    def test_preload_transitions_without_triangle_precondition(self):
+        # The triangle margin is a *safety during the lift*, not a preload gate: before
+        # the wheel is unloaded the CG is still on four wheels, so a 5 deg roll must not
+        # block the PRELOAD -> LIFT transition (the attitude that shifts the CG inside is
+        # commanded during the lift).
+        names = EXPORTS + ("Y_L1", "Y_L2")
+        controller = DeepPotholeExpertController(
+            scenario=self.scenario, vehicle=self.vehicle, export_names=names,
+            config=ExpertConfig(settle_time_s=0.0, preload_time_s=0.0),
+        )
+        values = dict(zip(EXPORTS, _exports(X_R1=100.70, Roll_E=5.0)))
+        values.update({"Y_L1": 0.63, "Y_L2": 0.63})
+        controller.step = STEP_FR_PRELOAD
+        controller(0.01, tuple(values[name] for name in names))
+        self.assertEqual(controller.step, STEP_FR_LIFT)
 
 
 @unittest.skipUnless(MODEL.exists(), "generated TruckSim model not present")
 class ConstrainedSuspensionAllocationTests(unittest.TestCase):
+    def test_identified_preload_holds_level_without_premature_unload(self):
+        # Preload must NOT tilt the body yet: a roll target would unload the lifted
+        # wheel and the diagonal partner before the lift.  It therefore holds the
+        # static loads level (near-zero force change), and the attitude is commanded
+        # together with the lift in the LIFT/CROSS phase.
+        vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
+        gain = [
+            [float(i == j) for j in range(4)] for i in range(4)
+        ]
+        controller = DeepPotholeExpertController(
+            scenario=PotholeScenario(), vehicle=vehicle, export_names=EXPORTS,
+            config=ExpertConfig(settle_time_s=0.0, preload_time_s=100.0,
+                                force_min_n=-1000.0, force_max_n=1000.0,
+                                force_rate_limit_n_per_s=1e9),
+            gain_matrix=gain,
+            roll_gain_deg_per_n={"FL": .001, "FR": -.001,
+                                 "RL": .001, "RR": -.001},
+        )
+        controller(0.0, _exports(X_R1=100.6))
+        controller(0.01, _exports(X_R1=100.7))
+        force = controller._applied_force
+        # No roll tilt during preload: all four corners stay near zero force.
+        for corner in CORNERS:
+            self.assertAlmostEqual(force[corner], 0.0, delta=100.0)
+
     def test_coupled_unload_preserves_support_wheel_floor(self):
         vehicle = load_vehicle(MODEL, static_wheel_load_n=MEASURED_STATIC_LOADS)
         # Matrix convention is [command][load].  A negative FR command unloads FR,

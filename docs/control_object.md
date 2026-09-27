@@ -1,174 +1,18 @@
-# 控制对象说明（角模块 DDEV）
+# 当前 TruckSim 控制对象：I_I 角模块车
 
-本文件说明本平台当前使用的 TruckSim 控制对象、它的架构、实测参数，以及为使其成为
-**有效**模型所做的三项显式修正。可直接用于向导师说明"控制对象是什么"。
+截至 2026-09-27，工程的唯一当前车型为 `models/corner_module_ddev`，源于 TruckSim 2019 的 Compact Utility Truck。`VEHICLE_CODE I_I` 表示前后均为独立悬架；旧 `hd_utility_ddev` 是前后刚性桥 S_S，已不作为本项目当前控制对象。
 
----
-
-## 1. 控制对象身份
-
-| 项目 | 值 |
+| 参数 | 当前值与出处 |
 |---|---|
-| TruckSim 数据集 | `Vehicle: Loaded Combination` → **`Compact Utility Truck (I_I)`** |
-| 类别 | TruckSim `2A - Utility Vehicles`（两轴轻型商用工具车） |
-| **车辆结构代码** | **`i_i`** —— 第一位 = 前桥，第二位 = 后桥，`i` = **Independent（独立悬架）**，`s` = Solid（刚性桥） |
-| 源工况 | `F:\TruckSim2019\TruckSim2019.0_Data\Results\Run_b20aee53-c150-44b1-a804-20e43bfde604\run_all.par` |
-| 生成目录 | `models/corner_module_ddev/` |
+| 总质量 | 约 1360 kg：簧载 600 kg、三个 200 kg 载荷、前后桥非簧载各 80 kg；见 `run_all.par` |
+| 轴距 / 轮距 | 1925 / 1260 mm；见 `run_all.par` |
+| 轮胎自由半径 | 四轮 `R0=263 mm`；见 `run_all.par` |
+| 簧载质心高度 | `H_CG_SU=700 mm`；见 `run_all.par` |
+| 簧载惯量 | `IXX_SU=384`, `IYY_SU=624.2`, `IZZ_SU=686.9 kg·m²` |
+| 当前前后悬架几何止挡 | 压缩约 +160 mm、回弹约 −100 mm；原始 TruckSim 前止挡不适合静态车姿，修订原因见 `source_manifest.json`。这是悬架几何界，不是执行器额定行程。 |
+| 四角执行器 | `IMP_FS_L1/R1/L2/R2` 弹簧座附加力；四轮驱动 `IMP_MYUSM_L1/R1/L2/R2`。信号映射见根目录 `IO_MAPPING.md`。 |
+| 仿真频率 | `run_all.par` 的 `tstep=0.0005 s`；`simfile.sim` 的 `EXT_MODEL_STEP=0.01 s` 不同。 |
 
-**对照**：原先使用的 `HD Utility Vehicle w/ Crate` 是 `s_s`（前后**刚性桥**），四角垂向
-响应经车桥机械耦合，不能作为角模块控制对象。本平台的 `Compact Utility Truck` 是
-`i_i`，前桥与后桥**均为独立悬架**。
+模型参数可追溯至 `models/corner_module_ddev/run_all.par`、`source_manifest.json` 和 `interface_contract.json`。原车型及后续隔离试验均未配真实电机/丝杠规格。旧移动越坑控制器 `expert_controller.py` 中 `force_limit_static_multiple=5.0`、`force_slew_time_s=0.4 s` 是**软件限幅**；静态 FR 诊断另用 `static_wheel_lift/config.py` 中的阶段配置，不能把两套参数混为硬件能力。
 
-## 2. 架构验证（不靠车型名称，直接查模型）
-
-生成器会把下面的结论自动写入 `models/corner_module_ddev/source_manifest.json`：
-
-```json
-"suspension_architecture": {
-  "vehicle_code": "I_I",
-  "front_axle": "independent",
-  "rear_axle": "independent",
-  "corners_mechanically_independent": true,
-  "independent_kinematics_datasets": [
-    "Compact Utility Truck - Drive Axle",
-    "Compact Utility Truck - Steer Axle"
-  ],
-  "compliance_datasets": [
-    "Compact Utility Truck - Drive Axle",
-    "Compact Utility Truck - Steer Axle"
-  ]
-}
-```
-
-即：前后桥都用 `Suspension: Independent System Kinematics`，且每桥有各自的
-`Suspension: Independent Compliance, Springs, and Dampers`（**每角独立弹簧与阻尼**）。
-因此一个角上的作用力只作用在该角，四个角的高度可以各自设定——这是角模块架构的定义。
-
-## 3. 八执行器接口
-
-原机械动力链由 `OPT_PT 0` 旁路，四个轮端电机与四个主动悬架作动器直接由外部控制器驱动：
-
-```text
-u = [ IMP_MYUSM_L1, IMP_MYUSM_R1, IMP_MYUSM_L2, IMP_MYUSM_R2,   # 轮端转矩 N·m
-      IMP_FS_L1,    IMP_FS_R1,    IMP_FS_L2,    IMP_FS_R2 ]      # 弹簧座附加力 N
-```
-
-轮序固定为 `FL, FR, RL, RR`。两组接口均为 `ADD`，零指令时退化为被动悬架。
-
-**验证结果（在该控制对象上重新跑过 17 轮同车脉冲矩阵）**
-
-```
-verdict: PASS
-torque: FL True  FR True  RL True  RR True
-active: FL True  FR True  RL True  RR True
-input integrity: 17/17 全部通过（每个案例只有目标输入列非零，无端口串线）
-```
-
-## 4. 实测车辆参数
-
-**质量**
-| 项目 | 值 |
-|---|---|
-| 簧载质量 `M_SU` | 600 kg |
-| 载荷 `M_PL` | 3 × 200 kg = **600 kg**（TruckSim 按载荷实例逐个声明，须求和） |
-| 非簧载质量 `M_US` | 80 kg / 桥（每角 40 kg） |
-| **总质量** | **1360 kg** |
-| 静态单轮载荷（实测） | 3484 / 3483 / 3163 / 3163 N |
-| 静态总重（实测） | 13 292 N（= 1360 × 9.81 = 13 337 N，误差 0.3%） |
-| 轴荷分配 | 前 52.4% / 后 47.6% |
-
-**惯量** `IXX 384.0`、`IYY 624.2`、`IZZ 686.9` kg·m²
-
-**几何**
-| 项目 | 值 |
-|---|---|
-| 轴距 | 1925 mm |
-| 轮距 | 1260 mm |
-| 轮胎半径 `R0` | 263 mm |
-| 簧载质心高度 `H_CG_SU` | 700 mm |
-| 质心到前轴 / 后轴 | 0.9161 m / 1.0089 m（由实测静载反推，两者之和 = 轴距 1.9250 m） |
-
-**悬架与轮胎**
-| 项目 | 值 |
-|---|---|
-| 形式 | 前后独立悬架，每角独立弹簧与阻尼 |
-| 前簧刚度 | 30 N/mm（原始值） |
-| 后簧 | 非线性表（`FS_COMP_TABLE`），60 mm 附近约 88 N/mm |
-| 轮胎 | 175/70 R13，`FZ_REF` 4100 N（额定高于 3322 N 静载，无需修正） |
-| 缓冲块行程 | 前 **121 mm**（原始 61 mm，已修正，见第 5 节）/ 后 101 mm |
-| 静态下沉量（实测） | 前 168.1 mm / 后 66.6 mm |
-
-**仿真** 求解步长 0.5 ms（定步长）；控制器采样 10 ms（与论文一致）
-
-## 5. 为使其成为"有效"模型所做的三项显式修正
-
-TruckSim 2019 的这个数据集**开箱即用是有缺陷的**，三项修正都已写入
-`source_manifest.json`，可复核。
-
-### 5.1 前缓冲块行程（本轮的关键修复）
-
-数据集的前缓冲块表以 **61 mm** 结束：`50,0 / 60,0 / 61,7000`，但该车**自身的静态坐姿是
-80.03 mm**。表格按最后一段（7000 N/mm）外插，于是 t=0 时前角被施加
-
-```
-7000 + (80.03 − 61) × 7000  ≈  140 kN
-```
-
-的力——**约等于整车重量的 10 倍**。这就是模型静止就剧烈振荡、前轮被抛离地面、任何控制器
-看起来都失效的原因。**证据**：该数据集自带的 TruckSim 运行日志
-（`LastRun_log.txt`）在 `T = 0` 报出完全相同的警告。
-
-**修正**：把静态坐姿以下的缓冲块行程外移（默认 121 mm），让缓冲块恢复"真正到底才起作用"。
-效果实测：
-
-| 指标 | 修正前 | 修正后 |
-|---|---|---|
-| 致命的越上界外插 | 存在（≈140 kN/角） | **消失** |
-| `quiet_at_rest` | False（漂移 0.518） | **True（漂移 0.025）** |
-| 静止四轮载荷 | 左右不对称 | **3484/3483/3163/3163，对称** |
-
-### 5.2 载荷求和
-
-`M_PL` 按载荷实例逐个声明（`M_PL(1..3) 各 200 kg`），必须求和。只取第一个会把整车算成
-960 kg，使三轮支撑静力解整体偏小 42%。
-
-### 5.3 作动器力限幅按车型定标
-
-原 ±100 kN 是按 8.9 t 卡车设的；对 1.36 t 的车这是整备质量的 7.5 倍，会把车掀飞。
-现按 `5 × 最大静态角载荷` 自动定标 → 角模块车 **±17.4 kN**，卡车数值不变。
-
-## 6. 专家策略复现质量（本平台的核心结论）
-
-论文：Liu et al., *IEEE/ASME Trans. Mechatronics* 29(6):4480-4491, 2024。
-策略：抬起目标轮 → 三轮支撑 → 保持车身姿态稳定通过坑槽。
-
-| 指标 | HD 卡车（刚性桥） | **角模块车（I_I，修正后）** |
-|---|---|---|
-| 到达坑口**之前**目标轮卸荷程度 | 71% | **100%** |
-| 达到该卸荷所需作动力 | −16.9 kN | **−9.4 kN** |
-| 目标轮完全卸荷位置 | 101.097 m | **100.895 m（坑口 101.10 前 20 cm）** |
-| 过坑期间目标轮载荷 | 0 N | **0 N** |
-| 安全带停机 | 未触发 | **未触发** |
-
-**结论**：在角模块控制对象上，目标轮在**到达坑口前 20 cm 就已被完全卸荷**，而且只需要卡车
-**55%** 的作动力。这正是"角模块独立悬架"相对"刚性桥"的意义所在——专家策略在该车型上
-复现得**更好**。
-
-## 7. 复现命令
-
-```powershell
-$env:PYTHONPATH='src'
-python scripts\build_corner_module_ddev.py            # 构建角模块控制对象
-python scripts\validate_hd_ddev_interfaces.py --simfile models\corner_module_ddev\simfile.sim --target runs\corner_module_interface_validation
-python scripts\probe_actuator_gain.py --model corner_module --out-dir runs\_actuator_gain_corner_module
-python scripts\build_corner_module_pothole_case.py    # 生成单轮深坑工况（按新车型重定标）
-python scripts\run_expert_pothole.py --model corner_module
-```
-
-### 可选的有效域杠杆
-
-```powershell
---payload-scale 0.3333                 # 只留一个 200 kg 载荷
---steer-spring-rate-n-per-mm 70        # 加硬前簧（实测会把运行变成提前终止，默认不改）
---steer-jounce-stop-mm 0               # 恢复原始 61 mm 缓冲块行程（会复现振荡）
-```
+静态抬轮的可移植证据车型位于 `evidence/static_fr_ii/model`，相对当前基准 I_I 车型，仅在隔离副本中将现有 200 kg 后部载荷后移 350 mm、左移 500 mm，并设置平坦物理路面和静止制动。成功保持段三轮轮载和力见[结果摘要](../evidence/static_fr_ii/lift_summary.json)。该结果尚不证明低速蠕行稳定或真实硬件可实现。

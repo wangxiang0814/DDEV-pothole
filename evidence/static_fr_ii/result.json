@@ -1,0 +1,41 @@
+{
+  "vehicle": "corner_module_ddev I_I",
+  "model_sha256": "496f280f0ef547b8c42ffb4e632184e511a007a8799ccd84b1ae02a8c20b52ce",
+  "total_mass_kg": 1360,
+  "moved_payload_mass_kg": 200,
+  "rearward_mm": 350.0,
+  "leftward_mm": 500.0,
+  "M1_status": "PASS",
+  "M2_status": "MONITORED",
+  "metrics": {
+    "window_start_s": 17.0,
+    "window_end_s": 20.0,
+    "max_abs_vx_kph": 8.44604951e-05,
+    "max_abs_wheel_rpm": 0.0226254499,
+    "max_abs_roll_rate_deg_s": 0.010948604,
+    "max_abs_pitch_rate_deg_s": 0.0106869258,
+    "min_fz_n": {
+      "FL": 3496.68893,
+      "FR": 3151.00829,
+      "RL": 3955.18452,
+      "RR": 2729.93439
+    },
+    "max_abs_roll_deg": 0.774512429,
+    "max_abs_pitch_deg": 0.280080217,
+    "min_lambda": 0.06004846631252984,
+    "min_edge_margin_m": 0.063300016548121,
+    "max_com_zmp_gap_m": 0.009047753752486145,
+    "final_zmp_xy": [
+      98.13960746862658,
+      0.07418012051795843
+    ],
+    "final_com_xy": [
+      98.1396886,
+      0.0830739426
+    ],
+    "final_target_zmp_xy": [
+      98.13960746862658,
+      0.07418012051795843
+    ]
+  }
+}

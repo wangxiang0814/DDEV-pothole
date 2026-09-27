@@ -1,11 +1,11 @@
 SIMFILE
-FILEBASE output\hd_utility_ddev
+FILEBASE output\corner_module_ddev
 INPUT run_all.par
-INPUTARCHIVE output\hd_utility_ddev_all.par
-ECHO output\hd_utility_ddev_echo.par
-FINAL output\hd_utility_ddev_end.par
-LOGFILE output\hd_utility_ddev_log.txt
-ERDFILE output\hd_utility_ddev.erd
+INPUTARCHIVE output\corner_module_ddev_all.par
+ECHO output\corner_module_ddev_echo.par
+FINAL output\corner_module_ddev_end.par
+LOGFILE output\corner_module_ddev_log.txt
+ERDFILE output\corner_module_ddev.erd
 PROGDIR F:\TruckSim2019\TruckSim2019.0_Prog\
 DATADIR F:\TruckSim2019\TruckSim2019.0_Data\
 RESOURCEDIR F:\TruckSim2019\TruckSim2019.0_Prog\Resources\
@@ -14,6 +14,6 @@ PRODUCT_VER 2019.0
 VEHICLE_CODE I_I
 EXT_MODEL_STEP 0.01
 PORTS_IMP 8
-PORTS_EXP 27
+PORTS_EXP 116
 DLLFILE F:\TruckSim2019\TruckSim2019.0_Prog\Programs\solvers\trucksim_64.dll
 END

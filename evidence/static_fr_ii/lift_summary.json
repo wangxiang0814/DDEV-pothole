@@ -1,0 +1,48 @@
+{
+  "vehicle": "I_I corner_module_ddev",
+  "source_model_sha256": "496f280f0ef547b8c42ffb4e632184e511a007a8799ccd84b1ae02a8c20b52ce",
+  "status": "LIFT_HOLD_PASS",
+  "hold_window_s": [
+    54,
+    58
+  ],
+  "fz_n": [
+    6395.6754369125,
+    0.0,
+    1228.886511025,
+    5710.2188787375
+  ],
+  "applied_suspension_force_n": [
+    7679.109100000001,
+    -2700.75116,
+    -7863.696079999999,
+    4582.790609999999
+  ],
+  "fr_clearance_mm": 41.65149846124999,
+  "roll_deg": -1.849066901525,
+  "pitch_deg": -4.240869399875001,
+  "fr_clearance_above_10mm_hold_s": 5.659999999999997,
+  "abort_time_s": null,
+  "post_return_fz_n": [
+    3694.8206253,
+    2961.7992269000006,
+    3858.7153734999993,
+    2821.613418400001
+  ],
+  "preload_trace_rows": 9601,
+  "raw_history_included": false,
+  "com_barycentric_lambda_fl_rl_rr": [
+    0.479887372615271,
+    0.10276884743634854,
+    0.4173437799483805
+  ],
+  "zmp_barycentric_lambda_fl_rl_rr": [
+    0.47962358887208273,
+    0.092156483634641,
+    0.4282199274932763
+  ],
+  "wheel_order": "FL,FR,RL,RR",
+  "test_condition": "flat physical road, four motor torques zero, 200 kg payload shifted 350 mm rear and 500 mm left",
+  "caveat": "open-loop replay with online abort; disturbance rejection and crawl not validated",
+  "early_rl_bias_trial_liftoff_s": 45.1605
+}

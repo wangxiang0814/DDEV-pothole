@@ -23,7 +23,7 @@ def build_trucksim2019_contract() -> Dict[str, Any]:
 
     The contract is shared by Python, Simulink and the generated TruckSim case.
     The checked-in status is backed by the retained same-vehicle pulse matrix in
-    runs/hd_utility_ddev_interface_validation/verification_summary.json.
+    runs/corner_module_interface_validation/verification_summary.json.
     """
     torque_evidence = (
         "TruckSim2019 Generic/VS_commands in-wheel motor example: "
@@ -39,6 +39,14 @@ def build_trucksim2019_contract() -> Dict[str, Any]:
         "schema_version": "2.0",
         "trucksim_version": "2019.0",
         "wheel_order": list(WHEEL_ORDER),
+        "control_object": {
+            "name": "Corner Module DDEV (Compact Utility Truck)",
+            "vehicle_code": "I_I",
+            "front_suspension": "independent",
+            "rear_suspension": "independent",
+            "four_corner_actuation": True,
+            "powertrain": "disabled; wheel torques supplied externally",
+        },
         "sign_conventions": {
             "vehicle_axes": "+X forward, +Y left, +Z up (must be reconfirmed for selected dataset)",
             "wheel_torque": "positive sign is confirmed by generated same-vehicle pulse report",
@@ -78,7 +86,7 @@ def build_trucksim2019_contract() -> Dict[str, Any]:
         "limitations": [
             "IMP_MYUSM applies commanded wheel/unsprung-mass reaction torque; electric motor electromagnetic and thermal dynamics remain external.",
             "IMP_FS adds force at each spring location while the original passive spring and damper remain active.",
-            "The HD Utility Vehicle uses solid axles, so independent commands produce mechanically coupled responses.",
+            "The I_I control object has independent suspension kinematics at both axles; body and tyre dynamics still couple the measured corner responses.",
             "A generated pulse-test report, not this static contract, is the authority for runtime verification status.",
         ],
     }

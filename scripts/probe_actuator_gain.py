@@ -46,6 +46,7 @@ from ddevsim.pothole_case import (  # noqa: E402
     PotholeScenario,
     build_single_wheel_pothole_case,
 )
+from ddevsim.suspension_actuator import signed_probe_cases  # noqa: E402
 
 CORNERS = ("FL", "FR", "RL", "RR")
 SUFFIX = {"FL": "L1", "FR": "R1", "RL": "L2", "RR": "R2"}
@@ -83,9 +84,8 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--model", choices=("corner_module", "hd_pothole"), default="corner_module",
-        help="corner_module measures the corner-module DDEV control object; "
-             "hd_pothole keeps the original solid-axle probe",
+        "--model", choices=("corner_module",), default="corner_module",
+        help="I_I corner-module control object",
     )
     parser.add_argument("--hold-s", type=float, default=HOLD_S)
     parser.add_argument(
@@ -115,14 +115,10 @@ def main() -> int:
     # a 9.4 kN vehicle, so the "gain" was measuring dynamics, not the actuator.
     # Holding the vehicle at zero speed on the flat approach keeps every sample in
     # static equilibrium.
-    if args.model == "hd_pothole":
-        base = ROOT / "models" / "hd_utility_ddev"
-    else:
-        base = ROOT / "models" / "corner_module_ddev"
+    base = ROOT / "models" / "corner_module_ddev"
     if not (base / "simfile.sim").exists():
         raise SystemExit(
-            "model %s is missing; build it first (build_hd_utility_ddev.py or "
-            "build_corner_module_ddev.py)" % base
+            "model %s is missing; run build_corner_module_ddev.py first" % base
         )
     probe_model = out_dir / "probe_model"
     run_all = base / "run_all.par"
@@ -164,32 +160,54 @@ def main() -> int:
 
     gain_matrix: Dict[str, Dict[str, float]] = {c: {} for c in CORNERS}
     deflection_matrix: Dict[str, Dict[str, float]] = {c: {} for c in CORNERS}
+    jounce_matrix: Dict[str, Dict[str, float]] = {c: {} for c in CORNERS}
     roll_response: Dict[str, float] = {}
 
-    for index, corner in enumerate(CORNERS):
+    settled_by_corner: Dict[str, Dict[int, Dict[str, float]]] = {
+        corner: {} for corner in CORNERS
+    }
+    for corner, signed_amplitude in signed_probe_cases(amplitude):
+        index = CORNERS.index(corner)
         port = 4 + index  # IMP_FS order is FL, FR, RL, RR
+        sign = 1 if signed_amplitude > 0 else -1
+        csv_path = out_dir / ("force_%s_%s.csv" % (corner, "pos" if sign > 0 else "neg"))
         case = run_stepwise(
-            simfile, _command(port, amplitude),
-            out_dir / ("force_%s.csv" % corner),
+            simfile, _command(port, signed_amplitude), csv_path,
             IMPORT_NAMES, export_names, log_decimation=LOG_DECIMATION, stop_at_s=args.hold_s,
         )
         if case["status"] != "COMPLETED":
             raise RuntimeError("%s run failed: %s" % (corner, case.get("error_message")))
-        settled = _settled_tail(out_dir / ("force_%s.csv" % corner))
+        settled = _settled_tail(csv_path)
+        settled_by_corner[corner][sign] = settled
+        reports.append({
+            "corner": corner, "sign": sign, "command_n": signed_amplitude,
+            "csv": str(csv_path), "settled": settled,
+            "delta_own_load_n": settled["exp_Fz_" + SUFFIX[corner]] - base["exp_Fz_" + SUFFIX[corner]],
+            "delta_own_jounce_mm": settled["exp_Jnc_" + SUFFIX[corner]] - base["exp_Jnc_" + SUFFIX[corner]],
+            "delta_roll_deg": settled["exp_Roll_E"] - base["exp_Roll_E"],
+        })
+
+        print("%+.0f N at %-3s -> dFz_own=%+.0f N dJnc_own=%+.2f mm dRoll=%+.3f deg" % (
+            signed_amplitude, corner, reports[-1]["delta_own_load_n"],
+            reports[-1]["delta_own_jounce_mm"], reports[-1]["delta_roll_deg"],
+        ))
+
+    for corner in CORNERS:
+        positive = settled_by_corner[corner][1]
+        negative = settled_by_corner[corner][-1]
 
         for other in CORNERS:
             wheel = SUFFIX[other]
-            delta_load = settled["exp_Fz_" + wheel] - base["exp_Fz_" + wheel]
-            delta_defl = settled["exp_CmpS_" + wheel] - base["exp_CmpS_" + wheel]
-            gain_matrix[corner][other] = delta_load / amplitude
-            deflection_matrix[corner][other] = delta_defl / amplitude
-        roll_response[corner] = settled["exp_Roll_E"] - base["exp_Roll_E"]
-
-        print("%+.0f N at %-3s -> " % (amplitude, corner) + " ".join(
-            "dFz_%s=%+8.0f" % (o, gain_matrix[corner][o] * amplitude)
-            for o in CORNERS) + "  dRoll=%+.3f deg" % roll_response[corner])
-
-        reports.append({"corner": corner, "settled": settled})
+            gain_matrix[corner][other] = (
+                positive["exp_Fz_" + wheel] - negative["exp_Fz_" + wheel]
+            ) / (2.0 * amplitude)
+            deflection_matrix[corner][other] = (
+                positive["exp_CmpS_" + wheel] - negative["exp_CmpS_" + wheel]
+            ) / (2.0 * amplitude)
+            jounce_matrix[corner][other] = (
+                positive["exp_Jnc_" + wheel] - negative["exp_Jnc_" + wheel]
+            ) / (2.0 * amplitude)
+        roll_response[corner] = (positive["exp_Roll_E"] - negative["exp_Roll_E"]) / 2.0
 
     # A single scalar "how effective is a corner's own actuator" number, used as
     # the controller's feedforward gain.
@@ -203,15 +221,18 @@ def main() -> int:
         "force_amplitude_n": amplitude,
         "hold_s": args.hold_s,
         "baseline_settled": base,
+        "experiments": reports,
         "gain_matrix_command_to_load": gain_matrix,
         "deflection_matrix_command_to_cmps_mm_per_n": deflection_matrix,
+        "jounce_matrix_command_to_jnc_mm_per_n": jounce_matrix,
         "roll_response_deg": roll_response,
         "diagonal_own_corner_gain": diagonal,
         "scalar_feedforward_gain": scalar_gain,
         "note": (
             "gain_matrix_command_to_load[cmd_corner][loaded_corner] is the change in "
-            "that corner's tyre normal load per newton of IMP_FS command. Rigid axles "
-            "make this matrix strongly off-diagonal."
+            "that corner's tyre normal load per newton of IMP_FS command, estimated "
+            "by central positive/negative finite differences on the I_I independent "
+            "suspension plant. Body and tyre dynamics still cause cross-coupling."
         ),
     }
     (out_dir / "gain_matrix.json").write_text(

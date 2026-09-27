@@ -1,0 +1,19 @@
+SIMFILE
+FILEBASE output\contact_mpc_stationary_probe
+INPUT run_all.par
+INPUTARCHIVE output\contact_mpc_stationary_probe_all.par
+ECHO output\contact_mpc_stationary_probe_echo.par
+FINAL output\contact_mpc_stationary_probe_end.par
+LOGFILE output\contact_mpc_stationary_probe_log.txt
+ERDFILE output\contact_mpc_stationary_probe.erd
+PROGDIR F:\TruckSim2019\TruckSim2019.0_Prog\
+DATADIR F:\TruckSim2019\TruckSim2019.0_Data\
+RESOURCEDIR F:\TruckSim2019\TruckSim2019.0_Prog\Resources\
+PRODUCT_ID TruckSim
+PRODUCT_VER 2019.0
+VEHICLE_CODE I_I
+EXT_MODEL_STEP 0.01
+PORTS_IMP 8
+PORTS_EXP 126
+DLLFILE F:\TruckSim2019\TruckSim2019.0_Prog\Programs\solvers\trucksim_64.dll
+END

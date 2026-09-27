@@ -15,9 +15,9 @@ from ddevsim.pothole_case import build_single_wheel_pothole_case
 
 def main() -> int:
     artifacts = build_single_wheel_pothole_case(
-        ROOT / "models" / "hd_utility_ddev" / "run_all.par",
-        ROOT / "models" / "hd_utility_ddev" / "simfile.sim",
-        ROOT / "models" / "hd_utility_ddev" / "single_wheel_deep_pothole",
+        ROOT / "models" / "corner_module_ddev" / "run_all.par",
+        ROOT / "models" / "corner_module_ddev" / "simfile.sim",
+        ROOT / "models" / "corner_module_ddev" / "single_wheel_deep_pothole",
     )
     print(json.dumps({key: str(value) for key, value in artifacts.items()}, ensure_ascii=False, indent=2))
     return 0

@@ -47,7 +47,6 @@ if str(ROOT / "src") not in sys.path:
 
 from ddevsim.cosim import run_stepwise  # noqa: E402
 from ddevsim.pothole_case import SCENARIO_EXPORTS  # noqa: E402
-from ddevsim.pothole_controller import WheelLiftController  # noqa: E402
 
 # Channels re-exported purely to pin the units of the contract channels.
 PROBE_EXPORTS = ("Rot_L1", "Rot_R1", "Rot_L2", "Rot_R2", "Z_L1", "Z_R1", "Z_L2", "Z_R2")
@@ -91,7 +90,7 @@ def build_probe_case(source_dir: Path, target_dir: Path, stop_s: float) -> Path:
     if count != 1:
         raise ValueError("source simfile must declare exactly one PORTS_EXP")
     simfile = simfile.replace("single_wheel_deep_pothole", "unit_probe")
-    simfile = simfile.replace("hd_utility_ddev", "unit_probe")
+    simfile = simfile.replace("corner_module_ddev", "unit_probe")
     (target_dir / "simfile.sim").write_text(simfile, encoding="ascii")
     return target_dir / "simfile.sim"
 
@@ -208,7 +207,7 @@ def analyze(rows, log_decimation: int):
 
 
 def main() -> int:
-    source_dir = ROOT / "models" / "hd_utility_ddev" / "single_wheel_deep_pothole"
+    source_dir = ROOT / "models" / "corner_module_ddev" / "single_wheel_deep_pothole"
     probe_dir = ROOT / "runs" / "_unit_probe"
     stop_s = 9.0
     log_decimation = 1  # full solver resolution: no aliasing of fast transients
@@ -217,7 +216,7 @@ def main() -> int:
     exports = list(CONTRACT_EXPORTS) + list(SCENARIO_EXPORTS) + list(PROBE_EXPORTS)
     result = run_stepwise(
         simfile,
-        WheelLiftController(),
+        lambda _time_s, _exports: (0.0,) * len(CONTRACT_IMPORTS),
         probe_dir / "unit_probe.csv",
         CONTRACT_IMPORTS,
         exports,

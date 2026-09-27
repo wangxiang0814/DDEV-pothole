@@ -6,7 +6,7 @@ Open a completed pothole run in VS Visualizer.
 Two things made this script show a vehicle floating in mid-air over an empty
 background, and both are fixed here.
 
-1. It pointed at `runs\hd_utility_ddev_single_wheel_deep_pothole\native`, a
+1. It pointed at `runs\corner_module_ddev_single_wheel_deep_pothole\native`, a
    history recorded *before* the road path was lengthened. That history's merged
    parameter file still declares `SPATH_START 0 / SEGMENT_LENGTH 40` while the
    vehicle starts at station 100 and every surface strip is declared at stations
@@ -25,8 +25,7 @@ non-ASCII command-line arguments (and this project's path contains Chinese
 characters) into underscores.
 
 .PARAMETER Model
-`corner_module` (default) opens the current control object's run;
-`truck` opens the retained solid-axle HD utility run.
+`corner_module` opens the current control object's run.
 
 .EXAMPLE
 $env:PYTHONPATH='src'; python scripts\run_expert_pothole.py
@@ -34,7 +33,7 @@ powershell -File scripts\open_pothole_visualizer.ps1
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('corner_module', 'truck')]
+    [ValidateSet('corner_module')]
     [string]$Model = 'corner_module',
     [int]$Width = 1280,
     [int]$Height = 720,
@@ -55,10 +54,6 @@ switch ($Model) {
     'corner_module' {
         $runDir = Join-Path $projectRoot 'runs\corner_module_expert_pothole'
         $description = 'Corner Module DDEV (control object)'
-    }
-    'truck' {
-        $runDir = Join-Path $projectRoot 'runs\hd_utility_ddev_expert_pothole'
-        $description = 'HD Utility DDEV solid-axle truck (retained comparison)'
     }
 }
 

@@ -49,6 +49,17 @@ class ChannelContractTests(unittest.TestCase):
             self.assertEqual(loaded["schema_version"], "2.0")
             self.assertTrue(loaded["limitations"])
 
+    def test_contract_identifies_the_independent_corner_module_control_object(self):
+        contract = build_trucksim2019_contract()
+
+        self.assertEqual(contract["control_object"]["vehicle_code"], "I_I")
+        self.assertEqual(contract["control_object"]["front_suspension"], "independent")
+        self.assertEqual(contract["control_object"]["rear_suspension"], "independent")
+        self.assertTrue(contract["control_object"]["four_corner_actuation"])
+        limitations = " ".join(contract["limitations"]).lower()
+        self.assertNotIn("solid axle", limitations)
+        self.assertNotIn("hd utility", limitations)
+
 
 if __name__ == "__main__":
     unittest.main()

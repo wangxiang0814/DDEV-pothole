@@ -7,7 +7,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Dict
 
-from .hd_ddev_case import DDEV_EXPORTS, parse_protected_parameters
+from .vehicle_case import DDEV_EXPORTS, parse_protected_parameters
 from .visual_mesh import write_visual_mesh
 
 
@@ -695,9 +695,9 @@ def build_single_wheel_pothole_case(
     run_all = target_dir / "run_all.par"
     run_all.write_text(transformed, encoding="utf-8")
     simfile_text = Path(source_simfile).read_text(encoding="ascii")
-    if "hd_utility_ddev" not in simfile_text:
-        raise ValueError("source simfile does not use expected hd_utility_ddev history basename")
-    simfile_text = simfile_text.replace("hd_utility_ddev", history_name)
+    if "corner_module_ddev" not in simfile_text:
+        raise ValueError("source simfile does not use expected corner_module_ddev history basename")
+    simfile_text = simfile_text.replace("corner_module_ddev", history_name)
     # Derive PORTS_EXP from the exports actually present rather than from a fixed 16:
     # a source case may already carry the scenario channels, and a mismatch between
     # the simfile's declared port count and the EXPORT lines aborts the solver.

@@ -1,71 +1,10 @@
-"""Paper-faithful expert strategy for a single-wheel deep pothole.
+"""Moving-pothole expert controller for the I_I corner-module vehicle.
 
-Reference
----------
-S. Liu, L. Zhang, Y. Liu, J. Wang, C. Yang, J. Zhang, "Motion Posture Control of
-Corner Module Architecture Intelligent Electric Vehicle on Deep-Potholed Roads",
-*IEEE/ASME Transactions on Mechatronics*, vol. 29, no. 6, pp. 4480-4491, 2024.
-
-Wheel numbering in the paper is ``1 = left front, 2 = right front, 3 = left
-rear, 4 = right rear``, which is exactly this platform's ``FL, FR, RL, RR``.  The
-paper's scenario (a deep pothole ahead of wheel 2, crossed by wheels 2 then 4) is
-therefore exactly this platform's right-track single-wheel pothole.
-
-The paper's mechanism, and what this module reproduces
-------------------------------------------------------
-A vehicle cannot be supported on three wheels with the CG on the FL-RR diagonal:
-solving the three-wheel equilibrium for this vehicle gives a *negative* load on
-the left-rear wheel::
-
-    contacts FL, RL, RR (wheel FR lifted)
-    pitch balance : F_FL = W * b / L
-    roll  balance : F_RR = W * c / B
-    F_RL          = W - F_FL - F_RR
-
-With the measured static loads of this model (W = 87296 N, L = 3.9 m,
-B = 1.975 m) the CG sits 2.0034 m from the rear axle, so ``W*b/L`` exceeds
-``W/2`` and ``F_RL`` comes out at about **-1194 N**: the vehicle would tip.
-
-The paper's fix is to *move the CG* by imposing a body attitude with the active
-suspension: extend wheels 1 and 4, compress wheel 3.  The resulting body roll
-carries the CG laterally, because the CG sits above the roll centre.  For this
-model (h_rc ~= 0.463 m, track 1.975 m) the paper's +-0.08 m deflection pattern
-gives::
-
-    roll  phi      = -2*0.08 / 1.975      = -4.64 deg
-    lateral CG shift = -h_rc * phi        = +0.0375 m  (to the left)
-    required shift (d >= B*b/L)           = +0.0270 m
-    resulting F_RL                        = +40 N   (paper: "very small", assumed 0)
-
-Every one of those numbers is reproduced by :func:`three_wheel_support`, and the
-required 0.114 m of differential travel fits inside this model's +-150 mm travel.
-
-Relationship to the previous controller
----------------------------------------
-The earlier ``WheelLiftController`` distributed the support reaction as
-``+|unload|/3`` on the three remaining corners.  That preserves the *net vertical
-force* but not the *roll moment*: for a lifted FR wheel it injected about
-+19 to +26 kN*m of roll moment toward the lifted side, which is the same order as
-this vehicle's roll stiffness and is a plausible cause of the sustained 14 deg
-roll observed in the retained run.  This controller instead commands the three
-wheel normal loads that satisfy the full static equilibrium, so the roll moment
-is balanced by the shifted CG rather than left as a residual.
-
-Control structure (mirroring the paper's Fig. 8)
-------------------------------------------------
-* Step 0 approach, Step 1 lift wheel 2, Step 2 recover, Step 3 lift wheel 4,
-  Step 4 recover -- the paper's time windows were 0-1.4, 1.4-3.1, 3.1-5,
-  5-6.9, 6.9-9 s.  Here the transitions are driven by the *measured wheel-centre
-  stations* versus the pothole geometry, so the same controller works for any
-  pothole station, length or crawl speed with no retuning.
-* feedforward ``uf``  : the active force that moves the passive 4-wheel load
-  distribution onto the required 3-wheel distribution.
-* feedback ``u``      : integral sliding-mode trim on the wheel-load error, with
-  a boundary layer (the solver step is 0.5 ms, so a discontinuous sign term would
-  chatter).
-* safety layer        : travel limits, force/torque limits and rate limits, finite
-  checks, and a latched ``SAFE_STOP`` that returns the vehicle to passive
-  suspension.
+The reference is Liu et al., IEEE/ASME Transactions on Mechatronics 29(6),
+4480–4491 (2024). Wheel order is FL/FR/RL/RR. This older moving scenario
+controller is retained for reproducibility; it is not the validated stationary
+FR lift controller. Vehicle geometry, actuator gains and all lift acceptance
+conditions must come from the selected I_I TruckSim case.
 """
 
 from __future__ import annotations
@@ -78,6 +17,8 @@ from .units import require_verified, to_si
 from .vehicle_params import GRAVITY, VehicleControllerParams
 from .bounded_allocation import bounded_weighted_least_squares
 from .terrain_preview import TerrainPreview
+from .support_geometry import cg_projection_world, support_triangle_margin_m
+from .identified_suspension import allocate_identified_force
 
 CORNERS: Tuple[str, ...] = ("FL", "FR", "RL", "RR")
 
@@ -346,29 +287,27 @@ def three_wheel_support(
     axle_length = vehicle.wheelbase_m
     track = vehicle.track_m
 
-    # The paper's attitude pattern for a lifted wheel `o`: extend `o` and its
-    # **diagonal** partner... no -- compress the *diagonal* partner.  The paper is
-    # explicit (Sec. IV, and its own numbers): for a lifted wheel 2 it sets
-    # SD1 = SD2 = SD4 = -0.08 m and **SD3 = +0.08 m**, so the odd corner is wheel 3 =
-    # left rear = the diagonal partner of the lifted wheel.
+    # The paper's attitude pattern (Fig. 1(b)) for a lifted wheel 2 (right-front):
+    # the diagonal partner RL goes **down** and the other two grounded corners FL and
+    # RR go **up**, so the body plane tilts and the CG is pushed inside the support
+    # triangle 1-3-4.  Here "down/up" refers to the *body* (and hence the CG), which is
+    # the quantity the paper's stability argument cares about.
     #
-    # This matters physically, not cosmetically.  The CG must move inside the triangle
-    # of the three remaining contacts; for a lifted front-right wheel those are FL, RL,
-    # RR, whose inward normal across the FL-RR diagonal points rearward and left.  The
-    # CG follows the *low* end of the body, so the body must sit low at the diagonal
-    # partner.  Compressing the cross-side corner instead (the previous behaviour) puts
-    # no roll on the body at all and leaves the third contact carrying a **negative**
-    # load: solving the three-wheel equilibrium gives F_RL = -589.6 N for a lifted front
-    # wheel on this vehicle, i.e. the model is asked to tip over.  With the paper's
-    # pattern the same solve gives F_RL = +501.1 N.
+    # In this module's convention ``+h = compress`` (jounce up, i.e. the body sits LOW at
+    # that corner / the wheel is raised toward the body), the pattern is:
+    #
+    #     lifted FR:  FL -h (body up)   FR +h (lifted)   RL +h (body down)   RR -h (body up)
+    #     lifted RR:  FL +h (body down) FR -h (body up)  RL +h (lifted)      RR -h (body up)
+    #
+    # i.e. the two grounded partners extend (body up), the diagonal partner compresses
+    # (body down), and the lifted wheel compresses (jounce up).  This is what yields the
+    # measured CG shift toward the triangle interior (+y for a lifted FR); the opposite
+    # reading (compress FL/RR, extend RL) unloads the diagonal partner to a *negative*
+    # load and pushes the CG the wrong way, which is exactly the "wheel falls into the
+    # pit" failure mode.
     odd = _diagonal_partner(lifted_corner)
     deflection = {c: -attitude_deflection_m for c in CORNERS}
     deflection[odd] = attitude_deflection_m
-    # The *lifted* corner must compress, not extend.  Measured on this plant: a positive
-    # IMP_FS command loads its wheel and extends the strut (jounce down), so to lift a
-    # wheel (negative command) the strut compresses (jounce up).  The paper's "negative SD
-    # raises the wheel" is exactly that jounce increase; ``three_wheel_support``'s own
-    # convention is ``+h = compress``, so the lifted corner carries ``+h``.
     deflection[lifted_corner] = attitude_deflection_m
 
     # Body attitude is the plane through the three **grounded** corners -- a lifted
@@ -503,8 +442,11 @@ class ExpertConfig:
     #: The original run began unloading FR at 0.64 s while the passive suspension
     #: was still ringing, so the controller amplified an initial-condition transient.
     settle_time_s: float = 1.0
-    #: Minimum time spent building a feasible support posture before unloading.
-    preload_time_s: float = 0.25
+    #: Minimum time spent building a feasible support posture before unloading.  The
+    #: attitude (FL/RR extend, RL compress) must establish the CG shift *before* the
+    #: wheel is unloaded, or the diagonal partner unloads and the body tips about the
+    #: FL-RR diagonal; 1.0 s gives the actuators time to reach the ~80 mm attitude.
+    preload_time_s: float = 1.0
     #: Observable wheel-load band used to declare a target corner lifted.
     lifted_load_max_n: float = 150.0
     #: Hard floor for every non-target support corner during three-wheel support.
@@ -520,6 +462,10 @@ class ExpertConfig:
     #: leaves no margin against the identified-matrix / contact-state mismatch, so the
     #: allocator must not target below this.
     support_load_target_n: float = 1000.0
+    min_triangle_margin_m: float = 0.01
+    identified_roll_target_fraction: float = 0.70
+    identified_max_roll_target_deg: float = 5.5
+    identified_roll_rate_damping_s: float = 0.15
     #: A transient below the floor must persist this long before recovery is entered.
     support_load_debounce_s: float = 0.05
     #: Path gates used before handing over from front recovery to rear preload.
@@ -538,7 +484,7 @@ class ExpertConfig:
     #:
     #: The paper's own timings agree: its ASS force starts at 1 s and the wheel is
     #: unloaded at 1.4 s, i.e. it allows 0.4 s of lead at a similar speed.
-    pre_lift_distance_m: float = 0.6
+    pre_lift_distance_m: float = 1.6
     #: Time allowed for the force to ramp back to zero in Steps 2 and 4.
     #:
     #: The paper's own low-speed Step 2 lasts 1.9 s (3.1-5 s), but that window is
@@ -565,12 +511,11 @@ class ExpertConfig:
     #: returns, so the lip is a gentle touch instead of an impact.
     #: Distance *before* the trailing edge at which the crossing-phase recovery starts.
     #:
-    #: A vehicle-specific adaptation, and a necessary one: this vehicle's rebound travel
-    #: is about 100 mm, so a lifted wheel hangs roughly that far below road level while it
-    #: is over the hole, and if the force is held until the wheel passes the trailing edge
-    #: it meets the exit lip as a step -- measured as a 39 kN landing (12x the static
-    #: load).  Starting the ramp this far early lets the passive suspension bring the wheel
-    #: back to road level exactly as the ground returns, so the lip is a gentle touch.
+    #: 0.45 m (with ``transition_time_s`` 0.6 s) lets the recovery's roll correction act
+    #: over the last part of the hole, which keeps the roll bounded; a much smaller lead
+    #: (0.05 m) lets the roll drift past the 12 deg safe-stop because the correction never
+    #: gets time to act.  The lifted wheel itself is NOT released during this ramp -- the
+    #: recovery branch holds its lift force until the wheel actually touches down.
     recovery_lead_m: float = 0.45
     #: Paper's SD magnitude for the attitude pattern (m).
     attitude_deflection_m: float = 0.08
@@ -579,7 +524,7 @@ class ExpertConfig:
     roll_centre_height_m: Optional[float] = None
     #: Static gain from an ``IMP_FS`` command to that corner's wheel load, used
     #: only when no measured gain matrix is supplied.  The measured value for this
-    #: solid-axle model is ~0.08 (see scripts/probe_actuator_gain.py).
+    #: This fallback is provisional; prefer a same-vehicle measured gain matrix.
     force_to_load_gain: float = 0.08
     #: Tikhonov factor for inverting the measured gain matrix (it has a condition
     #: number near 120, so an exact inverse would demand unreasonable commands).
@@ -601,13 +546,11 @@ class ExpertConfig:
     force_min_n: Optional[float] = None
     force_max_n: Optional[float] = None
     #: Multiple of the largest static corner load used when the limits are derived.
-    #: The paper's corner module is a ball-screw active suspension, so a generous
-    #: multiple is realistic; 5x keeps the manoeuvre from destroying the model.
-    #: Reduced to 2x for the corner-module control object, which has only about 72 mm
-    #: of jounce travel left at its static position (measured): a commanded force much
-    #: above one static corner load drives a front corner straight onto its stop within
-    #: a few hundred milliseconds, and the manoeuvre then degenerates into stop chatter.
-    force_limit_static_multiple: float = 2.0
+    #: The feasibility report (docs/feasibility_0p20m.md) shows the FR lift needs the
+    #: diagonal partner RL to command ~-15.7 kN (unload RL + shift the CG through the
+    #: measured off-diagonal coupling), and the lifted wheel needs ~11 kN to compress its
+    #: strut to road level.  5x (~17.6 kN) gives margin over both while staying bounded.
+    force_limit_static_multiple: float = 5.0
     #: Slew limit on the active force (N/s).  ``None`` derives it from the actuator
     #: limit as ``limit / force_slew_time_s``.
     #:
@@ -736,13 +679,20 @@ class ExpertConfig:
     #: bounded by construction.  It is also literally what the paper controls ("the desired
     #: value for the absolute value of SD during control is set to 0.08 m").
     sd_tracking: bool = True
+    #: Ball-screw mode: the passive spring has been neutralised (see the model build's
+    #: ``--neutralize-springs``), so the ``IMP_FS`` force is the *only* suspension force
+    #: and must carry the static weight at all times.  In this mode the feedforward is the
+    #: paper's full load-bearing force (``ms/2`` on the load-bearers) and the APPROACH /
+    #: recovery phases apply a static hold instead of ramping to zero.
+    ball_screw_mode: bool = False
     #: SD magnitude actually commanded, as a fraction of the travel available either side
-    #: of the static position.  The paper's own +-0.08 m sits inside its +-0.1 m limit,
-    #: but this vehicle has far less room: its static travel is 21-38 mm against a 121 mm
-    #: jounce stop and a -61 mm rebound stop, i.e. roughly 90 mm each way.  The magnitude
-    #: is therefore *derived from the model* rather than copied from the paper, which is
-    #: the parameter change the differing vehicle parameters require.
-    sd_travel_fraction: float = 0.45
+    #: of the static position.  The paper commands its full +-0.08 m; this vehicle's room
+    #: is ~82 mm each way, so 1.0 reproduces the paper's full deflection (and the
+    #: full-attitude CG shift its three-wheel support depends on).  The previous 0.45 was
+    #: chosen to avoid saturating the weak force-controlled actuator; with the
+    #: paper-faithful feedforward and the higher actuator limit it can hold the full
+    #: pattern.
+    sd_travel_fraction: float = 1.0
     #: Vehicle-adapted version of the paper's (+,+,-,+) Jnc pattern for a lifted
     #: front-right corner (the negative entry moves to the diagonal partner for the
     #: rear lift).  The crossing wheel uses at most 35 mm; the other two extended
@@ -758,20 +708,20 @@ class ExpertConfig:
     sd_stiffness_n_per_m: Optional[float] = None
     #: Fraction of the actuator limit a full-magnitude SD error may command.
     sd_authority_fraction: float = 0.6
-    #: Multiple of the corner's unsprung weight that the *lifted* corner may command.
+    #: Multiple of the corner's unsprung weight in the *lifted* corner's feedforward.
     #:
-    #: The lifted wheel is the one corner where a stiff deflection loop is actively
-    #: harmful.  Once it is off the ground its strut runs to the rebound stop, so pulling
-    #: harder cannot raise the wheel any further -- the reaction simply drags the **body**
-    #: down instead.  Measured: the loop commanded -3783 N (about 10x the unsprung weight)
-    #: and the body sank 200 mm across the hole, leaving the wheel resting on the hole
-    #: floor.  The paper's own feedforward for this corner is just the unsprung weight
-    #: (``Faf = -0.02ks - mu*g``), so one unsprung mass is the correct scale.
+    #: The full paper feedforward is ``Faf = -k_s * SD_lift - mu * g``.  The spring term
+    #: ``-k_s * SD_lift`` (compress the strut by the lift jounce) is now added separately
+    #: in ``_sd_forces``, so this multiple scales only the ``-mu * g`` part.  Raising it
+    #: past 1.0 alone did NOT hold the wheel up (3.5x still lets the strut run to the
+    #: rebound stop) and destabilised yaw to -72 deg, because a large lift force at an
+    #: unsupported corner drags the body down; the missing spring term plus the airborne
+    #: roll-regulator gate is what actually keeps the wheel off the ground.
     lift_force_unsprung_multiple: float = 1.0
-    #: Independent ceiling expressed on the actual actuator scale.  The unsprung
-    #: weight alone does not include the passive spring force that must be overcome
-    #: to jounce the corner module upward.
-    lift_force_limit_fraction: float = 0.65
+    #: Independent ceiling on the lifted-corner force, as a fraction of the actuator
+    #: limit.  The paper's ``-k_s*SD_lift - mu*g`` spring term is the floor; this fraction
+    #: is the ceiling that lets the P-term hold the wheel at road level.
+    lift_force_limit_fraction: float = 0.85
     #: Weight on keeping the command set's net roll moment small.  Larger values
     #: trade load-tracking accuracy for a body that does not roll away.
     roll_moment_weight: float = 1.0e-5
@@ -804,6 +754,7 @@ class DeepPotholeExpertController:
         config: Optional[ExpertConfig] = None,
         gain_matrix: Optional[Sequence[Sequence[float]]] = None,
         travel_gain_matrix: Optional[Sequence[Sequence[float]]] = None,
+        roll_gain_deg_per_n: Optional[Mapping[str, float]] = None,
         static_deflection_m: Optional[Dict[str, float]] = None,
         terrain_preview: Optional[TerrainPreview] = None,
     ) -> None:
@@ -818,6 +769,10 @@ class DeepPotholeExpertController:
             [list(row) for row in travel_gain_matrix]
             if travel_gain_matrix is not None else None
         )
+        self.roll_gain_deg_per_n = (
+            {c: float(roll_gain_deg_per_n[c]) for c in CORNERS}
+            if roll_gain_deg_per_n is not None else None
+        )
         # Measured static corner deflection, needed to turn the paper's relative
         # deflection pattern into absolute compression targets.
         self.static_deflection_m = (
@@ -825,16 +780,35 @@ class DeepPotholeExpertController:
             if static_deflection_m
             else None
         )
-        # Effective wheel rate per corner (N/m of jounce), used for the SD force
-        # feedforward.  The paper's feedforward is the equilibrium force that holds each
-        # suspension at its SD target against the passive spring; on this plant the rate is
-        # the static corner load divided by the static travel.
-        self.wheel_rate_n_per_m = {
-            c: (
-                float(vehicle.static_load(c)) / max(1e-4, float(static_deflection_m[c]))
-            )
-            for c in CORNERS
-        } if static_deflection_m else {c: 1.0e5 for c in CORNERS}
+        # Spring-seat jounce stiffness per corner (N of *command* per m of jounce),
+        # used for the SD force feedforward ``-rate * delta``.  This is the
+        # command-to-jounce rate, i.e. the inverse of the measured jounce-matrix
+        # diagonal ``travel_gain_matrix[i][i]`` (mm/N, negative by the probe's sign
+        # convention).  The paper's feedforward is the equilibrium ``IMP_FS`` force that
+        # holds each suspension at its SD target, so the correct quantity is exactly
+        # that command-to-jounce rate.
+        #
+        # The previous heuristic ``static_load / static_deflection`` is the passive
+        # *wheel* rate (tyre load per metre of travel), not the actuator-travel
+        # response; on the corner module it over-predicts the front corners by ~2x
+        # (166 vs 78 kN/m measured for FL) and therefore over-drives the attitude
+        # feedforward, which is part of the "wheel falls into the pit" failure.
+        self.wheel_rate_n_per_m: Dict[str, float] = {}
+        if travel_gain_matrix is not None:
+            for index, corner in enumerate(CORNERS):
+                gain_mm_per_n = float(travel_gain_matrix[index][index])
+                if gain_mm_per_n < 0.0:
+                    self.wheel_rate_n_per_m[corner] = 1000.0 / abs(gain_mm_per_n)
+                else:
+                    self.wheel_rate_n_per_m[corner] = 1.0e5
+        if not self.wheel_rate_n_per_m:
+            self.wheel_rate_n_per_m = {
+                c: (
+                    float(vehicle.static_load(c))
+                    / max(1e-4, float(static_deflection_m[c]))
+                )
+                for c in CORNERS
+            } if static_deflection_m else {c: 1.0e5 for c in CORNERS}
         self.export_index: Dict[str, int] = {
             name: index for index, name in enumerate(export_names)
         }
@@ -1052,31 +1026,50 @@ class DeepPotholeExpertController:
         )
 
     def _support_is_feasible(self, exports: Sequence[float], lifted: str) -> bool:
-        # Only the two *load-bearing* contacts are guarded here.  The diagonal partner of
-        # the lifted wheel (RL for a lifted FR) is the corner the paper itself assigns a
-        # "very small" load to -- it is unloaded mainly through the coupling of the two
-        # load-bearers and has almost no actuator authority of its own (measured own-gain
-        # 0.063), so holding it to a 300 N floor would abort every lift the moment the
-        # target wheel leaves the ground.
+        # All three intended contacts must remain real contacts.  The paper's
+        # diagonal-wheel load may be small, but zero leaves only two support points.
         loads = self._loads(exports)
-        load_bearers = [
-            c for c in CORNERS if c != lifted and c != _diagonal_partner(lifted)
-        ]
-        return all(
-            loads[corner] >= self.config.min_support_load_n for corner in load_bearers
+        load_ok = all(
+            loads[corner] >= self.config.min_support_load_n
+            for corner in CORNERS if corner != lifted
         )
+        margin = self._support_margin_m(exports, lifted)
+        return load_ok and (margin is None or margin >= 0.0)
+
+    def _support_margin_m(self, exports: Sequence[float], lifted: str) -> Optional[float]:
+        needed = {"Xo", "Yo", "Roll_E", "Pitch", "Yaw"}
+        needed.update("X_%s" % _suffix(c) for c in CORNERS)
+        needed.update("Y_%s" % _suffix(c) for c in CORNERS)
+        if not needed.issubset(self.export_index):
+            return None  # Legacy synthetic/export-minimal models lack contact geometry.
+        contact_xy = {
+            c: (self._channel(exports, "X_%s" % _suffix(c)),
+                self._channel(exports, "Y_%s" % _suffix(c)))
+            for c in CORNERS if c != lifted
+        }
+        cg_xy = cg_projection_world(
+            (self._channel(exports, "Xo"), self._channel(exports, "Yo")),
+            self.vehicle.cg_to_front_axle_m,
+            self.vehicle.cg_above_roll_centre_m,
+            self.vehicle.cg_above_roll_centre_m,
+            self._channel(exports, "Roll_E"),
+            self._channel(exports, "Pitch"),
+            self._channel(exports, "Yaw"),
+        )
+        return support_triangle_margin_m(contact_xy, cg_xy)
 
     def _support_has_margin(self, exports: Sequence[float], lifted: str) -> bool:
-        """True once every *load-bearing* corner reaches the working target, not just the
-        emergency floor.  Used to gate the PRELOAD -> LIFT transition, because entering a
-        lift with a support corner only just above 300 N is what collapses it mid-lift."""
+        """True once every support corner reaches the working load target.
+
+        Used to gate the PRELOAD -> LIFT transition.  It does NOT require the CG to
+        already sit inside the support triangle: before the wheel is unloaded the CG is
+        still on a four-wheel support, so the triangle margin is meaningless (and gating
+        on it here is a chicken-and-egg -- the attitude that shifts the CG into the
+        triangle is commanded *during* the lift, together with the unload)."""
         loads = self._loads(exports)
-        load_bearers = [
-            c for c in CORNERS if c != lifted and c != _diagonal_partner(lifted)
-        ]
         return all(
             loads[corner] >= self.config.support_load_target_n
-            for corner in load_bearers
+            for corner in CORNERS if corner != lifted
         )
 
     def _set_step(self, step: int, time_s: float, reason: str) -> None:
@@ -1102,6 +1095,44 @@ class DeepPotholeExpertController:
             self.step = STEP_APPROACH
             return
 
+        active_lift = (
+            "FR" if self.step in (STEP_FR_PRELOAD, STEP_FR_LIFT, STEP_FR_CROSS)
+            else "RR" if self.step in (STEP_RR_PRELOAD, STEP_RR_LIFT, STEP_RR_CROSS)
+            else None
+        )
+        if active_lift is not None:
+            is_preload = self.step in (STEP_FR_PRELOAD, STEP_RR_PRELOAD)
+            if is_preload:
+                support_ok = all(
+                    load >= self.config.min_support_load_n
+                    for load in self._loads(exports).values()
+                )
+            else:
+                # During LIFT/CROSS the CG must stay inside the three-wheel support
+                # triangle (plus the support load floor): this is the paper's core
+                # stability mechanism, enforced as a *safety* during the lift rather
+                # than as a precondition before it.
+                support_ok = self._support_is_feasible(exports, active_lift)
+                margin = self._support_margin_m(exports, active_lift)
+                support_ok = support_ok and (
+                    margin is None or margin >= self.config.min_triangle_margin_m
+                )
+            if support_ok:
+                self._support_low_since = None
+            elif self._support_low_since is None:
+                self._support_low_since = float(time_s)
+                return
+            elif time_s - self._support_low_since >= self.config.support_load_debounce_s:
+                self.safety_mode = "RECOVER"
+                recovery_step = (STEP_FR_TOUCHDOWN if active_lift == "FR"
+                                 else STEP_RR_TOUCHDOWN)
+                self._set_step(recovery_step, time_s,
+                               "%s_support_load_or_triangle_floor" % active_lift.lower())
+                self._begin_recovery(time_s)
+                return
+            else:
+                return
+
         if self.step == STEP_APPROACH:
             if front_station >= leading - self.config.pre_lift_distance_m:
                 self._set_step(STEP_FR_PRELOAD, time_s, "front_pre_lift_station")
@@ -1120,20 +1151,13 @@ class DeepPotholeExpertController:
         elif self.step == STEP_FR_CROSS:
             inside = preview.contains_wheel(front_station, self._lateral(exports, "FR"))
             self._pit_seen["FR"] = self._pit_seen["FR"] or inside
-            if self._support_is_feasible(exports, "FR"):
-                self._support_low_since = None
-            elif self._support_low_since is None:
-                self._support_low_since = float(time_s)
-            elif time_s - self._support_low_since >= self.config.support_load_debounce_s:
-                self.safety_mode = "RECOVER"
-                self._set_step(STEP_FR_TOUCHDOWN, time_s, "front_support_load_floor")
-                self._begin_recovery(time_s)
-                return
             if self._pit_seen["FR"] and front_station >= trailing - self.config.recovery_lead_m:
                 self.safety_mode = "CONTINUE"
                 self._set_step(STEP_FR_TOUCHDOWN, time_s, "front_cleared_pit")
                 self._begin_recovery(time_s)
         elif self.step == STEP_FR_TOUCHDOWN:
+            if self.safety_mode == "RECOVER":
+                return  # An emergency abort is not a completed front traversal.
             # The paper restores four-wheel support *before* lifting the next wheel:
             # Step 2 is "After the wheel 2 has passed over the pothole, the vehicle is
             # adjusted to a four-wheeled support state", and only then does Step 3 lift
@@ -1162,20 +1186,13 @@ class DeepPotholeExpertController:
         elif self.step == STEP_RR_CROSS:
             inside = preview.contains_wheel(rear_station, self._lateral(exports, "RR"))
             self._pit_seen["RR"] = self._pit_seen["RR"] or inside
-            if self._support_is_feasible(exports, "RR"):
-                self._support_low_since = None
-            elif self._support_low_since is None:
-                self._support_low_since = float(time_s)
-            elif time_s - self._support_low_since >= self.config.support_load_debounce_s:
-                self.safety_mode = "RECOVER"
-                self._set_step(STEP_RR_TOUCHDOWN, time_s, "rear_support_load_floor")
-                self._begin_recovery(time_s)
-                return
             if self._pit_seen["RR"] and rear_station >= trailing - self.config.recovery_lead_m:
                 self.safety_mode = "CONTINUE"
                 self._set_step(STEP_RR_TOUCHDOWN, time_s, "rear_cleared_pit")
                 self._begin_recovery(time_s)
         elif self.step == STEP_RR_TOUCHDOWN:
+            if self.safety_mode == "RECOVER":
+                return  # Do not report DONE after an emergency rear recovery.
             if self._recovery_finished(time_s) and self._four_wheel_recovered(exports):
                 self._set_step(STEP_DONE, time_s, "rear_recovered")
 
@@ -1298,13 +1315,81 @@ class DeepPotholeExpertController:
         return commands, predicted_map
 
     # ------------------------------------------------------------------- control
+    def _static_hold_forces(
+        self,
+        deflections: Mapping[str, float],
+        config: ExpertConfig,
+    ) -> Dict[str, float]:
+        """Forces that carry the static weight with the spring neutralised.
+
+        With the passive spring replaced by a negligible residual, each corner's
+        actuator must apply its own static load at all times so the vehicle holds its
+        ride height.  A proportional trim on top holds the strut at its static
+        deflection, i.e. position control around the static reference.
+        """
+        forces: Dict[str, float] = {}
+        for corner in CORNERS:
+            reference = 0.0 if self.static_deflection_m is None else (
+                self.static_deflection_m[corner]
+            )
+            error = deflections[corner] - reference
+            force = self.vehicle.static_load(corner) + (
+                self.sd_stiffness_n_per_m * error
+            )
+            forces[corner] = force
+        return forces
+
+    def _paper_feedforward_n(self, lifted_corner: str) -> Dict[str, float]:
+        """Paper's Step 1/3 feedforward forces (Liu et al. eq. 47-48).
+
+        For a lifted wheel the two *load-bearers* each carry half the sprung mass
+        (``ms/2``); the *lifted* wheel compresses its own spring by 0.02 m plus its
+        unsprung weight; the *diagonal partner* compresses its own spring by 0.08 m plus
+        the lifted wheel's 0.02 m plus the unsprung weight.  These are the equilibrium
+        forces a position-controlled ball-screw applies -- the paper's actuator *replaces*
+        the passive spring, so ``ms/2`` is the full load-bearing force (on this vehicle
+        ~5.9 kN per load-bearer and ~-10 kN on the diagonal partner), far larger than the
+        small travel-scaled ``-k*delta`` term this controller used previously.
+        """
+        ms = self.vehicle.sprung_mass_kg + self.vehicle.payload_mass_kg
+        mu = self.vehicle.unsprung_mass_per_corner_kg
+        if self.static_deflection_m is not None:
+            ks = {
+                c: self.vehicle.static_load(c)
+                / max(1e-4, self.static_deflection_m[c])
+                for c in CORNERS
+            }
+        else:
+            ks = {c: self.wheel_rate_n_per_m[c] for c in CORNERS}
+        odd = _diagonal_partner(lifted_corner)
+        load_bearers = [c for c in CORNERS if c != lifted_corner and c != odd]
+        faf: Dict[str, float] = {}
+        for corner in CORNERS:
+            if corner in load_bearers:
+                faf[corner] = ms / 2.0 * GRAVITY
+            elif corner == lifted_corner:
+                faf[corner] = -0.02 * ks[corner] - mu * GRAVITY
+            else:  # diagonal partner
+                faf[corner] = (
+                    -0.08 * ks[corner]
+                    - 0.02 * ks[lifted_corner]
+                    - mu * GRAVITY
+                )
+        return faf
+
     def _sd_forces(
         self,
         support: ThreeWheelSupport,
         deflections: Mapping[str, float],
         config: ExpertConfig,
+        preload: bool = False,
     ) -> Dict[str, float]:
         """Active forces from the paper's SD pattern, tracked by deflection feedback.
+
+        ``preload=True`` keeps the lifted wheel at its *static* deflection (sd = 0)
+        while the three support corners adopt the paper's attitude.  This establishes
+        the CG shift (FL/RR extend, RL compress) while the lifted wheel is still
+        grounded, so the diagonal partner stays loaded when the wheel is later unloaded.
 
         The pattern itself is the paper's and is scaled from +-0.08 m to this
         vehicle's travel envelope.  Liu et al. define SD with the opposite sign to
@@ -1316,18 +1401,38 @@ class DeepPotholeExpertController:
         (verified on this model -- a +4000 N command drives the front ride-spring
         compression down while a negative one drives it up).  So the force that opposes
         excess travel is ``+k * (travel - target)``.
+
+        The feedforward is the paper's own equilibrium force (eq. 47-48): a
+        position-controlled ball-screw applies the *full* load-bearing force ``ms/2`` on
+        the two load-bearers and compresses the diagonal partner by 0.08 m, rather than a
+        small proportional-to-deflection trim.
         """
         scale = self.sd_magnitude_m / max(1e-9, config.attitude_deflection_m)
-        # Force available on the lifted corner: enough to carry its unsprung mass, and no
-        # more.  See ``lift_force_unsprung_multiple`` for why a stiff loop here drags the
-        # body into the hole instead of raising the wheel.
+        # Force available on the lifted corner: the paper's spring term is the floor and
+        # a fraction of the actuator limit is the ceiling (the P-term legitimately needs
+        # headroom above the floor to hold the wheel at road level against the body drop).
+        lifted = support.lifted_corner
+        spring_term = self.wheel_rate_n_per_m[lifted] * config.lift_jounce_max_m
         unsprung_n = (
             self.vehicle.unsprung_mass_per_corner_kg
             * GRAVITY
             * config.lift_force_unsprung_multiple
         )
         actuator_n = min(config.force_max_n, -config.force_min_n)
-        lift_limit_n = min(unsprung_n, config.lift_force_limit_fraction * actuator_n)
+        lift_limit_n = max(
+            spring_term + unsprung_n,
+            config.lift_force_limit_fraction * actuator_n,
+        )
+        # Feedforward.  In ball-screw mode (spring neutralised) the actuator carries the
+        # whole corner load, so the feedforward is the paper's equilibrium force (eq.
+        # 47-48): ms/2 on the two load-bearers, the spring term + unsprung on the lifted
+        # wheel, and the diagonal partner's 0.08 m compression.  With the passive spring
+        # still active the feedforward is instead the force that holds the suspension at
+        # its SD target against that spring, ``-k * delta``.
+        if config.ball_screw_mode:
+            feedforward_n = self._paper_feedforward_n(lifted)
+        else:
+            feedforward_n = None
         forces: Dict[str, float] = {}
         for corner in CORNERS:
             reference = 0.0 if self.static_deflection_m is None else (
@@ -1339,18 +1444,17 @@ class DeepPotholeExpertController:
             # compresses to shed its small equilibrium load, and the two remaining
             # contacts extend to take up the transferred weight.
             sd = support.deflection_target_m[corner]
+            if preload and corner == support.lifted_corner:
+                # Preload keeps the lifted wheel grounded: no deflection target for it,
+                # only the support corners adopt the attitude.
+                sd = 0.0
             target = reference + scale * sd
             error = deflections[corner] - target
-            # Paper-faithful feedforward + proportional trim.  The feedforward is the
-            # equilibrium force that holds the suspension at its SD target against the
-            # passive spring: the passive spring changes force by k_wheel * delta when the
-            # travel moves by delta, so the actuator must apply -k_wheel * delta to hold it
-            # there.  Without this term the P-loop alone must sit at a non-zero error to
-            # produce the holding force, which is exactly the steady-state offset and the
-            # roll oscillation that then drives the roll-steer -> lateral-force -> yaw
-            # chain the paper's mechanism is designed to avoid.
-            delta = target - reference
-            feedforward = -self.wheel_rate_n_per_m[corner] * delta
+            if feedforward_n is not None:
+                feedforward = feedforward_n[corner]
+            else:
+                delta = target - reference
+                feedforward = -self.wheel_rate_n_per_m[corner] * delta
             force = feedforward + self.sd_stiffness_n_per_m * error
             if corner == support.lifted_corner:
                 # One-sided and bounded: pull the wheel up at most by its own weight, and
@@ -1536,23 +1640,101 @@ class DeepPotholeExpertController:
             self._last_control_time = float(time_s)
             support = self._active_support()
             if self.safe_stop:
-                forces = {c: 0.0 for c in CORNERS}
+                # Keep carrying the static weight after a safety latch only in ball-screw
+                # mode (spring neutralised); otherwise zeroing returns to the passive spring.
+                forces = (
+                    self._static_hold_forces(deflections, config)
+                    if config.ball_screw_mode else {c: 0.0 for c in CORNERS}
+                )
+            elif (
+                support is not None and self.gain_matrix is not None
+                and self.roll_gain_deg_per_n is not None
+            ):
+                # Preload is *not* a lift.  The passive spring already holds the static
+                # loads, so preload applies NO active force -- it is a settle delay before
+                # the lift, not a load-redistribution step.  (The incremental load-target
+                # allocator over-loads the front corners for a near-zero error on the tiny
+                # RL/RR gains, pitching the nose up and unloading the front wheels, so it
+                # must not run during preload.)
+                preload = self.step in (STEP_FR_PRELOAD, STEP_RR_PRELOAD)
+                if preload:
+                    forces = {c: 0.0 for c in CORNERS}
+                    matrix = None
+                    roll_target = 0.0
+                else:
+                    targets = dict(support.target_load_n)
+                    odd = _diagonal_partner(support.lifted_corner)
+                    targets[odd] = max(targets[odd], config.min_support_load_n + 200.0)
+                    roll_target = math.degrees(support.roll_angle_rad)
+                    roll_target = max(
+                        -config.identified_max_roll_target_deg,
+                        min(config.identified_max_roll_target_deg,
+                            roll_target * config.identified_roll_target_fraction),
+                    )
+                    matrix = {
+                        command: {load: self.gain_matrix[i][j]
+                                  for j, load in enumerate(CORNERS)}
+                        for i, command in enumerate(CORNERS)
+                    }
+                if not preload:
+                    # Diagonal load allocation (well-conditioned).  The full-matrix
+                    # incremental allocator is ill-conditioned on the tiny RL/RR own gains
+                    # (0.032/0.027) and returns ~0, so the lifted wheel is never unloaded.
+                    # A diagonal per-corner allocation unloads the lifted wheel directly;
+                    # the support-triangle coupling is then corrected by the SD height law.
+                    step_n = self._force_slew_n_per_s() * dt
+                    increment: Dict[str, float] = {}
+                    for idx, corner in enumerate(CORNERS):
+                        own = float(self.gain_matrix[idx][idx])
+                        inc = (
+                            (targets[corner] - loads[corner]) / own
+                            if abs(own) > 0.01 else 0.0
+                        )
+                        lo = max(
+                            config.force_min_n - self._applied_force[corner], -step_n,
+                        )
+                        hi = min(
+                            config.force_max_n - self._applied_force[corner], step_n,
+                        )
+                        increment[corner] = max(lo, min(hi, inc))
+                    forces = {
+                        c: self._applied_force[c] + increment[c] for c in CORNERS
+                    }
+                    # Hold the lifted wheel at road level (compress its strut), overriding
+                    # the diagonal unload which lets it droop to the rebound stop.
+                    if self.static_deflection_m is not None:
+                        sd_forces = self._sd_forces(support, deflections, config)
+                        forces[support.lifted_corner] = sd_forces[support.lifted_corner]
             elif support is not None and config.sd_tracking:
                 # The paper's own control variable: track the SD (suspension deflection)
                 # pattern.  This is the primary law: it is bounded by the travel envelope,
                 # so it cannot collapse a support corner the way the load-target allocator
                 # can when its static gain matrix mispredicts the real coupling.
-                forces = self._sd_forces(support, deflections, config)
-                roll_correction = config.roll_regulator_sign * (
-                    config.roll_gain_n_per_deg * roll_deg
+                forces = self._sd_forces(
+                    support, deflections, config,
+                    preload=self.step in (STEP_FR_PRELOAD, STEP_RR_PRELOAD),
                 )
-                roll_correction = max(
-                    -self.roll_limit_n, min(self.roll_limit_n, roll_correction)
-                )
-                for index, corner in enumerate(CORNERS):
-                    if corner == support.lifted_corner:
-                        continue
-                    forces[corner] += roll_correction * (1.0, -1.0, 1.0, -1.0)[index]
+                # The roll regulator must not fight the attitude while a wheel is
+                # airborne.  The SD pattern itself commands a non-zero roll (the paper's
+                # CG-shift mechanism): for a lifted right-front wheel the body must sit
+                # right-side-up so the CG moves left into the support triangle.  Regulating
+                # roll to *zero* during LIFT/CROSS therefore un-does the body tilt that
+                # keeps the CG inside the triangle -- measured, it halves the FL extension
+                # force and further unloads the diagonal partner, which is the tipping
+                # failure that drops the lifted wheel into the hole.
+                if self.step not in (
+                    STEP_FR_LIFT, STEP_FR_CROSS, STEP_RR_LIFT, STEP_RR_CROSS,
+                ):
+                    roll_correction = config.roll_regulator_sign * (
+                        config.roll_gain_n_per_deg * roll_deg
+                    )
+                    roll_correction = max(
+                        -self.roll_limit_n, min(self.roll_limit_n, roll_correction)
+                    )
+                    for index, corner in enumerate(CORNERS):
+                        if corner == support.lifted_corner:
+                            continue
+                        forces[corner] += roll_correction * (1.0, -1.0, 1.0, -1.0)[index]
             elif support is not None and self.gain_matrix is not None:
                 # Re-close the loop at every 10 ms sample.  The old implementation
                 # inverted the static matrix once and held that command through a
@@ -1661,13 +1843,40 @@ class DeepPotholeExpertController:
                 roll_correction = max(
                     -self.roll_limit_n, min(self.roll_limit_n, roll_correction)
                 )
-                forces = {c: self._recover_from[c] * blend for c in CORNERS}
+                # Ramp the held lift forces to the static hold (ball-screw mode) or to
+                # zero (passive spring): the recovery blends the lift/attitude command set
+                # back to the baseline the next phase needs.
+                if config.ball_screw_mode:
+                    forces = {
+                        c: self.vehicle.static_load(c)
+                        + (self._recover_from[c] - self.vehicle.static_load(c)) * blend
+                        for c in CORNERS
+                    }
+                else:
+                    forces = {c: self._recover_from[c] * blend for c in CORNERS}
+                lifted = "FR" if self.step == STEP_FR_TOUCHDOWN else "RR"
+                lifted_station = self._station(
+                    exports, "X_R1" if lifted == "FR" else "X_R2"
+                )
+                past_edge = lifted_station >= self.terrain_preview.trailing_edge_m
+                if loads[lifted] < config.min_recovered_load_n and not past_edge:
+                    # The lifted wheel is still over the hole: keep holding it up instead
+                    # of releasing the lift force (releasing it drops the wheel onto the
+                    # hole floor and then slams the exit lip).  Once the wheel is past the
+                    # trailing edge (or already touching down) the ramp lets it land.
+                    forces[lifted] = self._recover_from[lifted]
                 for index, corner in enumerate(CORNERS):
                     forces[corner] += roll_correction * (1.0, -1.0, 1.0, -1.0)[index]
                 if blend <= 0.0:
                     self._integral = {c: 0.0 for c in CORNERS}
             else:
-                forces = {c: 0.0 for c in CORNERS}
+                # APPROACH / DONE: in ball-screw mode the actuators carry the static
+                # weight continuously (they are the only suspension force); otherwise
+                # the passive spring does and the command is zero.
+                forces = (
+                    self._static_hold_forces(deflections, config)
+                    if config.ball_screw_mode else {c: 0.0 for c in CORNERS}
+                )
 
             # Rate limit and saturate, then commit as the held value.
             for corner in CORNERS:

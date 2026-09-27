@@ -1,18 +1,6 @@
-"""Build the corner-module DDEV control object from a TruckSim source case.
+"""Build the corner-module DDEV control object from TruckSim's Compact Utility Truck.
 
-Why this replaces the HD Utility Vehicle
-----------------------------------------
-The HD Utility Vehicle is ``VEHICLE_CODE s_s``: solid (rigid) axles front *and*
-rear.  Its eight actuator channels are independently *addressable* — that was
-verified — but the wheel vertical response is not independent, because the two
-wheels on each axle are joined by a rigid beam.  Measured on that model, a force at
-one spring seat changes the diagonally opposite wheel's load by 1.5x more than its
-own corner's, and building the paper's three-point support with actuators would
-have needed roughly 300 kN per corner.
-
-The paper being reproduced (Liu et al., IEEE/ASME ToM 2024) uses a corner-module
-vehicle whose four corners are genuinely independent.  This script therefore builds
-the control object from TruckSim's ``Compact Utility Truck (I_I)``:
+The selected source is ``Compact Utility Truck (I_I)``:
 
 * ``VEHICLE_CODE i_i`` — **independent front and independent rear**;
 * ``Suspension: Independent System Kinematics`` datasets on both axles;
@@ -38,7 +26,7 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
 from ddevsim.channels import write_contract  # noqa: E402
-from ddevsim.hd_ddev_case import build_hd_ddev_case, detect_vehicle_code  # noqa: E402
+from ddevsim.vehicle_case import build_vehicle_case, detect_vehicle_code  # noqa: E402
 from ddevsim.pothole_case import SCENARIO_EXPORTS  # noqa: E402
 
 #: TruckSim's cached run of ``Compact Utility Truck (I_I)``: a single-unit, two-axle
@@ -99,10 +87,31 @@ def main(argv=None) -> int:
             "stop beyond the static position; 0 keeps the stock value."
         ),
     )
+    parser.add_argument(
+        "--rebound-stop-mm",
+        type=float,
+        default=None,
+        help=(
+            "Rebound-stop onset travel (positive). The feasibility report shows the "
+            "0.20 m pit needs more droop room for the lifted wheel and the landing "
+            "impact; 100 mm (the paper's ~0.1 m each way) is a reasonable value. "
+            "Default None keeps the stock 61 mm."
+        ),
+    )
+    parser.add_argument(
+        "--neutralize-springs",
+        action="store_true",
+        help=(
+            "Replace the passive springs with a negligible residual rate so the "
+            "IMP_FS active force carries the whole corner load, reproducing the "
+            "paper's position-controlled ball-screw (which replaces the spring)."
+        ),
+    )
     args = parser.parse_args(argv)
 
     rate = args.steer_spring_rate_n_per_mm or None
     jounce = args.steer_jounce_stop_mm or None
+    rebound = args.rebound_stop_mm
     payload_scale = args.payload_scale if args.payload_scale != 1.0 else None
 
     source_text = args.source.read_text(encoding="utf-8", errors="replace")
@@ -113,7 +122,7 @@ def main(argv=None) -> int:
             "I_I (independent front and rear)" % code
         )
 
-    artifacts = build_hd_ddev_case(
+    artifacts = build_vehicle_case(
         args.source,
         args.target,
         program_dir=Path(r"F:\TruckSim2019\TruckSim2019.0_Prog"),
@@ -127,6 +136,8 @@ def main(argv=None) -> int:
         steer_spring_rate_n_per_mm=rate,
         payload_scale=payload_scale,
         steer_jounce_stop_mm=jounce,
+        rebound_stop_mm=rebound,
+        neutralize_springs_flag=args.neutralize_springs,
     )
     write_contract(args.target / "interface_contract.json")
 

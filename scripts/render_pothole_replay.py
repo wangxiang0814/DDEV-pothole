@@ -14,7 +14,7 @@ from ddevsim.replay_video import render_engineering_replay
 
 
 def main() -> int:
-    run_dir = ROOT / "runs" / "hd_utility_ddev_single_wheel_deep_pothole"
+    run_dir = ROOT / "runs" / "corner_module_ddev_single_wheel_deep_pothole"
     video_dir = run_dir / "video"
     result = render_engineering_replay(
         run_dir / "data" / "controller_and_dynamics.csv",

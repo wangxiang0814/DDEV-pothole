@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ddevsim.hd_ddev_case import parse_protected_parameters
+from ddevsim.vehicle_case import parse_protected_parameters
 from ddevsim.pothole_case import (
     PotholeScenario,
     SCENARIO_EXPORTS,
@@ -207,17 +207,17 @@ class PotholeCaseTests(unittest.TestCase):
             source_run.write_text(SOURCE, encoding="utf-8")
             source_sim = root / "source.sim"
             source_sim.write_text(
-                "SIMFILE\nFILEBASE output\\hd_utility_ddev\nINPUT run_all.par\n"
-                "INPUTARCHIVE output\\hd_utility_ddev_all.par\nECHO output\\hd_utility_ddev_echo.par\n"
-                "FINAL output\\hd_utility_ddev_end.par\nLOGFILE output\\hd_utility_ddev_log.txt\n"
-                "ERDFILE output\\hd_utility_ddev.erd\nPORTS_IMP 8\nPORTS_EXP 16\nEND\n",
+                "SIMFILE\nFILEBASE output\\corner_module_ddev\nINPUT run_all.par\n"
+                "INPUTARCHIVE output\\corner_module_ddev_all.par\nECHO output\\corner_module_ddev_echo.par\n"
+                "FINAL output\\corner_module_ddev_end.par\nLOGFILE output\\corner_module_ddev_log.txt\n"
+                "ERDFILE output\\corner_module_ddev.erd\nPORTS_IMP 8\nPORTS_EXP 16\nEND\n",
                 encoding="ascii",
             )
             artifacts = build_single_wheel_pothole_case(source_run, source_sim, root / "case")
             run_all = artifacts["run_all"].read_text(encoding="utf-8")
             simfile = artifacts["simfile"].read_text(encoding="ascii")
             self.assertIn("FILEBASE output\\single_wheel_deep_pothole", simfile)
-            self.assertNotIn("hd_utility_ddev", simfile)
+            self.assertNotIn("corner_module_ddev", simfile)
             # PORTS_EXP is derived from the EXPORT lines actually present, so that a
             # source which already carries scenario channels cannot desynchronise.
             exports = len([l for l in run_all.splitlines() if l.startswith("EXPORT ")])
@@ -233,10 +233,10 @@ class PotholeCaseTests(unittest.TestCase):
             source_run.write_text(SOURCE, encoding="utf-8")
             source_sim = root / "source.sim"
             source_sim.write_text(
-                "SIMFILE\nFILEBASE output\\hd_utility_ddev\nINPUT run_all.par\n"
-                "INPUTARCHIVE output\\hd_utility_ddev_all.par\nECHO output\\hd_utility_ddev_echo.par\n"
-                "FINAL output\\hd_utility_ddev_end.par\nLOGFILE output\\hd_utility_ddev_log.txt\n"
-                "ERDFILE output\\hd_utility_ddev.erd\nPORTS_IMP 8\nPORTS_EXP 16\nEND\n",
+                "SIMFILE\nFILEBASE output\\corner_module_ddev\nINPUT run_all.par\n"
+                "INPUTARCHIVE output\\corner_module_ddev_all.par\nECHO output\\corner_module_ddev_echo.par\n"
+                "FINAL output\\corner_module_ddev_end.par\nLOGFILE output\\corner_module_ddev_log.txt\n"
+                "ERDFILE output\\corner_module_ddev.erd\nPORTS_IMP 8\nPORTS_EXP 16\nEND\n",
                 encoding="ascii",
             )
             artifacts = build_single_wheel_pothole_case(
@@ -245,7 +245,7 @@ class PotholeCaseTests(unittest.TestCase):
             simfile = artifacts["simfile"].read_text(encoding="ascii")
             self.assertIn("FILEBASE output\\depth_010", simfile)
             self.assertIn("depth_010_all.par", simfile)
-            self.assertNotIn("hd_utility_ddev", simfile)
+            self.assertNotIn("corner_module_ddev", simfile)
 
     def test_scenario_exposes_pothole_geometry_for_the_controller(self):
         scenario = PotholeScenario()
