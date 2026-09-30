@@ -16,6 +16,8 @@
 
 **新增边界和速度验证：**同一独立车型副本在宽 1.1 m、深 0.25 m 的坑槽上完成 FR→RR 全循环 `PASS`；原基线坑槽为宽 0.9 m、深 0.20 m。该边界工况的车辆指标基本不变，符合抬起轮未接触坑底的假设，见[坑槽边界摘要](evidence/static_fr_ii/full_right_side_pit_boundary_summary.json)。两轮都用 3 km/h 档时，FR 坑内 3.04–3.25 km/h、RR 3.05–3.20 km/h，全循环 `PASS`，见[双轮 3 km/h 摘要](evidence/static_fr_ii/full_right_side_3k_summary.json)。此速度下 RR 最小 ZMP 重心坐标 0.0553、坑上最低净空 15.4 mm，已接近 0.05／10 mm 门槛；4–7 km/h 尚未验证。
 
+**较低附着工况：**物理路面摩擦系数从 0.7 降至 0.6 后，FR→RR 双轮 3 km/h 完整循环单次 `PASS`，见[μ=0.6 结果](evidence/static_fr_ii/full_right_side_3k_mu06_summary.json)。RR 最低坑上净空仅 10.14 mm，最大横向偏差 4.77 cm，几乎触及验收线。RR 在轮载已卸至近零后先进入姿态调整阶段，最终过坑净空门槛仍是 10 mm；不能把这次边界通过解释为充分的扰动鲁棒性。
+
 **当前限制：**预载仍主要依据固定车型的成功指令，反馈修正幅度有限；尚未在坑槽和扰动的参数矩阵中验证泛化。按当前研究范围，载荷质量与位置保持固定。移动试验仅在隔离副本中调整了悬架回弹限位和轮胎低速参数，均非硬件额定值。三轮轮载无需均载。后续按[审核通过的开发方案](docs/FR_LIFT_CRAWL_DEVELOPMENT_PLAN_20260929.md)推进闭环预载、协同分配及鲁棒性。旧的 `expert_controller.py` 是早期移动越坑研究代码，不代表当前 FR 控制回路。
 
 ## 仓库结构
@@ -48,6 +50,7 @@ python scripts/plot_closed_loop_run.py runs/fr_closed_loop_crawl_recheck
 python scripts/run_right_side_full_cycle.py --output runs/right_side_full_cycle_recheck
 python scripts/run_right_side_full_cycle.py --output runs/right_side_boundary_recheck --pit-width-m 1.1 --pit-depth-m 0.25
 python scripts/run_right_side_full_cycle.py --output runs/right_side_3k_recheck --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3.0 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3.0
+python scripts/run_right_side_full_cycle.py --output runs/right_side_3k_mu06_recheck --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3.0 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3.0 --road-friction 0.6
 ```
 
 压缩预载轨迹只保存仿真时间及八个输入通道；复核命令在相同隔离车型上重放它。此命令用于**重复已验证的静态试验**，不等于从任意初始工况自动规划抬轮。新车型或新载荷必须先重新辨识和验证可行性。四角力/速率限目前是仿真软件设定，未标称为硬件额定值；详见 [I/O 映射](IO_MAPPING.md)和[控制对象说明](docs/control_object.md)。

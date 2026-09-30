@@ -303,7 +303,7 @@ class RearCycleConfig:
 REAR_CYCLE_RUN = RearCycleConfig()
 TUNED_REAR_RUN = replace(
     REAR_CYCLE_RUN,
-    lift_entry_clearance_m=0.005,
+    lift_entry_clearance_m=0.003,
     posture_fl_force_n=-500.0,
     posture_hold_fl_force_n=-300.0,
     posture_target_clearance_m=0.035,

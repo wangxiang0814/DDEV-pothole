@@ -304,6 +304,7 @@ def main() -> None:
     parser.add_argument("--front-brake-lead-m", type=float)
     parser.add_argument("--pit-width-m", type=float)
     parser.add_argument("--pit-depth-m", type=float)
+    parser.add_argument("--road-friction", type=float)
     args = parser.parse_args()
     if ((args.rear_target_speed_kph is None) !=
             (args.rear_min_pit_speed_kph is None)):
@@ -321,7 +322,8 @@ def main() -> None:
             front_run.CFG,
             brake_start_before_far_edge_m=args.front_brake_lead_m)
     output = args.output.resolve()
-    model, scenario = front_run._prepare_model(output, crawl=True)
+    model, scenario = front_run._prepare_model(
+        output, crawl=True, road_friction=args.road_friction)
     if (args.front_brake_lead_m is not None and
             args.front_brake_lead_m >= float(scenario["length_m"])):
         parser.error("front brake lead must be shorter than pit length")
