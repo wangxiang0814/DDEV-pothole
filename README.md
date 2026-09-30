@@ -6,7 +6,15 @@
 
 **已完成原生静态验证：**平地、零电机转矩，FR 卸载并离地，FL/RL/RR 三轮正载，CoM 与轮载 ZMP 位于支撑三角形内，FR 净空超过 10 mm 持续 5.66 s，随后平滑落轮并恢复四轮。保持段 FL/FR/RL/RR 轮载约为 `6396/0/1229/5710 N`，ZMP 最小重心坐标裕度约 `0.092`。可审阅的[精简证据](evidence/static_fr_ii/lift_summary.json)与[轨迹图](evidence/static_fr_ii/lift_evidence.png)随仓库保存。
 
-**当前限制：**这是一段经过原生仿真验证的预载轨迹重放、局部悬架力调整和在线异常恢复试验，不是已经闭环验证的低速蠕行控制器。三轮轮载无需均载；下一阶段以支撑裕度、每轮可用摩擦力、横摆与轨迹误差为约束，验证三轮扭矩分配及扰动下的重心维持。旧的 `expert_controller.py` 是移动越坑研究代码，不代表当前 FR 静态试验的控制回路。
+**已完成单工况三轮蠕行：**在隔离的 I_I 模型和现有右轮迹坑槽上，预载轨迹按实测轮载误差加快／暂停，FR 离地后保持 5 s，以 2.04–2.13 km/h 跨坑，停车后落轮，原生 TruckSim 结果为 `PASS`。抬轮开始时间从约 48 s 缩短至 34.34 s；运动／停车的三支撑轮最小轮载约 881 N，最小轮载稳定点重心坐标裕度 0.0665，最大横向偏差约 2.84 cm。控制器 50 Hz 更新；求解积分步长仍为 0.5 ms。见[精简结果](evidence/static_fr_ii/closed_loop_2k_summary.json)。
+
+**已完成 3 km/h 档单工况验证：**固定载荷和同一坑槽下，目标速度 3.3 km/h，坑内实测 3.13–3.15 km/h；FR 净空最低 37.3 mm，三支撑轮最低轮载 730 N，运动中最小轮载压力中心三角形裕度 0.05495，横向偏差最大 3.55 cm。FR 越过坑槽后车辆停稳，RR 在坑前约 0.21 m，随后落轮并恢复四轮，原生结果为 `PASS`。减速从 FR 接近坑槽远缘时开始，落轮仍要求 FR 完全越过且 RR 留在坑前。见[3 km/h 精简结果](evidence/static_fr_ii/closed_loop_3k_summary.json)。4–7 km/h 尚未经验证；当前坑前停车距离是主要限制。
+
+**FR→RR 完整循环已有单工况 PASS：**`scripts/run_right_side_full_cycle.py` 在一个原生 TruckSim 运行中串联 FR 与 RR 的卸载、抬轮、三轮稳定保持、约 2 km/h 右轮迹过坑、停车、落轮和四轮恢复。RR 使用 FL/FR/RL 支撑三角形。最近的完整运行中，RR 保持 5 s，三支撑轮最低 942 N，最小 ZMP 三角形坐标 0.0707，坑上最低净空 39.9 mm，最大横向偏差 2.19 cm，最终全部验收项为 `PASS`。见[完整循环精简结果](evidence/static_fr_ii/full_right_side_2k_summary.json)。
+
+该 `PASS` 使用**独立的仿真车型副本**：原始 I_I 悬架运动学表只覆盖 ±70 mm，而本实验的扩展回弹达到约 150 mm；运行副本将表格超出原范围的部分设为边界值，并把随悬架压缩产生的轮心横向移动系数设为原值的 50%。原始车型文件和已有八路接口保持原样，完整循环副本额外接入第九路方向盘角输入用于横向闭环。未调整运动学的原模型上，RR 静止卸载会造成约 13 cm 横移，尚不满足直线要求。当前结论只针对固定质量、载荷、坑槽和这一仿真车型设置；更高速度及参数泛化仍待验证。
+
+**当前限制：**预载仍主要依据固定车型的成功指令，反馈修正幅度有限；尚未在坑槽和扰动的参数矩阵中验证泛化。按当前研究范围，载荷质量与位置保持固定。移动试验仅在隔离副本中调整了悬架回弹限位和轮胎低速参数，均非硬件额定值。三轮轮载无需均载。后续按[审核通过的开发方案](docs/FR_LIFT_CRAWL_DEVELOPMENT_PLAN_20260929.md)推进闭环预载、协同分配及鲁棒性。旧的 `expert_controller.py` 是早期移动越坑研究代码，不代表当前 FR 控制回路。
 
 ## 仓库结构
 
@@ -32,6 +40,10 @@ $env:PYTHONPATH = 'src'
 python -m pytest -q
 python scripts/run_static_fr_lift_probe.py --m1 evidence/static_fr_ii --preload evidence/static_fr_ii/preload_result.json --output runs/fr_static_ii_recheck --rl-support-n -4500 --fr-lift-n -100
 python scripts/plot_static_fr_lift.py runs/fr_static_ii_recheck/result.json
+python scripts/run_static_fr_closed_loop.py --crawl --output runs/fr_closed_loop_crawl_recheck
+python scripts/run_static_fr_closed_loop.py --crawl --target-speed-kph 3.3 --min-pit-speed-kph 3.0 --output runs/fr_closed_loop_crawl_3k_recheck
+python scripts/plot_closed_loop_run.py runs/fr_closed_loop_crawl_recheck
+python scripts/run_right_side_full_cycle.py --output runs/right_side_full_cycle_recheck
 ```
 
 压缩预载轨迹只保存仿真时间及八个输入通道；复核命令在相同隔离车型上重放它。此命令用于**重复已验证的静态试验**，不等于从任意初始工况自动规划抬轮。新车型或新载荷必须先重新辨识和验证可行性。四角力/速率限目前是仿真软件设定，未标称为硬件额定值；详见 [I/O 映射](IO_MAPPING.md)和[控制对象说明](docs/control_object.md)。

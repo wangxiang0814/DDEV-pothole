@@ -30,3 +30,13 @@ def test_inside_point_is_unchanged_and_bad_load_is_rejected():
     assert result.edge_distance_m == pytest.approx(math.sqrt(2) / 3)
     with pytest.raises(ValueError):
         assess_support(CONTACTS, {**loads, "FR": -1.0}, (0, 0), 0.05)
+
+
+def test_rr_lift_uses_fl_fr_rl_triangle():
+    loads = {"FL": 10.0, "FR": 10.0, "RL": 10.0, "RR": 10.0}
+    result = assess_support(CONTACTS, loads, (0.0, 0.0), 0.05,
+                            lifted_corner="RR")
+    assert result.support_corners == ("FL", "FR", "RL")
+    assert result.zmp_xy == pytest.approx((0.0, 0.0))
+    assert result.lambda_min == pytest.approx(0.0)
+    assert result.target_zmp_xy == pytest.approx((0.05, 0.05))

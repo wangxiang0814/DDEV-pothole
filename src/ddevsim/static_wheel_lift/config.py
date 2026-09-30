@@ -1,6 +1,9 @@
 """Simulation-only limits for the I_I static FR preload gate."""
 
-from dataclasses import dataclass
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass, replace
 
 from .identification_settle import IdentificationSettleLimits
 
@@ -168,7 +171,15 @@ LIFT_PROBE = LiftProbeConfig()
 @dataclass(frozen=True)
 class ClosedLoopRunConfig:
     control_period_s: float = 0.02
+    wheel_load_filter_cutoff_hz: float = 5.0
     preload_feedback_start_s: float = 7.0
+    preload_max_reference_rate: float = 1.5
+    preload_slow_tracking_error_n: float = 200.0
+    preload_pause_tracking_error_n: float = 500.0
+    preload_end_wait_limit_s: float = 3.0
+    preload_total_limit_s: float = 60.0
+    gain_blend_swing_fr_load_n: float = 50.0
+    gain_blend_stance_fr_load_n: float = 300.0
     ready_dwell_s: float = 0.5
     three_wheel_hold_s: float = 5.0
     lift_ramp_s: float = 4.0
@@ -177,8 +188,12 @@ class ClosedLoopRunConfig:
     return_ramp_s: float = 12.0
     fr_lift_force_n: float = -100.0
     rl_support_force_n: float = -4500.0
-    fr_feedback_limit_n: float = 300.0
-    support_feedback_limit_n: float = 300.0
+    fr_feedback_limit_n: float = 500.0
+    fr_feedback_slew_n_s: float = 400.0
+    fr_feedback_tracking_gain: float = 0.1
+    fr_feedback_deadband_n: float = 10.0
+    support_feedback_limit_n: float = 500.0
+    max_continuous_support_saturation_s: float = 0.5
     support_floor_n: float = 500.0
     lambda_target: float = 0.05
     lambda_abort: float = 0.015
@@ -195,12 +210,14 @@ class ClosedLoopRunConfig:
     crawl_speed_kph: float = 2.2
     crawl_min_speed_kph: float = 2.0
     crawl_max_speed_kph: float = 8.0
-    crawl_max_lateral_error_m: float = 0.1
+    crawl_max_lateral_error_m: float = 0.05
     crawl_max_yaw_error_deg: float = 2.0
     crossing_clearance_m: float = 0.30
+    brake_start_before_far_edge_m: float = 0.15
+    rear_stop_clearance_m: float = 0.05
     stop_speed_kph: float = 0.1
     stop_dwell_s: float = 1.0
-    stop_ramp_s: float = 1.8
+    stop_ramp_s: float = 2.2
     stop_max_brake_nm: float = 80.0
     torque_release_s: float = 1.0
     max_crawl_s: float = 40.0
@@ -213,3 +230,99 @@ class ClosedLoopRunConfig:
 
 
 CLOSED_LOOP_RUN = ClosedLoopRunConfig()
+
+
+@dataclass(frozen=True)
+class RearCycleConfig:
+    control_period_s: float = 0.02
+    settle_dwell_s: float = 1.0
+    preload_ramp_s: float = 8.0
+    preload_ready_timeout_s: float = 12.0
+    preload_fl_force_n: float = -3200.0
+    preload_fr_force_n: float = 6400.0
+    preload_feedback_fl_per_fr: float = -0.5
+    preload_feedback_limit_n: float = 1000.0
+    preload_feedback_slew_n_s: float = 1000.0
+    preload_feedback_gain: float = 0.1
+    preload_feedback_deadband_n: float = 10.0
+    max_continuous_feedback_saturation_s: float = 0.5
+    sim_force_limit_n: float = 18200.0
+    sim_force_slew_n_s: float = 45400.0
+    lift_force_n: float = -200.0
+    lift_ramp_s: float = 4.0
+    lift_timeout_s: float = 8.0
+    lift_entry_clearance_m: float = 0.01
+    posture_fl_force_n: float = -250.0
+    posture_hold_fl_force_n: float = -100.0
+    posture_ramp_s: float = 1.0
+    posture_target_roll_deg: float = -7.2
+    posture_target_clearance_m: float = 0.045
+    posture_release_s: float = 0.5
+    posture_settle_s: float = 1.0
+    posture_timeout_s: float = 4.0
+    posture_stop_release_s: float = 0.8
+    stop_roll_counter_fl_n: float = 250.0
+    stop_roll_counter_ramp_s: float = 0.5
+    hold_s: float = 5.0
+    lower_ramp_s: float = 4.0
+    return_ramp_s: float = 12.0
+    ready_dwell_s: float = 0.5
+    support_floor_n: float = 500.0
+    wheel_unloaded_n: float = 100.0
+    lambda_safe: float = 0.05
+    lambda_abort: float = 0.015
+    clearance_m: float = 0.01
+    lip_clearance_m: float = 0.005
+    attitude_limit_deg: float = 9.0
+    stationary_kph: float = 0.1
+    travel_rebound_abort_mm: float = -149.0
+    travel_jounce_abort_mm: float = 155.0
+    tyre_radius_m: float = 0.263
+    tyre_half_track_m: float = 0.625
+    crawl_speed_kph: float = 2.2
+    crawl_accel_ramp_s: float = 2.0
+    min_pit_speed_kph: float = 2.0
+    max_lateral_error_m: float = 0.05
+    pit_evaluation_edge_trim_m: float = 0.1
+    crawl_yaw_kp_nm_per_deg: float = 80.0
+    crawl_yaw_kd_nm_per_deg_s: float = 25.0
+    crawl_lateral_kp_n_per_m: float = 800.0
+    steer_lateral_deg_per_m: float = 1000.0
+    steer_yaw_deg_per_deg: float = 15.0
+    steer_limit_deg: float = 220.0
+    steer_slew_deg_s: float = 400.0
+    brake_start_before_far_edge_m: float = 0.15
+    crossing_clearance_m: float = 0.30
+    stop_ramp_s: float = 2.2
+    stop_dwell_s: float = 1.0
+    stop_max_brake_nm: float = 80.0
+    max_crawl_s: float = 30.0
+
+
+REAR_CYCLE_RUN = RearCycleConfig()
+TUNED_REAR_RUN = replace(
+    REAR_CYCLE_RUN,
+    lift_entry_clearance_m=0.005,
+    posture_fl_force_n=-500.0,
+    posture_hold_fl_force_n=-300.0,
+    posture_target_clearance_m=0.035,
+    attitude_limit_deg=10.0,
+)
+
+
+@dataclass(frozen=True)
+class RightSideModelConfig:
+    clamp_ride_tables: bool = True
+    lateral_ride_scale: float = 0.5
+
+
+RIGHT_SIDE_MODEL = RightSideModelConfig()
+
+
+def speed_trial_config(target_kph: float, min_pit_kph: float) -> ClosedLoopRunConfig:
+    """Keep requested speed and native acceptance bound in one trial config."""
+    if (not math.isfinite(target_kph) or not math.isfinite(min_pit_kph) or
+            not 0. < min_pit_kph <= target_kph <= CLOSED_LOOP_RUN.crawl_max_speed_kph):
+        raise ValueError("invalid crawl speed trial")
+    return replace(CLOSED_LOOP_RUN, crawl_speed_kph=target_kph,
+                   crawl_min_speed_kph=min_pit_kph)

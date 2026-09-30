@@ -12,6 +12,128 @@ from dataclasses import dataclass
 import numpy as np
 
 
+def blend_contact_gain(static_gain, swing_gain, fr_load_n: float, *,
+                       swing_n: float, stance_n: float) -> np.ndarray:
+    """Interpolate measured local gains across a lightly loaded FR contact."""
+    static = np.asarray(static_gain, dtype=float)
+    swing = np.asarray(swing_gain, dtype=float)
+    if (static.shape != (3, 3) or swing.shape != (3, 3) or
+            not np.isfinite(static).all() or not np.isfinite(swing).all() or
+            not all(math.isfinite(x) for x in (fr_load_n, swing_n, stance_n)) or
+            not 0. <= swing_n < stance_n or fr_load_n < 0.):
+        raise ValueError("invalid contact gain schedule")
+    swing_weight = float(np.clip((stance_n - fr_load_n) /
+                                 (stance_n - swing_n), 0., 1.))
+    return (1. - swing_weight) * static + swing_weight * swing
+
+
+class PreloadProgress:
+    """Advance a validated force trace only as quickly as loads can follow."""
+
+    def __init__(self, *, start_s: float, end_s: float, max_rate: float,
+                 slow_error_n: float, pause_error_n: float):
+        if (not 0. <= start_s < end_s or max_rate < 1. or
+                not 0. <= slow_error_n < pause_error_n):
+            raise ValueError("invalid preload progress limits")
+        self.start_s = start_s
+        self.end_s = end_s
+        self.max_rate = max_rate
+        self.slow_error_n = slow_error_n
+        self.pause_error_n = pause_error_n
+        self.progress_s = 0.
+        self.last_time_s: float | None = None
+        self.rate = 1.
+
+    def update(self, now_s: float, *, load_error_n: float) -> float:
+        if not math.isfinite(now_s) or not math.isfinite(load_error_n) or load_error_n < 0.:
+            raise ValueError("invalid preload observation")
+        if self.last_time_s is None:
+            self.progress_s = min(now_s, self.start_s)
+            self.last_time_s = now_s
+            return self.progress_s
+        if now_s <= self.last_time_s:
+            raise ValueError("preload timestamps must increase")
+        before_start = max(0., min(now_s, self.start_s) -
+                           min(self.last_time_s, self.start_s))
+        active_dt = max(0., now_s - max(self.last_time_s, self.start_s))
+        self.rate = (0. if load_error_n >= self.pause_error_n else
+                     1. if load_error_n >= self.slow_error_n else self.max_rate)
+        self.progress_s = min(self.end_s, self.progress_s + before_start +
+                              self.rate * active_dt)
+        self.last_time_s = now_s
+        return self.progress_s
+
+
+class WheelLoadFilter:
+    """First-order filter for FSM contact gates; raw loads remain available."""
+
+    def __init__(self, *, cutoff_hz: float, wheel_count: int):
+        if cutoff_hz <= 0. or wheel_count <= 0:
+            raise ValueError("invalid wheel-load filter settings")
+        self.cutoff_hz = cutoff_hz
+        self.wheel_count = wheel_count
+        self.value: np.ndarray | None = None
+        self.last_time_s: float | None = None
+
+    def update(self, now_s: float, raw_n) -> np.ndarray:
+        raw = np.asarray(raw_n, dtype=float)
+        if (raw.shape != (self.wheel_count,) or not np.isfinite(raw).all()
+                or np.any(raw < 0.) or not math.isfinite(now_s)):
+            raise ValueError("invalid wheel-load observation")
+        if self.last_time_s is None:
+            self.value = raw.copy()
+        else:
+            dt = now_s - self.last_time_s
+            if dt <= 0.:
+                raise ValueError("wheel-load timestamps must increase")
+            tau = 1. / (2. * math.pi * self.cutoff_hz)
+            self.value += dt / (tau + dt) * (raw - self.value)
+        self.last_time_s = now_s
+        return self.value.copy()
+
+
+class ScalarLoadFeedback:
+    """Rate-limited FR command correction using a measured local gain."""
+
+    def __init__(self, *, gain_load_per_force: float,
+                 control_period_s: float,
+                 correction_limit_n: float, slew_n_s: float,
+                 tracking_gain: float, deadband_n: float):
+        if (not all(math.isfinite(x) for x in (
+                gain_load_per_force, control_period_s, correction_limit_n, slew_n_s,
+                tracking_gain, deadband_n)) or
+                abs(gain_load_per_force) < 1e-6 or
+                min(control_period_s, correction_limit_n,
+                    slew_n_s, tracking_gain) <= 0. or
+                deadband_n < 0.):
+            raise ValueError("invalid scalar load-feedback settings")
+        self.gain = gain_load_per_force
+        self.period_s = control_period_s
+        self.limit_n = correction_limit_n
+        self.slew_n_s = slew_n_s
+        self.tracking_gain = tracking_gain
+        self.deadband_n = deadband_n
+        self.correction_n = 0.
+        self.last_time_s: float | None = None
+
+    def update(self, now_s: float, *, measured_n: float,
+               reference_n: float) -> float:
+        if not all(math.isfinite(v) for v in (now_s, measured_n, reference_n)):
+            raise ValueError("invalid scalar load observation")
+        if self.last_time_s is not None and now_s <= self.last_time_s:
+            raise ValueError("scalar load timestamps must increase")
+        dt = self.period_s if self.last_time_s is None else now_s - self.last_time_s
+        self.last_time_s = now_s
+        error = reference_n - measured_n
+        error = math.copysign(max(abs(error) - self.deadband_n, 0.), error)
+        requested = self.tracking_gain * error / self.gain
+        self.correction_n = float(np.clip(
+            self.correction_n + np.clip(requested, -self.slew_n_s * dt,
+                                        self.slew_n_s * dt),
+            -self.limit_n, self.limit_n))
+        return self.correction_n
+
+
 @dataclass(frozen=True)
 class SupportFeedbackConfig:
     filter_cutoff_hz: float = 5.0
@@ -93,6 +215,7 @@ class CrawlFeedbackConfig:
     max_torque_nm: float = 500.0
     max_torque_slew_nm_s: float = 1000.0
     integral_limit_n: float = 400.0
+    traction_utilization: float = 0.8
 
 
 class CrawlTorqueFeedback:
@@ -128,23 +251,32 @@ class CrawlTorqueFeedback:
         dt = self.period_s if self.last_update_s is None else now_s - self.last_update_s
         self.last_update_s = now_s
         speed_error = (target_kph - vx_kph) / 3.6
-        self.integral_n = float(np.clip(
+        candidate_integral = float(np.clip(
             self.integral_n + self.config.speed_ki_n_per_m * speed_error * dt,
             -self.config.integral_limit_n, self.config.integral_limit_n))
-        forward_n = (self.config.speed_kp_n_per_m_s * speed_error +
-                     self.integral_n +
-                     (self.config.rolling_force_n if target_kph > 0 else 0.))
         yaw_moment_nm = (-self.config.yaw_kp_nm_per_deg * yaw_deg -
                          self.config.yaw_kd_nm_per_deg_s * yaw_rate_deg_s -
                          self.config.lateral_kp_n_per_m * lateral_m)
-        rl_n = self.config.rl_force_fraction * forward_n
-        remainder = forward_n - rl_n
-        difference = yaw_moment_nm / self.half_track_m + rl_n
-        forces = np.array([(remainder - difference) / 2., rl_n,
-                           (remainder + difference) / 2.])
-        cap = np.minimum(self.friction * loads * self.radius_m,
+        def requested_torque(integral_n: float) -> np.ndarray:
+            forward_n = (self.config.speed_kp_n_per_m_s * speed_error +
+                         integral_n +
+                         (self.config.rolling_force_n if target_kph > 0 else 0.))
+            rl_n = self.config.rl_force_fraction * forward_n
+            remainder = forward_n - rl_n
+            difference = yaw_moment_nm / self.half_track_m + rl_n
+            forces = np.array([(remainder - difference) / 2., rl_n,
+                               (remainder + difference) / 2.])
+            return forces * self.radius_m
+
+        cap = np.minimum(self.config.traction_utilization * self.friction *
+                         loads * self.radius_m,
                          self.config.max_torque_nm)
-        desired = np.clip(forces * self.radius_m, -cap, cap)
+        requested = requested_torque(candidate_integral)
+        if np.any(np.abs(requested) > cap + 1e-8) and speed_error != 0.:
+            requested = requested_torque(self.integral_n)
+        else:
+            self.integral_n = candidate_integral
+        desired = np.clip(requested, -cap, cap)
         slew = self.config.max_torque_slew_nm_s * dt
         self.torque_nm += np.clip(desired - self.torque_nm, -slew, slew)
         return self.torque_nm.copy()

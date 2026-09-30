@@ -21,3 +21,5 @@
 | FR 净空 | 目前无独立 contact flag。当前**平地隔离模型**使用 `Z_R1 − Zgnd_R1i − R0`，并同时要求 FR 近零轮载；坑槽场景必须重新计算真实轮胎包络。 |
 
 车型参数、接口合同与软件限幅分别见 `models/corner_module_ddev/`、`src/ddevsim/interface_validation.py`、`src/ddevsim/static_wheel_lift/config.py`。当前成功试验的可移植模型和结果见 [evidence/static_fr_ii](evidence/static_fr_ii)。该隔离车型使用 200 kg 载荷后移 350 mm、左移 500 mm；力/速率限均为仿真软件限幅，不是硬件额定值。
+
+FR→RR 完整循环的独立运行副本额外接入第九路 `IMP_STEER_SW`（`REPLACE`，方向盘角，度），用于三轮蠕行时修正横向偏差。原始车型及已有八路控制入口保持原样。TruckSim 自带的 `Run_imp_tab.txt` 和导入通道数据集将该变量定义为方向盘角；本机负角脉冲试验使正偏航减小，证据保存在本机 `runs/right_side_steer_probe_neg60/`。这是软件转向输入，尚无实体转向执行器约束。

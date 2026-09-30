@@ -28,10 +28,12 @@ from ddevsim.contact_geometry import GEOMETRY_EXPORTS
 from ddevsim.interface_validation import EXPORT_NAMES, IMPORT_NAMES
 from ddevsim.pothole_case import SCENARIO_EXPORTS
 from ddevsim.static_wheel_lift.closed_loop import (
-    CrawlTorqueFeedback, SupportForceFeedback,
+    CrawlTorqueFeedback, PreloadProgress, ScalarLoadFeedback,
+    SupportForceFeedback, blend_contact_gain,
+    WheelLoadFilter,
 )
 from ddevsim.static_wheel_lift.command_trace import load_command_trace
-from ddevsim.static_wheel_lift.config import CLOSED_LOOP_RUN as CFG
+from ddevsim.static_wheel_lift.config import CLOSED_LOOP_RUN as CFG, speed_trial_config
 from ddevsim.static_wheel_lift.quintic_trajectory import quintic_step
 from ddevsim.static_wheel_lift.support_geometry import assess_support
 
@@ -59,7 +61,11 @@ def _barycentric(triangle: np.ndarray, point: np.ndarray) -> np.ndarray:
     return np.linalg.solve(frame, np.r_[point, 1.])
 
 
-def _prepare_model(output: Path, *, crawl: bool) -> tuple[Path, dict]:
+def _prepare_model(output: Path, *, crawl: bool,
+                   road_friction: float | None = None) -> tuple[Path, dict]:
+    if road_friction is not None and (not np.isfinite(road_friction) or
+                                      road_friction <= 0.):
+        raise ValueError("road friction must be positive and finite")
     if output.exists():
         raise FileExistsError(output)
     source = EVIDENCE / "model"
@@ -103,8 +109,17 @@ def _prepare_model(output: Path, *, crawl: bool) -> tuple[Path, dict]:
             raise ValueError("expected four I_I rebound-stop tables")
         content = content.replace(old_rebound, new_rebound)
         scenario = json.loads((PIT / "scenario.json").read_text(encoding="utf-8"))
+        if road_friction is not None:
+            old_mu = f'MU_ROAD_CONSTANT {scenario["friction"]:g}'
+            if content.count(old_mu) != 1:
+                raise ValueError("expected one physical road-friction value")
+            content = content.replace(old_mu,
+                                      f"MU_ROAD_CONSTANT {road_friction:g}")
+            scenario["friction"] = road_friction
         shutil.copytree(PIT / "visual_assets", model / "visual_assets",
                         dirs_exist_ok=True)
+        scenario["target_speed_kph"] = CFG.crawl_speed_kph
+    scenario["controller_period_s"] = CFG.control_period_s
     content, count = re.subn(r"(?m)^TSTOP\s+[-+0-9.eE]+\s*$",
                              "TSTOP 125" if crawl else "TSTOP 82", content)
     if count != 2:
@@ -123,14 +138,30 @@ class LiftCrawlController:
             raise ValueError("identified swing gain does not match I_I model")
         self.trace = load_command_trace(EVIDENCE / "preload_trace.csv.gz", IMPORT_NAMES)
         self.ref_time, self.ref_fz = _reference(EVIDENCE / "lift_reference.csv.gz")
+        self.preload_clock = PreloadProgress(
+            start_s=CFG.preload_feedback_start_s,
+            end_s=float(self.trace.time_s[-1]),
+            max_rate=CFG.preload_max_reference_rate,
+            slow_error_n=CFG.preload_slow_tracking_error_n,
+            pause_error_n=CFG.preload_pause_tracking_error_n)
         self.swing_gain = np.asarray(gain["gain_fz_per_command"], dtype=float)
         static_gain = np.asarray(json.loads((EVIDENCE / "gain_matrix.json").read_text(
             encoding="utf-8"))["gains"]["Fz_n"], dtype=float)
-        self.support = SupportForceFeedback(static_gain[np.ix_(SUPPORT, SUPPORT)],
+        self.fr_feedback = ScalarLoadFeedback(
+            gain_load_per_force=float(static_gain[1, 1]),
+            control_period_s=CFG.control_period_s,
+            correction_limit_n=CFG.fr_feedback_limit_n,
+            slew_n_s=CFG.fr_feedback_slew_n_s,
+            tracking_gain=CFG.fr_feedback_tracking_gain,
+            deadband_n=CFG.fr_feedback_deadband_n)
+        self.static_support_gain = static_gain[np.ix_(SUPPORT, SUPPORT)]
+        self.support = SupportForceFeedback(self.static_support_gain,
                                             control_period_s=CFG.control_period_s,
                                             correction_limit_n=CFG.support_feedback_limit_n,
                                             rebound_guard_mm=(CFG.moving_rebound_guard_mm
                                                               if crawl else CFG.rebound_guard_mm))
+        self.load_filter = WheelLoadFilter(
+            cutoff_hz=CFG.wheel_load_filter_cutoff_hz, wheel_count=4)
         self.drive = CrawlTorqueFeedback(control_period_s=CFG.control_period_s,
                                          tyre_radius_m=CFG.tyre_radius_m,
                                          half_track_m=CFG.tyre_half_track_m,
@@ -140,6 +171,7 @@ class LiftCrawlController:
         self.mode = "INIT_SETTLE"
         self.mode_start_s = 0.
         self.ready_since_s: float | None = None
+        self.preload_end_since_s: float | None = None
         self.stop_since_s: float | None = None
         self.stop_enter_speed_kph = 0.
         self.lift_start_s: float | None = None
@@ -149,6 +181,7 @@ class LiftCrawlController:
         self.abort_reason: str | None = None
         self.last_tick_s: float | None = None
         self.fr_correction_n = 0.
+        self.swing_gain_weight = 0.
         self.torques_nm = np.zeros(3)
         self.lower_start_torques_nm = np.zeros(3)
         self.initial_yo_m: float | None = None
@@ -170,7 +203,12 @@ class LiftCrawlController:
             self.lower_start_torques_nm = self.torques_nm.copy()
 
     def _ref_loads(self, now_s: float) -> np.ndarray:
-        reference_time = min(now_s, CFG.reference_hold_s) if self.crawl else now_s
+        if self.lift_start_s is None:
+            reference_time = self.preload_clock.progress_s
+        else:
+            reference_time = self.trace.time_s[-1] + now_s - self.lift_start_s
+            if self.crawl:
+                reference_time = min(reference_time, CFG.reference_hold_s)
         return np.array([np.interp(reference_time, self.ref_time, self.ref_fz[:, i])
                          for i in range(4)])
 
@@ -179,7 +217,7 @@ class LiftCrawlController:
         if self.last_tick_s is None or now_s - self.last_tick_s >= CFG.control_period_s - 1e-8:
             self.last_tick_s = now_s
             self._tick(now_s, x)
-        base = np.asarray(self.trace.at(now_s), dtype=float)
+        base = np.asarray(self.trace.at(self.preload_clock.progress_s), dtype=float)
         # The validated preload trace ends at 48 s and holds its final command.
         extra_fr = 0.
         extra_rl = 0.
@@ -212,27 +250,46 @@ class LiftCrawlController:
         else:
             base[[0, 2, 3]] = self.torques_nm
         base[1] = 0.  # FR is never driven during lift or crawl.
+        if self.rows and self.rows[-1]["time_s"] == now_s:
+            self.rows[-1].update({
+                "fact_fl_n": float(base[4]), "fact_fr_n": float(base[5]),
+                "fact_rl_n": float(base[6]), "fact_rr_n": float(base[7]),
+            })
         return tuple(float(v) for v in base)
 
     def _tick(self, now_s: float, x: dict[str, float]) -> None:
         fz = np.array([max(0., x["Fz_" + wheel]) for wheel in WHEELS])
+        gate_fz = self.load_filter.update(now_s, fz)
+        if self.mode in ("INIT_SETTLE", "PRELOAD_SHIFT"):
+            self.support.gain = blend_contact_gain(
+                self.static_support_gain, self.swing_gain, float(gate_fz[1]),
+                swing_n=CFG.gain_blend_swing_fr_load_n,
+                stance_n=CFG.gain_blend_stance_fr_load_n)
+            self.swing_gain_weight = float(np.clip(
+                (CFG.gain_blend_stance_fr_load_n - gate_fz[1]) /
+                (CFG.gain_blend_stance_fr_load_n -
+                 CFG.gain_blend_swing_fr_load_n), 0., 1.))
+        if self.mode in ("INIT_SETTLE", "PRELOAD_SHIFT"):
+            tracking_error = float(np.max(np.abs(
+                gate_fz - self._ref_loads(now_s))))
+            self.preload_clock.update(now_s, load_error_n=tracking_error)
         travel = np.array([x["Jnc_" + wheel] for wheel in WHEELS])
         contacts = {corner: (x["Xctc_" + wheel + "i"],
                              x["Yctc_" + wheel + "i"])
                     for corner, wheel in zip(("FL", "FR", "RL", "RR"), WHEELS)}
         com = np.array([x["XCG_TM"], x["YCG_TM"]])
-        assessment = assess_support(contacts, dict(zip(("FL", "FR", "RL", "RR"), fz)),
+        assessment = assess_support(contacts, dict(zip(("FL", "FR", "RL", "RR"), gate_fz)),
                                     tuple(com), CFG.lambda_target)
         triangle = np.array([contacts[c] for c in ("FL", "RL", "RR")])
         com_lambda = _barycentric(triangle, com)
         margin = min(assessment.lambda_min, float(np.min(com_lambda)))
         top_clearance = x["Z_R1"] - CFG.tyre_radius_m
         attitude = max(abs(x["Roll_E"]), abs(x["Pitch"]))
-        support_load = float(min(fz[SUPPORT]))
+        support_load = float(min(gate_fz[SUPPORT]))
         if self.initial_yo_m is None and now_s >= CFG.preload_feedback_start_s:
             self.initial_yo_m = x["Yo"]
             self.initial_yaw_deg = x["Yaw"]
-        ready = (fz[1] <= CFG.fr_ready_load_n and support_load >=
+        ready = (gate_fz[1] <= CFG.fr_ready_load_n and support_load >=
                  CFG.support_floor_n and margin >= CFG.lambda_target and
                  attitude <= CFG.ready_attitude_limit_deg and
                  abs(x["Vx"]) <= CFG.init_max_vx_kph)
@@ -242,32 +299,47 @@ class LiftCrawlController:
         else:
             self.ready_since_s = None
         if self.mode == "INIT_SETTLE" and now_s >= CFG.preload_feedback_start_s:
-            if (np.min(fz) > CFG.support_floor_n and
+            if (np.min(gate_fz) > CFG.support_floor_n and
                     abs(x["Vx"]) <= CFG.init_max_vx_kph):
                 self._enter("PRELOAD_SHIFT", now_s)
-        if (self.mode == "PRELOAD_SHIFT" and now_s >= self.trace.time_s[-1] and
-                self.ready_since_s is not None and
-                now_s - self.ready_since_s >= CFG.ready_dwell_s):
-            self._enter("LIFTING", now_s)
+        if (self.mode == "PRELOAD_SHIFT" and
+                self.preload_clock.progress_s >= self.trace.time_s[-1]):
+            if self.preload_end_since_s is None:
+                self.preload_end_since_s = now_s
+            if (self.ready_since_s is not None and
+                    now_s - self.ready_since_s >= CFG.ready_dwell_s):
+                self._enter("LIFTING", now_s)
+            elif now_s - self.preload_end_since_s >= CFG.preload_end_wait_limit_s:
+                self.abort_reason = "preload ready gate not reached"
+                self._enter("LOWERING", now_s)
+        if (self.mode == "PRELOAD_SHIFT" and
+                now_s - self.mode_start_s >= CFG.preload_total_limit_s):
+            self.abort_reason = "preload tracking deadline exceeded"
+            self._enter("LOWERING", now_s)
         if (self.mode == "LIFTING" and now_s - self.lift_start_s >=
                 CFG.lift_ramp_s + CFG.support_ramp_s and
                 top_clearance >= CFG.lift_clearance_m and
-                fz[1] <= CFG.fr_swing_load_n):
+                gate_fz[1] <= CFG.fr_swing_load_n):
             self._enter("THREE_WHEEL_HOLD", now_s)
         if (self.mode == "THREE_WHEEL_HOLD" and
                 now_s - self.hold_start_s >= CFG.three_wheel_hold_s):
             self._enter("CRAWL" if self.crawl else "LOWERING", now_s)
         if self.mode == "CRAWL":
             if x["X_R1"] >= (float(self.scenario["start_station_m"]) +
-                               float(self.scenario["length_m"]) +
-                               CFG.crossing_clearance_m):
+                               float(self.scenario["length_m"]) -
+                               CFG.brake_start_before_far_edge_m):
                 self.stop_enter_speed_kph = max(0., x["Vx"])
                 self._enter("STOP", now_s)
             elif now_s - self.crawl_start_s > CFG.max_crawl_s:
                 self.abort_reason = "crawl did not cross before timeout"
                 self._enter("ABORT_STOP", now_s)
         if self.mode == "STOP":
-            if abs(x["Vx"]) <= CFG.stop_speed_kph:
+            fr_clear = x["X_R1"] >= (float(self.scenario["start_station_m"]) +
+                                      float(self.scenario["length_m"]) +
+                                      CFG.crossing_clearance_m)
+            rear_clear = x["X_R2"] <= (float(self.scenario["start_station_m"]) -
+                                       CFG.rear_stop_clearance_m)
+            if fr_clear and rear_clear and abs(x["Vx"]) <= CFG.stop_speed_kph:
                 if self.stop_since_s is None:
                     self.stop_since_s = now_s
                 elif now_s - self.stop_since_s >= CFG.stop_dwell_s:
@@ -303,9 +375,9 @@ class LiftCrawlController:
             self.support.update(now_s, fz[SUPPORT], ref[SUPPORT],
                                 travel_mm=travel[SUPPORT])
         if self.mode == "PRELOAD_SHIFT":
-            self.fr_correction_n = float(np.clip(
-                self.fr_correction_n + 0.05 * (ref[1] - fz[1]),
-                -CFG.fr_feedback_limit_n, CFG.fr_feedback_limit_n))
+            self.fr_correction_n = self.fr_feedback.update(
+                now_s, measured_n=float(gate_fz[1]),
+                reference_n=float(ref[1]))
         if self.mode in ("CRAWL", "STOP", "ABORT_STOP"):
             if self.mode == "CRAWL":
                 target_speed = CFG.crawl_speed_kph
@@ -321,7 +393,7 @@ class LiftCrawlController:
                 yaw_rate_deg_s=x["AVz"],
                 lateral_m=x["Yo"] - (self.initial_yo_m or 0.),
                 loads_n=fz[SUPPORT], target_kph=target_speed)
-            if self.mode == "STOP":
+            if self.mode in ("STOP", "ABORT_STOP"):
                 self.torques_nm = np.maximum(
                     self.torques_nm, -CFG.stop_max_brake_nm)
                 self.drive.torque_nm = self.torques_nm.copy()
@@ -341,6 +413,9 @@ class LiftCrawlController:
             applied_torque = self.torques_nm
         self.rows.append({
             "time_s": now_s, "mode": self.mode, "vx_kph": x["Vx"],
+            "preload_ref_time_s": self.preload_clock.progress_s,
+            "preload_ref_rate": self.preload_clock.rate,
+            "support_swing_gain_weight": self.swing_gain_weight,
             "x_fr_m": x["X_R1"], "x_rr_m": x["X_R2"],
             "yo_m": x["Yo"], "yaw_deg": x["Yaw"],
             "roll_deg": x["Roll_E"], "pitch_deg": x["Pitch"],
@@ -351,17 +426,22 @@ class LiftCrawlController:
             "fz_rr_n": fz[3], "ref_fl_n": ref[0], "ref_fr_n": ref[1],
             "ref_rl_n": ref[2], "ref_rr_n": ref[3],
             "zmp_lambda_min": assessment.lambda_min,
+            "zmp_x_m": assessment.zmp_xy[0],
+            "zmp_y_m": assessment.zmp_xy[1],
+            "zmp_edge_distance_m": assessment.edge_distance_m,
+            "com_x_m": com[0], "com_y_m": com[1],
             "com_lambda_min": float(np.min(com_lambda)),
+            "support_feedback_saturated": bool(np.any(
+                np.abs(self.support.correction) >=
+                CFG.support_feedback_limit_n - 1e-8)),
             "force_corr_fl_n": applied_scale * self.support.correction[0],
             "force_corr_fr_n": applied_scale * self.fr_correction_n,
             "force_corr_rl_n": applied_scale * self.support.correction[1],
             "force_corr_rr_n": applied_scale * self.support.correction[2],
-            "fz_fl_filtered_n": (self.support.filtered[0]
-                                 if self.support.filtered is not None else fz[0]),
-            "fz_rl_filtered_n": (self.support.filtered[1]
-                                 if self.support.filtered is not None else fz[2]),
-            "fz_rr_filtered_n": (self.support.filtered[2]
-                                 if self.support.filtered is not None else fz[3]),
+            "fz_fl_filtered_n": gate_fz[0],
+            "fz_fr_filtered_n": gate_fz[1],
+            "fz_rl_filtered_n": gate_fz[2],
+            "fz_rr_filtered_n": gate_fz[3],
             "torque_fl_nm": applied_torque[0],
             "torque_rl_nm": applied_torque[1],
             "torque_rr_nm": applied_torque[2],
@@ -402,6 +482,23 @@ def evaluate_control_rows(rows: list[dict], *, crawl: bool, scenario: dict,
                    if moving else None)
     yaw_max = (max(abs(float(r["yaw_deg"]) - baseline_yaw) for r in moving)
                if moving else None)
+    saturation_start = None
+    last_saturation_time = None
+    longest_saturation_s = 0.
+    for sample in hold + moving:
+        instant = float(sample["time_s"])
+        saturated = sample.get("support_feedback_saturated", False) in (True, "True", "1", 1)
+        if saturated:
+            if (saturation_start is None or last_saturation_time is not None and
+                    instant - last_saturation_time > 1.5 * CFG.control_period_s):
+                saturation_start = instant
+            last_saturation_time = instant
+            longest_saturation_s = max(
+                longest_saturation_s,
+                instant - saturation_start + CFG.control_period_s)
+        else:
+            saturation_start = None
+            last_saturation_time = None
     criteria = {
         "native_completed": native_completed,
         "no_abort": abort_reason is None,
@@ -414,6 +511,8 @@ def evaluate_control_rows(rows: list[dict], *, crawl: bool, scenario: dict,
         "support_triangle_com": bool(hold) and min_value(hold + moving, "com_lambda_min") >= CFG.lambda_target,
         "four_wheel_recovered": all(float(end[k]) >= CFG.support_floor_n
                                     for k in ("fz_fl_n", "fz_fr_n", "fz_rl_n", "fz_rr_n")),
+        "no_sustained_support_saturation":
+            longest_saturation_s <= CFG.max_continuous_support_saturation_s,
     }
     if crawl:
         criteria.update({
@@ -429,6 +528,9 @@ def evaluate_control_rows(rows: list[dict], *, crawl: bool, scenario: dict,
             yaw_max <= CFG.crawl_max_yaw_error_deg,
             "stopped_before_lowering": bool(lowering) and
             abs(float(lowering[0]["vx_kph"])) <= CFG.stop_speed_kph,
+            "rear_stopped_before_pit": bool(lowering) and
+            float(lowering[0]["x_rr_m"]) <=
+            edge - CFG.rear_stop_clearance_m,
         })
     return {
         "status": "PASS" if all(criteria.values()) else "FAIL",
@@ -440,16 +542,27 @@ def evaluate_control_rows(rows: list[dict], *, crawl: bool, scenario: dict,
         "min_support_load_n": min_support,
         "moving_lateral_max_m": lateral_max,
         "moving_yaw_max_deg": yaw_max,
+        "longest_support_saturation_s": longest_saturation_s,
     }
 
 
 def main() -> None:
+    global CFG
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--crawl", action="store_true")
+    parser.add_argument("--road-friction", type=float,
+                        help="physical road mu in an isolated crawl copy")
+    parser.add_argument("--target-speed-kph", type=float)
+    parser.add_argument("--min-pit-speed-kph", type=float)
     args = parser.parse_args()
+    if (args.target_speed_kph is None) != (args.min_pit_speed_kph is None):
+        parser.error("target and minimum pit speed must be supplied together")
+    if args.target_speed_kph is not None:
+        CFG = speed_trial_config(args.target_speed_kph, args.min_pit_speed_kph)
     output = args.output.resolve()
-    model, scenario = _prepare_model(output, crawl=args.crawl)
+    model, scenario = _prepare_model(output, crawl=args.crawl,
+                                     road_friction=args.road_friction)
     controller = LiftCrawlController(crawl=args.crawl, scenario=scenario)
     native = run_stepwise(model / "simfile.sim", controller,
                           output / "native_5ms.csv", IMPORT_NAMES, EXPORTS,

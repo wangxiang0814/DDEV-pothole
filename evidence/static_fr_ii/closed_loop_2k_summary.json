@@ -1,0 +1,37 @@
+{
+  "vehicle": "I_I corner_module_ddev",
+  "source_run": "runs/fr_closed_loop_crawl_2k_regression_r",
+  "native_solver_completed": true,
+  "controller_mode": "COMPLETE",
+  "status": "PASS",
+  "control_period_s": 0.02,
+  "target_speed_kph": 2.2,
+  "pit_speed_kph": [
+    2.0363313464438852,
+    2.1257297068661667
+  ],
+  "lift_start_s": 34.340499999981944,
+  "four_wheel_recovered_s": 69.28050000014878,
+  "three_wheel_hold_s": 5.000000000023874,
+  "pit_top_clearance_min_m": 0.03582155234720691,
+  "minimum_support_load_n": 880.8657468869208,
+  "minimum_moving_zmp_lambda": 0.06651802645408106,
+  "minimum_moving_com_lambda": 0.09956230061051925,
+  "maximum_moving_lateral_error_m": 0.028360316523326403,
+  "maximum_moving_yaw_error_deg": 0.7987873553496951,
+  "support_feedback_saturated_samples": 0,
+  "rear_stopped_before_pit": true,
+  "pit": {
+    "start_station_m": 101.1,
+    "length_m": 0.8,
+    "width_m": 0.9,
+    "depth_m": 0.2,
+    "friction": 0.7
+  },
+  "simulation_only_changes": {
+    "suspension_rebound_stop_m": -0.15,
+    "tyre_low_speed_slip_m_s": 0.2
+  },
+  "scope": "Fixed payload layout and one known pit; preload is feedback-paced but still chiefly replays a calibrated force trace. No claim of broad robustness.",
+  "longest_support_saturation_s": 0.0
+}
