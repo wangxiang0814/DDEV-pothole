@@ -282,6 +282,7 @@ class RearCycleConfig:
     crawl_speed_kph: float = 2.2
     crawl_accel_ramp_s: float = 2.0
     min_pit_speed_kph: float = 2.0
+    max_crawl_speed_kph: float = 8.0
     max_lateral_error_m: float = 0.05
     pit_evaluation_edge_trim_m: float = 0.1
     crawl_yaw_kp_nm_per_deg: float = 80.0
@@ -314,9 +315,26 @@ TUNED_REAR_RUN = replace(
 class RightSideModelConfig:
     clamp_ride_tables: bool = True
     lateral_ride_scale: float = 0.5
+    max_boundary_pit_width_m: float = 1.4
 
 
 RIGHT_SIDE_MODEL = RightSideModelConfig()
+
+
+def rear_speed_trial_config(target_kph: float, min_pit_kph: float,
+                            base: RearCycleConfig = TUNED_REAR_RUN,
+                            accel_ramp_s: float | None = None) -> RearCycleConfig:
+    if (not math.isfinite(target_kph) or not math.isfinite(min_pit_kph) or
+            not 0. < min_pit_kph <= target_kph <= base.max_crawl_speed_kph):
+        raise ValueError("invalid rear crawl speed trial")
+    if accel_ramp_s is not None and (
+            not math.isfinite(accel_ramp_s) or
+            accel_ramp_s < base.control_period_s):
+        raise ValueError("invalid rear acceleration ramp")
+    return replace(base, crawl_speed_kph=target_kph,
+                   min_pit_speed_kph=min_pit_kph,
+                   crawl_accel_ramp_s=(base.crawl_accel_ramp_s if
+                                       accel_ramp_s is None else accel_ramp_s))
 
 
 def speed_trial_config(target_kph: float, min_pit_kph: float) -> ClosedLoopRunConfig:

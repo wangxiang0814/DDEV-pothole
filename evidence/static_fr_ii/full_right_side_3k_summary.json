@@ -1,0 +1,100 @@
+{
+  "status": "PASS",
+  "criteria": {
+    "native_completed": true,
+    "fr_stage_pass": true,
+    "rr_fsm_complete": true,
+    "rr_no_abort": true,
+    "rr_no_sustained_feedback_saturation": true,
+    "rr_forces_within_sim_limits": true,
+    "rr_hold_at_least_5_s": true,
+    "rr_hold_unloaded": true,
+    "rr_support_loaded": true,
+    "rr_zmp_safe": true,
+    "rr_com_safe": true,
+    "rr_clear_over_pit": true,
+    "rr_pit_speed": true,
+    "rr_straight": true,
+    "rr_stopped_before_lowering": true,
+    "four_wheel_recovered": true
+  },
+  "rr_abort_reason": null,
+  "rr_hold_duration_s": 5.000000000023874,
+  "rr_min_support_n": 736.9665130951255,
+  "rr_min_zmp_lambda": 0.055285856298626056,
+  "rr_min_com_lambda": 0.10595523839752968,
+  "rr_pit_min_clearance_m": 0.0154376259850032,
+  "rr_pit_speed_range_kph": [
+    3.0478555305254287,
+    3.2014823645171897
+  ],
+  "rr_max_lateral_m": 0.02473026795624358,
+  "rr_max_yaw_error_deg": 0.637287999064404,
+  "rr_max_abs_roll_deg": 9.171586090495058,
+  "rr_max_actuator_force_n": 6507.468120861715,
+  "rr_max_actuator_slew_n_s": 1638.4544839058872,
+  "rr_longest_feedback_saturation_s": 0.0,
+  "rr_static_lateral_shift_m": 0.019829519384943085,
+  "rr_last_x_m": 102.8341279244283,
+  "model_tuning": {
+    "original_kinematics": false,
+    "clamp_ride_tables": true,
+    "lateral_ride_scale": 0.5,
+    "steering_import": "IMP_STEER_SW"
+  },
+  "scenario": {
+    "start_station_m": 101.1,
+    "length_m": 0.8,
+    "width_m": 0.9,
+    "depth_m": 0.2,
+    "friction": 0.7
+  },
+  "rear_speed_config": {
+    "target_kph": 3.35,
+    "minimum_pit_kph": 3.0,
+    "accel_ramp_s": 2.0
+  },
+  "front_speed_config": {
+    "target_kph": 3.4,
+    "minimum_pit_kph": 3.0,
+    "brake_lead_m": 0.5
+  },
+  "front": {
+    "status": "PASS",
+    "criteria": {
+      "native_completed": true,
+      "no_abort": true,
+      "fsm_complete": true,
+      "hold_at_least_5_s": true,
+      "hold_fr_clearance": true,
+      "hold_fr_unloaded": true,
+      "support_wheels_loaded": true,
+      "support_triangle_zmp": true,
+      "support_triangle_com": true,
+      "four_wheel_recovered": true,
+      "no_sustained_support_saturation": true,
+      "pit_crossed": true,
+      "pit_speed_in_requested_range": true,
+      "lifted_fr_over_pit": true,
+      "straight_path": true,
+      "stopped_before_lowering": true,
+      "rear_stopped_before_pit": true
+    },
+    "hold_duration_s": 5.000000000023874,
+    "pit_speed_min_kph": 3.041029201322519,
+    "pit_speed_max_kph": 3.2493718553915754,
+    "pit_clearance_min_m": 0.034848934357960215,
+    "min_support_load_n": 711.9197131491018,
+    "moving_lateral_max_m": 0.02929817704457452,
+    "moving_yaw_max_deg": 0.8093107618761031,
+    "longest_support_saturation_s": 0.0
+  },
+  "provenance": {
+    "run": "right_side_both_3k_front34_rear335",
+    "entry": "python scripts/run_right_side_full_cycle.py --output runs/right_side_both_3k_front34_rear335 --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3.0 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3.0",
+    "vehicle": "TruckSim 2019 I_I corner_module_ddev",
+    "integration_dt_s": 0.0005,
+    "controller_period_s": 0.02,
+    "note": "Original I_I source model remains unchanged; this PASS applies to the isolated tuned model copy."
+  }
+}

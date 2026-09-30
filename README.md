@@ -12,7 +12,9 @@
 
 **FR→RR 完整循环已有单工况 PASS：**`scripts/run_right_side_full_cycle.py` 在一个原生 TruckSim 运行中串联 FR 与 RR 的卸载、抬轮、三轮稳定保持、约 2 km/h 右轮迹过坑、停车、落轮和四轮恢复。RR 使用 FL/FR/RL 支撑三角形。最近的完整运行中，RR 保持 5 s，三支撑轮最低 942 N，最小 ZMP 三角形坐标 0.0707，坑上最低净空 39.9 mm，最大横向偏差 2.19 cm，最终全部验收项为 `PASS`。见[完整循环精简结果](evidence/static_fr_ii/full_right_side_2k_summary.json)。
 
-该 `PASS` 使用**独立的仿真车型副本**：原始 I_I 悬架运动学表只覆盖 ±70 mm，而本实验的扩展回弹达到约 150 mm；运行副本将表格超出原范围的部分设为边界值，并把随悬架压缩产生的轮心横向移动系数设为原值的 50%。原始车型文件和已有八路接口保持原样，完整循环副本额外接入第九路方向盘角输入用于横向闭环。未调整运动学的原模型上，RR 静止卸载会造成约 13 cm 横移，尚不满足直线要求。当前结论只针对固定质量、载荷、坑槽和这一仿真车型设置；更高速度及参数泛化仍待验证。
+该 `PASS` 使用**独立的仿真车型副本**：原始 I_I 悬架运动学表只覆盖 ±70 mm，而本实验的扩展回弹达到约 150 mm；运行副本将表格超出原范围的部分设为边界值，并把随悬架压缩产生的轮心横向移动系数设为原值的 50%。原始车型文件和已有八路接口保持原样，完整循环副本额外接入第九路方向盘角输入用于横向闭环。未调整运动学的原模型上，RR 静止卸载会造成约 13 cm 横移，尚不满足直线要求。当前结论只针对固定质量、载荷、坑槽和这一仿真车型设置；4–7 km/h 及其他参数下的泛化仍待验证。
+
+**新增边界和速度验证：**同一独立车型副本在宽 1.1 m、深 0.25 m 的坑槽上完成 FR→RR 全循环 `PASS`；原基线坑槽为宽 0.9 m、深 0.20 m。该边界工况的车辆指标基本不变，符合抬起轮未接触坑底的假设，见[坑槽边界摘要](evidence/static_fr_ii/full_right_side_pit_boundary_summary.json)。两轮都用 3 km/h 档时，FR 坑内 3.04–3.25 km/h、RR 3.05–3.20 km/h，全循环 `PASS`，见[双轮 3 km/h 摘要](evidence/static_fr_ii/full_right_side_3k_summary.json)。此速度下 RR 最小 ZMP 重心坐标 0.0553、坑上最低净空 15.4 mm，已接近 0.05／10 mm 门槛；4–7 km/h 尚未验证。
 
 **当前限制：**预载仍主要依据固定车型的成功指令，反馈修正幅度有限；尚未在坑槽和扰动的参数矩阵中验证泛化。按当前研究范围，载荷质量与位置保持固定。移动试验仅在隔离副本中调整了悬架回弹限位和轮胎低速参数，均非硬件额定值。三轮轮载无需均载。后续按[审核通过的开发方案](docs/FR_LIFT_CRAWL_DEVELOPMENT_PLAN_20260929.md)推进闭环预载、协同分配及鲁棒性。旧的 `expert_controller.py` 是早期移动越坑研究代码，不代表当前 FR 控制回路。
 
@@ -44,6 +46,8 @@ python scripts/run_static_fr_closed_loop.py --crawl --output runs/fr_closed_loop
 python scripts/run_static_fr_closed_loop.py --crawl --target-speed-kph 3.3 --min-pit-speed-kph 3.0 --output runs/fr_closed_loop_crawl_3k_recheck
 python scripts/plot_closed_loop_run.py runs/fr_closed_loop_crawl_recheck
 python scripts/run_right_side_full_cycle.py --output runs/right_side_full_cycle_recheck
+python scripts/run_right_side_full_cycle.py --output runs/right_side_boundary_recheck --pit-width-m 1.1 --pit-depth-m 0.25
+python scripts/run_right_side_full_cycle.py --output runs/right_side_3k_recheck --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3.0 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3.0
 ```
 
 压缩预载轨迹只保存仿真时间及八个输入通道；复核命令在相同隔离车型上重放它。此命令用于**重复已验证的静态试验**，不等于从任意初始工况自动规划抬轮。新车型或新载荷必须先重新辨识和验证可行性。四角力/速率限目前是仿真软件设定，未标称为硬件额定值；详见 [I/O 映射](IO_MAPPING.md)和[控制对象说明](docs/control_object.md)。

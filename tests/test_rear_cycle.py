@@ -7,7 +7,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from run_right_side_full_cycle import (  # noqa: E402
     _enable_steering_import, _scale_lateral_ride_movement,
+    _set_pit_geometry, front_run,
 )
+from ddevsim.static_wheel_lift.config import rear_speed_trial_config  # noqa: E402
 from ddevsim.static_wheel_lift.rear_cycle import (  # noqa: E402
     RearCycleController, assess_rear_gate,
 )
@@ -76,3 +78,21 @@ def test_lateral_ride_scale_changes_only_copied_tables(tmp_path):
     content = run.read_text(encoding="utf-8")
     assert content.count("-70, 2\n") == 4
     assert content.count("70, 5\n") == 4
+
+
+def test_rear_speed_trial_has_explicit_validated_target():
+    config = rear_speed_trial_config(3.3, 3.0)
+    assert config.crawl_speed_kph == 3.3
+    assert config.min_pit_speed_kph == 3.0
+
+
+def test_boundary_pit_geometry_updates_copied_road_and_scenario(tmp_path):
+    model, scenario = front_run._prepare_model(tmp_path / "case", crawl=True)
+    _set_pit_geometry(model, scenario, width_m=1.1, depth_m=.25)
+    text = (model / "run_all.par").read_text(encoding="utf-8")
+    road = text.split("ROAD_DZ_CARPET 2D_LINEAR\n", 1)[1].split("ENDTABLE", 1)[0]
+    assert "-1.18" in road
+    assert "-0.25" in road
+    assert "SPEED_TARGET_CONSTANT 0" in text
+    assert scenario["width_m"] == 1.1
+    assert scenario["depth_m"] == .25

@@ -6,6 +6,7 @@ import argparse
 import csv
 import json
 import re
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -13,8 +14,11 @@ import numpy as np
 import run_static_fr_closed_loop as front_run
 
 from ddevsim.cosim import run_stepwise
+from ddevsim.pothole_case import corner_module_scenario, _procedure_block
+from ddevsim.visual_mesh import write_visual_mesh
 from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
-                                             RIGHT_SIDE_MODEL, TUNED_REAR_RUN)
+                                             RIGHT_SIDE_MODEL, TUNED_REAR_RUN,
+                                             rear_speed_trial_config)
 from ddevsim.static_wheel_lift.rear_cycle import RearCycleController
 
 STEERING_IMPORT = "IMP_STEER_SW"
@@ -84,9 +88,46 @@ def _scale_lateral_ride_movement(model: Path, factor: float) -> None:
         raise ValueError(f"expected four lateral kinematic tables, found {count}")
     path.write_text(content, encoding="utf-8")
 
+
+def _set_pit_geometry(model: Path, scenario: dict,
+                      *, width_m: float, depth_m: float) -> None:
+    """Regenerate the copied road and its display mesh for one boundary case."""
+    if not (0.0 < width_m < RIGHT_SIDE_MODEL.max_boundary_pit_width_m and
+            0.0 < depth_m < TUNED_REAR_RUN.tyre_radius_m):
+        raise ValueError("pit boundary case would reach the other tyre or tyre centre")
+    variant = corner_module_scenario(
+        width_m=width_m, depth_m=depth_m,
+        target_speed_kph=float(scenario["target_speed_kph"]))
+    path = model / "run_all.par"
+    content = path.read_text(encoding="utf-8")
+    generated = _procedure_block(variant)
+    table_pattern = r"(?m)^ROAD_DZ_CARPET 2D_LINEAR\s*\n(?:.*\n)*?ENDTABLE"
+    table = re.search(table_pattern, generated)
+    if table is None:
+        raise ValueError("generated pit has no physical road grid")
+    content, count = re.subn(table_pattern, lambda _: table.group(), content)
+    if count != 1:
+        raise ValueError("expected one physical road grid")
+    shape_start = r"ENTER_PARSFILE Roads\Shapes\DDEV_single_wheel_pothole.par"
+    shape_end = r"EXIT_PARSFILE Roads\Shapes\DDEV_single_wheel_pothole.par"
+    for source in (content, generated):
+        if source.count(shape_start) != 1 or source.count(shape_end) != 1:
+            raise ValueError("expected one pothole visual shape block")
+    old_end = content.index(shape_end) + len(shape_end)
+    new_end = generated.index(shape_end) + len(shape_end)
+    content = (content[:content.index(shape_start)] +
+               generated[generated.index(shape_start):new_end] +
+               content[old_end:])
+    path.write_text(content, encoding="utf-8")
+    write_visual_mesh(model / "visual_assets", variant)
+    scenario["width_m"], scenario["depth_m"] = width_m, depth_m
+    (model / "scenario.json").write_text(json.dumps(scenario, indent=2) + "\n",
+                                          encoding="utf-8")
+
 def _write_rows(path: Path, rows: list[dict]) -> None:
     if not rows:
-        raise ValueError("native controller produced no samples")
+        path.write_text("", encoding="utf-8")
+        return
     fields = list(dict.fromkeys(key for row in rows for key in row))
     with path.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
@@ -255,16 +296,48 @@ def main() -> None:
     parser.add_argument("--stop-at", type=float)
     parser.add_argument("--original-kinematics", action="store_true",
                         help="diagnostic: preserve the source I_I ride tables")
+    parser.add_argument("--rear-target-speed-kph", type=float)
+    parser.add_argument("--rear-min-pit-speed-kph", type=float)
+    parser.add_argument("--rear-accel-ramp-s", type=float)
+    parser.add_argument("--front-target-speed-kph", type=float)
+    parser.add_argument("--front-min-pit-speed-kph", type=float)
+    parser.add_argument("--front-brake-lead-m", type=float)
+    parser.add_argument("--pit-width-m", type=float)
+    parser.add_argument("--pit-depth-m", type=float)
     args = parser.parse_args()
+    if ((args.rear_target_speed_kph is None) !=
+            (args.rear_min_pit_speed_kph is None)):
+        parser.error("rear target and minimum pit speed must be supplied together")
+    if ((args.front_target_speed_kph is None) !=
+            (args.front_min_pit_speed_kph is None)):
+        parser.error("front target and minimum pit speed must be supplied together")
+    if args.front_target_speed_kph is not None:
+        front_run.CFG = front_run.speed_trial_config(
+            args.front_target_speed_kph, args.front_min_pit_speed_kph)
+    if args.front_brake_lead_m is not None:
+        if not np.isfinite(args.front_brake_lead_m) or args.front_brake_lead_m < 0.0:
+            parser.error("front brake lead must be nonnegative and finite")
+        front_run.CFG = replace(
+            front_run.CFG,
+            brake_start_before_far_edge_m=args.front_brake_lead_m)
     output = args.output.resolve()
     model, scenario = front_run._prepare_model(output, crawl=True)
+    if (args.front_brake_lead_m is not None and
+            args.front_brake_lead_m >= float(scenario["length_m"])):
+        parser.error("front brake lead must be shorter than pit length")
+    if args.pit_width_m is not None or args.pit_depth_m is not None:
+        _set_pit_geometry(model, scenario,
+                          width_m=(args.pit_width_m if args.pit_width_m is not None
+                                   else float(scenario["width_m"])),
+                          depth_m=(args.pit_depth_m if args.pit_depth_m is not None
+                                   else float(scenario["depth_m"])))
     if not args.original_kinematics and RIGHT_SIDE_MODEL.clamp_ride_tables:
         _clamp_kinematics_at_original_bounds(model)
     if not args.original_kinematics:
         _scale_lateral_ride_movement(model, RIGHT_SIDE_MODEL.lateral_ride_scale)
     _enable_steering_import(model)
     path = model / "run_all.par"
-    content, count = re.subn(r"(?m)^TSTOP 125\s*$",
+    content, count = re.subn(r"(?m)^TSTOP\s+[-+0-9.eE]+\s*$",
                              "TSTOP 115" if args.identify_rr_swing else "TSTOP 180",
                              path.read_text(encoding="utf-8"))
     if count != 2:
@@ -272,14 +345,21 @@ def main() -> None:
     path.write_text(content, encoding="utf-8")
     gain = np.array(json.loads((front_run.EVIDENCE / "gain_matrix.json").read_text(
         encoding="utf-8"))["gains"]["Fz_n"], dtype=float)
+    rear_config = (REAR_CYCLE_RUN if args.original_kinematics else
+                   TUNED_REAR_RUN)
+    if args.rear_accel_ramp_s is not None and args.rear_target_speed_kph is None:
+        parser.error("rear acceleration ramp requires a rear speed trial")
+    if args.rear_target_speed_kph is not None:
+        rear_config = rear_speed_trial_config(
+            args.rear_target_speed_kph, args.rear_min_pit_speed_kph,
+            rear_config, args.rear_accel_ramp_s)
     controller = FullRightSideController(
         scenario=scenario,
         rr_gain_per_coupled_force=float(
             gain[3, 1] + REAR_CYCLE_RUN.preload_feedback_fl_per_fr * gain[3, 0]),
         identify_rr_swing=args.identify_rr_swing,
         steer_probe_deg=args.steer_probe_deg,
-        rear_config=(REAR_CYCLE_RUN if args.original_kinematics
-                     else TUNED_REAR_RUN))
+        rear_config=rear_config)
     native = run_stepwise(model / "simfile.sim", controller,
                           output / "native_5ms.csv",
                           (*front_run.IMPORT_NAMES, STEERING_IMPORT),
@@ -300,6 +380,19 @@ def main() -> None:
         "lateral_ride_scale": (1.0 if args.original_kinematics else
                                RIGHT_SIDE_MODEL.lateral_ride_scale),
         "steering_import": STEERING_IMPORT,
+    }
+    result["scenario"] = {key: scenario[key] for key in
+                          ("start_station_m", "length_m", "width_m", "depth_m",
+                           "friction")}
+    result["rear_speed_config"] = {
+        "target_kph": rear_config.crawl_speed_kph,
+        "minimum_pit_kph": rear_config.min_pit_speed_kph,
+        "accel_ramp_s": rear_config.crawl_accel_ramp_s,
+    }
+    result["front_speed_config"] = {
+        "target_kph": front_run.CFG.crawl_speed_kph,
+        "minimum_pit_kph": front_run.CFG.crawl_min_speed_kph,
+        "brake_lead_m": front_run.CFG.brake_start_before_far_edge_m,
     }
     result["front"] = front_result
     result["native"] = native
