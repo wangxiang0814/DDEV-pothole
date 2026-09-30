@@ -51,7 +51,10 @@ python scripts/run_right_side_full_cycle.py --output runs/right_side_full_cycle_
 python scripts/run_right_side_full_cycle.py --output runs/right_side_boundary_recheck --pit-width-m 1.1 --pit-depth-m 0.25
 python scripts/run_right_side_full_cycle.py --output runs/right_side_3k_recheck --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3.0 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3.0
 python scripts/run_right_side_full_cycle.py --output runs/right_side_3k_mu06_recheck --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3.0 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3.0 --road-friction 0.6
+python scripts/open_run_visualizer.py right_side_both_3k_front34_rear335
 ```
+
+最后一条命令按 `runs/` 中的轮次名称打开已有的 TruckSim 原生动画；也可传入运行目录或具体 `.vs` 文件。它只在 VS Visualizer 中播放，不重跑仿真或导出视频。包含中文字符的工程路径会自动复制到临时英文路径，车辆和道路资源仍从本机 TruckSim 2019 目录读取。
 
 压缩预载轨迹只保存仿真时间及八个输入通道；复核命令在相同隔离车型上重放它。此命令用于**重复已验证的静态试验**，不等于从任意初始工况自动规划抬轮。新车型或新载荷必须先重新辨识和验证可行性。四角力/速率限目前是仿真软件设定，未标称为硬件额定值；详见 [I/O 映射](IO_MAPPING.md)和[控制对象说明](docs/control_object.md)。
 
