@@ -4,9 +4,22 @@
 
 ### 最新开发状态（2026-10-01）
 
-**最新噪声验证：标称工况 PASS，组合工况仍有方向鲁棒性缺口。**新增 50 Hz 可复现噪声试验，反馈使用带噪声的轮载、姿态、横向位置与速度，验收使用独立 TruckSim 真值及真实初始路径。标称 3 km/h 全循环通过，两次原生轨迹 SHA-256 相同：RR 最低净空 30.76 mm、最弱支撑 822 N、最大横移 2.75 cm。但 μ=0.6、起点提前 0.3 m、另一噪声种子组合横移 8.24 cm，结果 **FAIL**；支撑、净空和停车落轮通过。静止转向反馈仅改善至 8.13 cm，不推荐启用。下步先处理 RR 静止预载积累的横移／偏航，再提速。见[试验说明](docs/NOISE_ROBUSTNESS_20261001.md)与[通过及失败证据](evidence/static_fr_ii/noise_matrix_20261001.json)。当前 277 项 Python 测试通过。
+**最新：在明确调整悬架横向运动学的运行副本上，偏航改善且周期缩短。**推荐显式使用 `compact`、`--lateral-ride-scale 0`、RR `robust` 与 `--front-steering-feedback`。这是仿真参数调整：仅将四角悬架升降引起的轮心横向移动表缩放为 0，质量／载荷、原始车型文件和其他运动学表不变；CLI 默认仍为旧值 0.5，不能将本轮结果解释为旧模型纯控制器修复或泛化成功。
 
-当前推荐复核 `balanced` + RR `robust` + `--front-steering-feedback`，FR/RR 使用同一原始路径基准，保持固定质量和载荷位置。实际控制采用经典参考轨迹、轮载反馈、速度 PI、转矩/转向方向反馈及停车行程反馈；**尚未完整接入在线 QP，不宣称任意工况泛化成功**。
+| 最新噪声工况（横向表 scale=0） | 全循环 | 动作周期 | 全循环最大横移 | RR 最大偏航 | RR 最低净空 |
+|---|---|---:|---:|---:|---:|
+| μ=0.7，标称起点，seed=20261001 | PASS | 90.80 s | 2.17 cm | 0.37° | 32.18 mm |
+| μ=0.6，起点提前 0.3 m，seed=20261002 | PASS | 89.90 s | 2.18 cm | 0.35° | 32.99 mm |
+
+原约 102 s 周期缩短约 11–12%。主要是 FR 卸载约 24.5→16.5 s、RR 四轮恢复约 11.7→7.8 s；FR 恢复仍保留原时长，两次三轮保持各 ≥5 s，蠕行速度不变。RR 预载至停车的最大横移与偏航也已核查。新增坑前静态异常的安全落轮恢复入口，保留 FAIL 原因。278 项 Python 测试通过。见[偏航与时间分析](docs/TIMING_AND_YAW_20261001.md)、[包含失败尝试的证据](evidence/static_fr_ii/efficiency_yaw_matrix_20261001.json)。
+
+```powershell
+python scripts/run_right_side_full_cycle.py --output runs/compact_recheck --efficiency-profile compact --lateral-ride-scale 0 --rear-control-profile robust --front-steering-feedback --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3 --measurement-noise
+```
+
+**上一轮噪声验证（scale=0.5）：标称 PASS、组合 FAIL。**标称最大横移 2.75 cm；μ=0.6／起点提前 0.3 m／另一噪声种子组合横移 8.24 cm。轮角保持、静止转向及航向转矩反馈诊断均未有效解决，未保留新增失败控制分支。见[上一轮说明](docs/NOISE_ROBUSTNESS_20261001.md)及[证据](evidence/static_fr_ii/noise_matrix_20261001.json)。
+
+先前配置为 `balanced` + RR `robust` + `--front-steering-feedback`，横向表 scale=0.5。FR/RR 使用同一原始路径基准，保持固定质量和载荷位置。实际控制采用经典参考轨迹、轮载反馈、速度 PI、转矩/转向方向反馈及停车行程反馈；**尚未完整接入在线 QP，不宣称任意工况泛化成功**。
 
 | 无测量噪声的已复核工况 | 全循环结果 | RR 最低坑上净空 | RR 最弱支撑轮载 | 相对共用路径最大偏差 |
 |---|---|---:|---:|---:|
@@ -20,9 +33,9 @@
 
 **旧路径指标需正确理解：**旧 RR 阶段在 FR 恢复后重设路径零点，3.35/3.87 cm 是 RR 阶段新增偏差。按原始共用路径复核，这两轮约为 6.75/6.80 cm，旧 PASS 不证明整个流程 ≤5 cm。最新控制和验收均保留同一基准；标称累计偏差已降至 4.32 cm，原远起点失败工况降至 4.51 cm。历史结果原文保留，新增统一基准审计。
 
-停车轮速阻尼、自适应预载、RL 参与预载、静止转向和分阶段预载已作针对性诊断，均未解决对应横移或引入其他失败，不作为默认配置。推荐版本只启用下方命令所列设置。上一轮 274 项 Python 测试通过，本轮增加至 277 项；代码审阅指出的停车转矩交接和真值路径基准问题已修复。
+停车轮速阻尼、自适应预载、RL 参与预载、静止转向和分阶段预载已作针对性诊断，均未解决对应横移或引入其他失败，不作为默认配置。此前测试为 274／277 项，本轮为 278 项；代码审阅指出的停车转矩交接和真值路径基准问题已修复。
 
-后续先解决噪声组合工况的静止预载偏航，再完善约束分配及初始小偏差验证，最后提速。详见[无噪声反馈报告](docs/SHARED_PATH_FEEDBACK_20261001.md)、[共用路径证据](evidence/static_fr_ii/shared_path_matrix_20261001.json)及[上一轮报告](docs/RIGHT_SIDE_ROBUSTNESS_20261001.md)。下文为历史阶段成果；其中双轮 PASS 使用当时分阶段路径验收，不能直接代替最新共用路径验收。
+后续优先验证新仿真参数配置的其他起点／噪声种子，再完善约束分配与初始小偏差反馈。保留偏航原问题的模型范围说明；提速和进一步压缩应以稳定余量为依据。详见[历史无噪声反馈报告](docs/SHARED_PATH_FEEDBACK_20261001.md)、[共用路径证据](evidence/static_fr_ii/shared_path_matrix_20261001.json)及[上一轮报告](docs/RIGHT_SIDE_ROBUSTNESS_20261001.md)。下文为历史阶段成果；其中双轮 PASS 使用当时分阶段路径验收，不能直接代替最新共用路径验收。
 
 ```powershell
 python scripts/run_right_side_full_cycle.py --output runs/shared_path_recheck --efficiency-profile balanced --rear-control-profile robust --front-steering-feedback --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3

@@ -322,7 +322,8 @@ class RearCycleController:
             # Recovery is allowed on solid ground after stopping; never lower
             # RR into the known pit. Preserve abort_reason so this remains FAIL.
             can_recover = (
-                x["X_R2"] >= far_edge + cfg.crossing_clearance_m and
+                (x["X_R2"] >= far_edge + cfg.crossing_clearance_m or
+                 x["X_R2"] <= float(self.scenario["start_station_m"]) - cfg.crossing_clearance_m) and
                 abs(x["Vx"]) <= cfg.stationary_kph and
                 gate.min_support_n >= cfg.support_floor_n and
                 gate.zmp_lambda_min >= cfg.lambda_abort and

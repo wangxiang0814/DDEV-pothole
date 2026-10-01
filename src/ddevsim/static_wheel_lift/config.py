@@ -245,6 +245,10 @@ FAST_CYCLE_FRONT = replace(
     init_settle_s=2.0,
     preload_max_reference_rate=2.0,
 )
+COMPACT_CYCLE_FRONT = replace(
+    BALANCED_CYCLE_FRONT,
+    preload_max_reference_rate=2.5,
+)
 
 
 @dataclass(frozen=True)
@@ -349,6 +353,7 @@ ROBUST_REAR_RUN = replace(
     posture_fl_force_n=-650.0,
     posture_hold_fl_force_n=-450.0,
 )
+COMPACT_REAR_RETURN_RAMP_S = 8.0
 
 
 @dataclass(frozen=True)

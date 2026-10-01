@@ -18,6 +18,13 @@ def summarize(directory: Path) -> dict:
     native = result.pop("native", {})
     with (directory / "front_control_20ms.csv").open(encoding="utf-8", newline="") as stream:
         front = list(csv.DictReader(stream))
+    phase_durations = {}
+    for stage, samples in (("front", front), ("rear", rows)):
+        durations = {}
+        for current, following in zip(samples, samples[1:]):
+            mode = current["mode"]
+            durations[mode] = durations.get(mode, 0.) + float(following["time_s"]) - float(current["time_s"])
+        phase_durations[stage] = durations
     init_s = result.get("front_timing_config", {}).get("init_settle_s", 7.0)
     reference = next((r for r in front if float(r["time_s"]) >= init_s), None)
     shared_audit = None
@@ -39,6 +46,7 @@ def summarize(directory: Path) -> dict:
         "result": result,
         "shared_path_audit": shared_audit,
         "cycle_complete_s": complete,
+        "phase_durations_s": phase_durations,
         "native_final_time_s": native.get("final_time_s"),
         "native_stop_on_complete": native.get("stopped_on_controller_complete", False),
         "stop_min_fr_travel_mm": min((float(r["travel_fr_mm"]) for r in stops), default=None),

@@ -86,6 +86,7 @@ def test_rear_abort_recovers_only_after_clearance_and_stationary_dwell():
     controller.mode = "RR_ABORT_STOP"
     controller.abort_reason = "RR support suspension rebound limit"
     x = _rear_observation()
+    x['X_R2'] = 101.5  # Over the pit; neither safe recovery side is available.
     x["Vx"] = 0.
     controller(0., x)
     controller(2., x)
@@ -96,6 +97,21 @@ def test_rear_abort_recovers_only_after_clearance_and_stationary_dwell():
     controller(3.04, x)
     assert controller.mode == "RR_LOWERING"
     assert controller.abort_reason is not None
+
+
+def test_rear_abort_before_pit_recovers_on_solid_ground_without_waiting_to_cross():
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4)
+    controller.mode = 'RR_ABORT_STOP'
+    controller.abort_reason = 'static preload fault'
+    x = _rear_observation()
+    x['Vx'] = 0.
+    x['X_R2'] = 100.6
+    controller(0., x)
+    controller(1.04, x)
+    assert controller.mode == 'RR_LOWERING'
+    assert controller.abort_reason == 'static preload fault'
 
 
 def test_rear_lift_uses_posture_assistance_without_relaxing_entry_gate():

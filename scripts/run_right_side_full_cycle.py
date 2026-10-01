@@ -20,6 +20,7 @@ from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
                                              RIGHT_SIDE_MODEL, TUNED_REAR_RUN,
                                              FAST_CYCLE_FRONT, FAST_CYCLE_REAR,
                                              BALANCED_CYCLE_FRONT, CLOSED_LOOP_RUN,
+                                             COMPACT_CYCLE_FRONT, COMPACT_REAR_RETURN_RAMP_S,
                                              ROBUST_REAR_RUN,
                                              rear_speed_trial_config)
 from ddevsim.static_wheel_lift.rear_cycle import RearCycleController
@@ -348,13 +349,16 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast"),
+    parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast", "compact"),
                         default="baseline")
     parser.add_argument("--identify-rr-swing", action="store_true")
     parser.add_argument("--steer-probe-deg", type=float)
     parser.add_argument("--stop-at", type=float)
     parser.add_argument("--original-kinematics", action="store_true",
                         help="diagnostic: preserve the source I_I ride tables")
+    parser.add_argument("--lateral-ride-scale", type=float,
+                        default=RIGHT_SIDE_MODEL.lateral_ride_scale,
+                        help="copied suspension lateral movement scale, 0..1; default 0.5")
     parser.add_argument("--rear-target-speed-kph", type=float)
     parser.add_argument("--rear-min-pit-speed-kph", type=float)
     parser.add_argument("--rear-accel-ramp-s", type=float)
@@ -385,6 +389,8 @@ def main() -> None:
     parser.add_argument("--road-friction", type=float)
     parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
     args = parser.parse_args()
+    if not np.isfinite(args.lateral_ride_scale) or not 0. <= args.lateral_ride_scale <= 1.:
+        parser.error("lateral ride scale must be finite and in 0..1")
     if args.noise_seed < 0:
         parser.error("noise seed must be nonnegative")
     if ((args.rear_target_speed_kph is None) !=
@@ -397,6 +403,7 @@ def main() -> None:
         "baseline": CLOSED_LOOP_RUN,
         "balanced": BALANCED_CYCLE_FRONT,
         "fast": FAST_CYCLE_FRONT,
+        "compact": COMPACT_CYCLE_FRONT,
     }[args.efficiency_profile]
     if args.front_target_speed_kph is not None:
         front_run.CFG = front_run.speed_trial_config(
@@ -444,7 +451,7 @@ def main() -> None:
     if not args.original_kinematics and RIGHT_SIDE_MODEL.clamp_ride_tables:
         _clamp_kinematics_at_original_bounds(model)
     if not args.original_kinematics:
-        _scale_lateral_ride_movement(model, RIGHT_SIDE_MODEL.lateral_ride_scale)
+        _scale_lateral_ride_movement(model, args.lateral_ride_scale)
     _enable_steering_import(model)
     path = model / "run_all.par"
     content, count = re.subn(r"(?m)^TSTOP\s+[-+0-9.eE]+\s*$",
@@ -459,6 +466,8 @@ def main() -> None:
                    ROBUST_REAR_RUN if args.rear_control_profile == "robust" else
                    FAST_CYCLE_REAR if args.efficiency_profile == "fast" else
                    TUNED_REAR_RUN)
+    if args.efficiency_profile == "compact":
+        rear_config = replace(rear_config, return_ramp_s=COMPACT_REAR_RETURN_RAMP_S)
     if args.rear_adaptive_preload:
         rear_config = replace(rear_config, adaptive_preload=True,
                               preload_ready_timeout_s=rear_config.adaptive_preload_timeout_s)
@@ -572,7 +581,7 @@ def main() -> None:
         "clamp_ride_tables": (not args.original_kinematics and
                               RIGHT_SIDE_MODEL.clamp_ride_tables),
         "lateral_ride_scale": (1.0 if args.original_kinematics else
-                               RIGHT_SIDE_MODEL.lateral_ride_scale),
+                               args.lateral_ride_scale),
         "steering_import": STEERING_IMPORT,
     }
     result["efficiency_profile"] = args.efficiency_profile

@@ -23,3 +23,5 @@
 车型参数、接口合同与软件限幅分别见 `models/corner_module_ddev/`、`src/ddevsim/interface_validation.py`、`src/ddevsim/static_wheel_lift/config.py`。当前成功试验的可移植模型和结果见 [evidence/static_fr_ii](evidence/static_fr_ii)。该隔离车型使用 200 kg 载荷后移 350 mm、左移 500 mm；力/速率限均为仿真软件限幅，不是硬件额定值。
 
 FR→RR 完整循环的独立运行副本额外接入第九路 `IMP_STEER_SW`（`REPLACE`，方向盘角，度），用于三轮蠕行时修正横向偏差。原始车型及已有八路控制入口保持原样。TruckSim 自带的 `Run_imp_tab.txt` 和导入通道数据集将该变量定义为方向盘角；本机负角脉冲试验使正偏航减小，证据保存在本机 `runs/right_side_steer_probe_neg60/`。这是软件转向输入，尚无实体转向执行器约束。
+
+2026-10-01 新复核副本：显式 `--lateral-ride-scale 0` 将四个 `SUSP_LAT_TABLE` 输出设为零，改善悬架升降时横向轮心移动／轮胎受力耦合引起的偏航。CLI 默认仍是旧试验系数 0.5；结果记录实际值，不改原始车型及 I/O。当前平路坑槽的 FR/RR 坑口净空为 `Z_R1/R2−R0`（坑口平面 z=0、R0=0.263 m），同时检查近零轮载，不使用坑底 Zgnd 作为过坑净空基准。控制仍 50 Hz，求解步长仍 0.5 ms。compact 调整 FR 预载参考时钟最大速率至 2.5、RR return 至 8 s，FR return 12 s、两次 hold≥5 s 保留。见 `docs/TIMING_AND_YAW_20261001.md`。
