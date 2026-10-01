@@ -171,6 +171,7 @@ LIFT_PROBE = LiftProbeConfig()
 @dataclass(frozen=True)
 class ClosedLoopRunConfig:
     control_period_s: float = 0.02
+    init_settle_s: float = 7.0
     wheel_load_filter_cutoff_hz: float = 5.0
     preload_feedback_start_s: float = 7.0
     preload_max_reference_rate: float = 1.5
@@ -187,12 +188,14 @@ class ClosedLoopRunConfig:
     lower_ramp_s: float = 4.0
     return_ramp_s: float = 12.0
     fr_lift_force_n: float = -100.0
+    max_lift_trial_force_n: float = 1000.0
     rl_support_force_n: float = -4500.0
     fr_feedback_limit_n: float = 500.0
     fr_feedback_slew_n_s: float = 400.0
     fr_feedback_tracking_gain: float = 0.1
     fr_feedback_deadband_n: float = 10.0
     support_feedback_limit_n: float = 500.0
+    max_support_trial_feedback_n: float = 2000.0
     max_continuous_support_saturation_s: float = 0.5
     support_floor_n: float = 500.0
     lambda_target: float = 0.05
@@ -201,6 +204,7 @@ class ClosedLoopRunConfig:
     fr_swing_load_n: float = 100.0
     lift_clearance_m: float = 0.01
     lip_clearance_m: float = 0.005
+    post_pit_positive_clearance_m: float = 0.002
     attitude_limit_deg: float = 8.0
     rebound_guard_mm: float = -95.0
     rebound_abort_mm: float = -99.0
@@ -208,6 +212,7 @@ class ClosedLoopRunConfig:
     moving_rebound_abort_mm: float = -149.0
     jounce_abort_mm: float = 155.0
     crawl_speed_kph: float = 2.2
+    crawl_accel_ramp_s: float = 0.0
     crawl_min_speed_kph: float = 2.0
     crawl_max_speed_kph: float = 8.0
     crawl_max_lateral_error_m: float = 0.05
@@ -230,11 +235,22 @@ class ClosedLoopRunConfig:
 
 
 CLOSED_LOOP_RUN = ClosedLoopRunConfig()
+BALANCED_CYCLE_FRONT = replace(
+    CLOSED_LOOP_RUN,
+    init_settle_s=3.0,
+    preload_max_reference_rate=1.7,
+)
+FAST_CYCLE_FRONT = replace(
+    CLOSED_LOOP_RUN,
+    init_settle_s=2.0,
+    preload_max_reference_rate=2.0,
+)
 
 
 @dataclass(frozen=True)
 class RearCycleConfig:
     control_period_s: float = 0.02
+    post_complete_observe_s: float = 2.0
     settle_dwell_s: float = 1.0
     preload_ramp_s: float = 8.0
     preload_ready_timeout_s: float = 12.0
@@ -249,11 +265,13 @@ class RearCycleConfig:
     sim_force_limit_n: float = 18200.0
     sim_force_slew_n_s: float = 45400.0
     lift_force_n: float = -200.0
+    max_lift_trial_force_n: float = 1000.0
     lift_ramp_s: float = 4.0
     lift_timeout_s: float = 8.0
     lift_entry_clearance_m: float = 0.01
     posture_fl_force_n: float = -250.0
     posture_hold_fl_force_n: float = -100.0
+    max_posture_trial_force_n: float = 1000.0
     posture_ramp_s: float = 1.0
     posture_target_roll_deg: float = -7.2
     posture_target_clearance_m: float = 0.045
@@ -263,6 +281,10 @@ class RearCycleConfig:
     posture_stop_release_s: float = 0.8
     stop_roll_counter_fl_n: float = 250.0
     stop_roll_counter_ramp_s: float = 0.5
+    stop_travel_relief_start_mm: float = -143.0
+    stop_travel_relief_gain_n_per_mm: float = 80.0
+    stop_travel_relief_limit_n: float = 500.0
+    stop_travel_relief_slew_n_s: float = 1000.0
     hold_s: float = 5.0
     lower_ramp_s: float = 4.0
     return_ramp_s: float = 12.0
@@ -309,6 +331,12 @@ TUNED_REAR_RUN = replace(
     posture_target_clearance_m=0.035,
     attitude_limit_deg=10.0,
 )
+FAST_CYCLE_REAR = TUNED_REAR_RUN
+ROBUST_REAR_RUN = replace(
+    TUNED_REAR_RUN,
+    posture_fl_force_n=-650.0,
+    posture_hold_fl_force_n=-450.0,
+)
 
 
 @dataclass(frozen=True)
@@ -316,6 +344,7 @@ class RightSideModelConfig:
     clamp_ride_tables: bool = True
     lateral_ride_scale: float = 0.5
     max_boundary_pit_width_m: float = 1.4
+    max_start_offset_m: float = 0.4
 
 
 RIGHT_SIDE_MODEL = RightSideModelConfig()
@@ -337,10 +366,17 @@ def rear_speed_trial_config(target_kph: float, min_pit_kph: float,
                                        accel_ramp_s is None else accel_ramp_s))
 
 
-def speed_trial_config(target_kph: float, min_pit_kph: float) -> ClosedLoopRunConfig:
+def speed_trial_config(target_kph: float, min_pit_kph: float,
+                       accel_ramp_s: float | None = None,
+                       *, base: ClosedLoopRunConfig = CLOSED_LOOP_RUN) -> ClosedLoopRunConfig:
     """Keep requested speed and native acceptance bound in one trial config."""
     if (not math.isfinite(target_kph) or not math.isfinite(min_pit_kph) or
-            not 0. < min_pit_kph <= target_kph <= CLOSED_LOOP_RUN.crawl_max_speed_kph):
+            not 0. < min_pit_kph <= target_kph <= base.crawl_max_speed_kph):
         raise ValueError("invalid crawl speed trial")
-    return replace(CLOSED_LOOP_RUN, crawl_speed_kph=target_kph,
-                   crawl_min_speed_kph=min_pit_kph)
+    if accel_ramp_s is not None and (
+            not math.isfinite(accel_ramp_s) or accel_ramp_s < 0.):
+        raise ValueError("invalid front acceleration ramp")
+    return replace(base, crawl_speed_kph=target_kph,
+                   crawl_min_speed_kph=min_pit_kph,
+                   crawl_accel_ramp_s=(base.crawl_accel_ramp_s if
+                                       accel_ramp_s is None else accel_ramp_s))

@@ -2,6 +2,27 @@
 
 ## 当前控制对象与进展
 
+### 最新开发状态（2026-10-01）
+
+当前推荐复核 `balanced` 提效配置 + RR `robust` 配置，保持固定车型质量和载荷位置。实际控制采用经典参考轨迹、轮载反馈、速度 PI、方向反馈，以及新增的停车行程反馈；**尚未完整接入在线 QP，不宣称任意工况泛化成功**。
+
+| 新版本已复核工况 | 全循环结果 | RR 最低坑上净空 | RR 最弱支撑轮载 | RR 最大横向偏差 |
+|---|---|---:|---:|---:|
+| μ=0.7、标称起点、坑内约 3 km/h | PASS | 33.34 mm | 846 N | 3.35 cm |
+| μ=0.6、起点提前 0.3 m、坑内约 3 km/h | PASS | 30.18 mm | 855 N | 3.87 cm |
+
+原 3 km/h 基线 RR 净空约 15.44 mm、最弱支撑约 737 N。新版本标称完整动作约 101.8 s，原基线约 109.3 s；完成后观察 2 s 即结束仿真，避免无效运行至 180 s。FR/RR 各保持 5 s，落轮与恢复时间未压缩。
+
+主要修复是 RR 停车时 FR 支撑悬架回弹触边：新增实时有界力修正后，同一失败工况全循环通过，停车最小 FR 行程约 −145.3 mm，原 −149 mm 保护线未放宽。RR 横滚峰值仍约 9.73°，接近 10° 边界；旧控制 μ=0.4 和 3.5–4 km/h 试验有 FAIL，暂不发布为可靠范围。新版本异常落轮恢复已有单元验证，原生故障注入尚待验证。
+
+**新版本远起点（后移 0.3 m）仍为 FAIL：**已通过姿态辅助消除 RR 净空不足的进入卡点，完成两轮过坑及四轮恢复，但 RR 横向偏差 6.30 cm，超过 5 cm 验收线；其中约 6.15 cm 在静止预载/姿态调整期间产生。该工况不纳入推荐范围。下一步优先改善静止重心调整的侧向滑移，再开展噪声与更高速度验证。最终 Python 测试 264 项通过。
+
+后续集中完成运动支撑/净空/姿态的约束分配、小偏差与噪声验证，再提升速度。详细改动、失败原因与复核方式见[本次开发报告](docs/RIGHT_SIDE_ROBUSTNESS_20261001.md)及[精简工况证据](evidence/static_fr_ii/robustness_matrix_20261001.json)。下文保留早期阶段成果用于追溯。
+
+```powershell
+python scripts/run_right_side_full_cycle.py --output runs/robust_3k_recheck --efficiency-profile balanced --rear-control-profile robust --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3
+```
+
 唯一当前车型是 TruckSim 2019 `corner_module_ddev`（Compact Utility Truck，`I_I` 前后独立悬架，约 1.36 t）。四轮独立转矩和四角主动悬架力通过原有八通道接口输入；没有更换 TruckSim plant。求解器 `tstep=0.0005 s`，`simfile.sim` 的 `EXT_MODEL_STEP=0.01 s` 是另一项设置，不是求解积分步长。当前试验的 200 kg 载荷后移 350 mm、左移 500 mm，仅在随附的隔离平地模型中使用。
 
 **已完成原生静态验证：**平地、零电机转矩，FR 卸载并离地，FL/RL/RR 三轮正载，CoM 与轮载 ZMP 位于支撑三角形内，FR 净空超过 10 mm 持续 5.66 s，随后平滑落轮并恢复四轮。保持段 FL/FR/RL/RR 轮载约为 `6396/0/1229/5710 N`，ZMP 最小重心坐标裕度约 `0.092`。可审阅的[精简证据](evidence/static_fr_ii/lift_summary.json)与[轨迹图](evidence/static_fr_ii/lift_evidence.png)随仓库保存。

@@ -35,6 +35,7 @@ def run_stepwise(
     export_names: Sequence[str],
     log_decimation: int = 20,
     stop_at_s: float | None = None,
+    stop_when: Callable[[float], bool] | None = None,
 ) -> Dict[str, Any]:
     """Integrate a TruckSim case step by step with an external controller.
 
@@ -42,6 +43,7 @@ def run_stepwise(
     short diagnostic runs such as the static calibration).  The solver is always
     terminated through ``vs_terminate_run`` so a capped run leaves a valid,
     animatable history file.
+    ``stop_when`` can end a completed controller cycle after its own dwell.
     """
     simfile = Path(simfile).resolve()
     parsed = parse_simfile(simfile)
@@ -57,6 +59,9 @@ def run_stepwise(
     t_current = 0.0
     status = 1
     rows_written = 0
+    stopped_when = False
+    initialized = False
+    terminated = False
     try:
         dll = ctypes.cdll.LoadLibrary(str(dll_path))
         dll.vs_set_opt_error_dialog.argtypes = [ctypes.c_int]
@@ -82,8 +87,10 @@ def run_stepwise(
             solver_input_name(simfile), ctypes.byref(n_import), ctypes.byref(n_export),
             ctypes.byref(t_start), ctypes.byref(t_stop), ctypes.byref(t_step)
         )
+        initialized = True
         if n_import.value != len(import_names) or n_export.value != len(export_names):
             dll.vs_terminate_run(t_start)
+            terminated = True
             raise ValueError(
                 "solver I/O sizes %d/%d do not match contract %d/%d"
                 % (n_import.value, n_export.value, len(import_names), len(export_names))
@@ -116,23 +123,32 @@ def run_stepwise(
                     writer.writerow(row)
                     rows_written += 1
                 step_index += 1
+                if status == 0 and stop_when is not None and stop_when(t_current):
+                    stopped_when = True
+                    break
         dll.vs_terminate_run(ctypes.c_double(t_current))
+        terminated = True
         reached_limit = t_current >= limit_s - 1.5 * t_step.value
         reached_configured = t_current >= t_stop.value - 1.5 * t_step.value
         return {
             # Reaching the integration limit is success.  When the loop is capped
             # early the solver has not signalled its own end, so the raw solver
             # status alone cannot be the completion criterion.
-            "status": "COMPLETED" if reached_limit else "TERMINATED",
+            "status": "COMPLETED" if reached_limit or stopped_when else "TERMINATED",
             "solver_status": status,
             "solver_signalled_end": status != 0,
             "final_time_s": t_current,
             "configured_stop_s": t_stop.value,
             "capped_at_s": stop_at_s,
             "reached_configured_stop": reached_configured,
+            "stopped_on_controller_complete": stopped_when,
             "rows_written": rows_written,
             "csv": str(csv_path),
             "error_message": _decode_message(dll.vs_get_error_message()),
         }
     finally:
-        os.chdir(str(previous_directory))
+        try:
+            if initialized and not terminated:
+                dll.vs_terminate_run(ctypes.c_double(t_current))
+        finally:
+            os.chdir(str(previous_directory))

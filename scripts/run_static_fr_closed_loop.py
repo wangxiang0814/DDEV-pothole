@@ -29,7 +29,7 @@ from ddevsim.interface_validation import EXPORT_NAMES, IMPORT_NAMES
 from ddevsim.pothole_case import SCENARIO_EXPORTS
 from ddevsim.static_wheel_lift.closed_loop import (
     CrawlTorqueFeedback, PreloadProgress, ScalarLoadFeedback,
-    SupportForceFeedback, blend_contact_gain,
+    SupportForceFeedback, blend_contact_gain, front_clearance_guard_m,
     WheelLoadFilter,
 )
 from ddevsim.static_wheel_lift.command_trace import load_command_trace
@@ -286,7 +286,7 @@ class LiftCrawlController:
         top_clearance = x["Z_R1"] - CFG.tyre_radius_m
         attitude = max(abs(x["Roll_E"]), abs(x["Pitch"]))
         support_load = float(min(gate_fz[SUPPORT]))
-        if self.initial_yo_m is None and now_s >= CFG.preload_feedback_start_s:
+        if self.initial_yo_m is None and now_s >= CFG.init_settle_s:
             self.initial_yo_m = x["Yo"]
             self.initial_yaw_deg = x["Yaw"]
         ready = (gate_fz[1] <= CFG.fr_ready_load_n and support_load >=
@@ -298,9 +298,12 @@ class LiftCrawlController:
                 self.ready_since_s = now_s
         else:
             self.ready_since_s = None
-        if self.mode == "INIT_SETTLE" and now_s >= CFG.preload_feedback_start_s:
+        if self.mode == "INIT_SETTLE" and now_s >= CFG.init_settle_s:
             if (np.min(gate_fz) > CFG.support_floor_n and
                     abs(x["Vx"]) <= CFG.init_max_vx_kph):
+                if self.preload_clock.progress_s < CFG.preload_feedback_start_s:
+                    self.preload_clock.align_reference(
+                        now_s, CFG.preload_feedback_start_s)
                 self._enter("PRELOAD_SHIFT", now_s)
         if (self.mode == "PRELOAD_SHIFT" and
                 self.preload_clock.progress_s >= self.trace.time_s[-1]):
@@ -360,7 +363,12 @@ class LiftCrawlController:
                                    else CFG.rebound_abort_mm) or
                     max(travel) > CFG.jounce_abort_mm or
                     (self.mode in ("CRAWL", "STOP") and
-                     top_clearance < CFG.lip_clearance_m)):
+                     top_clearance < front_clearance_guard_m(
+                         x["X_R1"],
+                         float(self.scenario["start_station_m"]) +
+                         float(self.scenario["length_m"]),
+                         CFG.crossing_clearance_m, CFG.lip_clearance_m,
+                         CFG.post_pit_positive_clearance_m))):
                 self.abort_reason = "three-wheel support or clearance limit"
                 self._enter("ABORT_STOP", now_s)
         ref = self._ref_loads(now_s)
@@ -380,7 +388,11 @@ class LiftCrawlController:
                 reference_n=float(ref[1]))
         if self.mode in ("CRAWL", "STOP", "ABORT_STOP"):
             if self.mode == "CRAWL":
-                target_speed = CFG.crawl_speed_kph
+                target_speed = (CFG.crawl_speed_kph *
+                                quintic_step(now_s, self.crawl_start_s,
+                                             CFG.crawl_accel_ramp_s)[0]
+                                if CFG.crawl_accel_ramp_s > 0.
+                                else CFG.crawl_speed_kph)
             elif self.mode == "STOP":
                 target_speed = self.stop_enter_speed_kph * (
                     1. - quintic_step(now_s, self.mode_start_s,
@@ -399,6 +411,7 @@ class LiftCrawlController:
                 self.drive.torque_nm = self.torques_nm.copy()
         else:
             self.torques_nm[:] = 0.
+            target_speed = 0.
         if self.lower_start_s is None:
             applied_scale = 1.
         else:
@@ -413,6 +426,7 @@ class LiftCrawlController:
             applied_torque = self.torques_nm
         self.rows.append({
             "time_s": now_s, "mode": self.mode, "vx_kph": x["Vx"],
+            "speed_target_kph": target_speed,
             "preload_ref_time_s": self.preload_clock.progress_s,
             "preload_ref_rate": self.preload_clock.rate,
             "support_swing_gain_weight": self.swing_gain_weight,

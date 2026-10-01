@@ -6,7 +6,7 @@ import argparse
 import csv
 import json
 import re
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +18,9 @@ from ddevsim.pothole_case import corner_module_scenario, _procedure_block
 from ddevsim.visual_mesh import write_visual_mesh
 from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
                                              RIGHT_SIDE_MODEL, TUNED_REAR_RUN,
+                                             FAST_CYCLE_FRONT, FAST_CYCLE_REAR,
+                                             BALANCED_CYCLE_FRONT, CLOSED_LOOP_RUN,
+                                             ROBUST_REAR_RUN,
                                              rear_speed_trial_config)
 from ddevsim.static_wheel_lift.rear_cycle import RearCycleController
 
@@ -121,6 +124,23 @@ def _set_pit_geometry(model: Path, scenario: dict,
     path.write_text(content, encoding="utf-8")
     write_visual_mesh(model / "visual_assets", variant)
     scenario["width_m"], scenario["depth_m"] = width_m, depth_m
+    (model / "scenario.json").write_text(json.dumps(scenario, indent=2) + "\n",
+                                          encoding="utf-8")
+
+
+def _set_vehicle_start_offset(model: Path, scenario: dict, offset_m: float) -> None:
+    """Move the copied vehicle start while leaving road and pit fixed."""
+    path = model / "run_all.par"
+    content = path.read_text(encoding="utf-8")
+    pattern = r"(?m)^SSTART\s+([-+0-9.eE]+)\s*$"
+    starts = [float(value) for value in re.findall(pattern, content)]
+    if len(starts) != 2 or abs(starts[0] - starts[1]) > 1e-9:
+        raise ValueError("expected two identical vehicle starting stations")
+    new_start = starts[0] + offset_m
+    content = re.sub(pattern, f"SSTART {new_start:g}", content)
+    path.write_text(content, encoding="utf-8")
+    scenario["vehicle_start_station_m"] = new_start
+    scenario["approach_distance_m"] = float(scenario["start_station_m"]) - new_start
     (model / "scenario.json").write_text(json.dumps(scenario, indent=2) + "\n",
                                           encoding="utf-8")
 
@@ -291,6 +311,8 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast"),
+                        default="baseline")
     parser.add_argument("--identify-rr-swing", action="store_true")
     parser.add_argument("--steer-probe-deg", type=float)
     parser.add_argument("--stop-at", type=float)
@@ -299,12 +321,23 @@ def main() -> None:
     parser.add_argument("--rear-target-speed-kph", type=float)
     parser.add_argument("--rear-min-pit-speed-kph", type=float)
     parser.add_argument("--rear-accel-ramp-s", type=float)
+    parser.add_argument("--rear-preload-fl-force-n", type=float)
+    parser.add_argument("--rear-preload-fr-force-n", type=float)
+    parser.add_argument("--rear-lift-force-n", type=float)
+    parser.add_argument("--rear-posture-fl-force-n", type=float)
+    parser.add_argument("--rear-control-profile", choices=("baseline", "robust"),
+                        default="baseline")
+    parser.add_argument("--rear-posture-hold-fl-force-n", type=float)
     parser.add_argument("--front-target-speed-kph", type=float)
     parser.add_argument("--front-min-pit-speed-kph", type=float)
+    parser.add_argument("--front-accel-ramp-s", type=float)
+    parser.add_argument("--front-lift-force-n", type=float)
+    parser.add_argument("--front-support-feedback-limit-n", type=float)
     parser.add_argument("--front-brake-lead-m", type=float)
     parser.add_argument("--pit-width-m", type=float)
     parser.add_argument("--pit-depth-m", type=float)
     parser.add_argument("--road-friction", type=float)
+    parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
     args = parser.parse_args()
     if ((args.rear_target_speed_kph is None) !=
             (args.rear_min_pit_speed_kph is None)):
@@ -312,9 +345,31 @@ def main() -> None:
     if ((args.front_target_speed_kph is None) !=
             (args.front_min_pit_speed_kph is None)):
         parser.error("front target and minimum pit speed must be supplied together")
+    front_run.CFG = {
+        "baseline": CLOSED_LOOP_RUN,
+        "balanced": BALANCED_CYCLE_FRONT,
+        "fast": FAST_CYCLE_FRONT,
+    }[args.efficiency_profile]
     if args.front_target_speed_kph is not None:
         front_run.CFG = front_run.speed_trial_config(
-            args.front_target_speed_kph, args.front_min_pit_speed_kph)
+            args.front_target_speed_kph, args.front_min_pit_speed_kph,
+            args.front_accel_ramp_s, base=front_run.CFG)
+    elif args.front_accel_ramp_s is not None:
+        parser.error("front acceleration ramp requires a front speed trial")
+    if args.front_lift_force_n is not None:
+        if (not np.isfinite(args.front_lift_force_n) or
+                not -front_run.CFG.max_lift_trial_force_n <=
+                args.front_lift_force_n < 0.0):
+            parser.error("front lift force must be negative and within the configured simulation trial range")
+        front_run.CFG = replace(front_run.CFG,
+                                fr_lift_force_n=args.front_lift_force_n)
+    if args.front_support_feedback_limit_n is not None:
+        if (not np.isfinite(args.front_support_feedback_limit_n) or
+                not 0.0 < args.front_support_feedback_limit_n <=
+                front_run.CFG.max_support_trial_feedback_n):
+            parser.error("front support feedback limit exceeds the simulation trial range")
+        front_run.CFG = replace(front_run.CFG,
+                                support_feedback_limit_n=args.front_support_feedback_limit_n)
     if args.front_brake_lead_m is not None:
         if not np.isfinite(args.front_brake_lead_m) or args.front_brake_lead_m < 0.0:
             parser.error("front brake lead must be nonnegative and finite")
@@ -324,6 +379,11 @@ def main() -> None:
     output = args.output.resolve()
     model, scenario = front_run._prepare_model(
         output, crawl=True, road_friction=args.road_friction)
+    if (not np.isfinite(args.vehicle_start_offset_m) or
+            abs(args.vehicle_start_offset_m) > RIGHT_SIDE_MODEL.max_start_offset_m):
+        parser.error("vehicle start offset exceeds the configured trial range")
+    if args.vehicle_start_offset_m:
+        _set_vehicle_start_offset(model, scenario, args.vehicle_start_offset_m)
     if (args.front_brake_lead_m is not None and
             args.front_brake_lead_m >= float(scenario["length_m"])):
         parser.error("front brake lead must be shorter than pit length")
@@ -348,6 +408,8 @@ def main() -> None:
     gain = np.array(json.loads((front_run.EVIDENCE / "gain_matrix.json").read_text(
         encoding="utf-8"))["gains"]["Fz_n"], dtype=float)
     rear_config = (REAR_CYCLE_RUN if args.original_kinematics else
+                   ROBUST_REAR_RUN if args.rear_control_profile == "robust" else
+                   FAST_CYCLE_REAR if args.efficiency_profile == "fast" else
                    TUNED_REAR_RUN)
     if args.rear_accel_ramp_s is not None and args.rear_target_speed_kph is None:
         parser.error("rear acceleration ramp requires a rear speed trial")
@@ -355,6 +417,39 @@ def main() -> None:
         rear_config = rear_speed_trial_config(
             args.rear_target_speed_kph, args.rear_min_pit_speed_kph,
             rear_config, args.rear_accel_ramp_s)
+    for value, label, sign in (
+            (args.rear_preload_fl_force_n, "FL", -1),
+            (args.rear_preload_fr_force_n, "FR", 1)):
+        if value is not None and (
+                not np.isfinite(value) or sign * value <= 0.0 or
+                abs(value) > rear_config.sim_force_limit_n):
+            parser.error(f"rear preload {label} force has invalid sign or exceeds the simulation limit")
+    rear_config = replace(
+        rear_config,
+        preload_fl_force_n=(rear_config.preload_fl_force_n if
+                            args.rear_preload_fl_force_n is None else
+                            args.rear_preload_fl_force_n),
+        preload_fr_force_n=(rear_config.preload_fr_force_n if
+                            args.rear_preload_fr_force_n is None else
+                            args.rear_preload_fr_force_n))
+    if args.rear_lift_force_n is not None:
+        if (not np.isfinite(args.rear_lift_force_n) or
+                not -rear_config.max_lift_trial_force_n <=
+                args.rear_lift_force_n < 0.0):
+            parser.error("rear lift force must be negative and within the configured trial range")
+        rear_config = replace(rear_config, lift_force_n=args.rear_lift_force_n)
+    posture_force = (rear_config.posture_fl_force_n if
+                     args.rear_posture_fl_force_n is None else
+                     args.rear_posture_fl_force_n)
+    posture_hold = (rear_config.posture_hold_fl_force_n if
+                    args.rear_posture_hold_fl_force_n is None else
+                    args.rear_posture_hold_fl_force_n)
+    if (not np.isfinite(posture_force) or not np.isfinite(posture_hold) or
+            not -rear_config.max_posture_trial_force_n <= posture_force < 0.0 or
+            not posture_force <= posture_hold < 0.0):
+        parser.error("rear posture force must be negative and hold force no stronger than its ramp")
+    rear_config = replace(rear_config, posture_fl_force_n=posture_force,
+                          posture_hold_fl_force_n=posture_hold)
     controller = FullRightSideController(
         scenario=scenario,
         rr_gain_per_coupled_force=float(
@@ -366,7 +461,12 @@ def main() -> None:
                           output / "native_5ms.csv",
                           (*front_run.IMPORT_NAMES, STEERING_IMPORT),
                           front_run.EXPORTS, log_decimation=10,
-                          stop_at_s=args.stop_at)
+                          stop_at_s=args.stop_at,
+                          stop_when=(lambda now_s: (
+                              controller.rear.mode == "RR_COMPLETE" and
+                              controller.rear.mode_start_s is not None and
+                              now_s - controller.rear.mode_start_s >=
+                              rear_config.post_complete_observe_s)))
     _write_rows(output / "front_control_20ms.csv", controller.front.rows)
     _write_rows(output / "rear_control_20ms.csv", controller.rear.rows)
     front_result = front_run.evaluate_control_rows(
@@ -374,7 +474,7 @@ def main() -> None:
         native_completed=native["status"] == "COMPLETED",
         abort_reason=controller.front.abort_reason)
     result = evaluate_full_cycle(front_result, controller.rear, scenario,
-                                 native["reached_configured_stop"])
+                                 native["status"] == "COMPLETED")
     result["model_tuning"] = {
         "original_kinematics": args.original_kinematics,
         "clamp_ride_tables": (not args.original_kinematics and
@@ -383,17 +483,40 @@ def main() -> None:
                                RIGHT_SIDE_MODEL.lateral_ride_scale),
         "steering_import": STEERING_IMPORT,
     }
+    result["efficiency_profile"] = args.efficiency_profile
+    result["rear_control_profile"] = args.rear_control_profile
+    result["controller_config"] = {
+        "front": asdict(front_run.CFG), "rear": asdict(rear_config),
+    }
+    result["front_timing_config"] = {
+        "init_settle_s": front_run.CFG.init_settle_s,
+        "preload_max_reference_rate": front_run.CFG.preload_max_reference_rate,
+        "lift_ramp_s": front_run.CFG.lift_ramp_s,
+        "hold_s": front_run.CFG.three_wheel_hold_s,
+        "lower_ramp_s": front_run.CFG.lower_ramp_s,
+        "return_ramp_s": front_run.CFG.return_ramp_s,
+    }
     result["scenario"] = {key: scenario[key] for key in
                           ("start_station_m", "length_m", "width_m", "depth_m",
                            "friction")}
+    result["scenario"]["vehicle_start_offset_m"] = args.vehicle_start_offset_m
+    result["scenario"]["approach_distance_m"] = scenario["approach_distance_m"]
     result["rear_speed_config"] = {
         "target_kph": rear_config.crawl_speed_kph,
         "minimum_pit_kph": rear_config.min_pit_speed_kph,
         "accel_ramp_s": rear_config.crawl_accel_ramp_s,
+        "preload_fl_force_n": rear_config.preload_fl_force_n,
+        "preload_fr_force_n": rear_config.preload_fr_force_n,
+        "lift_force_n": rear_config.lift_force_n,
+        "posture_fl_force_n": rear_config.posture_fl_force_n,
+        "posture_hold_fl_force_n": rear_config.posture_hold_fl_force_n,
     }
     result["front_speed_config"] = {
         "target_kph": front_run.CFG.crawl_speed_kph,
         "minimum_pit_kph": front_run.CFG.crawl_min_speed_kph,
+        "accel_ramp_s": front_run.CFG.crawl_accel_ramp_s,
+        "lift_force_n": front_run.CFG.fr_lift_force_n,
+        "support_feedback_limit_n": front_run.CFG.support_feedback_limit_n,
         "brake_lead_m": front_run.CFG.brake_start_before_far_edge_m,
     }
     result["front"] = front_result

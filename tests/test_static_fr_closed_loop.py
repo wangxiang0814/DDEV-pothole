@@ -1,10 +1,12 @@
 import numpy as np
 import pytest
 
-from ddevsim.static_wheel_lift.config import CLOSED_LOOP_RUN, speed_trial_config
+from ddevsim.static_wheel_lift.config import (CLOSED_LOOP_RUN,
+                                               FAST_CYCLE_FRONT,
+                                               speed_trial_config)
 from ddevsim.static_wheel_lift.closed_loop import (
     CrawlTorqueFeedback, PreloadProgress, ScalarLoadFeedback,
-    SupportForceFeedback, blend_contact_gain,
+    SupportForceFeedback, blend_contact_gain, front_clearance_guard_m,
     WheelLoadFilter,
 )
 
@@ -139,3 +141,37 @@ def test_speed_trial_updates_target_and_acceptance_minimum_together():
     assert CLOSED_LOOP_RUN.crawl_speed_kph == 2.2
     with pytest.raises(ValueError):
         speed_trial_config(3.0, 3.5)
+
+
+def test_speed_trial_can_request_a_smooth_front_launch():
+    trial = speed_trial_config(4.4, 4.0, accel_ramp_s=2.0)
+    assert trial.crawl_accel_ramp_s == 2.0
+    assert CLOSED_LOOP_RUN.crawl_accel_ramp_s == 0.0
+    with pytest.raises(ValueError):
+        speed_trial_config(4.4, 4.0, accel_ramp_s=-0.1)
+
+
+def test_front_clearance_guard_changes_only_after_pit_is_cleared():
+    far_edge = 101.9
+    assert front_clearance_guard_m(102.19, far_edge, 0.3, 0.005, 0.002) == 0.005
+    assert front_clearance_guard_m(102.21, far_edge, 0.3, 0.005, 0.002) == 0.002
+    with pytest.raises(ValueError):
+        front_clearance_guard_m(102.21, far_edge, 0.3, 0.005, 0.006)
+
+
+def test_preload_clock_can_begin_at_validated_trace_start_after_settle():
+    clock = PreloadProgress(start_s=7., end_s=48., max_rate=2.,
+                            slow_error_n=200., pause_error_n=500.)
+    clock.update(0., load_error_n=0.)
+    clock.align_reference(2., 7.)
+    assert clock.update(2.5, load_error_n=0.) == 8.
+    with pytest.raises(ValueError):
+        clock.align_reference(2.5, 6.)
+
+
+def test_fast_cycle_profile_survives_speed_trial_override():
+    trial = speed_trial_config(3.4, 3.0, base=FAST_CYCLE_FRONT)
+    assert trial.init_settle_s == 2.0
+    assert trial.preload_max_reference_rate == 2.0
+    assert trial.return_ramp_s == CLOSED_LOOP_RUN.return_ramp_s
+    assert trial.crawl_speed_kph == 3.4

@@ -63,6 +63,16 @@ class PreloadProgress:
         self.last_time_s = now_s
         return self.progress_s
 
+    def align_reference(self, now_s: float, reference_s: float) -> None:
+        """Start the active trace after actual settle, skipping its idle prefix."""
+        if (not math.isfinite(now_s) or not math.isfinite(reference_s) or
+                self.last_time_s is None or now_s < self.last_time_s or
+                not self.progress_s <= reference_s <= self.end_s):
+            raise ValueError("invalid preload reference alignment")
+        self.progress_s = reference_s
+        self.start_s = now_s
+        self.last_time_s = now_s
+
 
 class WheelLoadFilter:
     """First-order filter for FSM contact gates; raw loads remain available."""
@@ -216,6 +226,18 @@ class CrawlFeedbackConfig:
     max_torque_slew_nm_s: float = 1000.0
     integral_limit_n: float = 400.0
     traction_utilization: float = 0.8
+
+
+def front_clearance_guard_m(x_fr_m: float, far_edge_m: float,
+                            crossing_clearance_m: float, pit_guard_m: float,
+                            post_pit_guard_m: float) -> float:
+    """Keep the full lip guard over the pit, then require positive clearance."""
+    if (crossing_clearance_m < 0. or post_pit_guard_m <= 0. or
+            pit_guard_m < post_pit_guard_m):
+        raise ValueError("invalid phase-specific clearance guards")
+    if x_fr_m < far_edge_m + crossing_clearance_m:
+        return pit_guard_m
+    return post_pit_guard_m
 
 
 class CrawlTorqueFeedback:

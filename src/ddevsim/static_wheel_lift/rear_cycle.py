@@ -100,6 +100,7 @@ class RearCycleController:
         self.torque = np.zeros(3)
         self.steer_deg = 0.0
         self.start_stop_speed_kph = 0.0
+        self.stop_travel_relief_n = 0.0
         self.initial_yaw_deg: float | None = None
         self.initial_yo_m: float | None = None
         self.rows: list[dict] = []
@@ -150,7 +151,8 @@ class RearCycleController:
                                quintic_step(now_s, self.stop_roll_counter_start_s,
                                             cfg.stop_roll_counter_ramp_s)[0])
             command[5] += (cfg.preload_fr_force_n * preload +
-                           self.unload_feedback.correction_n) * release
+                           self.unload_feedback.correction_n +
+                           self.stop_travel_relief_n) * release
             if self.mode not in ("RR_PRELOAD",):
                 lift = quintic_step(now_s, self.lift_start_s,
                                     cfg.lift_ramp_s)[0]
@@ -207,8 +209,15 @@ class RearCycleController:
             if (now_s - self.lift_start_s >= cfg.lift_ramp_s and
                     gate.clearance_m >= cfg.lift_entry_clearance_m and
                     filtered[3] <= cfg.wheel_unloaded_n):
-                self.posture_start_s = now_s
+                if self.posture_start_s is None:
+                    self.posture_start_s = now_s
                 self._enter("RR_POSTURE", now_s)
+            elif (now_s - self.lift_start_s >= cfg.lift_ramp_s and
+                  gate.ready and self.posture_start_s is None):
+                # An unloaded RR can remain almost touching with the scalar
+                # lift force alone. Apply the existing smooth body adjustment
+                # while stationary, retaining the clearance/contact entry gate.
+                self.posture_start_s = now_s
             elif now_s - self.lift_start_s >= cfg.lift_timeout_s:
                 self.abort_reason = "RR lift clearance gate not reached"
                 self.lower_start_s = now_s
@@ -238,6 +247,18 @@ class RearCycleController:
                 self.abort_reason = "RR crossing deadline exceeded"
                 self._enter("RR_ABORT_STOP", now_s)
         if self.mode == "RR_STOP":
+            # Positive FR spring-seat force extends FR in the measured model.
+            # Reduce it only once RR has cleared the far edge, with bounded slew.
+            desired_relief = 0.0
+            if x["X_R2"] >= far_edge + cfg.crossing_clearance_m:
+                desired_relief = -float(np.clip(
+                    (cfg.stop_travel_relief_start_mm - x["Jnc_R1"]) *
+                    cfg.stop_travel_relief_gain_n_per_mm,
+                    0., cfg.stop_travel_relief_limit_n))
+            relief_step = cfg.stop_travel_relief_slew_n_s * cfg.control_period_s
+            self.stop_travel_relief_n += float(np.clip(
+                desired_relief - self.stop_travel_relief_n,
+                -relief_step, relief_step))
             if self.posture_stop_release_start_s is None:
                 self.posture_stop_release_start_s = now_s
             if (self.stop_roll_counter_start_s is None and
@@ -245,6 +266,23 @@ class RearCycleController:
                 self.stop_roll_counter_start_s = now_s
             if (x["X_R2"] >= far_edge + cfg.crossing_clearance_m and
                     abs(x["Vx"]) <= cfg.stationary_kph):
+                if self.stop_since_s is None:
+                    self.stop_since_s = now_s
+                elif now_s - self.stop_since_s >= cfg.stop_dwell_s:
+                    self.lower_start_s = now_s
+                    self._enter("RR_LOWERING", now_s)
+            else:
+                self.stop_since_s = None
+        if self.mode == "RR_ABORT_STOP":
+            # Recovery is allowed on solid ground after stopping; never lower
+            # RR into the known pit. Preserve abort_reason so this remains FAIL.
+            can_recover = (
+                x["X_R2"] >= far_edge + cfg.crossing_clearance_m and
+                abs(x["Vx"]) <= cfg.stationary_kph and
+                gate.min_support_n >= cfg.support_floor_n and
+                gate.zmp_lambda_min >= cfg.lambda_abort and
+                gate.com_lambda_min >= cfg.lambda_abort)
+            if can_recover:
                 if self.stop_since_s is None:
                     self.stop_since_s = now_s
                 elif now_s - self.stop_since_s >= cfg.stop_dwell_s:
@@ -264,7 +302,19 @@ class RearCycleController:
             if (not gate.safe or
                     self.mode in ("RR_CRAWL", "RR_STOP") and
                     gate.clearance_m < cfg.lip_clearance_m):
-                self.abort_reason = "RR support or clearance limit"
+                travel = [x[f"Jnc_{wheel}"] for wheel in TRUCKSIM_WHEELS]
+                if min(travel) <= cfg.travel_rebound_abort_mm:
+                    self.abort_reason = "RR support suspension rebound limit"
+                elif max(travel) >= cfg.travel_jounce_abort_mm:
+                    self.abort_reason = "RR support suspension jounce limit"
+                elif max(abs(x["Roll_E"]), abs(x["Pitch"])) > cfg.attitude_limit_deg:
+                    self.abort_reason = "RR attitude limit"
+                elif gate.min_support_n < cfg.support_floor_n:
+                    self.abort_reason = "RR support wheel load limit"
+                elif not gate.safe:
+                    self.abort_reason = "RR support triangle limit"
+                else:
+                    self.abort_reason = "RR clearance limit"
                 self._enter("RR_ABORT_STOP", now_s)
         if self.mode in ("RR_CRAWL", "RR_STOP", "RR_ABORT_STOP"):
             if self.mode == "RR_CRAWL":
@@ -309,6 +359,7 @@ class RearCycleController:
             "rr_clearance_m": gate.clearance_m,
             "rr_ready": gate.ready, "rr_safe": gate.safe,
             "preload_feedback_n": self.unload_feedback.correction_n,
+            "stop_travel_relief_n": self.stop_travel_relief_n,
             "steer_sw_deg": self.steer_deg,
             **{f"fz_{wheel.lower()}_n": float(fz[i])
                for i, wheel in enumerate(WHEEL_NAMES)},
