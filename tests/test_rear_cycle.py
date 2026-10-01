@@ -8,6 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from run_right_side_full_cycle import (  # noqa: E402
     _enable_steering_import, _scale_lateral_ride_movement,
     _set_pit_geometry, _set_vehicle_start_offset, front_run,
+    FullRightSideController,
+    evaluate_full_cycle,
 )
 from ddevsim.static_wheel_lift.config import rear_speed_trial_config  # noqa: E402
 from ddevsim.static_wheel_lift.rear_cycle import (  # noqa: E402
@@ -114,6 +116,197 @@ def test_rear_lift_uses_posture_assistance_without_relaxing_entry_gate():
     controller(4.04, x)
     assert controller.mode == "RR_POSTURE"
     assert controller.posture_start_s == 4.02  # No reset of the force ramp.
+
+
+def test_rear_parking_feedback_resists_rotation_and_disables_unloaded_wheel():
+    from dataclasses import replace
+    from ddevsim.static_wheel_lift.config import ROBUST_REAR_RUN
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4,
+        config=replace(ROBUST_REAR_RUN, parking_damping_nm_per_rpm=100.))
+    x = _rear_observation()
+    x["Vx"] = 0.
+    for wheel, rpm in zip(("L1", "R1", "L2", "R2"), (1., -2., 0., 3.)):
+        x[f"AVy_{wheel}"] = rpm
+    command = controller(0., x)
+    assert command[0] < 0.
+    assert command[1] > 0.
+    assert command[2] == command[3] == 0.
+    assert max(abs(v) for v in command[:4]) <= (
+        ROBUST_REAR_RUN.parking_slew_nm_s * ROBUST_REAR_RUN.control_period_s)
+
+
+def test_adaptive_rear_preload_pauses_reference_without_aborting():
+    from dataclasses import replace
+    from ddevsim.static_wheel_lift.config import ROBUST_REAR_RUN
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4, config=replace(ROBUST_REAR_RUN, adaptive_preload=True))
+    controller.mode = "RR_PRELOAD"
+    controller.preload_start_s = 0.
+    controller.start_rr_load_n = 3000.
+    x = _rear_observation()
+    x["Vx"] = 0.
+    x["Fz_R2"] = 3000.
+    x["AVz"] = 3.
+    controller(0., x)
+    controller(.02, x)
+    assert controller.preload_reference_s == 0.
+    assert controller.mode == "RR_PRELOAD"
+    x["AVz"] = 0.
+    controller(.04, x)
+    assert controller.preload_reference_s > 0.
+
+
+def test_rear_rl_preload_participates_without_torquing_swing_rr():
+    from dataclasses import replace
+    from ddevsim.static_wheel_lift.config import ROBUST_REAR_RUN
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4,
+        config=replace(ROBUST_REAR_RUN, preload_rl_force_n=3000.))
+    controller.mode = "RR_PRELOAD"
+    controller.preload_start_s = -10.
+    controller.start_rr_load_n = 3000.
+    command = controller(0., _rear_observation())
+    assert command[6] == 3000.
+    assert command[3] == 0.
+
+
+def test_parking_to_crawl_seeds_drive_and_lowering_releases_smoothly():
+    from dataclasses import replace
+    from ddevsim.static_wheel_lift.config import ROBUST_REAR_RUN
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4,
+        config=replace(ROBUST_REAR_RUN, parking_damping_nm_per_rpm=100.))
+    controller.parking_torque[:] = (-100., -80., -60., 0.)
+    controller._enter("RR_CRAWL", 0.)
+    np.testing.assert_allclose(controller.drive.torque_nm, [-60., -100., -80.])
+    controller._enter("RR_LOWERING", 0.)
+    controller.lower_start_s = 0.
+    x = _rear_observation()
+    for wheel in ("L1", "R1", "L2"):
+        x[f"AVy_{wheel}"] = 1.
+    command = controller(0., x)
+    np.testing.assert_allclose(command[:3], [-90., -70., -50.])
+
+
+def test_static_steering_feedback_corrects_preload_drift_without_drive_torque():
+    from dataclasses import replace
+    from ddevsim.static_wheel_lift.config import ROBUST_REAR_RUN
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4,
+        config=replace(ROBUST_REAR_RUN, static_steering_feedback=True))
+    controller.mode = "RR_PRELOAD"
+    controller.preload_start_s = 0.
+    controller.start_rr_load_n = 3000.
+    controller.initial_yo_m = 0.
+    controller.initial_yaw_deg = 0.
+    x = _rear_observation()
+    x["Vx"] = 0.
+    x["Fz_R2"] = 3000.
+    command = controller(0., x)
+    assert controller.steer_deg == -8.
+    assert command[:4] == (0., 0., 0., 0.)
+
+
+def test_full_cycle_preserves_original_path_reference_on_handoff(monkeypatch):
+    class Front:
+        mode = "COMPLETE"
+        abort_reason = None
+        initial_yo_m = .001
+        initial_yaw_deg = .02
+
+        def __init__(self, **kwargs):
+            pass
+
+        def __call__(self, *args):
+            return (0.,) * 8
+
+    monkeypatch.setattr(front_run, "LiftCrawlController", Front)
+    controller = FullRightSideController(
+        scenario={"friction": .7}, rr_gain_per_coupled_force=-.4)
+    controller(0., [])
+    assert controller.rear.initial_yo_m == .001
+    assert controller.rear.initial_yaw_deg == .02
+    controller.front.abort_reason = "FR failed"
+    controller.rear_started = False
+    controller(.02, [])
+    assert not controller.rear_started
+
+
+def test_sequential_preload_adjusts_diagonal_before_other_supports():
+    from dataclasses import replace
+    from ddevsim.static_wheel_lift.config import ROBUST_REAR_RUN
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4,
+        config=replace(ROBUST_REAR_RUN, sequential_preload=True,
+                       preload_rl_force_n=3000., preload_feedback_deadband_n=1e6))
+    controller.mode = "RR_PRELOAD"
+    controller.preload_start_s = 0.
+    controller.start_rr_load_n = 3000.
+    first = controller(2., _rear_observation())
+    assert first[4] < 0. and first[5] == first[6] == 0.
+    second = controller(6., _rear_observation())
+    assert second[4] == ROBUST_REAR_RUN.preload_fl_force_n
+    assert second[5] > 0. and second[6] > 0.
+
+
+def test_full_cycle_evaluation_counts_drift_accumulated_before_rr():
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4)
+    controller.initial_yo_m = 0.
+    controller.initial_yaw_deg = 0.
+    controller.mode = "RR_CRAWL"
+    controller(0., _rear_observation())
+    result = evaluate_full_cycle({"status": "PASS"}, controller,
+                                 controller.scenario, True)
+    assert result["rr_max_lateral_m"] == .1
+    assert result["rr_local_lateral_max_m"] == 0.
+    assert not result["criteria"]["rr_straight"]
+
+
+def test_front_steering_feedback_uses_original_path_and_rate_limit(monkeypatch):
+    class Front:
+        mode = "CRAWL"
+        abort_reason = None
+        initial_yo_m = 0.
+        initial_yaw_deg = 0.
+        rows = []
+
+        def __init__(self, **kwargs):
+            pass
+
+        def __call__(self, *args):
+            return (0.,) * 8
+
+    monkeypatch.setattr(front_run, "LiftCrawlController", Front)
+    controller = FullRightSideController(
+        scenario={"friction": .7}, rr_gain_per_coupled_force=-.4,
+        front_steering_feedback=True)
+    x = {name: 0. for name in front_run.EXPORTS}
+    x["Yo"] = .03
+    x["Yaw"] = 1.
+    exports = [x[name] for name in front_run.EXPORTS]
+    assert controller(0., exports)[-1] == -8.
+    assert controller(.0005, exports)[-1] == -8.
+    assert controller(.02, exports)[-1] == -16.
+
+
+def test_front_evaluation_accepts_the_shared_path_reference():
+    row = {"mode": "CRAWL", "time_s": 0., "yo_m": .04,
+           "yaw_deg": 0., "x_fr_m": 100., "x_rr_m": 98., "vx_kph": 1.,
+           "fz_fl_n": 4500., "fz_fr_n": 0., "fz_rl_n": 4500., "fz_rr_n": 4500.}
+    result = front_run.evaluate_control_rows(
+        [row], crawl=True, scenario={"start_station_m": 101.1, "length_m": .8},
+        native_completed=True, abort_reason=None,
+        path_reference_yo_m=0., path_reference_yaw_deg=0.)
+    assert result["moving_lateral_max_m"] == .04
 
 
 def test_rear_steering_corrects_positive_lateral_and_yaw_with_rate_limit():

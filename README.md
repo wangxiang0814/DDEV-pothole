@@ -4,25 +4,26 @@
 
 ### 最新开发状态（2026-10-01）
 
-当前推荐复核 `balanced` 提效配置 + RR `robust` 配置，保持固定车型质量和载荷位置。实际控制采用经典参考轨迹、轮载反馈、速度 PI、方向反馈，以及新增的停车行程反馈；**尚未完整接入在线 QP，不宣称任意工况泛化成功**。
+当前推荐复核 `balanced` + RR `robust` + `--front-steering-feedback`，FR/RR 使用同一原始路径基准，保持固定质量和载荷位置。实际控制采用经典参考轨迹、轮载反馈、速度 PI、转矩/转向方向反馈及停车行程反馈；**尚未完整接入在线 QP，不宣称任意工况泛化成功**。
 
-| 新版本已复核工况 | 全循环结果 | RR 最低坑上净空 | RR 最弱支撑轮载 | RR 最大横向偏差 |
+| 最新已复核工况 | 全循环结果 | RR 最低坑上净空 | RR 最弱支撑轮载 | 相对共用路径最大偏差 |
 |---|---|---:|---:|---:|
-| μ=0.7、标称起点、坑内约 3 km/h | PASS | 33.34 mm | 846 N | 3.35 cm |
-| μ=0.6、起点提前 0.3 m、坑内约 3 km/h | PASS | 30.18 mm | 855 N | 3.87 cm |
+| μ=0.7、标称起点、坑内约 3 km/h | PASS | 28.46 mm | 826 N | 4.32 cm |
+| μ=0.7、起点后移 0.3 m、坑内约 3 km/h | PASS | 26.90 mm | 823 N | 4.51 cm |
+| μ=0.6、起点提前 0.3 m、坑内约 3 km/h | PASS | 29.04 mm | 854 N | 4.27 cm |
 
 原 3 km/h 基线 RR 净空约 15.44 mm、最弱支撑约 737 N。新版本标称完整动作约 101.8 s，原基线约 109.3 s；完成后观察 2 s 即结束仿真，避免无效运行至 180 s。FR/RR 各保持 5 s，落轮与恢复时间未压缩。
 
-主要修复是 RR 停车时 FR 支撑悬架回弹触边：新增实时有界力修正后，同一失败工况全循环通过，停车最小 FR 行程约 −145.3 mm，原 −149 mm 保护线未放宽。RR 横滚峰值仍约 9.73°，接近 10° 边界；旧控制 μ=0.4 和 3.5–4 km/h 试验有 FAIL，暂不发布为可靠范围。新版本异常落轮恢复已有单元验证，原生故障注入尚待验证。
+本次主要修复：FR 蠕行/停车接入现有转向通道反馈，FR→RR 保留同一路径基准，FR 异常后不继续启动 RR。上一版停车行程反馈和抬轮姿态辅助继续保留。三个代表工况全部完成两轮过坑、停车和四轮恢复，RR 横滚峰值约 9.00–9.35°，仍接近 10° 边界；μ=0.4、3.5–4 km/h 的旧 FAIL 尚未用新版本复核，暂不发布为可靠范围。
 
-**新版本远起点（后移 0.3 m）仍为 FAIL：**已通过姿态辅助消除 RR 净空不足的进入卡点，完成两轮过坑及四轮恢复，但 RR 横向偏差 6.30 cm，超过 5 cm 验收线；其中约 6.15 cm 在静止预载/姿态调整期间产生。该工况不纳入推荐范围。下一步优先改善静止重心调整的侧向滑移，再开展噪声与更高速度验证。最终 Python 测试 264 项通过。
+**旧路径指标需正确理解：**旧 RR 阶段在 FR 恢复后重设路径零点，3.35/3.87 cm 是 RR 阶段新增偏差。按原始共用路径复核，这两轮约为 6.75/6.80 cm，旧 PASS 不证明整个流程 ≤5 cm。最新控制和验收均保留同一基准；标称累计偏差已降至 4.32 cm，原远起点失败工况降至 4.51 cm。历史结果原文保留，新增统一基准审计。
 
-后续针对性预载重分配把该偏差降到 5.77 cm，仍 FAIL，且净空降到 12.36 mm，因此未采用。已检查本机已有 RR 三轮扰动辨识数据，下一控制更新将先核实三接触局部增益，再做净空/姿态/轮载的约束分配；不沿用四接触增益直接求逆。
+停车轮速阻尼、自适应预载、RL 参与预载、静止转向和分阶段预载已作针对性诊断，均未解决对应横移或引入其他失败，不作为默认配置。推荐版本只启用上方命令所列设置。Python 单元/接口测试 274 项通过，代码审阅指出的实验停车转矩交接问题已修复。
 
-后续集中完成运动支撑/净空/姿态的约束分配、小偏差与噪声验证，再提升速度。详细改动、失败原因与复核方式见[本次开发报告](docs/RIGHT_SIDE_ROBUSTNESS_20261001.md)及[精简工况证据](evidence/static_fr_ii/robustness_matrix_20261001.json)。下文保留早期阶段成果用于追溯。
+后续集中完成运动支撑/净空/姿态的约束分配、小偏差与噪声验证，再提升速度。详见[最新反馈报告](docs/SHARED_PATH_FEEDBACK_20261001.md)、[共用路径证据](evidence/static_fr_ii/shared_path_matrix_20261001.json)及[上一轮报告](docs/RIGHT_SIDE_ROBUSTNESS_20261001.md)。下文为历史阶段成果；其中双轮 PASS 使用当时分阶段路径验收，不能直接代替最新共用路径验收。
 
 ```powershell
-python scripts/run_right_side_full_cycle.py --output runs/robust_3k_recheck --efficiency-profile balanced --rear-control-profile robust --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3
+python scripts/run_right_side_full_cycle.py --output runs/shared_path_recheck --efficiency-profile balanced --rear-control-profile robust --front-steering-feedback --front-target-speed-kph 3.4 --front-min-pit-speed-kph 3 --front-brake-lead-m 0.5 --rear-target-speed-kph 3.35 --rear-min-pit-speed-kph 3
 ```
 
 唯一当前车型是 TruckSim 2019 `corner_module_ddev`（Compact Utility Truck，`I_I` 前后独立悬架，约 1.36 t）。四轮独立转矩和四角主动悬架力通过原有八通道接口输入；没有更换 TruckSim plant。求解器 `tstep=0.0005 s`，`simfile.sim` 的 `EXT_MODEL_STEP=0.01 s` 是另一项设置，不是求解积分步长。当前试验的 200 kg 载荷后移 350 mm、左移 500 mm，仅在随附的隔离平地模型中使用。

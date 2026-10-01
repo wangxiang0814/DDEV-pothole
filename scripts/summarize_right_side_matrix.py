@@ -16,11 +16,28 @@ def summarize(directory: Path) -> dict:
     complete = next((float(r["time_s"]) for r in rows if r["mode"] == "RR_COMPLETE"), None)
     stops = [r for r in rows if r["mode"] == "RR_STOP"]
     native = result.pop("native", {})
+    with (directory / "front_control_20ms.csv").open(encoding="utf-8", newline="") as stream:
+        front = list(csv.DictReader(stream))
+    init_s = result.get("front_timing_config", {}).get("init_settle_s", 7.0)
+    reference = next((r for r in front if float(r["time_s"]) >= init_s), None)
+    shared_audit = None
+    if reference is not None:
+        origin = result.get("path_reference_yo_m", float(reference["yo_m"]))
+        samples = ([r for r in front if r["mode"] in ("CRAWL", "STOP")] +
+                   [r for r in rows if r["mode"] in ("RR_CRAWL", "RR_STOP")])
+        maximum = max((abs(float(r["yo_m"]) - origin) for r in samples), default=None)
+        limit = result.get("controller_config", {}).get("rear", {}).get(
+            "max_lateral_error_m", 0.05)  # Historical documented 5 cm acceptance.
+        shared_audit = {"reference_yo_m": origin, "maximum_lateral_m": maximum,
+                        "limit_m": limit,
+                        "straight_pass": maximum is not None and maximum <= limit,
+                        "note": "Original result is preserved; this audit uses a common FR/RR path origin."}
     return {
         "run_name": directory.name,
         "model_run_all_sha256": hashlib.sha256(
             (directory / "model" / "run_all.par").read_bytes()).hexdigest(),
         "result": result,
+        "shared_path_audit": shared_audit,
         "cycle_complete_s": complete,
         "native_final_time_s": native.get("final_time_s"),
         "native_stop_on_complete": native.get("stopped_on_controller_complete", False),

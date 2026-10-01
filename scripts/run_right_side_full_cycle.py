@@ -161,6 +161,7 @@ class FullRightSideController:
     def __init__(self, *, scenario: dict, rr_gain_per_coupled_force: float,
                  identify_rr_swing: bool = False,
                  steer_probe_deg: float | None = None,
+                 front_steering_feedback: bool = False,
                  rear_config=REAR_CYCLE_RUN):
         self.front = front_run.LiftCrawlController(crawl=True, scenario=scenario)
         self.rear = RearCycleController(
@@ -171,13 +172,34 @@ class FullRightSideController:
         self.identify_rr_swing = identify_rr_swing
         self.probe_start_s: float | None = None
         self.steer_probe_deg = steer_probe_deg
+        self.front_steering_feedback = front_steering_feedback
+        self.front_steer_deg = 0.0
+        self.front_steer_tick_s: float | None = None
 
     def __call__(self, now_s: float, exports) -> tuple[float, ...]:
         if not self.rear_started:
             command = self.front(now_s, exports)
-            if self.front.mode == "COMPLETE":
+            if self.front_steering_feedback:
+                cfg = self.rear.config
+                if (self.front_steer_tick_s is None or
+                        now_s - self.front_steer_tick_s >= cfg.control_period_s - 1e-8):
+                    self.front_steer_tick_s = now_s
+                    x = dict(zip(front_run.EXPORTS, exports))
+                    desired = 0.0
+                    if self.front.mode in ("CRAWL", "STOP"):
+                        desired = float(np.clip(
+                            -cfg.steer_lateral_deg_per_m * (x["Yo"] - (self.front.initial_yo_m or 0.))
+                            -cfg.steer_yaw_deg_per_deg * (x["Yaw"] - (self.front.initial_yaw_deg or 0.)),
+                            -cfg.steer_limit_deg, cfg.steer_limit_deg))
+                    step = cfg.steer_slew_deg_s * cfg.control_period_s
+                    self.front_steer_deg += float(np.clip(desired - self.front_steer_deg, -step, step))
+                if self.front.rows and self.front.rows[-1]["time_s"] == now_s:
+                    self.front.rows[-1]["steer_sw_deg"] = self.front_steer_deg
+            if self.front.mode == "COMPLETE" and self.front.abort_reason is None:
+                self.rear.initial_yo_m = self.front.initial_yo_m
+                self.rear.initial_yaw_deg = self.front.initial_yaw_deg
                 self.rear_started = True
-            return (*command, 0.0)
+            return (*command, self.front_steer_deg)
         x = dict(zip(front_run.EXPORTS, exports))
         if self.identify_rr_swing and self.rear.mode == "RR_HOLD":
             if self.probe_start_s is None:
@@ -230,9 +252,11 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
     min_zmp = min((float(row["zmp_lambda_min"]) for row in stability), default=None)
     min_com = min((float(row["com_lambda_min"]) for row in stability), default=None)
     min_clearance = min((row["rr_clearance_m"] for row in pit), default=None)
-    max_lateral = (max(abs(row["yo_m"] - rows[0]["yo_m"]) for row in moving)
+    path_yo = rear.initial_yo_m if rear.initial_yo_m is not None else (rows[0]["yo_m"] if rows else 0.)
+    path_yaw = rear.initial_yaw_deg if rear.initial_yaw_deg is not None else (rows[0]["yaw_deg"] if rows else 0.)
+    max_lateral = (max(abs(row["yo_m"] - path_yo) for row in moving)
                    if moving else None)
-    max_yaw = (max(abs(row["yaw_deg"] - rows[0]["yaw_deg"]) for row in moving)
+    max_yaw = (max(abs(row["yaw_deg"] - path_yaw) for row in moving)
                if moving else None)
     max_roll = (max(abs(row["roll_deg"]) for row in stability)
                 if stability else None)
@@ -288,6 +312,10 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
         cfg.support_floor_n,
     }
     return {"status": "PASS" if all(criteria.values()) else "FAIL",
+            "path_reference_yo_m": path_yo,
+            "path_reference_yaw_deg": path_yaw,
+            "rr_local_lateral_max_m": (max(abs(row["yo_m"] - rows[0]["yo_m"])
+                                           for row in moving) if moving else None),
             "criteria": criteria,
             "rr_abort_reason": rear.abort_reason,
             "rr_hold_duration_s": hold_duration,
@@ -323,6 +351,12 @@ def main() -> None:
     parser.add_argument("--rear-accel-ramp-s", type=float)
     parser.add_argument("--rear-preload-fl-force-n", type=float)
     parser.add_argument("--rear-preload-fr-force-n", type=float)
+    parser.add_argument("--rear-preload-rl-force-n", type=float)
+    parser.add_argument("--rear-adaptive-preload", action="store_true")
+    parser.add_argument("--rear-sequential-preload", action="store_true")
+    parser.add_argument("--rear-static-steering", action="store_true")
+    parser.add_argument("--front-steering-feedback", action="store_true")
+    parser.add_argument("--rear-parking-damping-nm-per-rpm", type=float)
     parser.add_argument("--rear-lift-force-n", type=float)
     parser.add_argument("--rear-posture-fl-force-n", type=float)
     parser.add_argument("--rear-control-profile", choices=("baseline", "robust"),
@@ -411,6 +445,25 @@ def main() -> None:
                    ROBUST_REAR_RUN if args.rear_control_profile == "robust" else
                    FAST_CYCLE_REAR if args.efficiency_profile == "fast" else
                    TUNED_REAR_RUN)
+    if args.rear_adaptive_preload:
+        rear_config = replace(rear_config, adaptive_preload=True,
+                              preload_ready_timeout_s=rear_config.adaptive_preload_timeout_s)
+    if args.rear_sequential_preload:
+        rear_config = replace(rear_config, sequential_preload=True)
+    if args.rear_static_steering:
+        rear_config = replace(rear_config, static_steering_feedback=True)
+    if args.rear_parking_damping_nm_per_rpm is not None:
+        if (not np.isfinite(args.rear_parking_damping_nm_per_rpm) or
+                not 0. <= args.rear_parking_damping_nm_per_rpm <=
+                rear_config.parking_limit_nm):
+            parser.error("invalid rear parking damping trial")
+        rear_config = replace(rear_config,
+                              parking_damping_nm_per_rpm=args.rear_parking_damping_nm_per_rpm)
+    if args.rear_preload_rl_force_n is not None:
+        if (not np.isfinite(args.rear_preload_rl_force_n) or
+                not 0. <= args.rear_preload_rl_force_n <= rear_config.sim_force_limit_n):
+            parser.error("rear RL preload must be nonnegative and within simulation force limits")
+        rear_config = replace(rear_config, preload_rl_force_n=args.rear_preload_rl_force_n)
     if args.rear_accel_ramp_s is not None and args.rear_target_speed_kph is None:
         parser.error("rear acceleration ramp requires a rear speed trial")
     if args.rear_target_speed_kph is not None:
@@ -456,6 +509,7 @@ def main() -> None:
             gain[3, 1] + REAR_CYCLE_RUN.preload_feedback_fl_per_fr * gain[3, 0]),
         identify_rr_swing=args.identify_rr_swing,
         steer_probe_deg=args.steer_probe_deg,
+        front_steering_feedback=args.front_steering_feedback,
         rear_config=rear_config)
     native = run_stepwise(model / "simfile.sim", controller,
                           output / "native_5ms.csv",
@@ -472,7 +526,9 @@ def main() -> None:
     front_result = front_run.evaluate_control_rows(
         controller.front.rows, crawl=True, scenario=scenario,
         native_completed=native["status"] == "COMPLETED",
-        abort_reason=controller.front.abort_reason)
+        abort_reason=controller.front.abort_reason,
+        path_reference_yo_m=controller.front.initial_yo_m,
+        path_reference_yaw_deg=controller.front.initial_yaw_deg)
     result = evaluate_full_cycle(front_result, controller.rear, scenario,
                                  native["status"] == "COMPLETED")
     result["model_tuning"] = {
@@ -485,6 +541,7 @@ def main() -> None:
     }
     result["efficiency_profile"] = args.efficiency_profile
     result["rear_control_profile"] = args.rear_control_profile
+    result["front_steering_feedback"] = args.front_steering_feedback
     result["controller_config"] = {
         "front": asdict(front_run.CFG), "rear": asdict(rear_config),
     }
@@ -507,6 +564,7 @@ def main() -> None:
         "accel_ramp_s": rear_config.crawl_accel_ramp_s,
         "preload_fl_force_n": rear_config.preload_fl_force_n,
         "preload_fr_force_n": rear_config.preload_fr_force_n,
+        "preload_rl_force_n": rear_config.preload_rl_force_n,
         "lift_force_n": rear_config.lift_force_n,
         "posture_fl_force_n": rear_config.posture_fl_force_n,
         "posture_hold_fl_force_n": rear_config.posture_hold_fl_force_n,

@@ -254,8 +254,16 @@ class RearCycleConfig:
     settle_dwell_s: float = 1.0
     preload_ramp_s: float = 8.0
     preload_ready_timeout_s: float = 12.0
+    adaptive_preload: bool = False
+    sequential_preload: bool = False
+    preload_diagonal_fraction: float = 0.5
+    preload_fl_unload_share: float = 0.51
+    adaptive_preload_timeout_s: float = 20.0
+    preload_yaw_slow_deg_s: float = 0.6
+    preload_yaw_pause_deg_s: float = 2.0
     preload_fl_force_n: float = -3200.0
     preload_fr_force_n: float = 6400.0
+    preload_rl_force_n: float = 0.0
     preload_feedback_fl_per_fr: float = -0.5
     preload_feedback_limit_n: float = 1000.0
     preload_feedback_slew_n_s: float = 1000.0
@@ -285,6 +293,9 @@ class RearCycleConfig:
     stop_travel_relief_gain_n_per_mm: float = 80.0
     stop_travel_relief_limit_n: float = 500.0
     stop_travel_relief_slew_n_s: float = 1000.0
+    parking_damping_nm_per_rpm: float = 0.0
+    parking_limit_nm: float = 150.0
+    parking_slew_nm_s: float = 500.0
     hold_s: float = 5.0
     lower_ramp_s: float = 4.0
     return_ramp_s: float = 12.0
@@ -314,6 +325,7 @@ class RearCycleConfig:
     steer_yaw_deg_per_deg: float = 15.0
     steer_limit_deg: float = 220.0
     steer_slew_deg_s: float = 400.0
+    static_steering_feedback: bool = False
     brake_start_before_far_edge_m: float = 0.15
     crossing_clearance_m: float = 0.30
     stop_ramp_s: float = 2.2

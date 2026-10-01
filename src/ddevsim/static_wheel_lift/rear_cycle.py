@@ -78,6 +78,9 @@ class RearCycleController:
         self.posture_stop_release_start_s: float | None = None
         self.stop_roll_counter_start_s: float | None = None
         self.preload_start_s: float | None = None
+        self.preload_reference_s = 0.0
+        self.preload_clock_update_s: float | None = None
+        self.preload_reference_rate = 1.0
         self.start_rr_load_n: float | None = None
         self.abort_reason: str | None = None
         self.filter = WheelLoadFilter(cutoff_hz=5.0, wheel_count=4)
@@ -98,6 +101,7 @@ class RearCycleController:
                 yaw_kd_nm_per_deg_s=config.crawl_yaw_kd_nm_per_deg_s,
                 lateral_kp_n_per_m=config.crawl_lateral_kp_n_per_m))
         self.torque = np.zeros(3)
+        self.parking_torque = np.zeros(4)
         self.steer_deg = 0.0
         self.start_stop_speed_kph = 0.0
         self.stop_travel_relief_n = 0.0
@@ -106,10 +110,23 @@ class RearCycleController:
         self.rows: list[dict] = []
 
     def _enter(self, mode: str, now_s: float) -> None:
+        if mode == "RR_CRAWL" and self.config.parking_damping_nm_per_rpm > 0.:
+            self.drive.torque_nm = self.parking_torque[[2, 0, 1]].copy()
         self.mode = mode
         self.mode_start_s = now_s
         self.ready_since_s = None
         self.stop_since_s = None
+
+    def _preload_fractions(self, now_s: float) -> tuple[float, float]:
+        cfg = self.config
+        elapsed = (self.preload_reference_s if cfg.adaptive_preload else
+                   now_s - self.preload_start_s)
+        if cfg.sequential_preload:
+            split = cfg.preload_ramp_s * cfg.preload_diagonal_fraction
+            return (quintic_step(elapsed, 0., split)[0],
+                    quintic_step(elapsed, split, cfg.preload_ramp_s - split)[0])
+        fraction = quintic_step(elapsed, 0., cfg.preload_ramp_s)[0]
+        return fraction, fraction
 
     def __call__(self, now_s: float, exports: dict[str, float]) -> tuple[float, ...]:
         x = exports
@@ -122,14 +139,13 @@ class RearCycleController:
         cfg = self.config
         command = np.zeros(8)
         if self.preload_start_s is not None and self.mode != "RR_COMPLETE":
-            preload = quintic_step(now_s, self.preload_start_s,
-                                   cfg.preload_ramp_s)[0]
+            diagonal_preload, preload = self._preload_fractions(now_s)
             if self.mode in ("RR_LOWERING", "RR_RETURN"):
                 release = 1. - quintic_step(now_s, self.lower_start_s,
                                             cfg.lower_ramp_s + cfg.return_ramp_s)[0]
             else:
                 release = 1.
-            command[4] += (cfg.preload_fl_force_n * preload +
+            command[4] += (cfg.preload_fl_force_n * diagonal_preload +
                            cfg.preload_feedback_fl_per_fr *
                            self.unload_feedback.correction_n) * release
             if self.posture_start_s is not None:
@@ -153,6 +169,7 @@ class RearCycleController:
             command[5] += (cfg.preload_fr_force_n * preload +
                            self.unload_feedback.correction_n +
                            self.stop_travel_relief_n) * release
+            command[6] = cfg.preload_rl_force_n * preload * release
             if self.mode not in ("RR_PRELOAD",):
                 lift = quintic_step(now_s, self.lift_start_s,
                                     cfg.lift_ramp_s)[0]
@@ -164,6 +181,9 @@ class RearCycleController:
             # CrawlTorqueFeedback's three entries are left, left, right.
             # Here they map to RL, FL, FR; RR remains undriven in swing.
             command[[2, 0, 1]] = self.torque
+        elif self.mode in ("RR_SETTLE", "RR_PRELOAD", "RR_LIFTING",
+                            "RR_POSTURE", "RR_HOLD", "RR_LOWERING", "RR_RETURN"):
+            command[:4] = self.parking_torque
         if self.rows and self.rows[-1]["time_s"] == now_s:
             for i, wheel in enumerate(WHEEL_NAMES):
                 self.rows[-1][f"torque_{wheel.lower()}_nm"] = float(command[i])
@@ -175,6 +195,18 @@ class RearCycleController:
         fz = np.array([max(0., x[f"Fz_{wheel}"]) for wheel in TRUCKSIM_WHEELS])
         filtered = self.filter.update(now_s, fz)
         gate = assess_rear_gate(x, filtered, cfg)
+        rpm = np.array([x.get(f"AVy_{wheel}", 0.) for wheel in TRUCKSIM_WHEELS])
+        parking_target = np.clip(-cfg.parking_damping_nm_per_rpm * rpm,
+                                 -cfg.parking_limit_nm, cfg.parking_limit_nm)
+        if self.mode not in ("RR_SETTLE", "RR_PRELOAD", "RR_LIFTING",
+                              "RR_POSTURE", "RR_HOLD"):
+            parking_target[:] = 0.
+        parking_step = cfg.parking_slew_nm_s * cfg.control_period_s
+        self.parking_torque += np.clip(parking_target - self.parking_torque,
+                                      -parking_step, parking_step)
+        # Resist wheel motion only, and never torque the lifted RR.
+        self.parking_torque[fz <= cfg.wheel_unloaded_n] = 0.
+        self.parking_torque[self.parking_torque * rpm > 0.] = 0.
         if self.initial_yaw_deg is None:
             self.initial_yaw_deg, self.initial_yo_m = x["Yaw"], x["Yo"]
         if self.mode == "RR_SETTLE":
@@ -184,11 +216,24 @@ class RearCycleController:
                 self.preload_start_s = now_s
                 self.start_rr_load_n = float(filtered[3])
                 self._enter("RR_PRELOAD", now_s)
+        if (cfg.adaptive_preload and self.preload_start_s is not None and
+                self.mode in ("RR_PRELOAD", "RR_LIFTING", "RR_POSTURE", "RR_HOLD")):
+            dt = (0.0 if self.preload_clock_update_s is None else
+                  now_s - self.preload_clock_update_s)
+            self.preload_clock_update_s = now_s
+            self.preload_reference_rate = float(np.clip(
+                (cfg.preload_yaw_pause_deg_s - abs(x["AVz"])) /
+                (cfg.preload_yaw_pause_deg_s - cfg.preload_yaw_slow_deg_s),
+                0.0, 1.0))
+            self.preload_reference_s = min(
+                cfg.preload_ramp_s,
+                self.preload_reference_s + dt * self.preload_reference_rate)
         if self.mode == "RR_PRELOAD":
             elapsed = now_s - self.preload_start_s
+            diagonal, other = self._preload_fractions(now_s)
             ref = (self.start_rr_load_n or 0.) * (
-                1. - quintic_step(now_s, self.preload_start_s,
-                                   cfg.preload_ramp_s)[0])
+                1. - cfg.preload_fl_unload_share * diagonal -
+                (1. - cfg.preload_fl_unload_share) * other)
             self.unload_feedback.update(now_s, measured_n=float(filtered[3]),
                                         reference_n=ref)
             if gate.ready:
@@ -338,7 +383,9 @@ class RearCycleController:
                 self.drive.torque_nm = self.torque.copy()
         else:
             self.torque[:] = 0.
-        if self.mode in ("RR_CRAWL", "RR_STOP"):
+        if (self.mode in ("RR_CRAWL", "RR_STOP") or
+                cfg.static_steering_feedback and self.mode in
+                ("RR_PRELOAD", "RR_LIFTING", "RR_POSTURE", "RR_HOLD")):
             desired_steer = float(np.clip(
                 -cfg.steer_lateral_deg_per_m * (x["Yo"] - self.initial_yo_m)
                 -cfg.steer_yaw_deg_per_deg * (x["Yaw"] - self.initial_yaw_deg),
@@ -359,7 +406,11 @@ class RearCycleController:
             "rr_clearance_m": gate.clearance_m,
             "rr_ready": gate.ready, "rr_safe": gate.safe,
             "preload_feedback_n": self.unload_feedback.correction_n,
+            "preload_reference_s": self.preload_reference_s,
+            "preload_reference_rate": self.preload_reference_rate,
             "stop_travel_relief_n": self.stop_travel_relief_n,
+            **{f"wheel_{wheel.lower()}_rpm": float(rpm[i])
+               for i, wheel in enumerate(WHEEL_NAMES)},
             "steer_sw_deg": self.steer_deg,
             **{f"fz_{wheel.lower()}_n": float(fz[i])
                for i, wheel in enumerate(WHEEL_NAMES)},

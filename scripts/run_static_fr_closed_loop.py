@@ -464,7 +464,9 @@ class LiftCrawlController:
 
 def evaluate_control_rows(rows: list[dict], *, crawl: bool, scenario: dict,
                           native_completed: bool,
-                          abort_reason: str | None) -> dict:
+                          abort_reason: str | None,
+                          path_reference_yo_m: float | None = None,
+                          path_reference_yaw_deg: float | None = None) -> dict:
     """Apply phase-specific acceptance to measured native control samples."""
     if not rows:
         return {"status": "FAIL", "criteria": {"has_samples": False}}
@@ -490,8 +492,8 @@ def evaluate_control_rows(rows: list[dict], *, crawl: bool, scenario: dict,
     support_keys = ("fz_fl_n", "fz_rl_n", "fz_rr_n")
     min_support = (min(float(r[k]) for r in hold + moving for k in support_keys)
                    if hold or moving else None)
-    baseline_yo = float(rows[0]["yo_m"])
-    baseline_yaw = float(rows[0]["yaw_deg"])
+    baseline_yo = (float(rows[0]["yo_m"]) if path_reference_yo_m is None else path_reference_yo_m)
+    baseline_yaw = (float(rows[0]["yaw_deg"]) if path_reference_yaw_deg is None else path_reference_yaw_deg)
     lateral_max = (max(abs(float(r["yo_m"]) - baseline_yo) for r in moving)
                    if moving else None)
     yaw_max = (max(abs(float(r["yaw_deg"]) - baseline_yaw) for r in moving)
