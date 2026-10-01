@@ -392,3 +392,26 @@ def speed_trial_config(target_kph: float, min_pit_kph: float,
                    crawl_min_speed_kph=min_pit_kph,
                    crawl_accel_ramp_s=(base.crawl_accel_ramp_s if
                                        accel_ramp_s is None else accel_ramp_s))
+
+
+@dataclass(frozen=True)
+class ObservationNoiseConfig:
+    # Simulation stress settings, not measured sensor specifications.
+    seed: int = 20261001
+    period_s: float = .02
+    load_std_n: float = 20.
+    lateral_std_m: float = .001
+    attitude_std_deg: float = .02
+    speed_std_kph: float = .01
+    clip_sigma: float = 3.
+    truth_load_cutoff_hz: float = 5.
+
+    def __post_init__(self):
+        if (not isinstance(self.seed, int) or self.seed < 0 or
+                not all(math.isfinite(v) for v in (self.period_s, self.load_std_n,
+                    self.lateral_std_m, self.attitude_std_deg, self.speed_std_kph,
+                    self.clip_sigma, self.truth_load_cutoff_hz)) or
+                min(self.period_s, self.clip_sigma, self.truth_load_cutoff_hz) <= 0 or
+                min(self.load_std_n, self.lateral_std_m,
+                    self.attitude_std_deg, self.speed_std_kph) < 0):
+            raise ValueError('invalid noise configuration')

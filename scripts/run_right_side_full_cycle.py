@@ -23,6 +23,8 @@ from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
                                              ROBUST_REAR_RUN,
                                              rear_speed_trial_config)
 from ddevsim.static_wheel_lift.rear_cycle import RearCycleController
+from ddevsim.static_wheel_lift.observation_noise import (
+    ObservationNoiseConfig, NoisyFeedbackTrial)
 
 STEERING_IMPORT = "IMP_STEER_SW"
 
@@ -230,8 +232,11 @@ class FullRightSideController:
 
 
 def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
-                        scenario: dict, native_completed: bool) -> dict:
-    rows = rear.rows
+                        scenario: dict, native_completed: bool,
+                        truth_rows: list[dict] | None = None,
+                        path_reference_yo_m: float | None = None,
+                        path_reference_yaw_deg: float | None = None) -> dict:
+    rows = rear.rows if truth_rows is None else truth_rows
     cfg = rear.config
     edge = float(scenario["start_station_m"])
     far_edge = edge + float(scenario["length_m"])
@@ -254,6 +259,10 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
     min_clearance = min((row["rr_clearance_m"] for row in pit), default=None)
     path_yo = rear.initial_yo_m if rear.initial_yo_m is not None else (rows[0]["yo_m"] if rows else 0.)
     path_yaw = rear.initial_yaw_deg if rear.initial_yaw_deg is not None else (rows[0]["yaw_deg"] if rows else 0.)
+    if path_reference_yo_m is not None:
+        path_yo = path_reference_yo_m
+    if path_reference_yaw_deg is not None:
+        path_yaw = path_reference_yaw_deg
     max_lateral = (max(abs(row["yo_m"] - path_yo) for row in moving)
                    if moving else None)
     max_yaw = (max(abs(row["yaw_deg"] - path_yaw) for row in moving)
@@ -356,6 +365,9 @@ def main() -> None:
     parser.add_argument("--rear-sequential-preload", action="store_true")
     parser.add_argument("--rear-static-steering", action="store_true")
     parser.add_argument("--front-steering-feedback", action="store_true")
+    parser.add_argument("--measurement-noise", action="store_true",
+                        help="deterministic sensor noise; acceptance uses plant truth")
+    parser.add_argument("--noise-seed", type=int, default=ObservationNoiseConfig().seed)
     parser.add_argument("--rear-parking-damping-nm-per-rpm", type=float)
     parser.add_argument("--rear-lift-force-n", type=float)
     parser.add_argument("--rear-posture-fl-force-n", type=float)
@@ -373,6 +385,8 @@ def main() -> None:
     parser.add_argument("--road-friction", type=float)
     parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
     args = parser.parse_args()
+    if args.noise_seed < 0:
+        parser.error("noise seed must be nonnegative")
     if ((args.rear_target_speed_kph is None) !=
             (args.rear_min_pit_speed_kph is None)):
         parser.error("rear target and minimum pit speed must be supplied together")
@@ -511,7 +525,11 @@ def main() -> None:
         steer_probe_deg=args.steer_probe_deg,
         front_steering_feedback=args.front_steering_feedback,
         rear_config=rear_config)
-    native = run_stepwise(model / "simfile.sim", controller,
+    noise_config = ObservationNoiseConfig(seed=args.noise_seed,
+                                         period_s=front_run.CFG.control_period_s)
+    trial = (NoisyFeedbackTrial(controller, front_run.EXPORTS, front_run.CFG,
+                               noise_config) if args.measurement_noise else None)
+    native = run_stepwise(model / "simfile.sim", trial or controller,
                           output / "native_5ms.csv",
                           (*front_run.IMPORT_NAMES, STEERING_IMPORT),
                           front_run.EXPORTS, log_decimation=10,
@@ -521,16 +539,34 @@ def main() -> None:
                               controller.rear.mode_start_s is not None and
                               now_s - controller.rear.mode_start_s >=
                               rear_config.post_complete_observe_s)))
-    _write_rows(output / "front_control_20ms.csv", controller.front.rows)
-    _write_rows(output / "rear_control_20ms.csv", controller.rear.rows)
+    front_rows = trial.front_truth.rows if trial else controller.front.rows
+    rear_rows = trial.rear_truth.rows if trial else controller.rear.rows
+    if trial:
+        _write_rows(output / "front_observed_20ms.csv", controller.front.rows)
+        _write_rows(output / "rear_observed_20ms.csv", controller.rear.rows)
+    _write_rows(output / "front_control_20ms.csv", front_rows)
+    _write_rows(output / "rear_control_20ms.csv", rear_rows)
+    path_yo = trial.path_reference_yo_m if trial else controller.front.initial_yo_m
+    path_yaw = trial.path_reference_yaw_deg if trial else controller.front.initial_yaw_deg
     front_result = front_run.evaluate_control_rows(
-        controller.front.rows, crawl=True, scenario=scenario,
+        front_rows, crawl=True, scenario=scenario,
         native_completed=native["status"] == "COMPLETED",
         abort_reason=controller.front.abort_reason,
-        path_reference_yo_m=controller.front.initial_yo_m,
-        path_reference_yaw_deg=controller.front.initial_yaw_deg)
+        path_reference_yo_m=path_yo,
+        path_reference_yaw_deg=path_yaw)
     result = evaluate_full_cycle(front_result, controller.rear, scenario,
-                                 native["status"] == "COMPLETED")
+                                 native["status"] == "COMPLETED",
+                                 truth_rows=rear_rows,
+                                 path_reference_yo_m=path_yo,
+                                 path_reference_yaw_deg=path_yaw)
+    result["measurement_noise"] = {
+        "enabled": args.measurement_noise, "config": asdict(noise_config),
+        "acceptance_source": "plant_truth",
+        "control_path_reference_yo_m": controller.front.initial_yo_m,
+        "control_path_reference_yaw_deg": controller.front.initial_yaw_deg,
+        "load_observation_floor_n": 0.0,
+        "ideal_channels": "contact geometry, CoM, clearance, rates, travel, wheel speed",
+    }
     result["model_tuning"] = {
         "original_kinematics": args.original_kinematics,
         "clamp_ride_tables": (not args.original_kinematics and
