@@ -27,7 +27,8 @@ from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
 from ddevsim.static_wheel_lift.rear_cycle import RearCycleController
 from ddevsim.static_wheel_lift.observation_noise import (
     ObservationNoiseConfig, NoisyFeedbackTrial)
-from ddevsim.static_wheel_lift.system_identification import validated_contact_gains
+from ddevsim.static_wheel_lift.system_identification import validated_contact_gains, validated_support_models
+from ddevsim.static_wheel_lift.support_allocation_feedback import SupportAllocationFeedback
 
 STEERING_IMPORT = "IMP_STEER_SW"
 
@@ -168,6 +169,7 @@ class FullRightSideController:
                  steer_probe_deg: float | None = None,
                  front_steering_feedback: bool = False,
                  contact_gains=None,
+                 allocation=None,
                  rear_config=REAR_CYCLE_RUN):
         self.front = front_run.LiftCrawlController(crawl=True, scenario=scenario,
                                                    contact_gains=contact_gains)
@@ -182,6 +184,25 @@ class FullRightSideController:
         self.front_steering_feedback = front_steering_feedback
         self.front_steer_deg = 0.0
         self.front_steer_tick_s: float | None = None
+        self.allocation = allocation
+
+    def _allocate(self, now_s, x, command, stage):
+        if self.allocation is None:
+            return command
+        selected = self.front if stage == 'FR' else self.rear
+        output = self.allocation.apply(now_s, x, command, stage=stage, phase=selected.mode)
+        if stage == 'RR':
+            self.rear.last_suspension_force_n = np.asarray(output[4:8]).copy()
+        if selected.rows and selected.rows[-1]['time_s'] == now_s:
+            row = selected.rows[-1]
+            row.update(self.allocation.telemetry)
+            for i, c in enumerate(('fl', 'fr', 'rl', 'rr')):
+                row[f'fact_{c}_n'] = float(output[4 + i])
+        if (self.allocation.active and self.allocation.telemetry['support_qp_failure_s'] >=
+                self.allocation.config.max_continuous_failure_s):
+            selected.abort_reason = 'support allocation persistently infeasible'
+            selected._enter('ABORT_STOP' if stage == 'FR' else 'RR_ABORT_STOP', now_s)
+        return output
 
     def __call__(self, now_s: float, exports) -> tuple[float, ...]:
         if not self.rear_started:
@@ -206,7 +227,8 @@ class FullRightSideController:
                 self.rear.initial_yo_m = self.front.initial_yo_m
                 self.rear.initial_yaw_deg = self.front.initial_yaw_deg
                 self.rear_started = True
-            return (*command, self.front_steer_deg)
+            return self._allocate(now_s, dict(zip(front_run.EXPORTS, exports)),
+                                  (*command, self.front_steer_deg), 'FR')
         x = dict(zip(front_run.EXPORTS, exports))
         if self.identify_rr_swing and self.rear.mode == "RR_HOLD":
             if self.probe_start_s is None:
@@ -233,7 +255,7 @@ class FullRightSideController:
         if self.steer_probe_deg is not None:
             steer_deg = (self.steer_probe_deg if self.rear.mode in
                          ("RR_CRAWL", "RR_STOP") else 0.0)
-        return (*command, steer_deg)
+        return self._allocate(now_s, x, (*command, steer_deg), 'RR')
 
 
 def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
@@ -358,6 +380,8 @@ def main() -> None:
     parser.add_argument("--identify-rr-swing", action="store_true")
     parser.add_argument('--contact-gain-bundle', type=Path,
                         help='Optional native mode gains; exact selected model hash must match.')
+    parser.add_argument('--support-allocation', choices=('off', 'monitor', 'active'), default='off')
+    parser.add_argument('--support-allocation-gains', type=Path)
     parser.add_argument("--steer-probe-deg", type=float)
     parser.add_argument("--stop-at", type=float)
     parser.add_argument("--original-kinematics", action="store_true",
@@ -395,6 +419,8 @@ def main() -> None:
     parser.add_argument("--road-friction", type=float)
     parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
     args = parser.parse_args()
+    if (args.support_allocation != 'off') != (args.support_allocation_gains is not None):
+        parser.error('support allocation requires explicit gain bundle; off mode takes no bundle')
     if not np.isfinite(args.lateral_ride_scale) or not 0. <= args.lateral_ride_scale <= 1.:
         parser.error("lateral ride scale must be finite and in 0..1")
     if args.noise_seed < 0:
@@ -543,6 +569,17 @@ def main() -> None:
         parser.error("rear posture force must be negative and hold force no stronger than its ramp")
     rear_config = replace(rear_config, posture_fl_force_n=posture_force,
                           posture_hold_fl_force_n=posture_hold)
+    allocation, allocation_provenance = None, None
+    if args.support_allocation_gains is not None:
+        allocation_path = args.support_allocation_gains.resolve()
+        bundle = json.loads(allocation_path.read_text(encoding='utf-8'))
+        model_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+        models = validated_support_models(bundle, model_sha256=model_hash)
+        allocation = SupportAllocationFeedback(mode_models=models,
+            active=args.support_allocation == 'active', period_s=front_run.CFG.control_period_s,
+            front_limits=front_run.CFG, rear_limits=rear_config)
+        allocation_provenance = {'bundle_sha256': hashlib.sha256(allocation_path.read_bytes()).hexdigest(),
+                                 'model_sha256': model_hash, 'mode': args.support_allocation}
     controller = FullRightSideController(
         scenario=scenario,
         rr_gain_per_coupled_force=float(
@@ -551,6 +588,7 @@ def main() -> None:
         steer_probe_deg=args.steer_probe_deg,
         front_steering_feedback=args.front_steering_feedback,
         contact_gains=contact_gains,
+        allocation=allocation,
         rear_config=rear_config)
     noise_config = ObservationNoiseConfig(seed=args.noise_seed,
                                          period_s=front_run.CFG.control_period_s)
@@ -609,6 +647,9 @@ def main() -> None:
         "front": asdict(front_run.CFG), "rear": asdict(rear_config),
     }
     result['identified_gain_provenance'] = gain_provenance
+    if allocation is not None:
+        result['support_allocation'] = {**allocation.summary(), 'config': asdict(allocation.config),
+                                         'provenance': allocation_provenance}
     result["front_timing_config"] = {
         "init_settle_s": front_run.CFG.init_settle_s,
         "preload_max_reference_rate": front_run.CFG.preload_max_reference_rate,

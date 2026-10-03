@@ -91,3 +91,19 @@ def validated_contact_gains(bundle, *, model_sha256):
             raise ValueError(f'invalid wheel-load gain: {mode}')
         result[mode] = gain
     return result
+
+
+def validated_support_models(bundle, *, model_sha256):
+    """Validate every local state response needed by the online support QP."""
+    validated_contact_gains(bundle, model_sha256=model_sha256)
+    shapes = {'Fz_n': (4, 4), 'CoM_xy_m': (2, 4), 'ZMP_xy_m': (2, 4),
+              'attitude_rad': (2, 4), 'travel_m': (4, 4), 'wheel_height_m': (4, 4)}
+    for mode in ('FR', 'RR'):
+        gains = bundle['modes'][mode]['gains']
+        for key, shape in shapes.items():
+            if key not in gains:
+                raise ValueError(f'missing support model: {mode}/{key}')
+            matrix = np.asarray(gains[key], dtype=float)
+            if matrix.shape != shape or not np.isfinite(matrix).all():
+                raise ValueError(f'invalid support model: {mode}/{key}')
+    return bundle['modes']

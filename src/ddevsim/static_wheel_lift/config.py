@@ -276,6 +276,40 @@ RECOVERY_PRELOAD_ABORT_AFTER_S = 1.0
 
 
 @dataclass(frozen=True)
+class SupportQPConfig:
+    lambda_target: float = 0.075
+    lambda_floor: float = 0.05
+    clearance_floor_m: float = 0.01
+    swing_load_ceiling_n: float = 100.0
+    tyre_radius_m: float = 0.263
+    support_floor_n: float = 500.0
+    max_load_n: float = 12000.0
+    force_limit_n: float = 18200.0
+    correction_limit_n: float = 500.0
+    force_slew_n_s: float = 400.0
+    travel_lower_m: float = -0.149
+    travel_upper_m: float = 0.155
+    attitude_limit_deg: float = 10.0
+    load_scale_n: float = 1000.0
+    attitude_scale_deg: float = 3.0
+    load_weight: float = 1.0
+    attitude_weight: float = 2.0
+    tracking_gain: float = 0.1
+    attitude_damping_s: float = 0.8
+    increment_weight: float = 0.002
+    correction_weight: float = 0.002
+    filter_cutoff_hz: float = 5.0
+    release_s: float = 4.0
+    max_iterations: int = 80
+    solver_tolerance: float = 1e-10
+    constraint_tolerance: float = 1e-7
+    max_continuous_failure_s: float = 0.5
+
+
+SUPPORT_QP = SupportQPConfig()
+
+
+@dataclass(frozen=True)
 class RearCycleConfig:
     control_period_s: float = 0.02
     post_complete_observe_s: float = 2.0

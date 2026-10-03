@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import argparse
 import json
 from pathlib import Path
 import sys
@@ -10,16 +11,19 @@ import run_right_side_full_cycle as cycle
 from ddevsim.static_wheel_lift.config import RECOVERY_PRELOAD_ABORT_AFTER_S
 
 
-def inject_preload_abort(rear, now_s, *, after_s):
-    if (rear.mode != 'RR_PRELOAD' or rear.mode_start_s is None or
+def inject_preload_abort(rear, now_s, *, after_s, phase='RR_PRELOAD'):
+    if phase not in ('RR_PRELOAD', 'RR_HOLD'):
+        raise ValueError('fault must occur on solid ground before crawl')
+    if (rear.mode != phase or rear.mode_start_s is None or
             now_s - rear.mode_start_s < after_s):
         return False
-    rear.abort_reason = 'injected pit-front preload abort'
+    rear.abort_reason = f'injected pit-front {phase[3:].lower()} abort'
     rear._enter('RR_ABORT_STOP', now_s)
     return True
 
 
 class RecoveryTrialController(cycle.FullRightSideController):
+    injection_phase = 'RR_PRELOAD'
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fault_injected = False
@@ -28,11 +32,18 @@ class RecoveryTrialController(cycle.FullRightSideController):
         commands = super().__call__(now_s, exports)
         if self.rear_started and not self.fault_injected:
             self.fault_injected = inject_preload_abort(
-                self.rear, now_s, after_s=RECOVERY_PRELOAD_ABORT_AFTER_S)
+                self.rear, now_s, after_s=RECOVERY_PRELOAD_ABORT_AFTER_S,
+                phase=self.injection_phase)
         return commands
 
 
 def main():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('--abort-phase', choices=('RR_PRELOAD', 'RR_HOLD'), default='RR_PRELOAD')
+    fault, rest = parser.parse_known_args(sys.argv[1:])
+    sys.argv = [sys.argv[0], *rest]
+    RecoveryTrialController.injection_phase = fault.abort_phase
+    reason = f'injected pit-front {fault.abort_phase[3:].lower()} abort'
     if '--output' not in sys.argv:
         raise ValueError('supply --output and the normal full-cycle trial options')
     output = Path(sys.argv[sys.argv.index('--output') + 1]).resolve()
@@ -51,10 +62,10 @@ def main():
     after = rows[max(0, abort_index - 1):] if abort_index is not None else []
     report = {
         'recovery_status': 'PASS' if (aborts and recovered and result['status'] == 'FAIL' and
-            result['rr_abort_reason'] == 'injected pit-front preload abort' and
+            result['rr_abort_reason'] == reason and
             result['criteria']['four_wheel_recovered']) else 'FAIL',
         'task_status': result['status'], 'abort_reason': result['rr_abort_reason'],
-        'injection': {'phase': 'RR_PRELOAD', 'after_s': RECOVERY_PRELOAD_ABORT_AFTER_S},
+        'injection': {'phase': fault.abort_phase, 'after_s': RECOVERY_PRELOAD_ABORT_AFTER_S},
         'abort_start_s': float(aborts[0]['time_s']) if aborts else None,
         'final_mode': rows[-1]['mode'] if rows else None,
         'abort_max_abs_vx_kph': max((abs(float(r['vx_kph'])) for r in after), default=None),

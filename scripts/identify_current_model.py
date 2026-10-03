@@ -120,6 +120,8 @@ def main():
         record = {'native': native, 'settle_status': settled.status,
                   'settle_metrics': settled.metrics, 'minimum_wheel_load_n': min_load,
                   'response': response(csv_path, window_start, window_end)}
+        record['response']['wheel_height_m'] = [float(np.mean([
+            row[f'exp_Z_{w}'] - cfg.tyre_radius_m for row in tail])) for w in ('L1', 'R1', 'L2', 'R2')]
         record['maximum_attitude_deg'] = max(abs(row[f'exp_{field}']) for row in tail for field in ('Roll_E', 'Pitch'))
         record['travel_range_mm'] = [min(row[f'exp_Jnc_{w}'] for row in tail for w in ('L1', 'R1', 'L2', 'R2')),
                                      max(row[f'exp_Jnc_{w}'] for row in tail for w in ('L1', 'R1', 'L2', 'R2'))]

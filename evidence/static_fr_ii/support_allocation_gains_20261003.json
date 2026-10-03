@@ -1,0 +1,2340 @@
+{
+  "modes": {
+    "FOUR_CONTACT": {
+      "status": "PASS",
+      "gains": {
+        "CoM_xy_m": [
+          [
+            -5.253341147778201e-06,
+            -4.07654912680755e-06,
+            3.173775558025227e-07,
+            6.678483788675749e-07
+          ],
+          [
+            -2.1849680638402204e-06,
+            2.3078104049876203e-06,
+            -8.804383336658561e-07,
+            1.9105529092269813e-06
+          ]
+        ],
+        "Fz_n": [
+          [
+            0.33534898034913385,
+            -0.22468876698253007,
+            -0.01391391092269896,
+            0.03402577291770558
+          ],
+          [
+            -0.36394613486283467,
+            0.20299619201995028,
+            0.015650592817961297,
+            -0.030412355012468653
+          ],
+          [
+            -0.35808040049875856,
+            0.2466396097256802,
+            0.006175049426434271,
+            -0.017605068877808664
+          ],
+          [
+            0.3866232058852966,
+            -0.22465677221945043,
+            -0.007912734413975159,
+            0.013983237406490844
+          ]
+        ],
+        "ZMP_xy_m": [
+          [
+            -5.256370372279661e-06,
+            -4.0896241180234935e-06,
+            3.1729108636113776e-07,
+            6.692783318271722e-07
+          ],
+          [
+            -2.1675720237222252e-06,
+            2.012857411797242e-06,
+            -7.706028270084153e-07,
+            1.5873929351534755e-06
+          ]
+        ],
+        "attitude_rad": [
+          [
+            3.8611107017208e-06,
+            -3.517275131894742e-06,
+            1.374405680090264e-06,
+            -2.933595154747892e-06
+          ],
+          [
+            -8.955806366932031e-06,
+            -6.83001072425109e-06,
+            5.292594303392111e-07,
+            1.1119328768899023e-06
+          ]
+        ],
+        "travel_m": [
+          [
+            -2.1129734977057375e-05,
+            -1.06546882942644e-05,
+            -7.109188379052084e-07,
+            1.877687290274238e-06
+          ],
+          [
+            -1.303748469027425e-05,
+            -1.7016915335660825e-05,
+            8.920709685785455e-07,
+            -1.5389674827929537e-06
+          ],
+          [
+            -7.416541266832416e-07,
+            3.5072766134669477e-07,
+            -1.8207269955112515e-06,
+            -2.5489892768001955e-08
+          ],
+          [
+            7.663115456358477e-07,
+            -1.957831219950176e-06,
+            -1.5990185536204905e-08,
+            -3.874616245386584e-06
+          ]
+        ],
+        "wheel_height_m": [
+          [
+            -1.5193998054862865e-06,
+            1.0282412119700762e-06,
+            6.271216458852633e-08,
+            -1.5379799002494115e-07
+          ],
+          [
+            1.704404538653368e-06,
+            -8.974385835411428e-07,
+            -6.67260099750655e-08,
+            1.277260648379075e-07
+          ],
+          [
+            1.6230136109725636e-06,
+            -1.1165157755611e-06,
+            -2.8475077306737427e-08,
+            8.377275810473455e-08
+          ],
+          [
+            -1.7354581496259424e-06,
+            1.0058516159600976e-06,
+            4.452167082294109e-08,
+            -6.865194014962773e-08
+          ]
+        ]
+      },
+      "G_F_diagnostic": {
+        "algebraic_rank": 4,
+        "effective_rank": 3,
+        "relative_cutoff": 0.001,
+        "singular_values": [
+          0.8527258090239527,
+          0.03440457018213503,
+          0.02028539516356318,
+          7.506277971368742e-06
+        ],
+        "condition_number": 113601.68278826227,
+        "condition_is_infinite": false,
+        "requires_damping": true
+      },
+      "mode": "FOUR_CONTACT",
+      "source_model_sha256": "85ff4e994a6fb98e7f819d0c5ffdfe43b2b4870c31942d1915b68cddc00f70d2",
+      "probe_model_sha256": "0fb522550a6fdae75a5d90603efb377968aa9f488b2d61d44fb7cb9ee22838dc",
+      "source_model": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\front_rate3_lateral0_noise_nominal\\model",
+      "config": {
+        "amplitude_n": 250.0,
+        "duration_s": 18.0,
+        "ramp_start_s": 8.0,
+        "ramp_duration_s": 2.0,
+        "window_start_s": 16.0,
+        "window_end_s": 18.0,
+        "log_decimation": 10,
+        "hold_age_s": 3.0,
+        "swing_unloaded_n": 100.0,
+        "swing_support_floor_n": 500.0,
+        "swing_clearance_m": 0.01,
+        "lambda_safe": 0.05,
+        "tyre_radius_m": 0.263,
+        "attitude_limit_deg": 10.0,
+        "travel_min_mm": -149.0,
+        "travel_max_mm": 155.0
+      },
+      "settle_limits": {
+        "window_s": 1.0,
+        "min_samples_per_window": 50,
+        "max_mean_fz_change_n": 20.0,
+        "max_fz_std_n": 100.0,
+        "max_mean_attitude_change_deg": 0.02,
+        "max_attitude_std_deg": 0.05,
+        "max_mean_travel_change_mm": 1.0,
+        "max_mean_com_change_m": 0.002,
+        "max_abs_vx_kph": 0.036,
+        "max_abs_wheel_rpm": 1.0
+      },
+      "baseline": {
+        "native": {
+          "status": "COMPLETED",
+          "solver_status": 1,
+          "solver_signalled_end": true,
+          "final_time_s": 18.0,
+          "configured_stop_s": 18.0,
+          "capped_at_s": null,
+          "reached_configured_stop": true,
+          "stopped_on_controller_complete": false,
+          "rows_written": 3601,
+          "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\baseline\\native_5ms.csv",
+          "error_message": ""
+        },
+        "settle_status": "SETTLED",
+        "settle_metrics": {
+          "max_mean_fz_change_n": 0.05317375000095126,
+          "max_fz_std_n": 0.22432287470586001,
+          "max_mean_attitude_change_deg": 0.00017376634500024246,
+          "max_attitude_std_deg": 5.794924912429882e-05,
+          "max_mean_travel_change_mm": 0.009822610500016538,
+          "max_mean_com_change_m": 1.9167774999440113e-06,
+          "max_abs_vx_kph": 3.4539278e-05,
+          "max_abs_wheel_rpm": 0.00021409448
+        },
+        "minimum_wheel_load_n": 2690.00511,
+        "response": {
+          "Fz_n": [
+            3436.470157306735,
+            3215.88155755611,
+            3994.5218391521194,
+            2690.1782357606
+          ],
+          "attitude_rad": [
+            -0.01228016400281494,
+            -0.004318952373337069
+          ],
+          "travel_m": [
+            0.0372537813795511,
+            0.022728641000000008,
+            0.043013480578054854,
+            0.033396715622942615
+          ],
+          "CoM_xy_m": [
+            98.1398805369076,
+            0.0814110609321696
+          ],
+          "ZMP_xy_m": [
+            98.13988450915113,
+            0.0723634188366242
+          ],
+          "wheel_height_m": [
+            -0.015620906875311731,
+            -0.014662907451371585,
+            -0.018160884259351633,
+            -0.01230489011970076
+          ]
+        },
+        "maximum_attitude_deg": 0.703781544,
+        "travel_range_mm": [
+          22.7187667,
+          43.0143681
+        ]
+      },
+      "cases": {
+        "FL_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 18.0,
+            "configured_stop_s": 18.0,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 3601,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\FL_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.8049899500006177,
+            "max_fz_std_n": 1.1331269903668686,
+            "max_mean_attitude_change_deg": 0.0015111248099998198,
+            "max_attitude_std_deg": 0.0004590640212479429,
+            "max_mean_travel_change_mm": 0.045460859000030496,
+            "max_mean_com_change_m": 1.7969403999992806e-05,
+            "max_abs_vx_kph": 0.000391218511,
+            "max_abs_wheel_rpm": 0.0246928989
+          },
+          "minimum_wheel_load_n": 2797.08818,
+          "response": {
+            "Fz_n": [
+              3533.926192618455,
+              3112.534432468827,
+              3892.0105394513707,
+              2798.5555241895286
+            ],
+            "attitude_rad": [
+              -0.011456888720486471,
+              -0.006151329542546349
+            ],
+            "travel_m": [
+              0.0325684200266833,
+              0.02000332584962594,
+              0.042764083978802984,
+              0.03323306200399
+            ],
+            "CoM_xy_m": [
+              98.13881512294253,
+              0.08095614053466338
+            ],
+            "ZMP_xy_m": [
+              98.13881684553162,
+              0.07188273777042593
+            ],
+            "wheel_height_m": [
+              -0.016063322324189538,
+              -0.01418351809725687,
+              -0.017695925451371584,
+              -0.012791797179551135
+            ]
+          },
+          "maximum_attitude_deg": 0.65802814,
+          "travel_range_mm": [
+            19.9957052,
+            42.770955
+          ]
+        },
+        "FL_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 18.0,
+            "configured_stop_s": 18.0,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 3601,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\FL_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.10587054999859902,
+            "max_fz_std_n": 0.21101777135369015,
+            "max_mean_attitude_change_deg": 0.0002209696449997356,
+            "max_attitude_std_deg": 6.679755835211097e-05,
+            "max_mean_travel_change_mm": 0.004224351500031531,
+            "max_mean_com_change_m": 2.4198119999985224e-06,
+            "max_abs_vx_kph": 2.93087291e-05,
+            "max_abs_wheel_rpm": 0.000196988775
+          },
+          "minimum_wheel_load_n": 2605.02456,
+          "response": {
+            "Fz_n": [
+              3366.251702443888,
+              3294.5074999002445,
+              4071.05073970075,
+              2605.2439212468803
+            ],
+            "attitude_rad": [
+              -0.013387444071346871,
+              -0.001673426359080333
+            ],
+            "travel_m": [
+              0.04313328751521199,
+              0.026522068194763066,
+              0.043134911042144605,
+              0.03284990623117207
+            ],
+            "CoM_xy_m": [
+              98.14144179351642,
+              0.08204862456658349
+            ],
+            "ZMP_xy_m": [
+              98.14144503071776,
+              0.07296652378228705
+            ],
+            "wheel_height_m": [
+              -0.015303622421446395,
+              -0.015035720366583554,
+              -0.018507432256857866,
+              -0.011924068104738164
+            ]
+          },
+          "maximum_attitude_deg": 0.767274249,
+          "travel_range_mm": [
+            26.517707,
+            43.1353871
+          ]
+        },
+        "FR_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 18.0,
+            "configured_stop_s": 18.0,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 3601,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\FR_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 1.0569003000005068,
+            "max_fz_std_n": 3.0559942866341507,
+            "max_mean_attitude_change_deg": 0.0023965002850002692,
+            "max_attitude_std_deg": 0.0009240970172116449,
+            "max_mean_travel_change_mm": 0.06816356150000047,
+            "max_mean_com_change_m": 2.9031549000024803e-05,
+            "max_abs_vx_kph": 0.00108291669,
+            "max_abs_wheel_rpm": 0.0249697925
+          },
+          "minimum_wheel_load_n": 2656.02062,
+          "response": {
+            "Fz_n": [
+              3407.933745610975,
+              3241.7832272817964,
+              4028.5219205985027,
+              2658.9626369825432
+            ],
+            "attitude_rad": [
+              -0.01318794520194402,
+              -0.005152877639179472
+            ],
+            "travel_m": [
+              0.0359156495723192,
+              0.019999980932668332,
+              0.04299739166309228,
+              0.03252941982394015
+            ],
+            "CoM_xy_m": [
+              98.13934777730672,
+              0.08201192772992523
+            ],
+            "ZMP_xy_m": [
+              98.13934436385405,
+              0.07287592479539119
+            ],
+            "wheel_height_m": [
+              -0.01549064171321697,
+              -0.014778576807980061,
+              -0.018314251453865348,
+              -0.012165751571072332
+            ]
+          },
+          "maximum_attitude_deg": 0.7583837,
+          "travel_range_mm": [
+            19.9936882,
+            43.0085804
+          ]
+        },
+        "FR_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 18.0,
+            "configured_stop_s": 18.0,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 3601,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\FR_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.034312750001845416,
+            "max_fz_std_n": 0.2149214350080289,
+            "max_mean_attitude_change_deg": 8.639222499950971e-05,
+            "max_attitude_std_deg": 3.5476736518535346e-05,
+            "max_mean_travel_change_mm": 0.002852812999989851,
+            "max_mean_com_change_m": 9.672454999581914e-07,
+            "max_abs_vx_kph": 2.80484861e-05,
+            "max_abs_wheel_rpm": 0.000188330378
+          },
+          "minimum_wheel_load_n": 2771.08312,
+          "response": {
+            "Fz_n": [
+              3520.27812910224,
+              3140.2851312718212,
+              3905.2021157356626,
+              2771.2910230922685
+            ],
+            "attitude_rad": [
+              -0.011429307635996649,
+              -0.0017378722770539261
+            ],
+            "travel_m": [
+              0.0412429937194514,
+              0.028508438600498745,
+              0.04282202783241893,
+              0.03350833543391524
+            ],
+            "CoM_xy_m": [
+              98.14138605187013,
+              0.08085802252743142
+            ],
+            "ZMP_xy_m": [
+              98.14138917591306,
+              0.07186949608949257
+            ],
+            "wheel_height_m": [
+              -0.016004762319202007,
+              -0.01432985751620949,
+              -0.017755993566084798,
+              -0.012668677379052381
+            ]
+          },
+          "maximum_attitude_deg": 0.654950215,
+          "travel_range_mm": [
+            28.506176,
+            42.8231059
+          ]
+        },
+        "RL_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 18.0,
+            "configured_stop_s": 18.0,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 3601,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\RL_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.04703780000045299,
+            "max_fz_std_n": 0.21815651889726762,
+            "max_mean_attitude_change_deg": 0.00016773272999970334,
+            "max_attitude_std_deg": 5.617871688528925e-05,
+            "max_mean_travel_change_mm": 0.009470453999988138,
+            "max_mean_com_change_m": 1.544000170383697e-06,
+            "max_abs_vx_kph": 3.39563141e-05,
+            "max_abs_wheel_rpm": 0.000210148184
+          },
+          "minimum_wheel_load_n": 2687.79836,
+          "response": {
+            "Fz_n": [
+              3432.5847829675804,
+              3220.2520576558627,
+              3996.2459498753133,
+              2687.96857975062
+            ],
+            "attitude_rad": [
+              -0.011896432244014658,
+              -0.0041711453502377305
+            ],
+            "travel_m": [
+              0.03705527700822945,
+              0.022977678985536144,
+              0.04250504715261846,
+              0.03339214997655858
+            ],
+            "CoM_xy_m": [
+              98.13996917830407,
+              0.08116516441047383
+            ],
+            "ZMP_xy_m": [
+              98.13997313501575,
+              0.07214820024255653
+            ],
+            "wheel_height_m": [
+              -0.015603402179551135,
+              -0.014681548349127193,
+              -0.01816883584289278,
+              -0.012292472114713229
+            ]
+          },
+          "maximum_attitude_deg": 0.681753258,
+          "travel_range_mm": [
+            22.9681412,
+            42.5066083
+          ]
+        },
+        "RL_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 18.0,
+            "configured_stop_s": 18.0,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 3601,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\RL_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.057280099998024525,
+            "max_fz_std_n": 0.22629221087974236,
+            "max_mean_attitude_change_deg": 0.00020584215999996935,
+            "max_attitude_std_deg": 6.30745573074011e-05,
+            "max_mean_travel_change_mm": 0.010155020000006232,
+            "max_mean_com_change_m": 2.347112499967441e-06,
+            "max_abs_vx_kph": 3.48912513e-05,
+            "max_abs_wheel_rpm": 0.000215415178
+          },
+          "minimum_wheel_load_n": 2691.751,
+          "response": {
+            "Fz_n": [
+              3439.54173842893,
+              3212.426761246882,
+              3993.158425162096,
+              2691.9249469576075
+            ],
+            "attitude_rad": [
+              -0.01258363508405979,
+              -0.004435775065407336
+            ],
+            "travel_m": [
+              0.037410736427182054,
+              0.02253164350124687,
+              0.04341541065037408,
+              0.03340014506932668
+            ],
+            "CoM_xy_m": [
+              98.13981048952617,
+              0.08160538357730676
+            ],
+            "ZMP_xy_m": [
+              98.13981448947257,
+              0.07253350165606073
+            ],
+            "wheel_height_m": [
+              -0.015634758261845398,
+              -0.01464818534413966,
+              -0.018154598304239412,
+              -0.0123147329501247
+            ]
+          },
+          "maximum_attitude_deg": 0.721206113,
+          "travel_range_mm": [
+            22.5214566,
+            43.4158677
+          ]
+        },
+        "RR_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 18.0,
+            "configured_stop_s": 18.0,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 3601,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\RR_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.07939564999924187,
+            "max_fz_std_n": 0.2160762216526989,
+            "max_mean_attitude_change_deg": 0.00025352968499947615,
+            "max_attitude_std_deg": 7.680180242713735e-05,
+            "max_mean_travel_change_mm": 0.011996871000000908,
+            "max_mean_com_change_m": 2.908497999984383e-06,
+            "max_abs_vx_kph": 3.41720027e-05,
+            "max_abs_wheel_rpm": 0.000216259125
+          },
+          "minimum_wheel_load_n": 2695.8356,
+          "response": {
+            "Fz_n": [
+              3450.6841175561085,
+              3203.1775917207,
+              3987.1693349875286,
+              2696.0187485037427
+            ],
+            "attitude_rad": [
+              -0.013505591616432987,
+              -0.0038543536354962065
+            ],
+            "travel_m": [
+              0.038038085130922696,
+              0.022085720162094768,
+              0.043002523727930224,
+              0.03177792456807979
+            ],
+            "CoM_xy_m": [
+              98.1401595835412,
+              0.0822093957546135
+            ],
+            "ZMP_xy_m": [
+              98.14016405053167,
+              0.07302679916993164
+            ],
+            "wheel_height_m": [
+              -0.015685169680798017,
+              -0.014609574201995022,
+              -0.01812593368329178,
+              -0.012333573895261858
+            ]
+          },
+          "maximum_attitude_deg": 0.774076134,
+          "travel_range_mm": [
+            22.0737172,
+            43.0033169
+          ]
+        },
+        "RR_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 18.0,
+            "configured_stop_s": 18.0,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 3601,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_nominal_stance_identification\\RR_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.05288814999948954,
+            "max_fz_std_n": 0.2292287283871325,
+            "max_mean_attitude_change_deg": 0.00019062566500005484,
+            "max_attitude_std_deg": 6.166144361249918e-05,
+            "max_mean_travel_change_mm": 0.008938353999980109,
+            "max_mean_com_change_m": 1.7755001522345992e-06,
+            "max_abs_vx_kph": 3.61284137e-05,
+            "max_abs_wheel_rpm": 0.000214459478
+          },
+          "minimum_wheel_load_n": 2688.84135,
+          "response": {
+            "Fz_n": [
+              3433.6712310972557,
+              3218.3837692269344,
+              3995.971869426433,
+              2689.0271298004973
+            ],
+            "attitude_rad": [
+              -0.012038794039059041,
+              -0.004410320073941158
+            ],
+            "travel_m": [
+              0.037099241485785577,
+              0.022855203903491245,
+              0.043015268674314225,
+              0.03371523269077308
+            ],
+            "CoM_xy_m": [
+              98.13982565935177,
+              0.08125411930000001
+            ],
+            "ZMP_xy_m": [
+              98.13982941136575,
+              0.0722331027023549
+            ],
+            "wheel_height_m": [
+              -0.015608270685785547,
+              -0.014673437234413975,
+              -0.01816782006234415,
+              -0.012299247925187044
+            ]
+          },
+          "maximum_attitude_deg": 0.68988779,
+          "travel_range_mm": [
+            22.8461845,
+            43.0161864
+          ]
+        }
+      },
+      "freeze_s": 0.0,
+      "reference_run": null,
+      "scope": "local frozen-input mean around the recorded contact mode; not global gains"
+    },
+    "FR": {
+      "status": "PASS",
+      "gains": {
+        "CoM_xy_m": [
+          [
+            -2.4516838999858236e-05,
+            1.2981199998307602e-07,
+            1.448653500006003e-06,
+            -3.2352899989973593e-07
+          ],
+          [
+            1.5994599500001038e-06,
+            -5.3547214999866144e-08,
+            -1.9982302750000957e-06,
+            2.5357074450000626e-06
+          ]
+        ],
+        "Fz_n": [
+          [
+            -0.13250281749999157,
+            0.0008271035500074504,
+            0.00741910309999912,
+            -0.0007645110999874305
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.14641205294999918,
+            -0.0013870766999993975,
+            -0.024102809850001905,
+            0.022942716600001405
+          ],
+          [
+            -0.013910112500005197,
+            0.0005599506500075222,
+            0.016683701299996755,
+            -0.022178147599999646
+          ]
+        ],
+        "ZMP_xy_m": [
+          [
+            -2.4554688246524848e-05,
+            1.273394758811719e-07,
+            1.4440471460375193e-06,
+            -3.2019122895121654e-07
+          ],
+          [
+            9.95104793984347e-07,
+            -5.195519921255554e-08,
+            -1.5255053741767e-06,
+            2.1685820007588117e-06
+          ]
+        ],
+        "attitude_rad": [
+          [
+            -8.648863314388092e-07,
+            1.1584801806387157e-08,
+            2.7880641001406734e-06,
+            -3.4873524096897537e-06
+          ],
+          [
+            -3.321026699122807e-05,
+            4.189256993109014e-08,
+            2.0499939829455304e-06,
+            -5.075922039476932e-08
+          ]
+        ],
+        "travel_m": [
+          [
+            -6.268478886599999e-05,
+            6.702661599997106e-08,
+            6.499832249999283e-07,
+            7.589707700050852e-08
+          ],
+          [
+            6.632259350078385e-08,
+            -5.116341792749987e-05,
+            -6.709027999651784e-09,
+            3.4354149996834725e-09
+          ],
+          [
+            4.048572849999488e-07,
+            -4.264150000043987e-09,
+            -3.223240547499895e-06,
+            1.3362686250001365e-07
+          ],
+          [
+            1.4176914000046947e-08,
+            1.6151344999978946e-09,
+            1.3387373450000907e-07,
+            -4.078307097000009e-06
+          ]
+        ],
+        "wheel_height_m": [
+          [
+            5.259164649999981e-07,
+            -3.544675000001496e-09,
+            1.5262450000080863e-09,
+            -3.986554999999004e-08
+          ],
+          [
+            6.4028560145e-05,
+            -5.1095252429999996e-05,
+            -4.144846465000019e-06,
+            4.266615725000006e-06
+          ],
+          [
+            -6.637757700000014e-07,
+            6.282454999995829e-09,
+            1.0667312000000456e-07,
+            -9.685405000000279e-08
+          ],
+          [
+            5.6881965000012135e-08,
+            -2.4564249999983746e-09,
+            -5.3243169999994677e-08,
+            8.798364000000419e-08
+          ]
+        ]
+      },
+      "G_F_diagnostic": {
+        "algebraic_rank": 3,
+        "effective_rank": 2,
+        "relative_cutoff": 0.001,
+        "singular_values": [
+          0.20037096482376243,
+          0.03121750442187428,
+          1.5914752970215223e-08,
+          2.117823979586308e-18
+        ],
+        "condition_number": 9.461171785527829e+16,
+        "condition_is_infinite": false,
+        "requires_damping": true
+      },
+      "mode": "FR",
+      "source_model_sha256": "85ff4e994a6fb98e7f819d0c5ffdfe43b2b4870c31942d1915b68cddc00f70d2",
+      "probe_model_sha256": "e35cf36a14d99935adb7b179c18a0b162a53e8726e732d2553c0cb3fb261136d",
+      "source_model": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\front_rate3_lateral0_noise_nominal\\model",
+      "config": {
+        "amplitude_n": 250.0,
+        "duration_s": 18.0,
+        "ramp_start_s": 8.0,
+        "ramp_duration_s": 2.0,
+        "window_start_s": 16.0,
+        "window_end_s": 18.0,
+        "log_decimation": 10,
+        "hold_age_s": 3.0,
+        "swing_unloaded_n": 100.0,
+        "swing_support_floor_n": 500.0,
+        "swing_clearance_m": 0.01,
+        "lambda_safe": 0.05,
+        "tyre_radius_m": 0.263,
+        "attitude_limit_deg": 10.0,
+        "travel_min_mm": -149.0,
+        "travel_max_mm": 155.0
+      },
+      "settle_limits": {
+        "window_s": 1.0,
+        "min_samples_per_window": 50,
+        "max_mean_fz_change_n": 20.0,
+        "max_fz_std_n": 100.0,
+        "max_mean_attitude_change_deg": 0.02,
+        "max_attitude_std_deg": 0.05,
+        "max_mean_travel_change_mm": 1.0,
+        "max_mean_com_change_m": 0.002,
+        "max_abs_vx_kph": 0.036,
+        "max_abs_wheel_rpm": 1.0
+      },
+      "baseline": {
+        "native": {
+          "status": "COMPLETED",
+          "solver_status": 1,
+          "solver_signalled_end": true,
+          "final_time_s": 44.3405,
+          "configured_stop_s": 44.3405,
+          "capped_at_s": null,
+          "reached_configured_stop": true,
+          "stopped_on_controller_complete": false,
+          "rows_written": 8869,
+          "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\baseline\\native_5ms.csv",
+          "error_message": ""
+        },
+        "settle_status": "SETTLED",
+        "settle_metrics": {
+          "max_mean_fz_change_n": 0.03684875000044485,
+          "max_fz_std_n": 0.010767892017355079,
+          "max_mean_attitude_change_deg": 0.00014247680000378793,
+          "max_attitude_std_deg": 4.150275069727916e-05,
+          "max_mean_travel_change_mm": 0.003383722500046815,
+          "max_mean_com_change_m": 4.858000039575927e-06,
+          "max_abs_vx_kph": 1.82310797e-05,
+          "max_abs_wheel_rpm": 1.4745436e-05
+        },
+        "minimum_wheel_load_n": 0.0,
+        "response": {
+          "Fz_n": [
+            6426.949504525002,
+            0.0,
+            1136.5979719250006,
+            5773.496463850003
+          ],
+          "attitude_rad": [
+            -0.030547080629653948,
+            -0.06706805107560485
+          ],
+          "travel_m": [
+            -0.07676432575575001,
+            -0.04941659932650005,
+            0.07697694910849996,
+            0.017260825766
+          ],
+          "CoM_xy_m": [
+            98.09885603949996,
+            0.1016246288575001
+          ],
+          "ZMP_xy_m": [
+            98.09894647430382,
+            0.08752812248467899
+          ],
+          "wheel_height_m": [
+            -0.02953999998000001,
+            0.036118900614999984,
+            -0.005176735557500011,
+            -0.02638482627750001
+          ]
+        },
+        "maximum_attitude_deg": 3.84285753,
+        "travel_range_mm": [
+          -76.7676898,
+          76.9781873
+        ],
+        "minimum_support_load_n": 1136.56178,
+        "maximum_lifted_load_n": 0.0,
+        "minimum_clearance_m": 0.036112721999999986,
+        "minimum_support_margin": 0.08521841625605206
+      },
+      "cases": {
+        "FL_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 44.3405,
+            "configured_stop_s": 44.3405,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 8869,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\FL_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.0694643500003167,
+            "max_fz_std_n": 0.020447592880277986,
+            "max_mean_attitude_change_deg": 0.0003352212500011831,
+            "max_attitude_std_deg": 9.911291991304837e-05,
+            "max_mean_travel_change_mm": 0.008428861999902892,
+            "max_mean_com_change_m": 1.1116500047592126e-05,
+            "max_abs_vx_kph": 4.17060189e-05,
+            "max_abs_wheel_rpm": 3.06229723e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              6392.211756325006,
+              0.0,
+              1176.0300812249995,
+              5768.8018397999995
+            ],
+            "attitude_rad": [
+              -0.03094492256048577,
+              -0.07568775704124646
+            ],
+            "travel_m": [
+              -0.09290176382249998,
+              -0.04939816810774986,
+              0.07721186608375002,
+              0.0171852102865
+            ],
+            "CoM_xy_m": [
+              98.09228142725001,
+              0.10212508517500005
+            ],
+            "ZMP_xy_m": [
+              98.0923666102354,
+              0.08790865981559227
+            ],
+            "wheel_height_m": [
+              -0.029398104032500014,
+              0.05281986042499998,
+              -0.005355271507500012,
+              -0.02636624018500001
+            ]
+          },
+          "maximum_attitude_deg": 4.33691805,
+          "travel_range_mm": [
+            -92.9100304,
+            77.2143837
+          ],
+          "minimum_support_load_n": 1175.96027,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.052806189999999975,
+          "minimum_support_margin": 0.08817248561662867
+        },
+        "FL_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 44.3405,
+            "configured_stop_s": 44.3405,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 8869,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\FL_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.02359150000029331,
+            "max_fz_std_n": 0.006986488872102764,
+            "max_mean_attitude_change_deg": 0.00012942440000074384,
+            "max_attitude_std_deg": 3.827411634303468e-05,
+            "max_mean_travel_change_mm": 0.004454215999984967,
+            "max_mean_com_change_m": 5.19150002276092e-06,
+            "max_abs_vx_kph": 1.97652892e-05,
+            "max_abs_wheel_rpm": 2.77479121e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              6458.463165075002,
+              0.0,
+              1102.82405475,
+              5775.756896050002
+            ],
+            "attitude_rad": [
+              -0.030512479394766364,
+              -0.05908262354563242
+            ],
+            "travel_m": [
+              -0.06155936938949999,
+              -0.04943132940450025,
+              0.07700943744125005,
+              0.017178121829499977
+            ],
+            "CoM_xy_m": [
+              98.10453984674994,
+              0.1013253552
+            ],
+            "ZMP_xy_m": [
+              98.10464395435866,
+              0.0874111074186001
+            ],
+            "wheel_height_m": [
+              -0.029661062265000013,
+              0.020805580352499988,
+              -0.005023383622500011,
+              -0.026394681167500017
+            ]
+          },
+          "maximum_attitude_deg": 3.38526975,
+          "travel_range_mm": [
+            -61.5639031,
+            77.0110283
+          ],
+          "minimum_support_load_n": 1102.80411,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.020803978999999972,
+          "minimum_support_margin": 0.08268730598514983
+        },
+        "FR_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 44.3405,
+            "configured_stop_s": 44.3405,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 8869,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\FR_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.03694605000055162,
+            "max_fz_std_n": 0.010919799364462747,
+            "max_mean_attitude_change_deg": 0.00014257419999896825,
+            "max_attitude_std_deg": 4.156130953035377e-05,
+            "max_mean_travel_change_mm": 0.0033862530000305924,
+            "max_mean_com_change_m": 4.870500035281111e-06,
+            "max_abs_vx_kph": 1.83885735e-05,
+            "max_abs_wheel_rpm": 1.48885568e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              6427.146508900001,
+              0.0,
+              1136.3050852250003,
+              5773.592319875
+            ],
+            "attitude_rad": [
+              -0.030551368596884457,
+              -0.06706050658360779
+            ],
+            "travel_m": [
+              -0.07674830083649999,
+              -0.06220735184950001,
+              0.07698066456075003,
+              0.017257341376999996
+            ],
+            "CoM_xy_m": [
+              98.09888642074995,
+              0.10161642117499994
+            ],
+            "ZMP_xy_m": [
+              98.09897621028814,
+              0.08751929475049305
+            ],
+            "wheel_height_m": [
+              -0.029540930105000012,
+              0.02335512795249999,
+              -0.005175398582500013,
+              -0.026385283790000012
+            ]
+          },
+          "maximum_attitude_deg": 3.84242527,
+          "travel_range_mm": [
+            -76.751667,
+            76.9819024
+          ],
+          "minimum_support_load_n": 1136.26805,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.023348951000000007,
+          "minimum_support_margin": 0.08519640700836463
+        },
+        "FR_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 44.3405,
+            "configured_stop_s": 44.3405,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 8869,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\FR_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.036986650000471855,
+            "max_fz_std_n": 0.0108689843792965,
+            "max_mean_attitude_change_deg": 0.0001428050499998612,
+            "max_attitude_std_deg": 4.159492724236823e-05,
+            "max_mean_travel_change_mm": 0.003390503000019862,
+            "max_mean_com_change_m": 4.8805000290030875e-06,
+            "max_abs_vx_kph": 1.83918987e-05,
+            "max_abs_wheel_rpm": 1.48710117e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              6426.7329571249975,
+              0.0,
+              1136.998623575,
+              5773.312344549996
+            ],
+            "attitude_rad": [
+              -0.03055716099778765,
+              -0.06708145286857334
+            ],
+            "travel_m": [
+              -0.07678181414449997,
+              -0.03662564288575008,
+              0.07698279663575006,
+              0.017256533809749997
+            ],
+            "CoM_xy_m": [
+              98.09882151474996,
+              0.10164319478249988
+            ],
+            "ZMP_xy_m": [
+              98.0989125405502,
+              0.08754527235009933
+            ],
+            "wheel_height_m": [
+              -0.02953915776750001,
+              0.048902754167499986,
+              -0.005178539810000011,
+              -0.026384055577500013
+            ]
+          },
+          "maximum_attitude_deg": 3.84362568,
+          "travel_range_mm": [
+            -76.785186,
+            76.9840375
+          ],
+          "minimum_support_load_n": 1136.96161,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.04889655999999998,
+          "minimum_support_margin": 0.08524840243206688
+        },
+        "RL_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 44.3405,
+            "configured_stop_s": 44.3405,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 8869,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\RL_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.032096900000397,
+            "max_fz_std_n": 0.010418335399547264,
+            "max_mean_attitude_change_deg": 0.00012310369999690707,
+            "max_attitude_std_deg": 3.578719439515703e-05,
+            "max_mean_travel_change_mm": 0.0032425469999566303,
+            "max_mean_com_change_m": 4.336499969781471e-06,
+            "max_abs_vx_kph": 1.68332948e-05,
+            "max_abs_wheel_rpm": 1.41752782e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              6427.368243075002,
+              0.0,
+              1135.2809359999992,
+              5774.394724974998
+            ],
+            "attitude_rad": [
+              -0.030396195842877883,
+              -0.06695200978327058
+            ],
+            "travel_m": [
+              -0.07672732323500003,
+              -0.04941696743700001,
+              0.0767946867915,
+              0.017260200538
+            ],
+            "CoM_xy_m": [
+              98.09893740024998,
+              0.10151678792749999
+            ],
+            "ZMP_xy_m": [
+              98.09902757760636,
+              0.08744647279216088
+            ],
+            "wheel_height_m": [
+              -0.02954001556250001,
+              0.03589265441499998,
+              -0.00517089532250001,
+              -0.026387677227500007
+            ]
+          },
+          "maximum_attitude_deg": 3.83618943,
+          "travel_range_mm": [
+            -76.7305519,
+            76.7954308
+          ],
+          "minimum_support_load_n": 1135.24268,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.03588720200000001,
+          "minimum_support_margin": 0.0851195543621946
+        },
+        "RL_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 44.3405,
+            "configured_stop_s": 44.3405,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 8869,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\RL_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.052873949999593606,
+            "max_fz_std_n": 0.015628737405738533,
+            "max_mean_attitude_change_deg": 0.00020033384999784687,
+            "max_attitude_std_deg": 5.8862415638427965e-05,
+            "max_mean_travel_change_mm": 0.004100472000004629,
+            "max_mean_com_change_m": 7.810999903767879e-06,
+            "max_abs_vx_kph": 2.95622658e-05,
+            "max_abs_wheel_rpm": 2.50289727e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              6423.658691525003,
+              0.0,
+              1147.3323409250002,
+              5766.052874325
+            ],
+            "attitude_rad": [
+              -0.03179022789294822,
+              -0.06797700677474335
+            ],
+            "travel_m": [
+              -0.0770523148475,
+              -0.049413612923000186,
+              0.07840630706524995,
+              0.017193263670749994
+            ],
+            "CoM_xy_m": [
+              98.09821307349998,
+              0.10251590306500004
+            ],
+            "ZMP_xy_m": [
+              98.09830555403335,
+              0.08820922547924923
+            ],
+            "wheel_height_m": [
+              -0.029540778685000015,
+              0.03796507764749999,
+              -0.0052242318825000125,
+              -0.02636105564250001
+            ]
+          },
+          "maximum_attitude_deg": 3.8949906,
+          "travel_range_mm": [
+            -77.056388,
+            78.4085939
+          ],
+          "minimum_support_load_n": 1147.27865,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.037956553000000004,
+          "minimum_support_margin": 0.08602196973910373
+        },
+        "RR_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 44.3405,
+            "configured_stop_s": 44.3405,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 8869,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\RR_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.05359099999964201,
+            "max_fz_std_n": 0.015601971643907205,
+            "max_mean_attitude_change_deg": 0.0002154429999987606,
+            "max_attitude_std_deg": 6.309933275051546e-05,
+            "max_mean_travel_change_mm": 0.004322826000034752,
+            "max_mean_com_change_m": 6.707500006086775e-06,
+            "max_abs_vx_kph": 2.49247566e-05,
+            "max_abs_wheel_rpm": 2.04594769e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              6426.598331050002,
+              0.0,
+              1146.04422665,
+              5764.401396224999
+            ],
+            "attitude_rad": [
+              -0.03197783302488546,
+              -0.06709997640179022
+            ],
+            "travel_m": [
+              -0.07673687740599976,
+              -0.04941516048775022,
+              0.07704924285225,
+              0.015605180863749995
+            ],
+            "CoM_xy_m": [
+              98.09871682374998,
+              0.10266506271250002
+            ],
+            "ZMP_xy_m": [
+              98.0988086469523,
+              0.08841674751066642
+            ],
+            "wheel_height_m": [
+              -0.02955623976500001,
+              0.03787311295999999,
+              -0.0052166991725000125,
+              -0.02634883738250001
+            ]
+          },
+          "maximum_attitude_deg": 3.84472952,
+          "travel_range_mm": [
+            -76.7411744,
+            77.0509403
+          ],
+          "minimum_support_load_n": 1145.9905,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.03786403799999999,
+          "minimum_support_margin": 0.08592537350189833
+        },
+        "RR_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 44.3405,
+            "configured_stop_s": 44.3405,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 8869,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_fr_swing_identification_v2\\RR_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.03232790000015484,
+            "max_fz_std_n": 0.009519180040326368,
+            "max_mean_attitude_change_deg": 0.0001328743999988724,
+            "max_attitude_std_deg": 3.871638018654863e-05,
+            "max_mean_travel_change_mm": 0.0031865340000649667,
+            "max_mean_com_change_m": 4.460499965830422e-06,
+            "max_abs_vx_kph": 1.69287228e-05,
+            "max_abs_wheel_rpm": 1.37323958e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              6426.980586599996,
+              0.0,
+              1134.5728683499992,
+              5775.490470024999
+            ],
+            "attitude_rad": [
+              -0.030234156820040582,
+              -0.06707459679159283
+            ],
+            "travel_m": [
+              -0.07677482594450001,
+              -0.049416878195250064,
+              0.07698242942099999,
+              0.01764433441225
+            ],
+            "CoM_xy_m": [
+              98.09887858824993,
+              0.10139720898999999
+            ],
+            "ZMP_xy_m": [
+              98.09896874256678,
+              0.08733245651028701
+            ],
+            "wheel_height_m": [
+              -0.029536306990000014,
+              0.03573980509749999,
+              -0.005168272147500011,
+              -0.026392829202500013
+            ]
+          },
+          "maximum_attitude_deg": 3.84322299,
+          "travel_range_mm": [
+            -76.7779958,
+            76.9835602
+          ],
+          "minimum_support_load_n": 1134.53993,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.035734455,
+          "minimum_support_margin": 0.08506683430324936
+        }
+      },
+      "freeze_s": 26.34049999998396,
+      "reference_run": "runs\\front_rate3_lateral0_noise_nominal",
+      "scope": "local frozen-input mean around the recorded contact mode; not global gains"
+    },
+    "RR": {
+      "status": "PASS",
+      "gains": {
+        "CoM_xy_m": [
+          [
+            -2.7762468827688737e-05,
+            5.250748129441263e-06,
+            1.1731620942612154e-06,
+            -6.1695744761891544e-09
+          ],
+          [
+            -6.939233259850392e-05,
+            6.203911203491297e-05,
+            1.4607533665834116e-06,
+            -6.319553117162257e-08
+          ]
+        ],
+        "Fz_n": [
+          [
+            -0.7075922243890255,
+            0.5494158992518705,
+            0.017373753316707735,
+            -0.0006230728179561993
+          ],
+          [
+            0.5672485400498808,
+            -0.5195276294763044,
+            -0.011036402693262061,
+            0.000590022493763172
+          ],
+          [
+            0.14041295705735138,
+            -0.02990014822941339,
+            -0.006351070274336962,
+            3.317705735571508e-05
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "ZMP_xy_m": [
+          [
+            -2.793695912416183e-05,
+            5.369440952762261e-06,
+            1.174349528497487e-06,
+            -6.253477266682239e-09
+          ],
+          [
+            -5.742531761687719e-05,
+            5.1402535454457276e-05,
+            1.1094851161871366e-06,
+            -5.6524680947411806e-08
+          ]
+        ],
+        "attitude_rad": [
+          [
+            8.905132245723016e-05,
+            -7.648389051294063e-05,
+            -1.285656019804765e-06,
+            4.777461383562165e-08
+          ],
+          [
+            -4.0339579825740035e-05,
+            9.283235842677179e-06,
+            1.8157746109703671e-06,
+            -1.057499241768206e-08
+          ]
+        ],
+        "travel_m": [
+          [
+            -7.49138127097258e-05,
+            1.4983353495760577e-05,
+            5.29298323192165e-07,
+            -1.8363757107259236e-08
+          ],
+          [
+            3.4749568638403924e-05,
+            -7.83957630289277e-05,
+            -9.982186932665504e-07,
+            3.7627112219301706e-08
+          ],
+          [
+            5.492829466334642e-07,
+            -4.48817803491347e-07,
+            -2.9341495890273932e-06,
+            -6.656718205405587e-10
+          ],
+          [
+            -1.872426932635063e-09,
+            1.7328197506279174e-08,
+            -1.1070504239388267e-08,
+            -7.27425183192016e-06
+          ]
+        ],
+        "wheel_height_m": [
+          [
+            4.312395261845391e-06,
+            -4.069227326683288e-06,
+            -1.0066974563591353e-07,
+            3.661032418953228e-09
+          ],
+          [
+            -3.1468105236908546e-07,
+            5.176163241895209e-07,
+            1.9356852867830066e-08,
+            -1.524847880310376e-09
+          ],
+          [
+            1.4275006633416298e-06,
+            -1.5207926783042253e-06,
+            -4.3811471321708595e-08,
+            8.755261845239115e-10
+          ],
+          [
+            -0.00011134104618952619,
+            9.532500755112222e-05,
+            4.481243037406491e-06,
+            -7.27880228428926e-06
+          ]
+        ]
+      },
+      "G_F_diagnostic": {
+        "algebraic_rank": 3,
+        "effective_rank": 2,
+        "relative_cutoff": 0.001,
+        "singular_values": [
+          1.186843517968767,
+          0.08186241241652452,
+          6.040085504384057e-06,
+          0.0
+        ],
+        "condition_number": null,
+        "condition_is_infinite": true,
+        "requires_damping": true
+      },
+      "mode": "RR",
+      "source_model_sha256": "85ff4e994a6fb98e7f819d0c5ffdfe43b2b4870c31942d1915b68cddc00f70d2",
+      "probe_model_sha256": "22ceacdf674b3123a494c280b0f7cb484185120da7c96d0c17f5a4c2c9f05514",
+      "source_model": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\front_rate3_lateral0_noise_nominal\\model",
+      "config": {
+        "amplitude_n": 250.0,
+        "duration_s": 18.0,
+        "ramp_start_s": 8.0,
+        "ramp_duration_s": 2.0,
+        "window_start_s": 16.0,
+        "window_end_s": 18.0,
+        "log_decimation": 10,
+        "hold_age_s": 3.0,
+        "swing_unloaded_n": 100.0,
+        "swing_support_floor_n": 500.0,
+        "swing_clearance_m": 0.01,
+        "lambda_safe": 0.05,
+        "tyre_radius_m": 0.263,
+        "attitude_limit_deg": 10.0,
+        "travel_min_mm": -149.0,
+        "travel_max_mm": 155.0
+      },
+      "settle_limits": {
+        "window_s": 1.0,
+        "min_samples_per_window": 50,
+        "max_mean_fz_change_n": 20.0,
+        "max_fz_std_n": 100.0,
+        "max_mean_attitude_change_deg": 0.02,
+        "max_attitude_std_deg": 0.05,
+        "max_mean_travel_change_mm": 1.0,
+        "max_mean_com_change_m": 0.002,
+        "max_abs_vx_kph": 0.036,
+        "max_abs_wheel_rpm": 1.0
+      },
+      "baseline": {
+        "native": {
+          "status": "COMPLETED",
+          "solver_status": 1,
+          "solver_signalled_end": true,
+          "final_time_s": 86.921,
+          "configured_stop_s": 86.921,
+          "capped_at_s": null,
+          "reached_configured_stop": true,
+          "stopped_on_controller_complete": false,
+          "rows_written": 17386,
+          "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\baseline\\native_5ms.csv",
+          "error_message": ""
+        },
+        "settle_status": "SETTLED",
+        "settle_metrics": {
+          "max_mean_fz_change_n": 0.011898990548161237,
+          "max_fz_std_n": 0.08641542225747563,
+          "max_mean_attitude_change_deg": 0.00012055687325895903,
+          "max_attitude_std_deg": 6.561339095792098e-05,
+          "max_mean_travel_change_mm": 0.0026222060398239933,
+          "max_mean_com_change_m": 1.946393382468159e-06,
+          "max_abs_vx_kph": 3.74522566e-05,
+          "max_abs_wheel_rpm": 4.463432e-05
+        },
+        "minimum_wheel_load_n": 0.0,
+        "response": {
+          "Fz_n": [
+            1379.2444227680799,
+            5242.227164812972,
+            6715.570354264346,
+            0.0
+          ],
+          "attitude_rad": [
+            -0.12256460027762657,
+            -0.0127542479296414
+          ],
+          "travel_m": [
+            0.06020138778927679,
+            -0.11277544119950136,
+            0.06059577025860341,
+            -0.017377127653615942
+          ],
+          "CoM_xy_m": [
+            101.54311024937581,
+            0.17834920108728178
+          ],
+          "ZMP_xy_m": [
+            101.54331788303024,
+            0.15491196290757975
+          ],
+          "wheel_height_m": [
+            -0.007401459925187044,
+            -0.024993474326683304,
+            -0.03153909519451372,
+            0.04509960889276807
+          ]
+        },
+        "maximum_attitude_deg": 7.02255462,
+        "travel_range_mm": [
+          -112.77682,
+          60.5980506
+        ],
+        "minimum_support_load_n": 1379.12763,
+        "maximum_lifted_load_n": 0.0,
+        "minimum_clearance_m": 0.045095463999999974,
+        "minimum_support_margin": 0.10340701549540286
+      },
+      "cases": {
+        "FL_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 86.921,
+            "configured_stop_s": 86.921,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 17386,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\FL_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.24657753109408986,
+            "max_fz_std_n": 0.15694278446278614,
+            "max_mean_attitude_change_deg": 0.0015779353393048368,
+            "max_attitude_std_deg": 0.00046218945782519567,
+            "max_mean_travel_change_mm": 0.03071184119402659,
+            "max_mean_com_change_m": 2.435415427726184e-05,
+            "max_abs_vx_kph": 0.000149342648,
+            "max_abs_wheel_rpm": 0.000137249384
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              1250.5801875311722,
+              5345.4879907231925,
+              6740.983194214461,
+              0.0
+            ],
+            "attitude_rad": [
+              -0.10637364496696146,
+              -0.020084955611636385
+            ],
+            "travel_m": [
+              0.04684900306533667,
+              -0.10630170653615957,
+              0.06088014510673319,
+              -0.017398192379301736
+            ],
+            "CoM_xy_m": [
+              101.53811397755611,
+              0.16575064715710722
+            ],
+            "ZMP_xy_m": [
+              101.538294685856,
+              0.14453302105877497
+            ],
+            "wheel_height_m": [
+              -0.0066420577182045,
+              -0.025109633827930192,
+              -0.03132996753615962,
+              0.024581853127182033
+            ]
+          },
+          "maximum_attitude_deg": 6.09624455,
+          "travel_range_mm": [
+            -106.305092,
+            60.8842779
+          ],
+          "minimum_support_load_n": 1250.23407,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.024544306000000016,
+          "minimum_support_margin": 0.09374242571794644
+        },
+        "FL_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 86.921,
+            "configured_stop_s": 86.921,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 17386,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\FL_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.023901945522311507,
+            "max_fz_std_n": 0.9997031949659215,
+            "max_mean_attitude_change_deg": 0.00048205648183419214,
+            "max_attitude_std_deg": 0.0007406910016468478,
+            "max_mean_travel_change_mm": 0.02187800578114718,
+            "max_mean_com_change_m": 1.2552636889040514e-05,
+            "max_abs_vx_kph": 0.000439870566,
+            "max_abs_wheel_rpm": 0.000664811472
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              1604.376299725685,
+              5061.863720698252,
+              6670.776715685785,
+              0.0
+            ],
+            "attitude_rad": [
+              -0.15089930619557654,
+              8.483430123362925e-05
+            ],
+            "travel_m": [
+              0.08430590942019957,
+              -0.12367649085536153,
+              0.060605503633416456,
+              -0.017397256165835418
+            ],
+            "CoM_xy_m": [
+              101.55199521196995,
+              0.20044681345635917
+            ],
+            "ZMP_xy_m": [
+              101.55226316541808,
+              0.17324567986721356
+            ],
+            "wheel_height_m": [
+              -0.008798255349127196,
+              -0.02495229330174565,
+              -0.03204371786783043,
+              0.08025237622194513
+            ]
+          },
+          "maximum_attitude_deg": 8.64729401,
+          "travel_range_mm": [
+            -123.693772,
+            84.3327919
+          ],
+          "minimum_support_load_n": 1602.93961,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.080217714,
+          "minimum_support_margin": 0.12019858176700121
+        },
+        "FR_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 86.921,
+            "configured_stop_s": 86.921,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 17386,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\FR_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.039734454479003034,
+            "max_fz_std_n": 0.2002495681112913,
+            "max_mean_attitude_change_deg": 0.0003985833786135373,
+            "max_attitude_std_deg": 0.00016589810214764398,
+            "max_mean_travel_change_mm": 0.009825133631750305,
+            "max_mean_com_change_m": 5.083966119368011e-06,
+            "max_abs_vx_kph": 7.7706449e-05,
+            "max_abs_wheel_rpm": 0.000104865672
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              1514.7567339401494,
+              5114.039248578556,
+              6708.241786408981,
+              0.0
+            ],
+            "attitude_rad": [
+              -0.14122169046899088,
+              -0.010513411131959418
+            ],
+            "travel_m": [
+              0.06389112424588525,
+              -0.131932733957606,
+              0.060554922590523676,
+              -0.01738291692593516
+            ],
+            "CoM_xy_m": [
+              101.5442403017457,
+              0.1936546581321697
+            ],
+            "ZMP_xy_m": [
+              101.54447469486534,
+              0.16763922355552216
+            ],
+            "wheel_height_m": [
+              -0.008432478750623452,
+              -0.024916516413965098,
+              -0.03195155445635911,
+              0.06821942790024937
+            ]
+          },
+          "maximum_attitude_deg": 8.09189404,
+          "travel_range_mm": [
+            -131.942147,
+            63.8941276
+          ],
+          "minimum_support_load_n": 1514.44773,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.06821476700000001,
+          "minimum_support_margin": 0.11355476281589738
+        },
+        "FR_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 86.921,
+            "configured_stop_s": 86.921,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 17386,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\FR_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.06598292562148345,
+            "max_fz_std_n": 0.04498578638522986,
+            "max_mean_attitude_change_deg": 0.0004640015689041377,
+            "max_attitude_std_deg": 0.00014924833822819552,
+            "max_mean_travel_change_mm": 0.00711407415671772,
+            "max_mean_com_change_m": 6.316289228897043e-06,
+            "max_abs_vx_kph": 3.68187206e-05,
+            "max_abs_wheel_rpm": 3.00463781e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              1240.0487843142141,
+              5373.803063316708,
+              6723.191860523688,
+              0.0
+            ],
+            "attitude_rad": [
+              -0.10297974521252057,
+              -0.015155029053298007
+            ],
+            "travel_m": [
+              0.05639944749800496,
+              -0.09273485244314214,
+              0.06077933149226935,
+              -0.0173915810246883
+            ],
+            "CoM_xy_m": [
+              101.54161492768098,
+              0.16263510211471321
+            ],
+            "ZMP_xy_m": [
+              101.54178997438896,
+              0.14193795582829352
+            ],
+            "wheel_height_m": [
+              -0.0063978650872818085,
+              -0.02517532457605986,
+              -0.031191158117206998,
+              0.020556924124688267
+            ]
+          },
+          "maximum_attitude_deg": 5.90079537,
+          "travel_range_mm": [
+            -92.737808,
+            60.780313
+          ],
+          "minimum_support_load_n": 1239.95225,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.020545504999999964,
+          "minimum_support_margin": 0.09297088445928492
+        },
+        "RL_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 86.921,
+            "configured_stop_s": 86.921,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 17386,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\RL_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.02446129029772237,
+            "max_fz_std_n": 0.21865737254453282,
+            "max_mean_attitude_change_deg": 0.00018899135564653946,
+            "max_attitude_std_deg": 0.00015922814137607692,
+            "max_mean_travel_change_mm": 0.004474058492512256,
+            "max_mean_com_change_m": 2.789552567605824e-06,
+            "max_abs_vx_kph": 8.54965265e-05,
+            "max_abs_wheel_rpm": 0.000110522254
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              1380.5761982044885,
+              5241.381397431423,
+              6715.079105386528,
+              0.0
+            ],
+            "attitude_rad": [
+              -0.12266361356733432,
+              -0.01261506482650888
+            ],
+            "travel_m": [
+              0.06024188839625938,
+              -0.11285264240149626,
+              0.060370775950872806,
+              -0.017380978040149632
+            ],
+            "CoM_xy_m": [
+              101.54320030174559,
+              0.17846143514214452
+            ],
+            "ZMP_xy_m": [
+              101.5434082696506,
+              0.15499682133949397
+            ],
+            "wheel_height_m": [
+              -0.007409192079800511,
+              -0.024992010134663352,
+              -0.03154245849875313,
+              0.0454407717456359
+            ]
+          },
+          "maximum_attitude_deg": 7.0284214,
+          "travel_range_mm": [
+            -112.854506,
+            60.3751328
+          ],
+          "minimum_support_load_n": 1380.27828,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.04543168599999997,
+          "minimum_support_margin": 0.10349495229338092
+        },
+        "RL_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 86.921,
+            "configured_stop_s": 86.921,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 17386,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\RL_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.008711818654774106,
+            "max_fz_std_n": 0.03388998890761439,
+            "max_mean_attitude_change_deg": 9.705848234187187e-05,
+            "max_attitude_std_deg": 3.200020038742404e-05,
+            "max_mean_travel_change_mm": 0.002995679203948498,
+            "max_mean_com_change_m": 1.2623596766792033e-06,
+            "max_abs_vx_kph": 1.66287564e-05,
+            "max_abs_wheel_rpm": 2.07434636e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              1371.8893215461346,
+              5246.899598778054,
+              6718.254640523696,
+              0.0
+            ],
+            "attitude_rad": [
+              -0.12202078555743194,
+              -0.013522952131994063
+            ],
+            "travel_m": [
+              0.0599772392346633,
+              -0.11235353305486298,
+              0.0618378507453865,
+              -0.017375442788029938
+            ],
+            "CoM_xy_m": [
+              101.54261372069845,
+              0.17773105845885281
+            ],
+            "ZMP_xy_m": [
+              101.54282109488635,
+              0.1544420787814004
+            ],
+            "wheel_height_m": [
+              -0.007358857206982554,
+              -0.025001688561097267,
+              -0.03152055276309228,
+              0.04320015022693265
+            ]
+          },
+          "maximum_attitude_deg": 6.99137873,
+          "travel_range_mm": [
+            -112.356405,
+            61.8390033
+          ],
+          "minimum_support_load_n": 1371.8376,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.04319915699999999,
+          "minimum_support_margin": 0.10285961185708281
+        },
+        "RR_pos": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 86.921,
+            "configured_stop_s": 86.921,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 17386,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\RR_pos\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.011624401990275146,
+            "max_fz_std_n": 0.08568078402017648,
+            "max_mean_attitude_change_deg": 0.00011978204559703887,
+            "max_attitude_std_deg": 6.484853846548936e-05,
+            "max_mean_travel_change_mm": 0.002595916233843809,
+            "max_mean_com_change_m": 2.0026123053185074e-06,
+            "max_abs_vx_kph": 3.70904273e-05,
+            "max_abs_wheel_rpm": 4.4202149e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              1378.975398104738,
+              5242.481625785535,
+              6715.584955162099,
+              0.0
+            ],
+            "attitude_rad": [
+              -0.12254397571793856,
+              -0.012758903926685458
+            ],
+            "travel_m": [
+              0.06019345732743141,
+              -0.1127591979975062,
+              0.060595657331920176,
+              -0.020506692589276797
+            ],
+            "CoM_xy_m": [
+              101.54310752119706,
+              0.17832193441147148
+            ],
+            "ZMP_xy_m": [
+              101.54331511103736,
+              0.15488758580036688
+            ],
+            "wheel_height_m": [
+              -0.007399879279301756,
+              -0.024994131254364102,
+              -0.03153871581546136,
+              0.04196782647132169
+            ]
+          },
+          "maximum_attitude_deg": 7.02137115,
+          "travel_range_mm": [
+            -112.760583,
+            60.5979155
+          ],
+          "minimum_support_load_n": 1378.85961,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.04196361999999998,
+          "minimum_support_margin": 0.10338690718021903
+        },
+        "RR_neg": {
+          "native": {
+            "status": "COMPLETED",
+            "solver_status": 1,
+            "solver_signalled_end": true,
+            "final_time_s": 86.921,
+            "configured_stop_s": 86.921,
+            "capped_at_s": null,
+            "reached_configured_stop": true,
+            "stopped_on_controller_complete": false,
+            "rows_written": 17386,
+            "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\current_scale0_rr_swing_identification\\RR_neg\\native_5ms.csv",
+            "error_message": ""
+          },
+          "settle_status": "SETTLED",
+          "settle_metrics": {
+            "max_mean_fz_change_n": 0.012136506964907312,
+            "max_fz_std_n": 0.08731107929694028,
+            "max_mean_attitude_change_deg": 0.0001214542914923511,
+            "max_attitude_std_deg": 6.626606018874456e-05,
+            "max_mean_travel_change_mm": 0.0026481378259433086,
+            "max_mean_com_change_m": 2.0329603813706854e-06,
+            "max_abs_vx_kph": 3.77582176e-05,
+            "max_abs_wheel_rpm": 4.51978974e-05
+          },
+          "minimum_wheel_load_n": 0.0,
+          "response": {
+            "Fz_n": [
+              1379.286934513716,
+              5242.186614538653,
+              6715.568366633421,
+              0.0
+            ],
+            "attitude_rad": [
+              -0.12256786302485637,
+              -0.012753616430476617
+            ],
+            "travel_m": [
+              0.06020263920598504,
+              -0.11277801155361585,
+              0.060595990167830446,
+              -0.016869566673316717
+            ],
+            "CoM_xy_m": [
+              101.5431106059843,
+              0.1783535321770573
+            ],
+            "ZMP_xy_m": [
+              101.54331823777599,
+              0.15491584814084058
+            ],
+            "wheel_height_m": [
+              -0.007401709795511233,
+              -0.024993368830423947,
+              -0.03153915357855362,
+              0.04560722761346632
+            ]
+          },
+          "maximum_attitude_deg": 7.02274283,
+          "travel_range_mm": [
+            -112.779391,
+            60.5982939
+          ],
+          "minimum_support_load_n": 1379.16886,
+          "maximum_lifted_load_n": 0.0,
+          "minimum_clearance_m": 0.045603174999999996,
+          "minimum_support_margin": 0.10341011948254719
+        }
+      },
+      "freeze_s": 68.92100000014706,
+      "reference_run": "runs\\front_rate3_lateral0_noise_nominal",
+      "scope": "local frozen-input mean around the recorded contact mode; not global gains"
+    }
+  },
+  "scope": "local frozen-input means; tail-window contact and settle gates; no global feasibility guarantee",
+  "height_gain_note": "Derived from the same verified native probe CSV and settled windows; clearance is relative to the flat top plane, not pit bottom."
+}
