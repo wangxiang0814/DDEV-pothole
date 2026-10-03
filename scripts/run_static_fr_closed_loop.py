@@ -131,7 +131,7 @@ def _prepare_model(output: Path, *, crawl: bool,
 
 
 class LiftCrawlController:
-    def __init__(self, *, crawl: bool, scenario: dict):
+    def __init__(self, *, crawl: bool, scenario: dict, contact_gains=None):
         model_hash = hashlib.sha256((EVIDENCE / "model" / "run_all.par").read_bytes()).hexdigest()
         gain = json.loads((EVIDENCE / "swing_support_gain.json").read_text(encoding="utf-8"))
         if gain["model_sha256"] != model_hash:
@@ -147,6 +147,9 @@ class LiftCrawlController:
         self.swing_gain = np.asarray(gain["gain_fz_per_command"], dtype=float)
         static_gain = np.asarray(json.loads((EVIDENCE / "gain_matrix.json").read_text(
             encoding="utf-8"))["gains"]["Fz_n"], dtype=float)
+        if contact_gains is not None:
+            static_gain = contact_gains['FOUR_CONTACT']
+            self.swing_gain = contact_gains['FR'][np.ix_(SUPPORT, SUPPORT)]
         self.fr_feedback = ScalarLoadFeedback(
             gain_load_per_force=float(static_gain[1, 1]),
             control_period_s=CFG.control_period_s,

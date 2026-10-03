@@ -78,6 +78,9 @@ class RearCycleController:
         self.posture_stop_release_start_s: float | None = None
         self.stop_roll_counter_start_s: float | None = None
         self.preload_start_s: float | None = None
+        self.lift_start_s: float | None = None
+        self.last_suspension_force_n = np.zeros(4)
+        self.abort_suspension_force_n: np.ndarray | None = None
         self.preload_reference_s = 0.0
         self.preload_clock_update_s: float | None = None
         self.preload_reference_rate = 1.0
@@ -110,6 +113,8 @@ class RearCycleController:
         self.rows: list[dict] = []
 
     def _enter(self, mode: str, now_s: float) -> None:
+        if mode == 'RR_ABORT_STOP' and self.abort_suspension_force_n is None:
+            self.abort_suspension_force_n = self.last_suspension_force_n.copy()
         if mode == "RR_CRAWL" and self.config.parking_damping_nm_per_rpm > 0.:
             self.drive.torque_nm = self.parking_torque[[2, 0, 1]].copy()
         self.mode = mode
@@ -170,13 +175,25 @@ class RearCycleController:
                            self.unload_feedback.correction_n +
                            self.stop_travel_relief_n) * release
             command[6] = cfg.preload_rl_force_n * preload * release
-            if self.mode not in ("RR_PRELOAD",):
+            if self.lift_start_s is not None and self.mode != 'RR_PRELOAD':
                 lift = quintic_step(now_s, self.lift_start_s,
                                     cfg.lift_ramp_s)[0]
                 if self.mode in ("RR_LOWERING", "RR_RETURN"):
                     lift *= 1. - quintic_step(now_s, self.lower_start_s,
                                               cfg.lower_ramp_s)[0]
                 command[7] = cfg.lift_force_n * lift
+        if self.abort_suspension_force_n is not None and self.mode in (
+                'RR_ABORT_STOP', 'RR_LOWERING', 'RR_RETURN'):
+            # Freeze actual inputs at the fault; do not finish a preload script.
+            release, lift_release = 1., 1.
+            if self.mode in ('RR_LOWERING', 'RR_RETURN'):
+                release -= quintic_step(now_s, self.lower_start_s,
+                                        cfg.lower_ramp_s + cfg.return_ramp_s)[0]
+                lift_release -= quintic_step(now_s, self.lower_start_s,
+                                             cfg.lower_ramp_s)[0]
+            command[4:7] = self.abort_suspension_force_n[:3] * release
+            command[7] = self.abort_suspension_force_n[3] * lift_release
+        self.last_suspension_force_n = command[4:].copy()
         if self.mode in ("RR_CRAWL", "RR_STOP", "RR_ABORT_STOP"):
             # CrawlTorqueFeedback's three entries are left, left, right.
             # Here they map to RL, FL, FR; RR remains undriven in swing.

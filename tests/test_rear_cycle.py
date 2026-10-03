@@ -44,6 +44,29 @@ def test_rear_gate_uses_three_other_wheels_and_real_clearance():
     assert gate.clearance_m > 0.
 
 
+def test_pre_lift_abort_freezes_force_then_recovers_without_lift_timestamp():
+    controller = RearCycleController(
+        scenario={'friction': .7, 'start_station_m': 101.1, 'length_m': .8},
+        rr_gain_per_coupled_force=-.4)
+    controller.mode = 'RR_PRELOAD'
+    controller.mode_start_s = controller.preload_start_s = 0.
+    x = _rear_observation()
+    x['Vx'], x['Fz_R2'] = 0., 3000.
+    before = np.asarray(controller(1., x))[4:]
+    controller.abort_reason = 'pre-lift test fault'
+    controller._enter('RR_ABORT_STOP', 1.)
+    np.testing.assert_allclose(np.asarray(controller(1.02, x))[4:], before)
+    np.testing.assert_allclose(np.asarray(controller(1.2, x))[4:], before)
+    controller(2.04, x)
+    assert controller.mode == 'RR_LOWERING'
+    later = np.asarray(controller(3.04, x))[4:]
+    assert np.max(abs(later)) < np.max(abs(before))
+    commands = controller(20., x)
+    assert controller.mode == 'RR_COMPLETE'
+    assert controller.abort_reason == 'pre-lift test fault'
+    np.testing.assert_allclose(commands[4:], 0.)
+
+
 def test_rear_stop_travel_relief_is_feedback_driven_and_rate_limited():
     controller = RearCycleController(
         scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},

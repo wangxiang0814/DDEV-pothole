@@ -247,8 +247,32 @@ FAST_CYCLE_FRONT = replace(
 )
 COMPACT_CYCLE_FRONT = replace(
     BALANCED_CYCLE_FRONT,
-    preload_max_reference_rate=2.5,
+    preload_max_reference_rate=3.0,
 )
+
+
+@dataclass(frozen=True)
+class CurrentModelProbeConfig:
+    amplitude_n: float = 250.0
+    duration_s: float = 18.0
+    ramp_start_s: float = 8.0
+    ramp_duration_s: float = 2.0
+    window_start_s: float = 16.0
+    window_end_s: float = 18.0
+    log_decimation: int = 10
+    hold_age_s: float = 3.0
+    swing_unloaded_n: float = 100.0
+    swing_support_floor_n: float = 500.0
+    swing_clearance_m: float = 0.01
+    lambda_safe: float = 0.05
+    tyre_radius_m: float = 0.263
+    attitude_limit_deg: float = 10.0
+    travel_min_mm: float = -149.0
+    travel_max_mm: float = 155.0
+
+
+CURRENT_MODEL_PROBE = CurrentModelProbeConfig()
+RECOVERY_PRELOAD_ABORT_AFTER_S = 1.0
 
 
 @dataclass(frozen=True)

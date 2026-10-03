@@ -16,11 +16,23 @@ class LoadAllocation:
 
 
 def allocate_loads(
-    contacts_xy, total_load_n, target_zmp_xy, previous_n, *, fr_target_n,
+    contacts_xy, total_load_n, target_zmp_xy, previous_n, *, fr_target_n=None,
     lower_n, upper_n, nominal_n=None, smooth_weight=1.0,
     nominal_weight=0.1, fr_weight=10.0, regularization=1e-6,
+    lifted_corner='FR', lift_target_n=None,
 ) -> LoadAllocation:
-    """Allocate FL/FR/RL/RR loads; never relax exact equilibrium to hit FR target."""
+    """Allocate ordered loads; preserve equilibrium for either contact schedule.
+
+    fr_target_n/fr_weight remain compatible aliases for the historical FR API.
+    """
+    if lifted_corner not in ('FL', 'FR', 'RL', 'RR'):
+        raise ValueError('invalid lifted wheel')
+    if lift_target_n is not None and fr_target_n is not None:
+        raise ValueError('supply one lift schedule target')
+    scheduled_n = lift_target_n if lift_target_n is not None else fr_target_n
+    if scheduled_n is None or not np.isfinite(scheduled_n) or scheduled_n < 0:
+        raise ValueError('finite nonnegative lift load target required')
+    lifted_index = ('FL', 'FR', 'RL', 'RR').index(lifted_corner)
     xy = np.asarray(contacts_xy, dtype=float)
     target = np.asarray(target_zmp_xy, dtype=float)
     prev = np.asarray(previous_n, dtype=float)
@@ -34,7 +46,7 @@ def allocate_loads(
     if not all(np.isfinite(a).all() for a in (xy, target, prev, low, high, nominal)):
         raise ValueError("nonfinite wheel-load QP input")
     if (total_load_n <= 0 or not np.isfinite(total_load_n) or
-            not np.isfinite(fr_target_n) or np.any(low < 0) or np.any(high < low) or
+            np.any(low < 0) or np.any(high < low) or
             min(smooth_weight, nominal_weight, fr_weight, regularization) < 0):
         raise ValueError("invalid wheel-load QP bounds or weights")
     # Normalize loads to avoid poorly scaled N and N*m rows in SLSQP.
@@ -48,12 +60,12 @@ def allocate_loads(
         return LoadAllocation("INFEASIBLE", None, None)
     p = prev / scale
     n = nominal / scale
-    f = fr_target_n / scale
+    f = scheduled_n / scale
 
     def cost(x):
         return float(smooth_weight * np.sum((x - p)**2) +
                      nominal_weight * np.sum((x - n)**2) +
-                     fr_weight * (x[1] - f)**2 + regularization * np.sum(x**2))
+                     fr_weight * (x[lifted_index] - f)**2 + regularization * np.sum(x**2))
 
     result = minimize(cost, feasible.x, method="SLSQP", bounds=bounds,
                       constraints={"type": "eq", "fun": lambda x: matrix @ x - rhs},

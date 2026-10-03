@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import re
 from dataclasses import asdict, replace
@@ -26,6 +27,7 @@ from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
 from ddevsim.static_wheel_lift.rear_cycle import RearCycleController
 from ddevsim.static_wheel_lift.observation_noise import (
     ObservationNoiseConfig, NoisyFeedbackTrial)
+from ddevsim.static_wheel_lift.system_identification import validated_contact_gains
 
 STEERING_IMPORT = "IMP_STEER_SW"
 
@@ -165,8 +167,10 @@ class FullRightSideController:
                  identify_rr_swing: bool = False,
                  steer_probe_deg: float | None = None,
                  front_steering_feedback: bool = False,
+                 contact_gains=None,
                  rear_config=REAR_CYCLE_RUN):
-        self.front = front_run.LiftCrawlController(crawl=True, scenario=scenario)
+        self.front = front_run.LiftCrawlController(crawl=True, scenario=scenario,
+                                                   contact_gains=contact_gains)
         self.rear = RearCycleController(
             scenario=scenario,
             rr_gain_per_coupled_force=rr_gain_per_coupled_force,
@@ -352,6 +356,8 @@ def main() -> None:
     parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast", "compact"),
                         default="baseline")
     parser.add_argument("--identify-rr-swing", action="store_true")
+    parser.add_argument('--contact-gain-bundle', type=Path,
+                        help='Optional native mode gains; exact selected model hash must match.')
     parser.add_argument("--steer-probe-deg", type=float)
     parser.add_argument("--stop-at", type=float)
     parser.add_argument("--original-kinematics", action="store_true",
@@ -462,6 +468,17 @@ def main() -> None:
     path.write_text(content, encoding="utf-8")
     gain = np.array(json.loads((front_run.EVIDENCE / "gain_matrix.json").read_text(
         encoding="utf-8"))["gains"]["Fz_n"], dtype=float)
+    contact_gains, gain_provenance = None, None
+    if args.contact_gain_bundle is not None:
+        bundle_path = args.contact_gain_bundle.resolve()
+        bundle = json.loads(bundle_path.read_text(encoding='utf-8'))
+        model_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+        contact_gains = validated_contact_gains(bundle, model_sha256=model_hash)
+        gain = contact_gains['FOUR_CONTACT']
+        gain_provenance = {'bundle': str(bundle_path),
+                           'bundle_sha256': hashlib.sha256(bundle_path.read_bytes()).hexdigest(),
+                           'model_sha256': model_hash,
+                           'scope': 'four-contact/FR local load feedback; RR swing gain reserved for allocation'}
     rear_config = (REAR_CYCLE_RUN if args.original_kinematics else
                    ROBUST_REAR_RUN if args.rear_control_profile == "robust" else
                    FAST_CYCLE_REAR if args.efficiency_profile == "fast" else
@@ -533,6 +550,7 @@ def main() -> None:
         identify_rr_swing=args.identify_rr_swing,
         steer_probe_deg=args.steer_probe_deg,
         front_steering_feedback=args.front_steering_feedback,
+        contact_gains=contact_gains,
         rear_config=rear_config)
     noise_config = ObservationNoiseConfig(seed=args.noise_seed,
                                          period_s=front_run.CFG.control_period_s)
@@ -590,6 +608,7 @@ def main() -> None:
     result["controller_config"] = {
         "front": asdict(front_run.CFG), "rear": asdict(rear_config),
     }
+    result['identified_gain_provenance'] = gain_provenance
     result["front_timing_config"] = {
         "init_settle_s": front_run.CFG.init_settle_s,
         "preload_max_reference_rate": front_run.CFG.preload_max_reference_rate,

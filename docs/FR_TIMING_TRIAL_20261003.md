@@ -1,5 +1,7 @@
 # FR 卸载时间优化试验（2026-10-03）
 
+**后续进展：**近起点/μ=0.6/seed=20261002 与远起点/μ=0.7/seed=20261003 均复核 PASS；集中配置 `COMPACT_CYCLE_FRONT.preload_max_reference_rate` 已更新为 3.0。三工况完整周期 87.68–88.48 s、FR 卸载 13.88–14.30 s、最大横移 2.17–2.23 cm。以下保留最初单工况诊断过程；“推荐不变”只描述当时状态。新证据见 `evidence/static_fr_ii/compact3_validation_20261003.json`。
+
 ## 结果
 
 保持当前车型副本、compact / 横向表 scale=0、RR robust、FR 转向反馈、seed=20261001 和标称场景，仅覆盖 FR `preload_max_reference_rate=3.0`。原生结果 PASS。

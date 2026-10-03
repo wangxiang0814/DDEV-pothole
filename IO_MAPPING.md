@@ -1,5 +1,7 @@
 # 当前 I_I TruckSim–Python I/O 映射
 
+2026-10-03 更新：compact 的 FR 最大参考推进速度为 3.0，求解/控制周期及通道不变。当前车型三接触模式辨识见 `evidence/static_fr_ii/current_contact_gains_20261003.json`；完整循环可选 `--contact-gain-bundle` 必须匹配最终运行模型 SHA256，不默认替换历史局部增益。辨识只使用原九路完整循环接口，在输出日志记录后冻结保持输入，不添加新物理通道。
+
 本工程当前仅使用 `models/corner_module_ddev`：约 1.36 t 的 Compact Utility Truck，`VEHICLE_CODE I_I`，前后独立悬架。`models/corner_module_ddev/simfile.sim` 调用 TruckSim 2019 DLL；Python 入口为 `src/ddevsim/cosim.py:run_stepwise`。求解器积分 `tstep=0.0005 s`；`EXT_MODEL_STEP=0.01 s` 是外部模型配置，不可当作积分步长。CSV 的 5 ms 抽样只是记录间隔。
 
 轮序固定 FL/FR/RL/RR = L1/R1/L2/R2，坐标为全局 +X 前、+Y 左、+Z 上。正 `Jnc` 表示悬架压缩；每角 `IMP_FS` 是弹簧座附加力（ADD 模式），实际力另由 `FsExt` 回读，不能仅凭命令名推断车身升降。当前静态试验中四个电机转矩恒为零。
