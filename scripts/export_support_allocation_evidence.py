@@ -40,8 +40,8 @@ def main():
                                            for c in ('fl', 'fr', 'rl', 'rr')},
         'model_run_all_sha256': hashlib.sha256((args.recovery / 'model/run_all.par').read_bytes()).hexdigest(),
     })
-    report = {'scope': 'fixed nominal tuned I_I model; optional support allocation; truth acceptance',
-              'historical_monitor_scope': 'Initial shadow run predates wheel-height gain/constraint; not height-constraint validation.',
+    report = {'scope': 'each tuned I_I run preserves its own exact model and config; truth acceptance',
+              'historical_monitor_scope': 'Only historical support_qp_monitor_nominal predates the wheel-height constraint; later transition monitors preserve their own validated height model.',
               'runs': records, 'recovery': recovery}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf-8')

@@ -1,5 +1,7 @@
 # 当前 I_I TruckSim–Python I/O 映射
 
+2026-10-04 后续：`--support-allocation-transitions` 可扩展卸载末段/抬升反馈；`--average-path-reference` 在初始化末窗冻结平均Yo/Yaw供FR/RR共用。控制通道与单位不变。分配日志新增 `support_qp_clearance_floor_m`、`support_qp_roll_target_deg/pitch_target_deg`、`support_qp_swing_gain_weight`，记录不同阶段实际预测门槛和目标。
+
 2026-10-04：在线三支撑分配通过原九路完整循环接口施加，不增加物理通道。`--support-allocation active/monitor` 必须配匹配车型 SHA256 的 `--support-allocation-gains`；标称与 μ=0.6/近起点的增益分别发布。最终 Fact 指令已包含基线与附加修正，日志另记分配参考/状态/耗时。求解 0.5 ms、控制 20 ms、原生记录 5 ms 不变。
 
 2026-10-03 更新：compact 的 FR 最大参考推进速度为 3.0，求解/控制周期及通道不变。当前车型三接触模式辨识见 `evidence/static_fr_ii/current_contact_gains_20261003.json`；完整循环可选 `--contact-gain-bundle` 必须匹配最终运行模型 SHA256，不默认替换历史局部增益。辨识只使用原九路完整循环接口，在输出日志记录后冻结保持输入，不添加新物理通道。

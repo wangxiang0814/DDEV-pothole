@@ -29,6 +29,8 @@ from ddevsim.static_wheel_lift.observation_noise import (
     ObservationNoiseConfig, NoisyFeedbackTrial)
 from ddevsim.static_wheel_lift.system_identification import validated_contact_gains, validated_support_models
 from ddevsim.static_wheel_lift.support_allocation_feedback import SupportAllocationFeedback
+from ddevsim.static_wheel_lift.path_reference import StaticPathReference
+from ddevsim.static_wheel_lift.config import PATH_REFERENCE
 
 STEERING_IMPORT = "IMP_STEER_SW"
 
@@ -170,6 +172,7 @@ class FullRightSideController:
                  front_steering_feedback: bool = False,
                  contact_gains=None,
                  allocation=None,
+                 path_reference=None,
                  rear_config=REAR_CYCLE_RUN):
         self.front = front_run.LiftCrawlController(crawl=True, scenario=scenario,
                                                    contact_gains=contact_gains)
@@ -185,6 +188,7 @@ class FullRightSideController:
         self.front_steer_deg = 0.0
         self.front_steer_tick_s: float | None = None
         self.allocation = allocation
+        self.path_reference = path_reference
 
     def _allocate(self, now_s, x, command, stage):
         if self.allocation is None:
@@ -206,7 +210,13 @@ class FullRightSideController:
 
     def __call__(self, now_s: float, exports) -> tuple[float, ...]:
         if not self.rear_started:
+            was_settling = self.front.mode == 'INIT_SETTLE'
+            if self.path_reference is not None and was_settling:
+                x = dict(zip(front_run.EXPORTS, exports))
+                self.path_reference.update(now_s, x['Yo'], x['Yaw'])
             command = self.front(now_s, exports)
+            if self.path_reference is not None and was_settling and self.front.mode != 'INIT_SETTLE':
+                self.front.initial_yo_m, self.front.initial_yaw_deg = self.path_reference.freeze()
             if self.front_steering_feedback:
                 cfg = self.rear.config
                 if (self.front_steer_tick_s is None or
@@ -382,6 +392,8 @@ def main() -> None:
                         help='Optional native mode gains; exact selected model hash must match.')
     parser.add_argument('--support-allocation', choices=('off', 'monitor', 'active'), default='off')
     parser.add_argument('--support-allocation-gains', type=Path)
+    parser.add_argument('--support-allocation-transitions', action='store_true')
+    parser.add_argument('--average-path-reference', action='store_true')
     parser.add_argument("--steer-probe-deg", type=float)
     parser.add_argument("--stop-at", type=float)
     parser.add_argument("--original-kinematics", action="store_true",
@@ -421,6 +433,8 @@ def main() -> None:
     args = parser.parse_args()
     if (args.support_allocation != 'off') != (args.support_allocation_gains is not None):
         parser.error('support allocation requires explicit gain bundle; off mode takes no bundle')
+    if args.support_allocation_transitions and args.support_allocation == 'off':
+        parser.error('transition allocation requires active or monitor support allocation')
     if not np.isfinite(args.lateral_ride_scale) or not 0. <= args.lateral_ride_scale <= 1.:
         parser.error("lateral ride scale must be finite and in 0..1")
     if args.noise_seed < 0:
@@ -577,7 +591,8 @@ def main() -> None:
         models = validated_support_models(bundle, model_sha256=model_hash)
         allocation = SupportAllocationFeedback(mode_models=models,
             active=args.support_allocation == 'active', period_s=front_run.CFG.control_period_s,
-            front_limits=front_run.CFG, rear_limits=rear_config)
+            front_limits=front_run.CFG, rear_limits=rear_config,
+            transitions=args.support_allocation_transitions)
         allocation_provenance = {'bundle_sha256': hashlib.sha256(allocation_path.read_bytes()).hexdigest(),
                                  'model_sha256': model_hash, 'mode': args.support_allocation}
     controller = FullRightSideController(
@@ -589,6 +604,7 @@ def main() -> None:
         front_steering_feedback=args.front_steering_feedback,
         contact_gains=contact_gains,
         allocation=allocation,
+        path_reference=StaticPathReference() if args.average_path_reference else None,
         rear_config=rear_config)
     noise_config = ObservationNoiseConfig(seed=args.noise_seed,
                                          period_s=front_run.CFG.control_period_s)
@@ -643,6 +659,12 @@ def main() -> None:
     result["efficiency_profile"] = args.efficiency_profile
     result["rear_control_profile"] = args.rear_control_profile
     result["front_steering_feedback"] = args.front_steering_feedback
+    result['path_reference_estimation'] = {
+        'averaged': args.average_path_reference,
+        'config': asdict(PATH_REFERENCE),
+        'sample_count': controller.path_reference.sample_count if controller.path_reference else 1,
+        'scope': 'INIT_SETTLE trailing window; freeze on existing settle-to-preload transition; shared FR/RR reference',
+    }
     result["controller_config"] = {
         "front": asdict(front_run.CFG), "rear": asdict(rear_config),
     }

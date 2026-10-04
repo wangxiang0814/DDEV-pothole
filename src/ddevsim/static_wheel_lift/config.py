@@ -304,9 +304,22 @@ class SupportQPConfig:
     solver_tolerance: float = 1e-10
     constraint_tolerance: float = 1e-7
     max_continuous_failure_s: float = 0.5
+    transition_clearance_slack_m: float = 0.002
+    transition_contact_blend_low_n: float = 50.0
+    transition_contact_blend_high_n: float = 300.0
 
 
 SUPPORT_QP = SupportQPConfig()
+
+
+@dataclass(frozen=True)
+class PathReferenceConfig:
+    window_s: float = 1.0
+    period_s: float = 0.02
+    min_samples: int = 30
+
+
+PATH_REFERENCE = PathReferenceConfig()
 
 
 @dataclass(frozen=True)

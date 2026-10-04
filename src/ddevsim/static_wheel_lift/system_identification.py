@@ -98,7 +98,7 @@ def validated_support_models(bundle, *, model_sha256):
     validated_contact_gains(bundle, model_sha256=model_sha256)
     shapes = {'Fz_n': (4, 4), 'CoM_xy_m': (2, 4), 'ZMP_xy_m': (2, 4),
               'attitude_rad': (2, 4), 'travel_m': (4, 4), 'wheel_height_m': (4, 4)}
-    for mode in ('FR', 'RR'):
+    for mode in ('FOUR_CONTACT', 'FR', 'RR'):
         gains = bundle['modes'][mode]['gains']
         for key, shape in shapes.items():
             if key not in gains:
