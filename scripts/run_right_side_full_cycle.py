@@ -21,7 +21,7 @@ from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
                                              RIGHT_SIDE_MODEL, TUNED_REAR_RUN,
                                              FAST_CYCLE_FRONT, FAST_CYCLE_REAR,
                                              BALANCED_CYCLE_FRONT, CLOSED_LOOP_RUN,
-                                             COMPACT_CYCLE_FRONT, COMPACT_REAR_RETURN_RAMP_S,
+                                             COMPACT_CYCLE_FRONT, EFFICIENT_CYCLE_FRONT, COMPACT_REAR_RETURN_RAMP_S,
                                              ROBUST_REAR_RUN,
                                              rear_speed_trial_config)
 from ddevsim.static_wheel_lift.rear_cycle import RearCycleController
@@ -193,6 +193,7 @@ class FullRightSideController:
 
     def __call__(self, now_s, exports):
         if not getattr(self, 'feedback_fresh', True):
+            self.feedback_was_stale=True
             selected = self.rear if self.rear_started else self.front
             if selected.abort_reason is None:
                 selected.abort_reason = 'feedback packet stale'
@@ -274,6 +275,11 @@ class FullRightSideController:
         return output
 
     def _call_fresh(self, now_s: float, exports) -> tuple[float, ...]:
+        if getattr(self,'feedback_was_stale',False):
+            if self.rear_started:
+                x=dict(zip(front_run.EXPORTS,exports))
+                self.rear.resume_abort_braking(now_s,x['Vx'])
+            self.feedback_was_stale=False
         if not self.rear_started:
             was_settling = self.front.mode == 'INIT_SETTLE'
             if self.path_reference is not None and was_settling:
@@ -464,7 +470,7 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast", "compact"),
+    parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast", "compact", "efficient"),
                         default="baseline")
     parser.add_argument("--identify-rr-swing", action="store_true")
     parser.add_argument('--contact-gain-bundle', type=Path,
@@ -552,6 +558,7 @@ def main() -> None:
         "balanced": BALANCED_CYCLE_FRONT,
         "fast": FAST_CYCLE_FRONT,
         "compact": COMPACT_CYCLE_FRONT,
+        "efficient": EFFICIENT_CYCLE_FRONT,
     }[args.efficiency_profile]
     if args.front_preload_reference_rate is not None:
         if (not np.isfinite(args.front_preload_reference_rate) or
@@ -631,7 +638,7 @@ def main() -> None:
                    ROBUST_REAR_RUN if args.rear_control_profile == "robust" else
                    FAST_CYCLE_REAR if args.efficiency_profile == "fast" else
                    TUNED_REAR_RUN)
-    if args.efficiency_profile == "compact":
+    if args.efficiency_profile in ("compact", "efficient"):
         rear_config = replace(rear_config, return_ramp_s=COMPACT_REAR_RETURN_RAMP_S)
     if args.rear_adaptive_preload:
         rear_config = replace(rear_config, adaptive_preload=True,

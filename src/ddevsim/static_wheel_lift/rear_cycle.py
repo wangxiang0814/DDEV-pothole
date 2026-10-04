@@ -138,6 +138,14 @@ class RearCycleController:
         self.ready_since_s = None
         self.stop_since_s = None
 
+    def resume_abort_braking(self, now_s, speed_kph):
+        """Resume from fresh measured speed; never advance the brake ramp while blind."""
+        if self.mode=='RR_ABORT_STOP':
+            self.abort_start_speed_kph=max(0.,speed_kph)
+            self.mode_start_s=now_s
+            self.stop_since_s=None
+            self.abort_exit_since_s=None
+
     def _recovery_supported(self, gate):
         cfg = self.config
         return bool(gate is not None and gate.safe and

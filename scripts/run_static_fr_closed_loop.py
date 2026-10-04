@@ -30,7 +30,7 @@ from ddevsim.pothole_case import SCENARIO_EXPORTS
 from ddevsim.static_wheel_lift.closed_loop import (
     CrawlTorqueFeedback, PreloadProgress, ScalarLoadFeedback,
     SupportForceFeedback, blend_contact_gain, front_clearance_guard_m,
-    front_abort_recovery_ready,
+    front_abort_recovery_ready, front_restoration_checks,
     WheelLoadFilter,
 )
 from ddevsim.static_wheel_lift.command_trace import load_command_trace
@@ -549,6 +549,8 @@ def evaluate_control_rows(rows: list[dict], *, crawl: bool, scenario: dict,
             longest_saturation_s <= CFG.max_continuous_support_saturation_s,
     }
     if crawl:
+        criteria.update(front_restoration_checks(rows,config=CFG,scenario=scenario,
+                        path_reference_yo_m=baseline_yo))
         criteria.update({
             "pit_crossed": float(end["x_fr_m"]) >= far_edge + CFG.crossing_clearance_m,
             "pit_speed_in_requested_range": bool(pit) and

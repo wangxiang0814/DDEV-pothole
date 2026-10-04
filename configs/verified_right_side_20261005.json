@@ -1,0 +1,60 @@
+{
+  "scope": "Fixed tuned I_I, fixed mass/payload; finite native validation cases, not universal robustness. Boundary reuse requires explicit verified source model.",
+  "common": {
+    "efficiency-profile": "efficient",
+    "lateral-ride-scale": 0,
+    "rear-control-profile": "robust",
+    "front-steering-feedback": true,
+    "front-target-speed-kph": 3.4,
+    "front-min-pit-speed-kph": 3,
+    "front-accel-ramp-s": 1,
+    "front-brake-lead-m": 0.5,
+    "rear-target-speed-kph": 3.6,
+    "rear-min-pit-speed-kph": 3,
+    "rear-accel-ramp-s": 2.5,
+    "measurement-noise": true,
+    "average-path-reference": true,
+    "support-allocation": "active",
+    "support-allocation-transitions": true,
+    "feedback-delay-s": 0.04
+  },
+  "cases": {
+    "nominal_bias": {
+      "options": {
+        "noise-seed": 20261001,
+        "support-allocation-gains": "evidence/static_fr_ii/support_allocation_gains_20261003.json",
+        "support-force-pulse-n": -200
+      }
+    },
+    "low_mu": {
+      "options": {
+        "noise-seed": 20261005,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3
+      }
+    },
+    "boundary_bias": {
+      "requires_reference_model": true,
+      "options": {
+        "noise-seed": 20261005,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "pit-width-m": 1.1,
+        "pit-depth-m": 0.25,
+        "support-force-pulse-n": 200
+      }
+    },
+    "slow_rear": {
+      "options": {
+        "noise-seed": 20261005,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "rear-target-speed-kph": 2.6,
+        "rear-min-pit-speed-kph": 2
+      }
+    }
+  }
+}

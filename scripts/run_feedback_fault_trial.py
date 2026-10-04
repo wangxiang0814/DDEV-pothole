@@ -1,4 +1,4 @@
-"""RR pit-front HOLD packet-outage or persistent support-QP-failure trial."""
+"""RR HOLD faults and geometry-triggered moving packet-outage truth audits."""
 import argparse
 import csv
 import json
@@ -16,20 +16,24 @@ class TrialController(cycle.FullRightSideController):
     fault = 'packet'
     after_s = FEEDBACK_FAULT_TRIAL.after_hold_s
     duration_s = FEEDBACK_FAULT_TRIAL.packet_outage_s
+    phase = 'RR_HOLD'
+    pit_fraction = FEEDBACK_FAULT_TRIAL.moving_pit_fraction
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fault_time_s = None
         self.now_s = 0.
         TrialController.active = self
 
-    def trigger(self, now_s):
+    def trigger(self, now_s, truth=None):
         self.now_s = now_s
+        at_trigger = (now_s-self.rear.mode_start_s >= self.after_s if self.phase=='RR_HOLD' and self.rear.mode_start_s is not None else
+            truth is not None and self.rear.scenario['start_station_m']+self.pit_fraction*self.rear.scenario['length_m'] <= truth['X_R2'] < self.rear.scenario['start_station_m']+self.rear.scenario['length_m'])
         if (self.fault_time_s is None and self.rear_started and
-                self.rear.mode == 'RR_HOLD' and now_s-self.rear.mode_start_s >= self.after_s):
+                self.rear.mode == self.phase and at_trigger):
             self.fault_time_s = now_s
 
     def __call__(self, now_s, exports):
-        self.trigger(now_s)
+        self.trigger(now_s,dict(zip(cycle.front_run.EXPORTS,exports)))
         return super().__call__(now_s,exports)
 
 
@@ -38,16 +42,22 @@ def main():
     parser.add_argument('--fault',choices=('packet','qp'),required=True)
     parser.add_argument('--fault-after-s',type=float,default=FEEDBACK_FAULT_TRIAL.after_hold_s)
     parser.add_argument('--packet-outage-s',type=float,default=FEEDBACK_FAULT_TRIAL.packet_outage_s)
+    parser.add_argument('--fault-phase',choices=('RR_HOLD','RR_CRAWL'),default='RR_HOLD')
+    parser.add_argument('--fault-pit-fraction',type=float,default=FEEDBACK_FAULT_TRIAL.moving_pit_fraction)
     args,rest=parser.parse_known_args(sys.argv[1:])
     import math
     if (not all(math.isfinite(v) and v>0 for v in (args.fault_after_s,args.packet_outage_s)) or
+            not math.isfinite(args.fault_pit_fraction) or not 0.<args.fault_pit_fraction<1. or
+            args.fault_phase=='RR_CRAWL' and args.fault!='packet' or
             '--measurement-noise' not in rest or '--output' not in rest or
             '--support-allocation' not in rest or rest[rest.index('--support-allocation')+1]!='active'):
         raise ValueError('positive finite durations, output, noise wrapper and active support allocation required')
     output=Path(rest[rest.index('--output')+1]).resolve()
     TrialController.fault=args.fault;TrialController.after_s=args.fault_after_s
     TrialController.duration_s=args.packet_outage_s
+    TrialController.phase=args.fault_phase;TrialController.pit_fraction=args.fault_pit_fraction
     original_controller=cycle.FullRightSideController
+    original_step=cycle.run_stepwise
     original_noise=observation.ObservationNoise
     original_allocate=allocation.allocate_support_increment
     class FrozenNoise(original_noise):
@@ -56,7 +66,7 @@ def main():
         def observe(self,now_s,truth):
             c=TrialController.active
             if c is not None:
-                c.trigger(now_s)
+                c.trigger(now_s,truth)
             if c is not None and c.fault=='packet' and c.fault_time_s is not None and now_s-c.fault_time_s < c.duration_s:
                 if self.held is None:
                     self.held=super().observe(now_s,truth)
@@ -70,17 +80,32 @@ def main():
         if c is not None and c.fault=='qp' and c.fault_time_s is not None:
             return SupportIncrement('INFEASIBLE',None,None,None,None)
         return original_allocate(**kwargs)
+    def bounded_run(*args,**kwargs):
+        original_stop=kwargs.get('stop_when')
+        def stop(now):
+            c=TrialController.active
+            return bool((original_stop and original_stop(now)) or
+                (c is not None and c.phase=='RR_CRAWL' and c.fault_time_s is not None and
+                 c.rear.abort_reason is not None and now-c.fault_time_s>=FEEDBACK_FAULT_TRIAL.moving_observe_s))
+        kwargs['stop_when']=stop
+        return original_step(*args,**kwargs)
     sys.argv=[sys.argv[0],*rest]
     cycle.FullRightSideController=TrialController
     observation.ObservationNoise=FrozenNoise
     allocation.allocate_support_increment=failed_qp
+    cycle.run_stepwise=bounded_run
     try:
         cycle.main()
     finally:
         cycle.FullRightSideController=original_controller
         observation.ObservationNoise=original_noise
         allocation.allocate_support_increment=original_allocate
-    report=audit(output,TrialController.active.fault_time_s,args)
+        cycle.run_stepwise=original_step
+    if args.fault_phase=='RR_CRAWL':
+        from moving_packet_audit import audit_moving_packet
+        report=audit_moving_packet(output,TrialController.active.fault_time_s,args)
+    else:
+        report=audit(output,TrialController.active.fault_time_s,args)
     (output/'feedback_fault_report.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 

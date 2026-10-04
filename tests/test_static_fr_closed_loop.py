@@ -11,6 +11,23 @@ from ddevsim.static_wheel_lift.closed_loop import (
 )
 
 
+@pytest.mark.parametrize('unsafe', [None,'attitude','support','travel','speed','pit','path','nan'])
+def test_restoration_audit_catches_later_unsafe_sample(unsafe):
+    from ddevsim.static_wheel_lift.closed_loop import front_restoration_checks
+    row=dict(mode='LOWERING',vx_kph=0.,x_fr_m=102.3,x_rr_m=100.,
+             yo_m=0.,roll_deg=0.,pitch_deg=0.)
+    row.update({f'fz_{c}_n':1000. for c in ('fl','fr','rl','rr')})
+    row.update({f'travel_{c}_mm':0. for c in ('fl','fr','rl','rr')})
+    later={**row,'mode':'RETURN_TO_FOUR_WHEEL'}
+    changes={'attitude':('roll_deg',20.),'support':('fz_rl_n',0.),
+             'travel':('travel_fl_mm',-160.),'speed':('vx_kph',.3),
+             'pit':('x_fr_m',101.5),'path':('yo_m',.1),'nan':('pitch_deg',float('nan'))}
+    if unsafe: later[changes[unsafe][0]]=changes[unsafe][1]
+    checks=front_restoration_checks([row,later],config=CLOSED_LOOP_RUN,
+        scenario={'start_station_m':101.1,'length_m':.8},path_reference_yo_m=0.)
+    assert all(checks.values())==(unsafe is None)
+
+
 def test_support_feedback_uses_measured_rl_load_and_respects_travel():
     gains = np.array([[-0.12, 0., 0.], [0.173, -0.015, 0.019],
                       [-0.054, 0.011, -0.019]])

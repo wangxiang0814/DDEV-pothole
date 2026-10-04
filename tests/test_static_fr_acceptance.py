@@ -8,7 +8,8 @@ from run_static_fr_closed_loop import evaluate_control_rows
 
 def row(time, mode, x=99.1, speed=0., clearance=.04):
     return dict(time_s=time, mode=mode, x_fr_m=x, x_rr_m=x - 1.94,
-                vx_kph=speed,
+                vx_kph=speed, roll_deg=0.,pitch_deg=0.,
+                travel_fl_mm=0.,travel_fr_mm=0.,travel_rl_mm=0.,travel_rr_mm=0.,
                 yo_m=0., yaw_deg=0., fr_top_clearance_m=clearance,
                 fz_fl_n=6400., fz_fr_n=0., fz_rl_n=1300., fz_rr_n=5600.,
                 zmp_lambda_min=.09, com_lambda_min=.1,

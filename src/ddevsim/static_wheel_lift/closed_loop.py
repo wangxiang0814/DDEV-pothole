@@ -258,6 +258,32 @@ def front_abort_recovery_ready(x, *, support_load_n, margin, config, scenario):
         min(travel) > config.moving_rebound_abort_mm and max(travel) < config.jounce_abort_mm)
 
 
+def front_restoration_checks(rows, *, config, scenario, path_reference_yo_m):
+    """Audit every FR lowering/restoration sample, independently of final contact."""
+    samples = [r for r in rows if r['mode'] in ('LOWERING','RETURN_TO_FOUR_WHEEL','COMPLETE')]
+    start = float(scenario['start_station_m'])
+    end = start + float(scenario['length_m'])
+    solid = lambda station: (station <= start-config.rear_stop_clearance_m or
+                             station >= end+config.crossing_clearance_m)
+    checks = dict(fr_recovery_attitude_safe=False,fr_recovery_support_loaded=False,
+                  fr_recovery_travel_safe=False,fr_recovery_straight=False,
+                  fr_recovery_stopped_on_solid_ground=False)
+    keys = ('vx_kph','x_fr_m','x_rr_m','yo_m','roll_deg','pitch_deg',
+            'fz_fl_n','fz_rl_n','fz_rr_n',
+            'travel_fl_mm','travel_fr_mm','travel_rl_mm','travel_rr_mm')
+    if not samples or not all(math.isfinite(float(r.get(k,float('nan')))) for r in samples for k in keys):
+        return checks
+    checks.update(
+        fr_recovery_attitude_safe=max(abs(float(r[k])) for r in samples for k in ('roll_deg','pitch_deg'))<=config.attitude_limit_deg,
+        fr_recovery_support_loaded=min(float(r[k]) for r in samples for k in ('fz_fl_n','fz_rl_n','fz_rr_n'))>=config.support_floor_n,
+        fr_recovery_travel_safe=(min(float(r[k]) for r in samples for k in keys[-4:])>config.moving_rebound_abort_mm and
+                                 max(float(r[k]) for r in samples for k in keys[-4:])<config.jounce_abort_mm),
+        fr_recovery_straight=max(abs(float(r['yo_m'])-path_reference_yo_m) for r in samples)<=config.crawl_max_lateral_error_m,
+        fr_recovery_stopped_on_solid_ground=all(abs(float(r['vx_kph']))<=config.stop_speed_kph and
+            solid(float(r['x_fr_m'])) and solid(float(r['x_rr_m'])) for r in samples))
+    return checks
+
+
 class CrawlTorqueFeedback:
     """Speed PI and yaw/lateral PD with friction-limited three-wheel torque."""
 

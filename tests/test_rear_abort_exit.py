@@ -90,3 +90,14 @@ def test_safe_braking_does_not_require_permission_to_drive_out():
     x['Vx']=0.
     c(1.02,x);c(4.,x)
     assert c.mode=='RR_ABORT_STOP' and not c.abort_exit_attempted
+
+
+def test_resumed_braking_restarts_from_fresh_speed_without_spending_outage_time():
+    c,x=setup_exit();c.mode='RR_CRAWL';x['Vx']=3.
+    c(0.,x);c._enter('RR_ABORT_STOP',0.)
+    c.resume_abort_braking(.3,3.3)
+    x['Vx']=3.3;c(.32,x)
+    assert c.rows[-1]['speed_ref_kph']>3.29
+    assert c.mode=='RR_ABORT_STOP' and c.abort_reason=='original fault'
+    c(.8,x)
+    assert 1.6<c.rows[-1]['speed_ref_kph']<1.7

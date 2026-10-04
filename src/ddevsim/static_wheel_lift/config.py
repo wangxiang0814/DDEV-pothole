@@ -249,6 +249,11 @@ COMPACT_CYCLE_FRONT = replace(
     BALANCED_CYCLE_FRONT,
     preload_max_reference_rate=3.0,
 )
+EFFICIENT_CYCLE_FRONT = replace(
+    COMPACT_CYCLE_FRONT,
+    preload_max_reference_rate=5.0,
+    return_ramp_s=9.0,
+)
 
 
 @dataclass(frozen=True)
@@ -329,6 +334,9 @@ FEEDBACK_HEALTH = FeedbackHealthConfig()
 class FeedbackFaultTrialConfig:
     after_hold_s: float = .5
     packet_outage_s: float = 1.
+    moving_pit_fraction: float = .2
+    moving_observe_s: float = 25.
+    moving_stopped_hold_s: float = 5.
 
 
 FEEDBACK_FAULT_TRIAL = FeedbackFaultTrialConfig()
