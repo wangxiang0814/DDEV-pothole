@@ -31,6 +31,7 @@ from ddevsim.static_wheel_lift.system_identification import validated_contact_ga
 from ddevsim.static_wheel_lift.support_allocation_feedback import SupportAllocationFeedback
 from ddevsim.static_wheel_lift.path_reference import StaticPathReference
 from ddevsim.static_wheel_lift.config import PATH_REFERENCE
+from ddevsim.static_wheel_lift.config import FEEDBACK_HEALTH
 from ddevsim.static_wheel_lift.force_disturbance import SupportForcePulse
 from ddevsim.static_wheel_lift.config import SupportForcePulseConfig
 from ddevsim.static_wheel_lift.pit_scene_transfer import (
@@ -178,6 +179,54 @@ class FullRightSideController:
         self.allocation = allocation
         self.path_reference = path_reference
         self.disturbance = disturbance
+        self.feedback_fresh = True
+        self.last_command = (0.,) * 9
+        self.last_command_time_s = None
+        self.last_stale_log_s = None
+
+    def set_feedback_timestamp(self, now_s, measurement_time_s):
+        if measurement_time_s is None:
+            self.feedback_fresh = False
+            return
+        age = now_s - measurement_time_s
+        self.feedback_fresh = bool(np.isfinite(age) and 0. <= age <= FEEDBACK_HEALTH.max_packet_age_s)
+
+    def __call__(self, now_s, exports):
+        if not getattr(self, 'feedback_fresh', True):
+            selected = self.rear if self.rear_started else self.front
+            if selected.abort_reason is None:
+                selected.abort_reason = 'feedback packet stale'
+            abort_mode = 'RR_ABORT_STOP' if self.rear_started else 'ABORT_STOP'
+            if selected.mode != abort_mode:
+                selected._enter(abort_mode, now_s)
+            # No optimization, progress, exit or lowering from an old packet.
+            # Keep actual suspension/steering; relinquish drive with bounded slew.
+            output = np.asarray(self.last_command, dtype=float).copy()
+            dt = 0. if self.last_command_time_s is None else max(0., now_s-self.last_command_time_s)
+            step = FEEDBACK_HEALTH.torque_release_slew_nm_s * dt
+            output[:4] += np.clip(-output[:4], -step, step)
+            if getattr(self, 'allocation', None) is not None:
+                # Keep actuator history current even while no QP is run, so
+                # fresh feedback cannot spend the outage as one large rate step.
+                self.allocation.last_applied = output[4:8].copy()
+                self.allocation.last_application_s = now_s
+            if selected.rows and (self.last_stale_log_s is None or
+                    now_s-self.last_stale_log_s >= FEEDBACK_HEALTH.log_period_s-1e-8):
+                row = {**selected.rows[-1], 'time_s': now_s, 'mode': abort_mode,
+                       'feedback_fresh': False, 'speed_ref_kph': 0.,
+                       'support_qp_status': 'STALE_PACKET', 'support_qp_failure_s': 0.}
+                for i,c in enumerate(('fl','fr','rl','rr')):
+                    row[f'torque_{c}_nm'],row[f'fact_{c}_n']=float(output[i]),float(output[4+i])
+                selected.rows.append(row)
+                self.last_stale_log_s=now_s
+            command = tuple(map(float, output))
+        else:
+            command = self._call_fresh(now_s, exports)
+            selected = self.rear if self.rear_started else self.front
+            if getattr(selected, 'rows', None) and selected.rows[-1]['time_s'] == now_s:
+                selected.rows[-1]['feedback_fresh'] = True
+        self.last_command, self.last_command_time_s = command, now_s
+        return command
 
     def _disturb(self, now_s, command, stage):
         if self.disturbance is None:
@@ -216,7 +265,7 @@ class FullRightSideController:
             selected._enter('ABORT_STOP' if stage == 'FR' else 'RR_ABORT_STOP', now_s)
         return output
 
-    def __call__(self, now_s: float, exports) -> tuple[float, ...]:
+    def _call_fresh(self, now_s: float, exports) -> tuple[float, ...]:
         if not self.rear_started:
             was_settling = self.front.mode == 'INIT_SETTLE'
             if self.path_reference is not None and was_settling:
@@ -378,6 +427,7 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
         min(end[f"fz_{wheel}_n"] for wheel in ("fl", "fr", "rl", "rr")) >=
         cfg.support_floor_n,
     }
+    criteria = {key: bool(value) for key, value in criteria.items()}
     return {"status": "PASS" if all(criteria.values()) else "FAIL",
             "path_reference_yo_m": path_yo,
             "path_reference_yaw_deg": path_yaw,
@@ -749,6 +799,7 @@ def main() -> None:
         'sample_count': controller.path_reference.sample_count if controller.path_reference else 1,
         'scope': 'INIT_SETTLE trailing window; freeze on existing settle-to-preload transition; shared FR/RR reference',
     }
+    result['feedback_health_config'] = asdict(FEEDBACK_HEALTH)
     result["controller_config"] = {
         "front": asdict(front_run.CFG), "rear": asdict(rear_config),
     }

@@ -114,6 +114,8 @@ class NoisyFeedbackTrial:
     def __call__(self, now_s, exports):
         truth = dict(zip(self.export_names, exports))
         observed = self.noise.observe(now_s, truth)
+        if hasattr(self.controller, 'set_feedback_timestamp'):
+            self.controller.set_feedback_timestamp(now_s, self.noise.measurement_time_s)
         front_count = len(self.controller.front.rows)
         rear_count = len(self.controller.rear.rows)
         command = self.controller(now_s, [observed[key] for key in self.export_names])

@@ -316,6 +316,25 @@ SUPPORT_QP = SupportQPConfig()
 
 
 @dataclass(frozen=True)
+class FeedbackHealthConfig:
+    max_packet_age_s: float = .12
+    torque_release_slew_nm_s: float = 500.
+    log_period_s: float = .02
+
+
+FEEDBACK_HEALTH = FeedbackHealthConfig()
+
+
+@dataclass(frozen=True)
+class FeedbackFaultTrialConfig:
+    after_hold_s: float = .5
+    packet_outage_s: float = 1.
+
+
+FEEDBACK_FAULT_TRIAL = FeedbackFaultTrialConfig()
+
+
+@dataclass(frozen=True)
 class PathReferenceConfig:
     window_s: float = 1.0
     period_s: float = 0.02
