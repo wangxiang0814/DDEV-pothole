@@ -110,7 +110,7 @@ def test_rear_posture_feedback_tracks_intended_roll_instead_of_blocking_adjustme
     assert np.rad2deg(c.target_att[0]) == pytest.approx(ROBUST_REAR_RUN.posture_target_roll_deg)
 
 
-@pytest.mark.parametrize('allow_exit,expected_limit', [(False,500.),(True,1000.)])
+@pytest.mark.parametrize('allow_exit,expected_limit', [(False,500.),(True,750.)])
 def test_rear_abort_keeps_closed_loop_after_one_snapshot_handoff(monkeypatch,allow_exit,expected_limit):
     from dataclasses import replace
     from types import SimpleNamespace

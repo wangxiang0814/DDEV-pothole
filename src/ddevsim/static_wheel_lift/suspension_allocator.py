@@ -29,6 +29,7 @@ class SupportIncrement:
     predicted_fz_n: np.ndarray | None
     predicted_margin: float | None
     cost: float | None
+    solver: str = 'NONE'
 
 
 def allocate_support_increment(*, lifted_corner, contacts_xy, fz_n, fz_target_n,
@@ -106,12 +107,6 @@ def allocate_support_increment(*, lifted_corner, contacts_xy, fz_n, fz_target_n,
         margins.append((bary, derivative))
     matrix, limit = np.asarray(rows), np.asarray(rhs)
     box = list(zip(lower, upper))
-    initial = np.clip(np.zeros(3), lower, upper)
-    if np.max(matrix @ initial - limit) > config.constraint_tolerance:
-        feasible = linprog(np.zeros(3), A_ub=matrix, b_ub=limit, bounds=box, method='highs')
-        if not feasible.success:
-            return SupportIncrement('INFEASIBLE', None, None, None, None)
-        initial = feasible.x
     load_scale = config.load_scale_n
     att_scale = np.deg2rad(config.attitude_scale_deg)
     m = np.vstack((np.sqrt(config.load_weight) * models['Fz_n'] / load_scale,
@@ -121,16 +116,34 @@ def allocate_support_increment(*, lifted_corner, contacts_xy, fz_n, fz_target_n,
     target = np.r_[np.sqrt(config.load_weight) * config.tracking_gain * (a['target'] - start['Fz_n']) / load_scale,
                    np.sqrt(config.attitude_weight) * config.tracking_gain * (a['att_target'] - start['attitude_rad']) / att_scale,
                    np.zeros(3), -np.sqrt(config.correction_weight) * a['corr'] / config.correction_limit_n]
+    if config.direct_feasible_solve:
+        # A feasible unconstrained least-squares minimum is also the constrained
+        # global minimum. SVD avoids an inverse or squared condition number.
+        direct = np.linalg.lstsq(m, target, rcond=None)[0]
+        if (np.isfinite(direct).all() and np.all(direct >= lower) and
+                np.all(direct <= upper) and
+                np.max(matrix @ direct - limit) <= config.constraint_tolerance):
+            force = current_force + expansion @ direct * scale
+            predicted = start['Fz_n'] + models['Fz_n'] @ direct
+            margin = min(float(min(b + d @ direct)) for b, d in margins)
+            return SupportIncrement('OPTIMAL', force, predicted, margin,
+                                    .5 * float(np.sum((m @ direct - target)**2)), 'DIRECT')
+    initial = np.clip(np.zeros(3), lower, upper)
+    if np.max(matrix @ initial - limit) > config.constraint_tolerance:
+        feasible = linprog(np.zeros(3), A_ub=matrix, b_ub=limit, bounds=box, method='highs')
+        if not feasible.success:
+            return SupportIncrement('INFEASIBLE', None, None, None, None)
+        initial = feasible.x
     fitted = minimize(lambda v: .5 * float(np.sum((m @ v - target)**2)), initial,
                       jac=lambda v: m.T @ (m @ v - target), bounds=box,
                       constraints=LinearConstraint(matrix, -np.inf, limit), method='SLSQP',
                       options={'ftol': config.solver_tolerance, 'maxiter': config.max_iterations})
     if not fitted.success or np.max(matrix @ fitted.x - limit) > config.constraint_tolerance:
-        return SupportIncrement('SOLVER_FAILED', None, None, None, None)
+        return SupportIncrement('SOLVER_FAILED', None, None, None, None, 'SLSQP')
     force = current_force + expansion @ fitted.x * scale
     predicted = start['Fz_n'] + models['Fz_n'] @ fitted.x
     margin = min(float(min(b + d @ fitted.x)) for b, d in margins)
-    return SupportIncrement('OPTIMAL', force, predicted, margin, float(fitted.fun))
+    return SupportIncrement('OPTIMAL', force, predicted, margin, float(fitted.fun), 'SLSQP')
 
 
 def plan_local_unload_step(

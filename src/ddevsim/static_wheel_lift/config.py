@@ -288,7 +288,7 @@ class SupportQPConfig:
     correction_limit_n: float = 500.0
     force_slew_n_s: float = 400.0
     abort_force_slew_n_s: float = 1200.0
-    abort_correction_limit_n: float = 1000.0
+    abort_correction_limit_n: float = 750.0
     travel_lower_m: float = -0.149
     travel_upper_m: float = 0.155
     attitude_limit_deg: float = 10.0
@@ -303,6 +303,7 @@ class SupportQPConfig:
     filter_cutoff_hz: float = 5.0
     release_s: float = 4.0
     max_iterations: int = 80
+    direct_feasible_solve: bool = True
     solver_tolerance: float = 1e-10
     constraint_tolerance: float = 1e-7
     max_continuous_failure_s: float = 0.5
@@ -433,7 +434,7 @@ ROBUST_REAR_RUN = replace(
     posture_fl_force_n=-650.0,
     posture_hold_fl_force_n=-450.0,
 )
-COMPACT_REAR_RETURN_RAMP_S = 8.0
+COMPACT_REAR_RETURN_RAMP_S = 6.0
 
 
 @dataclass(frozen=True)

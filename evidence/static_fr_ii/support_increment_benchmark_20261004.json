@@ -1,0 +1,106 @@
+{
+  "scope": "Interleaved same-process synthetic three-input contract cases, not plant performance or hard realtime certification.",
+  "samples_per_case_per_solver": 100,
+  "allocator_source_sha256": "9f797086b105dc4fdaa5ed08df44bb1ec8c338a3aa8c828736aed43593216098",
+  "config": {
+    "lambda_target": 0.075,
+    "lambda_floor": 0.05,
+    "clearance_floor_m": 0.01,
+    "swing_load_ceiling_n": 100.0,
+    "tyre_radius_m": 0.263,
+    "support_floor_n": 500.0,
+    "max_load_n": 12000.0,
+    "force_limit_n": 18200.0,
+    "correction_limit_n": 500.0,
+    "force_slew_n_s": 400.0,
+    "abort_force_slew_n_s": 1200.0,
+    "abort_correction_limit_n": 750.0,
+    "travel_lower_m": -0.149,
+    "travel_upper_m": 0.155,
+    "attitude_limit_deg": 10.0,
+    "load_scale_n": 1000.0,
+    "attitude_scale_deg": 3.0,
+    "load_weight": 1.0,
+    "attitude_weight": 2.0,
+    "tracking_gain": 0.1,
+    "attitude_damping_s": 0.8,
+    "increment_weight": 0.002,
+    "correction_weight": 0.002,
+    "filter_cutoff_hz": 5.0,
+    "release_s": 4.0,
+    "max_iterations": 80,
+    "direct_feasible_solve": true,
+    "solver_tolerance": 1e-10,
+    "constraint_tolerance": 1e-07,
+    "max_continuous_failure_s": 0.5,
+    "transition_clearance_slack_m": 0.002,
+    "transition_contact_blend_low_n": 50.0,
+    "transition_contact_blend_high_n": 300.0
+  },
+  "results": {
+    "FR_interior": {
+      "maximum_force_difference_n": 0.008523244456215232,
+      "selected_solvers": {
+        "DIRECT": 100
+      },
+      "iterative": {
+        "median_ms": 0.552549999999985,
+        "p95_ms": 0.7845150000000438,
+        "max_ms": 1.355800000000018
+      },
+      "direct_with_fallback": {
+        "median_ms": 0.294349999999971,
+        "p95_ms": 0.4465549999999984,
+        "max_ms": 0.5700999999999623
+      }
+    },
+    "FR_force_box_active": {
+      "maximum_force_difference_n": 0.0,
+      "selected_solvers": {
+        "SLSQP": 100
+      },
+      "iterative": {
+        "median_ms": 0.7744500000000099,
+        "p95_ms": 1.048714999999986,
+        "max_ms": 1.372299999999993
+      },
+      "direct_with_fallback": {
+        "median_ms": 0.8154000000000217,
+        "p95_ms": 1.126130000000064,
+        "max_ms": 1.2847000000000275
+      }
+    },
+    "RR_interior": {
+      "maximum_force_difference_n": 0.00852324445621524,
+      "selected_solvers": {
+        "DIRECT": 100
+      },
+      "iterative": {
+        "median_ms": 0.5683999999999689,
+        "p95_ms": 0.7988799999999961,
+        "max_ms": 0.9014999999999995
+      },
+      "direct_with_fallback": {
+        "median_ms": 0.3029999999999977,
+        "p95_ms": 0.4510899999999872,
+        "max_ms": 0.8313000000000903
+      }
+    },
+    "RR_force_box_active": {
+      "maximum_force_difference_n": 0.0,
+      "selected_solvers": {
+        "SLSQP": 100
+      },
+      "iterative": {
+        "median_ms": 0.819750000000008,
+        "p95_ms": 1.1200900000000125,
+        "max_ms": 1.4387999999999623
+      },
+      "direct_with_fallback": {
+        "median_ms": 0.8603500000000097,
+        "p95_ms": 1.2177450000000478,
+        "max_ms": 5.819600000000036
+      }
+    }
+  }
+}

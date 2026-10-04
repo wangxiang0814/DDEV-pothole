@@ -310,6 +310,18 @@ def test_full_cycle_evaluation_counts_drift_accumulated_before_rr():
     assert not result["criteria"]["rr_straight"]
 
 
+def test_return_attitude_excursion_cannot_be_hidden_by_final_recovery():
+    controller = RearCycleController(
+        scenario={"friction": .7, "start_station_m": 101.1, "length_m": .8},
+        rr_gain_per_coupled_force=-.4)
+    controller.mode = 'RR_CRAWL'
+    controller(0., _rear_observation())
+    row = dict(controller.rows[0], mode='RR_RETURN', roll_deg=12.)
+    controller.rows = [row, dict(row, time_s=1., mode='RR_COMPLETE', roll_deg=0.)]
+    result = evaluate_full_cycle({'status': 'PASS'}, controller, controller.scenario, True)
+    assert not result['criteria']['rr_recovery_attitude_safe']
+
+
 def test_front_steering_feedback_uses_original_path_and_rate_limit(monkeypatch):
     class Front:
         mode = "CRAWL"

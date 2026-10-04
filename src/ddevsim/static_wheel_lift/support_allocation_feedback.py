@@ -45,6 +45,7 @@ class SupportAllocationFeedback:
         self.longest_failure_s = 0.
         self.solve_times_ms = []
         self.status_counts = {}
+        self.solver_counts = {}
         self.telemetry = self._blank()
 
     @staticmethod
@@ -185,6 +186,8 @@ class SupportAllocationFeedback:
                     dt_s=min(dt, self.period_s), config=cfg)
             elapsed_ms = (time.perf_counter() - begin) * 1000.
             status = result.status if result is not None else 'LOAD_INFEASIBLE'
+            solver = getattr(result, 'solver', 'NONE') if result is not None else 'NONE'
+            self.solver_counts[solver] = self.solver_counts.get(solver, 0) + 1
             self.status_counts[status] = self.status_counts.get(status, 0) + 1
             self.phase_counts[phase] = self.phase_counts.get(phase, 0) + 1
             self.solve_times_ms.append(elapsed_ms)
@@ -235,6 +238,7 @@ class SupportAllocationFeedback:
     def summary(self):
         samples = np.asarray(self.solve_times_ms)
         return {'active': self.active, 'status_counts': self.status_counts,
+                'solver_counts': self.solver_counts,
                 'transitions': self.transitions, 'phase_counts': self.phase_counts,
                 'longest_failure_s': self.longest_failure_s,
                 'solve_mean_ms': float(samples.mean()) if samples.size else None,

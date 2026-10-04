@@ -298,6 +298,7 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
                            hold[-1]["time_s"]) - hold[0]["time_s"])
                      if hold else 0.)
     stability = hold + moving
+    recovery = [row for row in rows if row['mode'] in ('RR_LOWERING','RR_RETURN','RR_COMPLETE')]
     min_support = min((row["min_support_n"] for row in stability), default=None)
     min_zmp = min((float(row["zmp_lambda_min"]) for row in stability), default=None)
     min_com = min((float(row["com_lambda_min"]) for row in stability), default=None)
@@ -361,6 +362,18 @@ def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
         "rr_stopped_before_lowering": lowering is not None and
         abs(lowering["vx_kph"]) <= cfg.stationary_kph and
         lowering["x_rr_m"] >= far_edge + cfg.crossing_clearance_m,
+        'rr_recovery_attitude_safe': bool(recovery) and
+        max(abs(row[k]) for row in recovery for k in ('roll_deg','pitch_deg')) <= cfg.attitude_limit_deg,
+        'rr_recovery_support_loaded': bool(recovery) and
+        min(row['min_support_n'] for row in recovery) >= cfg.support_floor_n,
+        'rr_recovery_travel_safe': bool(recovery) and
+        min(row[f'travel_{c}_mm'] for row in recovery for c in ('fl','fr','rl','rr')) >= cfg.travel_rebound_abort_mm and
+        max(row[f'travel_{c}_mm'] for row in recovery for c in ('fl','fr','rl','rr')) <= cfg.travel_jounce_abort_mm,
+        'rr_recovery_straight': bool(recovery) and
+        max(abs(row['yo_m']-path_yo) for row in recovery) <= cfg.max_lateral_error_m,
+        'rr_recovery_stopped_on_solid_ground': bool(recovery) and
+        all(abs(row['vx_kph']) <= cfg.stationary_kph and
+            row['x_rr_m'] >= far_edge + cfg.crossing_clearance_m for row in recovery),
         "four_wheel_recovered": end is not None and
         min(end[f"fz_{wheel}_n"] for wheel in ("fl", "fr", "rl", "rr")) >=
         cfg.support_floor_n,

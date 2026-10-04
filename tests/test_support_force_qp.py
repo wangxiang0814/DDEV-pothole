@@ -1,4 +1,5 @@
 import numpy as np
+from dataclasses import replace
 
 from ddevsim.static_wheel_lift.suspension_allocator import allocate_support_increment
 from ddevsim.static_wheel_lift.config import SUPPORT_QP
@@ -56,3 +57,39 @@ def test_unreachable_travel_constraint_reports_infeasible():
     result = allocate_support_increment(**a)
     assert result.status == 'INFEASIBLE'
     assert result.force_n is None
+
+
+def test_feasible_unconstrained_minimum_avoids_iterative_solver(monkeypatch):
+    import ddevsim.static_wheel_lift.suspension_allocator as module
+    a = inputs()
+    a['fz_target_n'] = a['fz_n'].copy()
+    def unexpected(*args, **kwargs):
+        raise AssertionError('iterative solver used for feasible global minimum')
+    monkeypatch.setattr(module, 'minimize', unexpected)
+    result = allocate_support_increment(**a)
+    assert result.status == 'OPTIMAL'
+    assert result.solver == 'DIRECT'
+    np.testing.assert_allclose(result.force_n, 0., atol=1e-12)
+
+
+def test_direct_candidate_outside_force_box_uses_constrained_fallback():
+    a = inputs()
+    a['fz_target_n'] = a['fz_n'] + 100. * (a['fz_target_n'] - a['fz_n'])
+    result = allocate_support_increment(**a)
+    assert result.solver == 'SLSQP'
+    baseline = allocate_support_increment(**{**a, 'config': replace(SUPPORT_QP, direct_feasible_solve=False)})
+    np.testing.assert_allclose(result.force_n, baseline.force_n, atol=1e-7)
+    assert result.cost <= baseline.cost + 1e-10
+
+
+def test_direct_solution_matches_constrained_oracle_on_small_load_targets():
+    rng = np.random.default_rng(20261004)
+    for _ in range(20):
+        a = inputs()
+        a['fz_target_n'] = a['fz_n'] + rng.normal(0., .1, 4)
+        result = allocate_support_increment(**a)
+        oracle = allocate_support_increment(**{**a, 'config': replace(SUPPORT_QP, direct_feasible_solve=False)})
+        assert result.status == oracle.status == 'OPTIMAL'
+        assert result.solver == 'DIRECT'
+        np.testing.assert_allclose(result.force_n, oracle.force_n, atol=.01)
+        assert result.cost <= oracle.cost + 1e-9
