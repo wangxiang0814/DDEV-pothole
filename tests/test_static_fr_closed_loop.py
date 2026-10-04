@@ -175,3 +175,17 @@ def test_fast_cycle_profile_survives_speed_trial_override():
     assert trial.preload_max_reference_rate == 2.0
     assert trial.return_ramp_s == CLOSED_LOOP_RUN.return_ramp_s
     assert trial.crawl_speed_kph == 3.4
+
+
+def test_front_abort_recovery_requires_safe_attitude_travel_and_triangle():
+    from ddevsim.static_wheel_lift.closed_loop import front_abort_recovery_ready
+    x={'X_R1':100.,'X_R2':97.,'Vx':0.,'Roll_E':-6.,'Pitch':0.,
+       **{f'Jnc_{w}':0. for w in ('L1','R1','L2','R2')}}
+    scene={'start_station_m':101.1,'length_m':.8}
+    args=dict(support_load_n=1000.,margin=.08,config=CLOSED_LOOP_RUN,scenario=scene)
+    assert front_abort_recovery_ready(x,**args)
+    assert not front_abort_recovery_ready({**x,'Roll_E':12.},**args)
+    assert not front_abort_recovery_ready({**x,'Jnc_L1':-160.},**args)
+    assert not front_abort_recovery_ready(x,**{**args,'margin':.03})
+    assert not front_abort_recovery_ready({**x,'X_R1':101.5},**args)
+    assert not front_abort_recovery_ready({**x,'Pitch':float('nan')},**args)

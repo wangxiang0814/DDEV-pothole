@@ -30,6 +30,7 @@ from ddevsim.pothole_case import SCENARIO_EXPORTS
 from ddevsim.static_wheel_lift.closed_loop import (
     CrawlTorqueFeedback, PreloadProgress, ScalarLoadFeedback,
     SupportForceFeedback, blend_contact_gain, front_clearance_guard_m,
+    front_abort_recovery_ready,
     WheelLoadFilter,
 )
 from ddevsim.static_wheel_lift.command_trace import load_command_trace
@@ -357,14 +358,8 @@ class LiftCrawlController:
         if self.mode == "ABORT_STOP":
             # Keep FR lifted over the pit. Recover only after braking on solid
             # ground, with RR also on solid ground and three supports intact.
-            start = float(self.scenario["start_station_m"])
-            end = start + float(self.scenario["length_m"])
-            solid = lambda station: (station <= start - CFG.crossing_clearance_m or
-                                     station >= end + CFG.crossing_clearance_m)
-            can_recover = (solid(x["X_R1"]) and solid(x["X_R2"]) and
-                           abs(x["Vx"]) <= CFG.stop_speed_kph and
-                           support_load >= CFG.support_floor_n and
-                           margin >= CFG.lambda_abort)
+            can_recover = front_abort_recovery_ready(x, support_load_n=support_load,
+                margin=margin, config=CFG, scenario=self.scenario)
             if can_recover:
                 if self.stop_since_s is None:
                     self.stop_since_s = now_s

@@ -240,6 +240,24 @@ def front_clearance_guard_m(x_fr_m: float, far_edge_m: float,
     return post_pit_guard_m
 
 
+def front_abort_recovery_ready(x, *, support_load_n, margin, config, scenario):
+    """Solid-ground FR recovery needs current support, attitude and travel safety."""
+    start = float(scenario['start_station_m'])
+    end = start + float(scenario['length_m'])
+    solid = lambda station: (station <= start-config.crossing_clearance_m or
+                             station >= end+config.crossing_clearance_m)
+    travel = [x[f'Jnc_{w}'] for w in ('L1','R1','L2','R2')]
+    values = [start,end,x['X_R1'],x['X_R2'],x['Vx'],x['Roll_E'],x['Pitch'],
+              support_load_n,margin,*travel]
+    if not all(math.isfinite(v) for v in values):
+        return False
+    return bool(solid(x['X_R1']) and solid(x['X_R2']) and
+        abs(x['Vx']) <= config.stop_speed_kph and
+        support_load_n >= config.support_floor_n and margin >= config.lambda_target and
+        max(abs(x['Roll_E']),abs(x['Pitch'])) <= config.attitude_limit_deg and
+        min(travel) > config.moving_rebound_abort_mm and max(travel) < config.jounce_abort_mm)
+
+
 class CrawlTorqueFeedback:
     """Speed PI and yaw/lateral PD with friction-limited three-wheel torque."""
 

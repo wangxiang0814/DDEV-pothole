@@ -205,6 +205,14 @@ class FullRightSideController:
             dt = 0. if self.last_command_time_s is None else max(0., now_s-self.last_command_time_s)
             step = FEEDBACK_HEALTH.torque_release_slew_nm_s * dt
             output[:4] += np.clip(-output[:4], -step, step)
+            if hasattr(selected, 'drive'):
+                indices = [2,0,1] if self.rear_started else [0,2,3]
+                selected.drive.torque_nm = output[indices].copy()
+                selected.drive.last_update_s = now_s
+                if self.rear_started:
+                    selected.torque = selected.drive.torque_nm.copy()
+                else:
+                    selected.torques_nm = selected.drive.torque_nm.copy()
             if getattr(self, 'allocation', None) is not None:
                 # Keep actuator history current even while no QP is run, so
                 # fresh feedback cannot spend the outage as one large rate step.
