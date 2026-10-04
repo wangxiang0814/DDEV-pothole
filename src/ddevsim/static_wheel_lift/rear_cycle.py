@@ -126,8 +126,8 @@ class RearCycleController:
             if self.abort_suspension_force_n is None or self.mode == 'RR_ABORT_EXIT':
                 self.abort_suspension_force_n = self.last_suspension_force_n.copy()
             self.abort_start_speed_kph = max(0., self.last_speed_kph)
-            self.abort_smooth_stop = (self.config.allow_abort_exit and
-                self.recovery_feedback_healthy and self._recovery_supported(self.last_gate))
+            self.abort_smooth_stop = (self.recovery_feedback_healthy and
+                self._recovery_supported(self.last_gate))
             self.abort_exit_since_s = None
         if mode == 'RR_ABORT_EXIT':
             self.abort_exit_attempted = True

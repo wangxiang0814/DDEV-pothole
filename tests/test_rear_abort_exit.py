@@ -78,3 +78,15 @@ def test_unsafe_support_cancels_gentle_braking_reference():
     x['Roll_E']=20.
     c(.02,x)
     assert c.rows[-1]['speed_ref_kph']==0. and c.mode=='RR_ABORT_STOP'
+
+
+def test_safe_braking_does_not_require_permission_to_drive_out():
+    c,x=setup_exit()
+    c.config=replace(c.config,allow_abort_exit=False)
+    c.mode='RR_CRAWL';x['Vx']=3.
+    c(0.,x);c._enter('RR_ABORT_STOP',0.)
+    c(.02,x)
+    assert c.abort_smooth_stop and c.rows[-1]['speed_ref_kph']>2.9
+    x['Vx']=0.
+    c(1.02,x);c(4.,x)
+    assert c.mode=='RR_ABORT_STOP' and not c.abort_exit_attempted
