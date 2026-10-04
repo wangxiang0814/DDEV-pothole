@@ -288,6 +288,7 @@ class SupportQPConfig:
     correction_limit_n: float = 500.0
     force_slew_n_s: float = 400.0
     abort_force_slew_n_s: float = 1200.0
+    abort_correction_limit_n: float = 1000.0
     travel_lower_m: float = -0.149
     travel_upper_m: float = 0.155
     attitude_limit_deg: float = 10.0
@@ -408,6 +409,13 @@ class RearCycleConfig:
     stop_dwell_s: float = 1.0
     stop_max_brake_nm: float = 80.0
     max_crawl_s: float = 30.0
+    allow_abort_exit: bool = False
+    abort_stop_ramp_s: float = 1.0
+    abort_exit_dwell_s: float = 2.0
+    abort_exit_speed_kph: float = 0.7
+    abort_exit_accel_s: float = 1.0
+    abort_exit_stop_buffer_m: float = 0.15
+    abort_exit_timeout_s: float = 10.0
 
 
 REAR_CYCLE_RUN = RearCycleConfig()
@@ -524,10 +532,13 @@ class PitAbortTrialConfig:
     trigger_fraction: float = .5
     max_observe_after_abort_s: float = 25.
     minimum_stopped_hold_s: float = 5.
+    max_recovery_observe_s: float = 45.
 
     def __post_init__(self):
         if (not all(math.isfinite(x) for x in (self.trigger_fraction,
-                self.max_observe_after_abort_s, self.minimum_stopped_hold_s)) or
+                self.max_observe_after_abort_s, self.minimum_stopped_hold_s,
+                self.max_recovery_observe_s)) or
                 not 0. < self.trigger_fraction < 1. or
-                not 0. < self.minimum_stopped_hold_s < self.max_observe_after_abort_s):
+                not 0. < self.minimum_stopped_hold_s < self.max_observe_after_abort_s or
+                self.max_recovery_observe_s < self.max_observe_after_abort_s):
             raise ValueError('invalid pit abort trial configuration')

@@ -110,7 +110,9 @@ def test_rear_posture_feedback_tracks_intended_roll_instead_of_blocking_adjustme
     assert np.rad2deg(c.target_att[0]) == pytest.approx(ROBUST_REAR_RUN.posture_target_roll_deg)
 
 
-def test_rear_abort_keeps_closed_loop_after_one_snapshot_handoff(monkeypatch):
+@pytest.mark.parametrize('allow_exit,expected_limit', [(False,500.),(True,1000.)])
+def test_rear_abort_keeps_closed_loop_after_one_snapshot_handoff(monkeypatch,allow_exit,expected_limit):
+    from dataclasses import replace
     from types import SimpleNamespace
     import ddevsim.static_wheel_lift.support_allocation_feedback as module
     captured = []
@@ -121,7 +123,8 @@ def test_rear_abort_keeps_closed_loop_after_one_snapshot_handoff(monkeypatch):
         return SimpleNamespace(status='OPTIMAL',force_n=force,cost=0.,predicted_margin=.1)
     monkeypatch.setattr(module,'allocate_support_increment',solve)
     c = SupportAllocationFeedback(mode_models={'RR':{'gains':{}}},active=True,
-        period_s=.02,front_limits=CLOSED_LOOP_RUN,rear_limits=ROBUST_REAR_RUN,transitions=True)
+        period_s=.02,front_limits=CLOSED_LOOP_RUN,
+        rear_limits=replace(ROBUST_REAR_RUN,allow_abort_exit=allow_exit),transitions=True)
     c.stage='RR'
     c.correction=np.array([100.,-50.,20.])
     x=dict(Roll_E=-7.2,Pitch=0.,AVx=0.,AVy=0.,XCG_TM=.4,YCG_TM=.4)
@@ -133,6 +136,7 @@ def test_rear_abort_keeps_closed_loop_after_one_snapshot_handoff(monkeypatch):
     second=c.apply(1.02,x,snapshot,stage='RR',phase='RR_ABORT_STOP')
     assert len(captured)==2
     assert captured[0]['config'].force_slew_n_s == 1200.
+    assert captured[0]['config'].correction_limit_n == expected_limit
     np.testing.assert_allclose(captured[0]['correction_n'],0.)
     np.testing.assert_allclose(captured[1]['correction_n'],[4.,0.,0.])
     assert first[4]==504. and second[4]==508.

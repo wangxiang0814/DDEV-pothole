@@ -36,6 +36,7 @@ class SupportAllocationFeedback:
         self.last_applied = np.zeros(4)
         self.last_application_s = None
         self.abort_max_output_slew_n_s = 0.
+        self.abort_active = False
         self.filtered = None
         self.target_att = None
         self.release_start_s = None
@@ -72,12 +73,14 @@ class SupportAllocationFeedback:
             self.release_start_s = None
             self.release_correction = None
             self.failure_start_s = None
-        active_phases = ('THREE_WHEEL_HOLD', 'CRAWL', 'STOP') if stage == 'FR' else ('RR_HOLD', 'RR_CRAWL', 'RR_STOP', 'RR_ABORT_STOP')
+            self.abort_active = False
+        active_phases = ('THREE_WHEEL_HOLD', 'CRAWL', 'STOP') if stage == 'FR' else ('RR_HOLD', 'RR_CRAWL', 'RR_STOP', 'RR_ABORT_STOP', 'RR_ABORT_EXIT')
         transition_phases = ('PRELOAD_SHIFT', 'LIFTING') if stage == 'FR' else ('RR_PRELOAD', 'RR_LIFTING', 'RR_POSTURE')
         transition = self.transitions and phase in transition_phases
         preload = phase in ('PRELOAD_SHIFT', 'RR_PRELOAD')
         lowering = phase in ('LOWERING', 'RETURN_TO_FOUR_WHEEL', 'RR_LOWERING', 'RR_RETURN')
         if stage == 'RR' and phase == 'RR_ABORT_STOP' and self.phase != 'RR_ABORT_STOP':
+            self.abort_active = True
             # RR's recovery snapshot already includes our last applied inputs.
             self.correction[:] = 0.
             self.release_start_s = None
@@ -144,10 +147,12 @@ class SupportAllocationFeedback:
                       else current_limits.travel_jounce_abort_mm)
             cfg = replace(self.config, attitude_limit_deg=att_bound,
                            travel_lower_m=rebound / 1000., travel_upper_m=jounce / 1000.)
-            if phase == 'RR_ABORT_STOP':
+            if phase in ('RR_ABORT_STOP', 'RR_ABORT_EXIT'):
                 # Hard braking needs faster damping than steady crawl. Keep
-                # the correction magnitude, force, travel and contact bounds.
-                cfg = replace(cfg, force_slew_n_s=cfg.abort_force_slew_n_s)
+                # the simulated actuator force, travel and contact bounds.
+                cfg = replace(cfg, force_slew_n_s=cfg.abort_force_slew_n_s,
+                              correction_limit_n=(cfg.abort_correction_limit_n
+                                if self.rear_limits.allow_abort_exit else cfg.correction_limit_n))
             height = x[f'Z_{WHEELS[ORDER.index(stage)]}'] - cfg.tyre_radius_m
             if transition:
                 cfg = replace(cfg, clearance_floor_m=min(cfg.clearance_floor_m,
@@ -211,7 +216,7 @@ class SupportAllocationFeedback:
             self.failure_start_s = None
         if self.active:
             base[4 + support] += self.correction
-            if phase == 'RR_ABORT_STOP' and self.last_application_s is not None:
+            if (self.abort_active or phase in ('RR_ABORT_STOP','RR_ABORT_EXIT')) and self.last_application_s is not None:
                 application_dt = max(0., now_s - self.last_application_s)
                 maximum_step = self.rear_limits.sim_force_slew_n_s * application_dt
                 step = np.clip(base[4:8] - self.last_applied, -maximum_step, maximum_step)

@@ -1,5 +1,7 @@
 """Inject a geometry-triggered RR over-pit abort and audit plant-truth response."""
 import csv
+import argparse
+from dataclasses import replace
 import json
 from pathlib import Path
 import sys
@@ -9,7 +11,8 @@ from ddevsim.static_wheel_lift.config import PitAbortTrialConfig, SUPPORT_QP
 CFG = PitAbortTrialConfig()
 
 
-def inject_over_pit_abort(rear, now_s, station, config=CFG):
+def inject_over_pit_abort(rear, now_s, station, config=None):
+    config = CFG if config is None else config
     start, length = rear.scenario['start_station_m'], rear.scenario['length_m']
     if rear.mode != 'RR_CRAWL' or not start + config.trigger_fraction * length <= station < start + length:
         return False
@@ -39,6 +42,8 @@ def audit(run, fault_time_s):
     with (run / 'rear_control_20ms.csv').open(encoding='utf-8', newline='') as stream:
         rows = list(csv.DictReader(stream))
     abort = [r for r in rows if r['mode'] == 'RR_ABORT_STOP']
+    swing = [r for r in rows if r['mode'] in ('RR_ABORT_STOP','RR_ABORT_EXIT')]
+    post = [r for r in rows if fault_time_s is not None and float(r['time_s']) >= fault_time_s]
     lowering = [r for r in rows if r['mode'] in ('RR_LOWERING', 'RR_RETURN')]
     cfg = result['controller_config']['rear']
     start = result['scenario']['start_station_m']
@@ -63,28 +68,31 @@ def audit(run, fault_time_s):
                      terminal_hold >= CFG.minimum_stopped_hold_s)
     max_slew = max((abs(float(row[f'fact_{c}_n']) - float(previous[f'fact_{c}_n'])) /
                     (float(row['time_s']) - float(previous['time_s']))
-                   for previous, row in zip(rows, rows[1:]) if row['mode'] == 'RR_ABORT_STOP'
+                   for previous, row in zip(rows, rows[1:]) if fault_time_s is not None and float(row['time_s']) >= fault_time_s
                    and float(row['time_s']) > float(previous['time_s'])
                    for c in ('fl','fr','rl','rr')), default=0.)
-    max_failure = max((float(r.get('support_qp_failure_s', 0.)) for r in abort), default=0.)
+    max_failure = max((float(r.get('support_qp_failure_s', 0.)) for r in swing), default=0.)
     native_slew = result.get('support_allocation', {}).get('abort_max_native_output_slew_n_s')
+    origin = result.get('path_reference_yo_m', float(rows[0]['yo_m']) if rows else 0.)
+    lateral = max((abs(float(r['yo_m']) - origin) for r in post), default=None)
     criteria = {
         'injected_inside_pit': bool(abort and start < float(abort[0]['x_rr_m']) < end),
         'task_remains_fail': result['status'] == 'FAIL' and result['rr_abort_reason'] == 'injected RR over-pit abort',
-        'support_positive': bool(abort and min(float(r['min_support_n']) for r in abort) >= cfg['support_floor_n']),
-        'zmp_safe': bool(abort and min(float(r['zmp_lambda_min']) for r in abort) >= cfg['lambda_safe']),
-        'com_safe': bool(abort and min(float(r['com_lambda_min']) for r in abort) >= cfg['lambda_safe']),
-        'clearance_positive': bool(abort and min(float(r['rr_clearance_m']) for r in abort) >= cfg['clearance_m']),
-        'rr_unloaded': bool(abort and max(float(r['fz_rr_filtered_n']) for r in abort) <= cfg['wheel_unloaded_n']),
-        'attitude_safe': bool(abort and max(abs(float(r[k])) for r in abort for k in ('roll_deg','pitch_deg')) <= cfg['attitude_limit_deg']),
+        'support_positive': bool(post and min(float(r['min_support_n']) for r in post) >= cfg['support_floor_n']),
+        'zmp_safe': bool(swing and min(float(r['zmp_lambda_min']) for r in swing) >= cfg['lambda_safe']),
+        'com_safe': bool(swing and min(float(r['com_lambda_min']) for r in swing) >= cfg['lambda_safe']),
+        'clearance_positive': bool(swing and min(float(r['rr_clearance_m']) for r in swing) >= cfg['clearance_m']),
+        'rr_unloaded': bool(swing and max(float(r['fz_rr_filtered_n']) for r in swing) <= cfg['wheel_unloaded_n']),
+        'attitude_safe': bool(post and max(abs(float(r[k])) for r in post for k in ('roll_deg','pitch_deg')) <= cfg['attitude_limit_deg']),
         'no_lowering_over_pit': all(solid(float(r['x_rr_m'])) for r in lowering),
         'stopped_before_lowering': not lowering or abs(float(lowering[0]['vx_kph'])) <= cfg['stationary_kph'],
-        'travel_safe': bool(abort and min(float(r[f'travel_{c}_mm']) for r in abort for c in ('fl','fr','rl','rr')) >= cfg['travel_rebound_abort_mm'] and
-                            max(float(r[f'travel_{c}_mm']) for r in abort for c in ('fl','fr','rl','rr')) <= cfg['travel_jounce_abort_mm']),
-        'force_within_sim_limits': bool(abort and max(abs(float(r[f'fact_{c}_n'])) for r in abort for c in ('fl','fr','rl','rr')) <= cfg['sim_force_limit_n']),
+        'travel_safe': bool(post and min(float(r[f'travel_{c}_mm']) for r in post for c in ('fl','fr','rl','rr')) >= cfg['travel_rebound_abort_mm'] and
+                            max(float(r[f'travel_{c}_mm']) for r in post for c in ('fl','fr','rl','rr')) <= cfg['travel_jounce_abort_mm']),
+        'force_within_sim_limits': bool(post and max(abs(float(r[f'fact_{c}_n'])) for r in post for c in ('fl','fr','rl','rr')) <= cfg['sim_force_limit_n']),
         'force_rate_20ms_average_within_sim_limits': max_slew <= cfg['sim_force_slew_n_s'],
         'force_rate_native_within_sim_limits': native_slew is not None and native_slew <= cfg['sim_force_slew_n_s'],
         'no_persistent_qp_failure': max_failure <= SUPPORT_QP.max_continuous_failure_s,
+        'recovery_straight': lateral is not None and lateral <= cfg['max_lateral_error_m'],
         'stopped': bool(stopped),
         'native_completed': native_complete,
         'recovered_or_stable_hold': recovered or safe_hold,
@@ -97,17 +105,27 @@ def audit(run, fault_time_s):
                 fault_time_s=fault_time_s, abort_start_s=float(abort[0]['time_s']) if abort else None,
                 abort_handoff_force_step_n=jump, stopped_hold_s=stopped_hold,
                 terminal_stopped_hold_s=terminal_hold, bounded_observation_completed=bounded_observation,
-                min_abort_support_n=min((float(r['min_support_n']) for r in abort), default=None),
-                min_abort_zmp_lambda=min((float(r['zmp_lambda_min']) for r in abort), default=None),
-                min_abort_clearance_m=min((float(r['rr_clearance_m']) for r in abort), default=None),
-                max_abort_roll_deg=max((abs(float(r['roll_deg'])) for r in abort), default=None),
+                min_abort_support_n=min((float(r['min_support_n']) for r in swing), default=None),
+                min_abort_zmp_lambda=min((float(r['zmp_lambda_min']) for r in swing), default=None),
+                min_abort_clearance_m=min((float(r['rr_clearance_m']) for r in swing), default=None),
+                max_abort_roll_deg=max((abs(float(r['roll_deg'])) for r in swing), default=None),
+                max_recovery_roll_deg=max((abs(float(r['roll_deg'])) for r in post), default=None),
+                recovery_max_lateral_m=lateral,
                 max_abort_force_slew_20ms_n_s=max_slew,
                 max_abort_force_slew_native_n_s=native_slew, max_abort_qp_failure_s=max_failure,
+                exit_samples=sum(r['mode']=='RR_ABORT_EXIT' for r in rows),
                 final_mode=rows[-1]['mode'] if rows else None,
                 scope='one geometry-triggered abort; not general over-pit recovery or support-loss certification')
 
 
 def main():
+    global CFG
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('--abort-trigger-fraction',type=float,default=CFG.trigger_fraction)
+    trial,rest=parser.parse_known_args(sys.argv[1:])
+    CFG=replace(CFG,trigger_fraction=trial.abort_trigger_fraction,
+        max_observe_after_abort_s=(CFG.max_recovery_observe_s if '--rear-abort-exit' in rest else CFG.max_observe_after_abort_s))
+    sys.argv=[sys.argv[0],*rest]
     if '--output' not in sys.argv:
         raise ValueError('supply --output and the normal full-cycle configuration')
     output = Path(sys.argv[sys.argv.index('--output') + 1]).resolve()

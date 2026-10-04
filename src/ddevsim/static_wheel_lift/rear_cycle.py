@@ -86,6 +86,15 @@ class RearCycleController:
         self.preload_reference_rate = 1.0
         self.start_rr_load_n: float | None = None
         self.abort_reason: str | None = None
+        self.abort_exit_since_s = None
+        self.abort_exit_attempted = False
+        self.abort_exit_failure = None
+        self.recovery_feedback_healthy = False
+        self.last_gate = None
+        self.last_rr_load_n = float('inf')
+        self.last_speed_kph = 0.
+        self.abort_start_speed_kph = 0.
+        self.abort_smooth_stop = False
         self.filter = WheelLoadFilter(cutoff_hz=5.0, wheel_count=4)
         self.unload_feedback = ScalarLoadFeedback(
             gain_load_per_force=rr_gain_per_coupled_force,
@@ -113,14 +122,27 @@ class RearCycleController:
         self.rows: list[dict] = []
 
     def _enter(self, mode: str, now_s: float) -> None:
-        if mode == 'RR_ABORT_STOP' and self.abort_suspension_force_n is None:
-            self.abort_suspension_force_n = self.last_suspension_force_n.copy()
+        if mode == 'RR_ABORT_STOP':
+            if self.abort_suspension_force_n is None or self.mode == 'RR_ABORT_EXIT':
+                self.abort_suspension_force_n = self.last_suspension_force_n.copy()
+            self.abort_start_speed_kph = max(0., self.last_speed_kph)
+            self.abort_smooth_stop = (self.config.allow_abort_exit and
+                self.recovery_feedback_healthy and self._recovery_supported(self.last_gate))
+            self.abort_exit_since_s = None
+        if mode == 'RR_ABORT_EXIT':
+            self.abort_exit_attempted = True
         if mode == "RR_CRAWL" and self.config.parking_damping_nm_per_rpm > 0.:
             self.drive.torque_nm = self.parking_torque[[2, 0, 1]].copy()
         self.mode = mode
         self.mode_start_s = now_s
         self.ready_since_s = None
         self.stop_since_s = None
+
+    def _recovery_supported(self, gate):
+        cfg = self.config
+        return bool(gate is not None and gate.safe and
+            gate.zmp_lambda_min >= cfg.lambda_safe and gate.com_lambda_min >= cfg.lambda_safe and
+            gate.clearance_m >= cfg.clearance_m and self.last_rr_load_n <= cfg.wheel_unloaded_n)
 
     def _preload_fractions(self, now_s: float) -> tuple[float, float]:
         cfg = self.config
@@ -135,6 +157,7 @@ class RearCycleController:
 
     def __call__(self, now_s: float, exports: dict[str, float]) -> tuple[float, ...]:
         x = exports
+        self.last_speed_kph = x['Vx']
         if self.mode_start_s is None:
             self.mode_start_s = now_s
         if (self.last_tick_s is None or
@@ -183,7 +206,7 @@ class RearCycleController:
                                               cfg.lower_ramp_s)[0]
                 command[7] = cfg.lift_force_n * lift
         if self.abort_suspension_force_n is not None and self.mode in (
-                'RR_ABORT_STOP', 'RR_LOWERING', 'RR_RETURN'):
+                'RR_ABORT_STOP', 'RR_ABORT_EXIT', 'RR_LOWERING', 'RR_RETURN'):
             # Freeze actual inputs at the fault; do not finish a preload script.
             release, lift_release = 1., 1.
             if self.mode in ('RR_LOWERING', 'RR_RETURN'):
@@ -194,7 +217,7 @@ class RearCycleController:
             command[4:7] = self.abort_suspension_force_n[:3] * release
             command[7] = self.abort_suspension_force_n[3] * lift_release
         self.last_suspension_force_n = command[4:].copy()
-        if self.mode in ("RR_CRAWL", "RR_STOP", "RR_ABORT_STOP"):
+        if self.mode in ("RR_CRAWL", "RR_STOP", "RR_ABORT_STOP", "RR_ABORT_EXIT"):
             # CrawlTorqueFeedback's three entries are left, left, right.
             # Here they map to RL, FL, FR; RR remains undriven in swing.
             command[[2, 0, 1]] = self.torque
@@ -212,6 +235,8 @@ class RearCycleController:
         fz = np.array([max(0., x[f"Fz_{wheel}"]) for wheel in TRUCKSIM_WHEELS])
         filtered = self.filter.update(now_s, fz)
         gate = assess_rear_gate(x, filtered, cfg)
+        self.last_gate = gate
+        self.last_rr_load_n = float(filtered[3])
         rpm = np.array([x.get(f"AVy_{wheel}", 0.) for wheel in TRUCKSIM_WHEELS])
         parking_target = np.clip(-cfg.parking_damping_nm_per_rpm * rpm,
                                  -cfg.parking_limit_nm, cfg.parking_limit_nm)
@@ -342,9 +367,10 @@ class RearCycleController:
                 (x["X_R2"] >= far_edge + cfg.crossing_clearance_m or
                  x["X_R2"] <= float(self.scenario["start_station_m"]) - cfg.crossing_clearance_m) and
                 abs(x["Vx"]) <= cfg.stationary_kph and
+                gate.safe and
                 gate.min_support_n >= cfg.support_floor_n and
-                gate.zmp_lambda_min >= cfg.lambda_abort and
-                gate.com_lambda_min >= cfg.lambda_abort)
+                gate.zmp_lambda_min >= cfg.lambda_safe and
+                gate.com_lambda_min >= cfg.lambda_safe)
             if can_recover:
                 if self.stop_since_s is None:
                     self.stop_since_s = now_s
@@ -353,6 +379,27 @@ class RearCycleController:
                     self._enter("RR_LOWERING", now_s)
             else:
                 self.stop_since_s = None
+            in_recovery_gap = (float(self.scenario['start_station_m']) - cfg.crossing_clearance_m <
+                               x['X_R2'] < far_edge + cfg.crossing_clearance_m)
+            can_exit = (self.mode == 'RR_ABORT_STOP' and cfg.allow_abort_exit and
+                not self.abort_exit_attempted and in_recovery_gap and gate.ready and
+                self._recovery_supported(gate) and self.recovery_feedback_healthy and
+                abs(x['Yo'] - self.initial_yo_m) <= cfg.max_lateral_error_m)
+            if can_exit:
+                if self.abort_exit_since_s is None:
+                    self.abort_exit_since_s = now_s
+                elif now_s - self.abort_exit_since_s >= cfg.abort_exit_dwell_s:
+                    self._enter('RR_ABORT_EXIT', now_s)
+            else:
+                self.abort_exit_since_s = None
+        if self.mode == 'RR_ABORT_EXIT':
+            if (not self._recovery_supported(gate) or not self.recovery_feedback_healthy or
+                    abs(x['Yo'] - self.initial_yo_m) > cfg.max_lateral_error_m or
+                    now_s - self.mode_start_s > cfg.abort_exit_timeout_s):
+                self.abort_exit_failure = 'exit support, feedback, path or deadline gate'
+                self._enter('RR_ABORT_STOP', now_s)
+            elif x['X_R2'] >= far_edge + cfg.crossing_clearance_m + cfg.abort_exit_stop_buffer_m:
+                self._enter('RR_ABORT_STOP', now_s)
         if self.mode == "RR_LOWERING" and now_s - self.lower_start_s >= cfg.lower_ramp_s:
             if filtered[3] >= cfg.support_floor_n:
                 self._enter("RR_RETURN", now_s)
@@ -379,7 +426,8 @@ class RearCycleController:
                 else:
                     self.abort_reason = "RR clearance limit"
                 self._enter("RR_ABORT_STOP", now_s)
-        if self.mode in ("RR_CRAWL", "RR_STOP", "RR_ABORT_STOP"):
+        target_speed = 0.
+        if self.mode in ("RR_CRAWL", "RR_STOP", "RR_ABORT_STOP", "RR_ABORT_EXIT"):
             if self.mode == "RR_CRAWL":
                 target_speed = (cfg.crawl_speed_kph *
                                 quintic_step(now_s, self.mode_start_s,
@@ -388,8 +436,12 @@ class RearCycleController:
                 target_speed = self.start_stop_speed_kph * (
                     1. - quintic_step(now_s, self.mode_start_s,
                                        cfg.stop_ramp_s)[0])
-            else:
-                target_speed = 0.
+            elif self.mode == 'RR_ABORT_EXIT':
+                target_speed = cfg.abort_exit_speed_kph * quintic_step(
+                    now_s, self.mode_start_s, cfg.abort_exit_accel_s)[0]
+            elif self.abort_smooth_stop and self._recovery_supported(gate) and self.recovery_feedback_healthy:
+                target_speed = self.abort_start_speed_kph * (1. - quintic_step(
+                    now_s, self.mode_start_s, cfg.abort_stop_ramp_s)[0])
             self.torque = self.drive.update(
                 now_s, vx_kph=x["Vx"],
                 yaw_deg=x["Yaw"] - self.initial_yaw_deg,
@@ -401,7 +453,7 @@ class RearCycleController:
                 self.drive.torque_nm = self.torque.copy()
         else:
             self.torque[:] = 0.
-        if (self.mode in ("RR_CRAWL", "RR_STOP") or
+        if (self.mode in ("RR_CRAWL", "RR_STOP", "RR_ABORT_EXIT") or
                 cfg.static_steering_feedback and self.mode in
                 ("RR_PRELOAD", "RR_LIFTING", "RR_POSTURE", "RR_HOLD")):
             desired_steer = float(np.clip(
@@ -423,6 +475,9 @@ class RearCycleController:
             "min_support_n": gate.min_support_n,
             "rr_clearance_m": gate.clearance_m,
             "rr_ready": gate.ready, "rr_safe": gate.safe,
+            "speed_ref_kph": target_speed,
+            "abort_exit_attempted": self.abort_exit_attempted,
+            "abort_exit_failure": self.abort_exit_failure,
             "preload_feedback_n": self.unload_feedback.correction_n,
             "preload_reference_s": self.preload_reference_s,
             "preload_reference_rate": self.preload_reference_rate,

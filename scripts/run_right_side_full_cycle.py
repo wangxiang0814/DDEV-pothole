@@ -201,6 +201,8 @@ class FullRightSideController:
         output = self.allocation.apply(now_s, x, command, stage=stage, phase=selected.mode)
         if stage == 'RR':
             self.rear.last_suspension_force_n = np.asarray(output[4:8]).copy()
+            self.rear.recovery_feedback_healthy = (self.allocation.active and
+                self.allocation.telemetry.get('support_qp_status') == 'OPTIMAL')
         if selected.rows and selected.rows[-1]['time_s'] == now_s:
             row = selected.rows[-1]
             row.update(self.allocation.telemetry)
@@ -209,7 +211,8 @@ class FullRightSideController:
         if (selected.mode not in ('ABORT_STOP', 'RR_ABORT_STOP') and
                 self.allocation.active and self.allocation.telemetry['support_qp_failure_s'] >=
                 self.allocation.config.max_continuous_failure_s):
-            selected.abort_reason = 'support allocation persistently infeasible'
+            if selected.abort_reason is None:
+                selected.abort_reason = 'support allocation persistently infeasible'
             selected._enter('ABORT_STOP' if stage == 'FR' else 'RR_ABORT_STOP', now_s)
         return output
 
@@ -400,6 +403,8 @@ def main() -> None:
     parser.add_argument('--support-allocation-reference-model', type=Path,
                         help='Explicit source run_all.par for strictly verified pit width/depth gain reuse.')
     parser.add_argument('--support-allocation-transitions', action='store_true')
+    parser.add_argument('--rear-abort-exit', action='store_true',
+                        help='Optional gated RR over-pit exit; requires active support allocation.')
     parser.add_argument('--average-path-reference', action='store_true')
     parser.add_argument("--steer-probe-deg", type=float)
     parser.add_argument("--stop-at", type=float)
@@ -615,6 +620,10 @@ def main() -> None:
         parser.error("rear posture force must be negative and hold force no stronger than its ramp")
     rear_config = replace(rear_config, posture_fl_force_n=posture_force,
                           posture_hold_fl_force_n=posture_hold)
+    if args.rear_abort_exit:
+        if args.support_allocation != 'active' or args.support_allocation_gains is None:
+            parser.error('rear abort exit requires active support allocation and gains')
+        rear_config = replace(rear_config, allow_abort_exit=True)
     allocation, allocation_provenance = None, None
     if args.support_allocation_reference_model is not None and args.support_allocation_gains is None:
         parser.error('scene gain reuse requires --support-allocation-gains')

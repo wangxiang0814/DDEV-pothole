@@ -34,6 +34,7 @@ from run_pit_abort_trial import audit
 def test_safe_hold_requires_complete_stopped_observation_and_healthy_qp(
         tmp_path, final_mode, native_complete, final_speed, qp_failure, expected):
     base = dict(mode='RR_ABORT_STOP', time_s=10., vx_kph=0., x_rr_m=101.5,
+        yo_m=0.,
         min_support_n=1500., zmp_lambda_min=.1, com_lambda_min=.1,
         rr_clearance_m=.05, fz_rr_filtered_n=0., roll_deg=-7., pitch_deg=0.,
         support_qp_failure_s=qp_failure)
