@@ -120,3 +120,30 @@ def test_control_log_records_actual_force_command_and_geometry():
     assert row["fz_fr_filtered_n"] == pytest.approx(3000.)
     assert row["preload_ref_time_s"] == pytest.approx(0.)
     assert row["support_feedback_saturated"] is False
+
+@pytest.mark.parametrize('x_fr,x_rr,vx,support,expected', [
+    (99., 97., 0., 1300., 'LOWERING'),
+    (101.5, 99.5, 0., 1300., 'ABORT_STOP'),
+    (102.5, 100.5, 0., 1300., 'LOWERING'),
+    (103.5, 101.5, 0., 1300., 'ABORT_STOP'),
+    (99., 97., .5, 1300., 'ABORT_STOP'),
+    (99., 97., 0., 100., 'ABORT_STOP')])
+def test_front_abort_only_recovers_stopped_on_solid_ground(x_fr, x_rr, vx, support, expected):
+    controller = LiftCrawlController(crawl=True, scenario={
+        'friction': .7, 'start_station_m': 101., 'length_m': .8})
+    controller.mode = 'STOP'
+    controller.stop_since_s = 8.
+    controller._enter('ABORT_STOP', 9.99)
+    controller.abort_reason = 'test abort'
+    controller.lift_start_s = 1.
+    values = dict.fromkeys(EXPORTS, 0.)
+    values.update(Fz_L1=6400., Fz_R1=0., Fz_L2=support, Fz_R2=5600.,
+        Xctc_L1i=1., Yctc_L1i=.625, Xctc_R1i=1., Yctc_R1i=-.625,
+        Xctc_L2i=-1., Yctc_L2i=.625, Xctc_R2i=-1., Yctc_R2i=-.625,
+        XCG_TM=-.3, YCG_TM=.4, Z_R1=.3, X_R1=x_fr, X_R2=x_rr, Vx=vx)
+    observation = tuple(values[name] for name in EXPORTS)
+    controller(10., observation)
+    assert controller.mode == 'ABORT_STOP'
+    controller(10. + CFG.stop_dwell_s + .02, observation)
+    assert controller.mode == expected
+    assert controller.abort_reason == 'test abort'

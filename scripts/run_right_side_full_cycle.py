@@ -413,6 +413,8 @@ def main() -> None:
     parser.add_argument("--front-steering-feedback", action="store_true")
     parser.add_argument("--measurement-noise", action="store_true",
                         help="deterministic sensor noise; acceptance uses plant truth")
+    parser.add_argument("--feedback-delay-s", type=float, default=0.,
+                        help="sampled observation packet delay; requires --measurement-noise")
     parser.add_argument("--noise-seed", type=int, default=ObservationNoiseConfig().seed)
     parser.add_argument("--rear-parking-damping-nm-per-rpm", type=float)
     parser.add_argument("--rear-lift-force-n", type=float)
@@ -437,6 +439,9 @@ def main() -> None:
         parser.error('transition allocation requires active or monitor support allocation')
     if not np.isfinite(args.lateral_ride_scale) or not 0. <= args.lateral_ride_scale <= 1.:
         parser.error("lateral ride scale must be finite and in 0..1")
+    if (not np.isfinite(args.feedback_delay_s) or args.feedback_delay_s < 0. or
+            (args.feedback_delay_s > 0. and not args.measurement_noise)):
+        parser.error("feedback delay must be finite, nonnegative and requires --measurement-noise")
     if args.noise_seed < 0:
         parser.error("noise seed must be nonnegative")
     if ((args.rear_target_speed_kph is None) !=
@@ -607,7 +612,8 @@ def main() -> None:
         path_reference=StaticPathReference() if args.average_path_reference else None,
         rear_config=rear_config)
     noise_config = ObservationNoiseConfig(seed=args.noise_seed,
-                                         period_s=front_run.CFG.control_period_s)
+                                         period_s=front_run.CFG.control_period_s,
+                                         feedback_delay_s=args.feedback_delay_s)
     trial = (NoisyFeedbackTrial(controller, front_run.EXPORTS, front_run.CFG,
                                noise_config) if args.measurement_noise else None)
     native = run_stepwise(model / "simfile.sim", trial or controller,
@@ -616,10 +622,15 @@ def main() -> None:
                           front_run.EXPORTS, log_decimation=10,
                           stop_at_s=args.stop_at,
                           stop_when=(lambda now_s: (
+                              (controller.front.mode == "COMPLETE" and
+                               controller.front.abort_reason is not None and
+                               now_s - controller.front.lower_start_s >=
+                               front_run.CFG.lower_ramp_s + front_run.CFG.return_ramp_s +
+                               rear_config.post_complete_observe_s) or (
                               controller.rear.mode == "RR_COMPLETE" and
                               controller.rear.mode_start_s is not None and
                               now_s - controller.rear.mode_start_s >=
-                              rear_config.post_complete_observe_s)))
+                              rear_config.post_complete_observe_s))))
     front_rows = trial.front_truth.rows if trial else controller.front.rows
     rear_rows = trial.rear_truth.rows if trial else controller.rear.rows
     if trial:
@@ -640,6 +651,7 @@ def main() -> None:
                                  truth_rows=rear_rows,
                                  path_reference_yo_m=path_yo,
                                  path_reference_yaw_deg=path_yaw)
+    result["fr_abort_reason"] = controller.front.abort_reason
     result["measurement_noise"] = {
         "enabled": args.measurement_noise, "config": asdict(noise_config),
         "acceptance_source": "plant_truth",
@@ -647,6 +659,10 @@ def main() -> None:
         "control_path_reference_yaw_deg": controller.front.initial_yaw_deg,
         "load_observation_floor_n": 0.0,
         "ideal_channels": "contact geometry, CoM, clearance, rates, travel, wheel speed",
+        "delay_scope": "all exported observation channels; controller timestamp remains current",
+        "delay_sampling": "control-period packets, causal hold, first packet during warmup",
+        "maximum_logged_age_s": max((r.get("measurement_age_s", 0.)
+                                       for r in front_rows + rear_rows), default=0.),
     }
     result["model_tuning"] = {
         "original_kinematics": args.original_kinematics,

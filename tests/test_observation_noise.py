@@ -67,3 +67,61 @@ def test_noisy_trial_records_truth_path_origin_at_reference_capture():
     assert trial.path_reference_yaw_deg == .456
     trial(.02, (.8, .9))
     assert trial.path_reference_yo_m == .123
+
+def test_delayed_packet_is_causal_and_includes_geometry():
+    from ddevsim.static_wheel_lift.observation_noise import ObservationNoise, ObservationNoiseConfig
+    config = ObservationNoiseConfig(feedback_delay_s=.04, load_std_n=0.,
+        lateral_std_m=0., attitude_std_deg=0., speed_std_kph=0.)
+    sensor = ObservationNoise(config)
+    for time in (0., .02, .04, .06):
+        observed = sensor.observe(time, {'Fz_L1': time, 'XCG_TM': time})
+    assert observed == {'Fz_L1': .02, 'XCG_TM': .02}
+    assert abs(sensor.measurement_time_s - .02) < 1e-12
+    assert abs(sensor.measurement_age_s - .04) < 1e-12
+    assert sensor.observe(.061, {'Fz_L1': 9., 'XCG_TM': 9.}) == observed
+
+
+def test_delay_warmup_and_noninteger_tick_age():
+    from ddevsim.static_wheel_lift.observation_noise import ObservationNoise, ObservationNoiseConfig
+    sensor = ObservationNoise(ObservationNoiseConfig(feedback_delay_s=.025))
+    sensor.observe(0., {'XCG_TM': 0.})
+    assert sensor.observe(.01, {'XCG_TM': 10.})['XCG_TM'] == 0.
+    assert sensor.measurement_age_s == .01
+    sensor.observe(.02, {'XCG_TM': 20.})
+    assert sensor.observe(.04, {'XCG_TM': 40.})['XCG_TM'] == 0.
+    assert sensor.observe(.06, {'XCG_TM': 60.})['XCG_TM'] == 20.
+    assert abs(sensor.measurement_age_s - .04) < 1e-12
+
+
+def test_delay_configuration_rejects_negative_or_nonfinite():
+    import pytest
+    from ddevsim.static_wheel_lift.config import ObservationNoiseConfig
+    for delay in (-.01, float('nan'), float('inf')):
+        with pytest.raises(ValueError):
+            ObservationNoiseConfig(feedback_delay_s=delay)
+
+def test_delayed_trial_keeps_current_timestamp_and_independent_truth():
+    from ddevsim.static_wheel_lift.observation_noise import NoisyFeedbackTrial, ObservationNoiseConfig
+    from ddevsim.static_wheel_lift.config import CLOSED_LOOP_RUN, REAR_CYCLE_RUN
+    class Controller:
+        def __init__(self):
+            self.front = SimpleNamespace(rows=[], initial_yo_m=None)
+            self.rear = SimpleNamespace(rows=[], config=REAR_CYCLE_RUN)
+        def __call__(self, now, exports):
+            self.front.rows.append({'time_s': now, 'yo_m': exports[0]})
+            return (0.,) * 9
+    class Audit:
+        def __init__(self):
+            self.rows = []
+        def capture(self, row, truth, **kwargs):
+            self.rows.append({**row, 'yo_m': truth['Yo']})
+    controller = Controller()
+    config = ObservationNoiseConfig(feedback_delay_s=.04, lateral_std_m=0.)
+    trial = NoisyFeedbackTrial(controller, ('Yo',), CLOSED_LOOP_RUN, config)
+    trial.front_truth = Audit()
+    for time in (0., .02, .04, .06):
+        trial(time, (time,))
+    assert controller.front.rows[-1]['yo_m'] == .02
+    assert controller.front.rows[-1]['time_s'] == .06
+    assert trial.front_truth.rows[-1]['yo_m'] == .06
+    assert abs(trial.front_truth.rows[-1]['measurement_age_s'] - .04) < 1e-12

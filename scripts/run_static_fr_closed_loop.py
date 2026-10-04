@@ -194,6 +194,8 @@ class LiftCrawlController:
     def _enter(self, mode: str, now_s: float) -> None:
         self.mode = mode
         self.mode_start_s = now_s
+        if mode == "ABORT_STOP":
+            self.stop_since_s = None
         if mode == "LIFTING":
             self.lift_start_s = now_s
             self.support.gain = self.swing_gain
@@ -346,6 +348,24 @@ class LiftCrawlController:
             rear_clear = x["X_R2"] <= (float(self.scenario["start_station_m"]) -
                                        CFG.rear_stop_clearance_m)
             if fr_clear and rear_clear and abs(x["Vx"]) <= CFG.stop_speed_kph:
+                if self.stop_since_s is None:
+                    self.stop_since_s = now_s
+                elif now_s - self.stop_since_s >= CFG.stop_dwell_s:
+                    self._enter("LOWERING", now_s)
+            else:
+                self.stop_since_s = None
+        if self.mode == "ABORT_STOP":
+            # Keep FR lifted over the pit. Recover only after braking on solid
+            # ground, with RR also on solid ground and three supports intact.
+            start = float(self.scenario["start_station_m"])
+            end = start + float(self.scenario["length_m"])
+            solid = lambda station: (station <= start - CFG.crossing_clearance_m or
+                                     station >= end + CFG.crossing_clearance_m)
+            can_recover = (solid(x["X_R1"]) and solid(x["X_R2"]) and
+                           abs(x["Vx"]) <= CFG.stop_speed_kph and
+                           support_load >= CFG.support_floor_n and
+                           margin >= CFG.lambda_abort)
+            if can_recover:
                 if self.stop_since_s is None:
                     self.stop_since_s = now_s
                 elif now_s - self.stop_since_s >= CFG.stop_dwell_s:

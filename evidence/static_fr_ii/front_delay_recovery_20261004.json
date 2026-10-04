@@ -1,0 +1,21 @@
+{
+  "run_name": "feedback_delay40_front_recovery_20261004",
+  "recovery_status": "PASS",
+  "task_status": "FAIL",
+  "criteria": {
+    "abort_recorded": true,
+    "task_remains_fail": true,
+    "stopped_on_solid_ground_before_lowering": true,
+    "four_wheel_recovered": true,
+    "continuous_abort_handoff": true,
+    "native_completed": true
+  },
+  "abort_reason": "three-wheel support or clearance limit",
+  "abort_start_s": 29.88049999997571,
+  "lower_start_s": 31.860499999971097,
+  "final_time_s": 49.86050000005605,
+  "abort_handoff_force_jump_n": 0.0,
+  "maximum_following_20ms_force_step_n": 42.028272255255615,
+  "model_run_all_sha256": "85ff4e994a6fb98e7f819d0c5ffdfe43b2b4870c31942d1915b68cddc00f70d2",
+  "scope": "FR stopped on solid ground; no over-pit or support-loss recovery claim"
+}

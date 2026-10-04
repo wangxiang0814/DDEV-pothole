@@ -1,6 +1,8 @@
 """Deterministic sensor trials and independent plant-truth acceptance logs."""
 from .config import ObservationNoiseConfig
 
+from collections import deque
+
 import numpy as np
 
 from .closed_loop import WheelLoadFilter
@@ -15,13 +17,18 @@ class ObservationNoise:
         self.rng = np.random.default_rng(config.seed)
         self.last_tick_s = None
         self.offsets = {}
+        self.packets = deque()
+        self.measurement_time_s = None
+        self.measurement_age_s = 0.
         self.scales = {**{f'Fz_{w}': config.load_std_n for w in ('L1', 'R1', 'L2', 'R2')},
                        'Yo': config.lateral_std_m, 'Yaw': config.attitude_std_deg,
                        'Roll_E': config.attitude_std_deg, 'Pitch': config.attitude_std_deg,
                        'Vx': config.speed_std_kph}
 
     def observe(self, now_s, truth):
-        if self.last_tick_s is None or now_s - self.last_tick_s >= self.config.period_s - 1e-8:
+        new_tick = (self.last_tick_s is None or
+                    now_s - self.last_tick_s >= self.config.period_s - 1e-8)
+        if new_tick:
             self.last_tick_s = now_s
             self.offsets = {key: float(np.clip(self.rng.normal(),
                             -self.config.clip_sigma, self.config.clip_sigma)) * scale
@@ -33,7 +40,19 @@ class ObservationNoise:
                 # Existing load estimators require nonnegative wheel loads.
                 if key.startswith('Fz_'):
                     observed[key] = max(0., observed[key])
-        return observed
+        if self.config.feedback_delay_s > 0.:
+            if new_tick:
+                self.packets.append((now_s, observed))
+            cutoff = now_s - self.config.feedback_delay_s
+            # Keep the latest packet at or before cutoff and all newer packets.
+            # Before the history fills, the first available sample is held.
+            while len(self.packets) > 1 and self.packets[1][0] <= cutoff + 1e-10:
+                self.packets.popleft()
+            self.measurement_time_s, observed = self.packets[0]
+        else:
+            self.measurement_time_s = now_s
+        self.measurement_age_s = now_s - self.measurement_time_s
+        return dict(observed)
 
 
 class TruthAudit:
@@ -102,8 +121,12 @@ class NoisyFeedbackTrial:
                 self.controller.front.initial_yo_m is not None):
             self.path_reference_yo_m = truth['Yo']
             self.path_reference_yaw_deg = truth['Yaw']
+        timing = dict(measurement_time_s=self.noise.measurement_time_s,
+                      measurement_age_s=self.noise.measurement_age_s)
         if len(self.controller.front.rows) > front_count:
+            self.controller.front.rows[-1].update(timing)
             self.front_truth.capture(self.controller.front.rows[-1], truth, lifted_corner='FR')
         if len(self.controller.rear.rows) > rear_count:
+            self.controller.rear.rows[-1].update(timing)
             self.rear_truth.capture(self.controller.rear.rows[-1], truth, lifted_corner='RR')
         return command
