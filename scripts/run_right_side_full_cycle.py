@@ -15,7 +15,7 @@ import numpy as np
 import run_static_fr_closed_loop as front_run
 
 from ddevsim.cosim import run_stepwise
-from ddevsim.pothole_case import corner_module_scenario, _procedure_block
+from ddevsim.pothole_case import corner_module_scenario
 from ddevsim.visual_mesh import write_visual_mesh
 from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
                                              RIGHT_SIDE_MODEL, TUNED_REAR_RUN,
@@ -33,6 +33,8 @@ from ddevsim.static_wheel_lift.path_reference import StaticPathReference
 from ddevsim.static_wheel_lift.config import PATH_REFERENCE
 from ddevsim.static_wheel_lift.force_disturbance import SupportForcePulse
 from ddevsim.static_wheel_lift.config import SupportForcePulseConfig
+from ddevsim.static_wheel_lift.pit_scene_transfer import (
+    replace_pit_geometry_parameters, validated_pit_scene_models)
 
 STEERING_IMPORT = "IMP_STEER_SW"
 
@@ -113,24 +115,7 @@ def _set_pit_geometry(model: Path, scenario: dict,
         target_speed_kph=float(scenario["target_speed_kph"]))
     path = model / "run_all.par"
     content = path.read_text(encoding="utf-8")
-    generated = _procedure_block(variant)
-    table_pattern = r"(?m)^ROAD_DZ_CARPET 2D_LINEAR\s*\n(?:.*\n)*?ENDTABLE"
-    table = re.search(table_pattern, generated)
-    if table is None:
-        raise ValueError("generated pit has no physical road grid")
-    content, count = re.subn(table_pattern, lambda _: table.group(), content)
-    if count != 1:
-        raise ValueError("expected one physical road grid")
-    shape_start = r"ENTER_PARSFILE Roads\Shapes\DDEV_single_wheel_pothole.par"
-    shape_end = r"EXIT_PARSFILE Roads\Shapes\DDEV_single_wheel_pothole.par"
-    for source in (content, generated):
-        if source.count(shape_start) != 1 or source.count(shape_end) != 1:
-            raise ValueError("expected one pothole visual shape block")
-    old_end = content.index(shape_end) + len(shape_end)
-    new_end = generated.index(shape_end) + len(shape_end)
-    content = (content[:content.index(shape_start)] +
-               generated[generated.index(shape_start):new_end] +
-               content[old_end:])
+    content = replace_pit_geometry_parameters(content, variant)
     path.write_text(content, encoding="utf-8")
     write_visual_mesh(model / "visual_assets", variant)
     scenario["width_m"], scenario["depth_m"] = width_m, depth_m
@@ -412,6 +397,8 @@ def main() -> None:
                         help='Optional native mode gains; exact selected model hash must match.')
     parser.add_argument('--support-allocation', choices=('off', 'monitor', 'active'), default='off')
     parser.add_argument('--support-allocation-gains', type=Path)
+    parser.add_argument('--support-allocation-reference-model', type=Path,
+                        help='Explicit source run_all.par for strictly verified pit width/depth gain reuse.')
     parser.add_argument('--support-allocation-transitions', action='store_true')
     parser.add_argument('--average-path-reference', action='store_true')
     parser.add_argument("--steer-probe-deg", type=float)
@@ -629,17 +616,28 @@ def main() -> None:
     rear_config = replace(rear_config, posture_fl_force_n=posture_force,
                           posture_hold_fl_force_n=posture_hold)
     allocation, allocation_provenance = None, None
+    if args.support_allocation_reference_model is not None and args.support_allocation_gains is None:
+        parser.error('scene gain reuse requires --support-allocation-gains')
     if args.support_allocation_gains is not None:
         allocation_path = args.support_allocation_gains.resolve()
         bundle = json.loads(allocation_path.read_text(encoding='utf-8'))
         model_hash = hashlib.sha256(path.read_bytes()).hexdigest()
-        models = validated_support_models(bundle, model_sha256=model_hash)
+        transfer = None
+        if args.support_allocation_reference_model is None:
+            models = validated_support_models(bundle, model_sha256=model_hash)
+        else:
+            variant = corner_module_scenario(width_m=scenario['width_m'],
+                depth_m=scenario['depth_m'], target_speed_kph=float(scenario['target_speed_kph']))
+            models, transfer = validated_pit_scene_models(bundle,
+                args.support_allocation_reference_model.resolve(), path, variant)
         allocation = SupportAllocationFeedback(mode_models=models,
             active=args.support_allocation == 'active', period_s=front_run.CFG.control_period_s,
             front_limits=front_run.CFG, rear_limits=rear_config,
             transitions=args.support_allocation_transitions)
         allocation_provenance = {'bundle_sha256': hashlib.sha256(allocation_path.read_bytes()).hexdigest(),
                                  'model_sha256': model_hash, 'mode': args.support_allocation}
+        if transfer is not None:
+            allocation_provenance['scene_transfer'] = transfer
     controller = FullRightSideController(
         scenario=scenario,
         rr_gain_per_coupled_force=float(
