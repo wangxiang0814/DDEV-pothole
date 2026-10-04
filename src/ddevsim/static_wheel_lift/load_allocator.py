@@ -54,10 +54,6 @@ def allocate_loads(
     matrix = np.vstack((np.ones(4), xy.T))
     rhs = np.r_[1.0, target]
     bounds = list(zip(low / scale, high / scale))
-    feasible = linprog(np.zeros(4), A_eq=matrix, b_eq=rhs,
-                       bounds=bounds, method="highs")
-    if not feasible.success:
-        return LoadAllocation("INFEASIBLE", None, None)
     p = prev / scale
     n = nominal / scale
     f = scheduled_n / scale
@@ -66,6 +62,32 @@ def allocate_loads(
         return float(smooth_weight * np.sum((x - p)**2) +
                      nominal_weight * np.sum((x - n)**2) +
                      fr_weight * (x[lifted_index] - f)**2 + regularization * np.sum(x**2))
+
+    if low[lifted_index] == high[lifted_index]:
+        # Fixed lift load plus three equilibrium equations leaves one unique
+        # solution. Solve support geometry, not an inverse of actuator gains.
+        support = np.array([i for i in range(4) if i != lifted_index])
+        origin = xy[support[0]]
+        frame = np.vstack((np.ones(3), (xy[support] - origin).T))
+        fixed = low[lifted_index] / scale
+        remaining = np.r_[1. - fixed, target - origin - fixed * (xy[lifted_index] - origin)]
+        try:
+            candidate = np.zeros(4)
+            candidate[lifted_index] = fixed
+            candidate[support] = np.linalg.solve(frame, remaining)
+        except np.linalg.LinAlgError:
+            pass  # Degenerate geometry retains the general feasibility path.
+        else:
+            if (np.max(np.abs(matrix @ candidate - rhs)) > 1e-7 or
+                    np.any(candidate < low / scale - 1e-12) or
+                    np.any(candidate > high / scale + 1e-12)):
+                return LoadAllocation('INFEASIBLE', None, None)
+            return LoadAllocation('OPTIMAL', candidate * scale, cost(candidate))
+
+    feasible = linprog(np.zeros(4), A_eq=matrix, b_eq=rhs,
+                       bounds=bounds, method="highs")
+    if not feasible.success:
+        return LoadAllocation("INFEASIBLE", None, None)
 
     result = minimize(cost, feasible.x, method="SLSQP", bounds=bounds,
                       constraints={"type": "eq", "fun": lambda x: matrix @ x - rhs},

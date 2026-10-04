@@ -107,3 +107,16 @@ def validated_support_models(bundle, *, model_sha256):
             if matrix.shape != shape or not np.isfinite(matrix).all():
                 raise ValueError(f'invalid support model: {mode}/{key}')
     return bundle['modes']
+
+
+def assemble_support_bundle(records):
+    """Bundle independently identified modes only for one identical plant."""
+    from copy import deepcopy
+    modes = ('FOUR_CONTACT', 'FR', 'RR')
+    if set(records) != set(modes):
+        raise ValueError('all three contact modes are required')
+    source = records['FOUR_CONTACT']['source_model_sha256']
+    bundle = {'source_model_sha256': source, 'modes': deepcopy(records),
+              'scope': 'local contact-mode responses for exactly one source model'}
+    validated_support_models(bundle, model_sha256=source)
+    return bundle

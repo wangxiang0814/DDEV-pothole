@@ -1,0 +1,35 @@
+{
+  "baseline_ref": "cb4077b",
+  "baseline_source_sha256": "2b89681e7f18a399a69daf38b61721b0826dec289333d7ecd3e262fba287b984",
+  "direct_source_sha256": "cd7759b6f430479416efe661f473098e57ccbb1194255273fe082585647cecf4",
+  "samples_per_corner_per_solver": 100,
+  "scope": "interleaved same-process upper allocator timing; no hard realtime guarantee",
+  "results": {
+    "FR": {
+      "maximum_force_difference_n": 9.094947017729282e-13,
+      "generic": {
+        "median_ms": 4.837650000000027,
+        "p95_ms": 8.428529999999856,
+        "max_ms": 9.020099999999864
+      },
+      "direct": {
+        "median_ms": 0.521350000000087,
+        "p95_ms": 1.2404499999997265,
+        "max_ms": 1.864600000000216
+      }
+    },
+    "RR": {
+      "maximum_force_difference_n": 1.8189894035458565e-12,
+      "generic": {
+        "median_ms": 7.83440000000013,
+        "p95_ms": 8.900974999999733,
+        "max_ms": 10.472099999999873
+      },
+      "direct": {
+        "median_ms": 1.0118000000001182,
+        "p95_ms": 1.2546949999997725,
+        "max_ms": 1.4896999999995941
+      }
+    }
+  }
+}

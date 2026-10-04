@@ -1,5 +1,7 @@
 # 当前 I_I TruckSim–Python I/O 映射
 
+2026-10-04：在线三支撑分配通过原九路完整循环接口施加，不增加物理通道。`--support-allocation active/monitor` 必须配匹配车型 SHA256 的 `--support-allocation-gains`；标称与 μ=0.6/近起点的增益分别发布。最终 Fact 指令已包含基线与附加修正，日志另记分配参考/状态/耗时。求解 0.5 ms、控制 20 ms、原生记录 5 ms 不变。
+
 2026-10-03 更新：compact 的 FR 最大参考推进速度为 3.0，求解/控制周期及通道不变。当前车型三接触模式辨识见 `evidence/static_fr_ii/current_contact_gains_20261003.json`；完整循环可选 `--contact-gain-bundle` 必须匹配最终运行模型 SHA256，不默认替换历史局部增益。辨识只使用原九路完整循环接口，在输出日志记录后冻结保持输入，不添加新物理通道。
 
 本工程当前仅使用 `models/corner_module_ddev`：约 1.36 t 的 Compact Utility Truck，`VEHICLE_CODE I_I`，前后独立悬架。`models/corner_module_ddev/simfile.sim` 调用 TruckSim 2019 DLL；Python 入口为 `src/ddevsim/cosim.py:run_stepwise`。求解器积分 `tstep=0.0005 s`；`EXT_MODEL_STEP=0.01 s` 是外部模型配置，不可当作积分步长。CSV 的 5 ms 抽样只是记录间隔。
