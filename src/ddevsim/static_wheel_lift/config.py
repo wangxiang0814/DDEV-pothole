@@ -287,6 +287,7 @@ class SupportQPConfig:
     force_limit_n: float = 18200.0
     correction_limit_n: float = 500.0
     force_slew_n_s: float = 400.0
+    abort_force_slew_n_s: float = 1200.0
     travel_lower_m: float = -0.149
     travel_upper_m: float = 0.155
     attitude_limit_deg: float = 10.0
@@ -492,3 +493,41 @@ class ObservationNoiseConfig:
                 min(self.load_std_n, self.lateral_std_m,
                     self.attitude_std_deg, self.speed_std_kph, self.feedback_delay_s) < 0):
             raise ValueError('invalid noise configuration')
+
+
+@dataclass(frozen=True)
+class SupportForcePulseConfig:
+    # Explicit simulation actuator-bias stress trial, not a hardware specification.
+    amplitude_n: float = 200.
+    phase: str = 'RR_HOLD'
+    corner: str = 'FL'
+    start_delay_s: float = .5
+    ramp_s: float = .5
+    hold_s: float = 1.
+    recovery_release_s: float = SUPPORT_QP.release_s
+    force_limit_n: float = SUPPORT_QP.force_limit_n
+
+    def __post_init__(self):
+        support = {'THREE_WHEEL_HOLD': ('FL', 'RL', 'RR'),
+                   'RR_HOLD': ('FL', 'FR', 'RL')}
+        if (self.phase not in support or self.corner not in support[self.phase] or
+                not all(math.isfinite(x) for x in (self.amplitude_n, self.start_delay_s,
+                    self.ramp_s, self.hold_s, self.recovery_release_s, self.force_limit_n)) or
+                self.amplitude_n == 0. or abs(self.amplitude_n) > self.force_limit_n or
+                min(self.start_delay_s, self.hold_s) < 0. or
+                min(self.ramp_s, self.recovery_release_s, self.force_limit_n) <= 0.):
+            raise ValueError('invalid support force pulse configuration')
+
+
+@dataclass(frozen=True)
+class PitAbortTrialConfig:
+    trigger_fraction: float = .5
+    max_observe_after_abort_s: float = 25.
+    minimum_stopped_hold_s: float = 5.
+
+    def __post_init__(self):
+        if (not all(math.isfinite(x) for x in (self.trigger_fraction,
+                self.max_observe_after_abort_s, self.minimum_stopped_hold_s)) or
+                not 0. < self.trigger_fraction < 1. or
+                not 0. < self.minimum_stopped_hold_s < self.max_observe_after_abort_s):
+            raise ValueError('invalid pit abort trial configuration')

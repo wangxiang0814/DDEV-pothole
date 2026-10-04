@@ -31,6 +31,8 @@ from ddevsim.static_wheel_lift.system_identification import validated_contact_ga
 from ddevsim.static_wheel_lift.support_allocation_feedback import SupportAllocationFeedback
 from ddevsim.static_wheel_lift.path_reference import StaticPathReference
 from ddevsim.static_wheel_lift.config import PATH_REFERENCE
+from ddevsim.static_wheel_lift.force_disturbance import SupportForcePulse
+from ddevsim.static_wheel_lift.config import SupportForcePulseConfig
 
 STEERING_IMPORT = "IMP_STEER_SW"
 
@@ -173,6 +175,7 @@ class FullRightSideController:
                  contact_gains=None,
                  allocation=None,
                  path_reference=None,
+                 disturbance=None,
                  rear_config=REAR_CYCLE_RUN):
         self.front = front_run.LiftCrawlController(crawl=True, scenario=scenario,
                                                    contact_gains=contact_gains)
@@ -189,6 +192,22 @@ class FullRightSideController:
         self.front_steer_tick_s: float | None = None
         self.allocation = allocation
         self.path_reference = path_reference
+        self.disturbance = disturbance
+
+    def _disturb(self, now_s, command, stage):
+        if self.disturbance is None:
+            return command
+        selected = self.front if stage == 'FR' else self.rear
+        actual = self.disturbance.apply(now_s, command, stage=stage, phase=selected.mode)
+        if stage == 'RR':
+            # Recovery must snapshot actual inputs, including the unknown bias.
+            self.rear.last_suspension_force_n = np.asarray(actual[4:8]).copy()
+        if selected.rows and selected.rows[-1]['time_s'] == now_s:
+            row = selected.rows[-1]
+            row.update(self.disturbance.telemetry)
+            for i, c in enumerate(('fl', 'fr', 'rl', 'rr')):
+                row[f'fact_{c}_n'] = float(actual[4 + i])
+        return actual
 
     def _allocate(self, now_s, x, command, stage):
         if self.allocation is None:
@@ -202,7 +221,8 @@ class FullRightSideController:
             row.update(self.allocation.telemetry)
             for i, c in enumerate(('fl', 'fr', 'rl', 'rr')):
                 row[f'fact_{c}_n'] = float(output[4 + i])
-        if (self.allocation.active and self.allocation.telemetry['support_qp_failure_s'] >=
+        if (selected.mode not in ('ABORT_STOP', 'RR_ABORT_STOP') and
+                self.allocation.active and self.allocation.telemetry['support_qp_failure_s'] >=
                 self.allocation.config.max_continuous_failure_s):
             selected.abort_reason = 'support allocation persistently infeasible'
             selected._enter('ABORT_STOP' if stage == 'FR' else 'RR_ABORT_STOP', now_s)
@@ -237,8 +257,8 @@ class FullRightSideController:
                 self.rear.initial_yo_m = self.front.initial_yo_m
                 self.rear.initial_yaw_deg = self.front.initial_yaw_deg
                 self.rear_started = True
-            return self._allocate(now_s, dict(zip(front_run.EXPORTS, exports)),
-                                  (*command, self.front_steer_deg), 'FR')
+            return self._disturb(now_s, self._allocate(now_s, dict(zip(front_run.EXPORTS, exports)),
+                                  (*command, self.front_steer_deg), 'FR'), 'FR')
         x = dict(zip(front_run.EXPORTS, exports))
         if self.identify_rr_swing and self.rear.mode == "RR_HOLD":
             if self.probe_start_s is None:
@@ -265,7 +285,7 @@ class FullRightSideController:
         if self.steer_probe_deg is not None:
             steer_deg = (self.steer_probe_deg if self.rear.mode in
                          ("RR_CRAWL", "RR_STOP") else 0.0)
-        return self._allocate(now_s, x, (*command, steer_deg), 'RR')
+        return self._disturb(now_s, self._allocate(now_s, x, (*command, steer_deg), 'RR'), 'RR')
 
 
 def evaluate_full_cycle(front_result: dict, rear: RearCycleController,
@@ -413,6 +433,9 @@ def main() -> None:
     parser.add_argument("--front-steering-feedback", action="store_true")
     parser.add_argument("--measurement-noise", action="store_true",
                         help="deterministic sensor noise; acceptance uses plant truth")
+    parser.add_argument("--support-force-pulse-n", type=float,
+                        help="finite unknown support-actuator force bias, signed N")
+    parser.add_argument("--support-force-pulse-stage", choices=('FR', 'RR'), default='RR')
     parser.add_argument("--feedback-delay-s", type=float, default=0.,
                         help="sampled observation packet delay; requires --measurement-noise")
     parser.add_argument("--noise-seed", type=int, default=ObservationNoiseConfig().seed)
@@ -425,6 +448,8 @@ def main() -> None:
     parser.add_argument("--front-target-speed-kph", type=float)
     parser.add_argument("--front-min-pit-speed-kph", type=float)
     parser.add_argument("--front-accel-ramp-s", type=float)
+    parser.add_argument("--front-preload-reference-rate", type=float,
+                        help="maximum feedback-governed preload reference speed; baseline unchanged")
     parser.add_argument("--front-lift-force-n", type=float)
     parser.add_argument("--front-support-feedback-limit-n", type=float)
     parser.add_argument("--front-brake-lead-m", type=float)
@@ -433,6 +458,15 @@ def main() -> None:
     parser.add_argument("--road-friction", type=float)
     parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
     args = parser.parse_args()
+    disturbance = None
+    if args.support_force_pulse_n is not None:
+        try:
+            disturbance = SupportForcePulse(SupportForcePulseConfig(
+                amplitude_n=args.support_force_pulse_n,
+                phase='THREE_WHEEL_HOLD' if args.support_force_pulse_stage == 'FR' else 'RR_HOLD',
+                corner='RL' if args.support_force_pulse_stage == 'FR' else 'FL'))
+        except ValueError as exc:
+            parser.error(str(exc))
     if (args.support_allocation != 'off') != (args.support_allocation_gains is not None):
         parser.error('support allocation requires explicit gain bundle; off mode takes no bundle')
     if args.support_allocation_transitions and args.support_allocation == 'off':
@@ -456,6 +490,12 @@ def main() -> None:
         "fast": FAST_CYCLE_FRONT,
         "compact": COMPACT_CYCLE_FRONT,
     }[args.efficiency_profile]
+    if args.front_preload_reference_rate is not None:
+        if (not np.isfinite(args.front_preload_reference_rate) or
+                args.front_preload_reference_rate < 1.):
+            parser.error("preload rate must be finite and at least 1")
+        front_run.CFG = replace(front_run.CFG,
+            preload_max_reference_rate=args.front_preload_reference_rate)
     if args.front_target_speed_kph is not None:
         front_run.CFG = front_run.speed_trial_config(
             args.front_target_speed_kph, args.front_min_pit_speed_kph,
@@ -609,6 +649,7 @@ def main() -> None:
         front_steering_feedback=args.front_steering_feedback,
         contact_gains=contact_gains,
         allocation=allocation,
+        disturbance=disturbance,
         path_reference=StaticPathReference() if args.average_path_reference else None,
         rear_config=rear_config)
     noise_config = ObservationNoiseConfig(seed=args.noise_seed,
@@ -651,6 +692,13 @@ def main() -> None:
                                  truth_rows=rear_rows,
                                  path_reference_yo_m=path_yo,
                                  path_reference_yaw_deg=path_yaw)
+    if disturbance is not None:
+        report = disturbance.summary()
+        result['force_disturbance'] = report
+        passed = report['delivered']
+        result['criteria']['disturbance_trial_delivered'] = passed
+        if not passed:
+            result['status'] = 'FAIL'
     result["fr_abort_reason"] = controller.front.abort_reason
     result["measurement_noise"] = {
         "enabled": args.measurement_noise, "config": asdict(noise_config),

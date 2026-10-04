@@ -33,6 +33,7 @@ def test_lowering_handoff_starts_from_current_correction_and_finishes_at_zero():
 def test_rear_abort_snapshot_is_not_double_added_by_outer_feedback():
     c = controller()
     c.stage = 'RR'
+    c.last_update_s = 10.  # Native handoff between QP ticks does not double-add.
     c.correction = np.array([100., -50., 20.])
     snapshot = (0.,) * 4 + (500., 600., 700., -200., 0.)
     assert c.apply(10., {}, snapshot, stage='RR', phase='RR_ABORT_STOP') == snapshot
@@ -107,3 +108,72 @@ def test_rear_posture_feedback_tracks_intended_roll_instead_of_blocking_adjustme
     x['Roll_E'], x['Z_R2'] = -8., .303
     c.apply(2., x, (0.,)*9, stage='RR', phase='RR_HOLD')
     assert np.rad2deg(c.target_att[0]) == pytest.approx(ROBUST_REAR_RUN.posture_target_roll_deg)
+
+
+def test_rear_abort_keeps_closed_loop_after_one_snapshot_handoff(monkeypatch):
+    from types import SimpleNamespace
+    import ddevsim.static_wheel_lift.support_allocation_feedback as module
+    captured = []
+    def solve(**kw):
+        captured.append(kw)
+        force = np.asarray(kw['base_force_n']) + np.r_[kw['correction_n'],0.]
+        force[0] += 4.
+        return SimpleNamespace(status='OPTIMAL',force_n=force,cost=0.,predicted_margin=.1)
+    monkeypatch.setattr(module,'allocate_support_increment',solve)
+    c = SupportAllocationFeedback(mode_models={'RR':{'gains':{}}},active=True,
+        period_s=.02,front_limits=CLOSED_LOOP_RUN,rear_limits=ROBUST_REAR_RUN,transitions=True)
+    c.stage='RR'
+    c.correction=np.array([100.,-50.,20.])
+    x=dict(Roll_E=-7.2,Pitch=0.,AVx=0.,AVy=0.,XCG_TM=.4,YCG_TM=.4)
+    for w,xy,load in zip(('L1','R1','L2','R2'),((1,1),(1,-1),(-1,1),(-1,-1)),(4000,4000,4000,0)):
+        x.update({f'Xctc_{w}i':xy[0],f'Yctc_{w}i':xy[1],f'Fz_{w}':load,
+                  f'Jnc_{w}':0.,f'Z_{w}':.303})
+    snapshot=(0.,)*4+(500.,600.,700.,-200.,0.)
+    first=c.apply(1.,x,snapshot,stage='RR',phase='RR_ABORT_STOP')
+    second=c.apply(1.02,x,snapshot,stage='RR',phase='RR_ABORT_STOP')
+    assert len(captured)==2
+    assert captured[0]['config'].force_slew_n_s == 1200.
+    np.testing.assert_allclose(captured[0]['correction_n'],0.)
+    np.testing.assert_allclose(captured[1]['correction_n'],[4.,0.,0.])
+    assert first[4]==504. and second[4]==508.
+
+
+def test_persistent_failure_does_not_reenter_abort_or_replace_initial_reason():
+    import sys
+    from pathlib import Path
+    from types import SimpleNamespace
+    sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
+    from run_right_side_full_cycle import FullRightSideController
+    c=object.__new__(FullRightSideController)
+    events=[]
+    c.rear=SimpleNamespace(mode='RR_ABORT_STOP',rows=[],abort_reason='injected fault',
+        _enter=lambda *args:events.append(args))
+    c.allocation=SimpleNamespace(active=True,telemetry={'support_qp_failure_s':1.},
+        config=SimpleNamespace(max_continuous_failure_s=.5),apply=lambda *args,**kw:args[2])
+    c._allocate(1.,{},(0.,)*9,'RR')
+    assert events==[] and c.rear.abort_reason=='injected fault'
+
+
+def test_abort_output_limits_actual_native_step_not_only_qp_average():
+    c = controller()
+    c.stage = 'RR'
+    c.phase = 'RR_ABORT_STOP'
+    c.last_update_s = 1.
+    c.last_application_s = 1.
+    c.correction = np.array([24., -24., 0.])
+    first = c.apply(1.0005, {}, (0.,)*9, stage='RR', phase='RR_ABORT_STOP')
+    np.testing.assert_allclose(first[4:8], [22.7, -22.7, 0., 0.])
+    second = c.apply(1.001, {}, (0.,)*9, stage='RR', phase='RR_ABORT_STOP')
+    np.testing.assert_allclose(second[4:8], [24., -24., 0., 0.])
+
+
+def test_abort_lowering_releases_actual_correction_not_unapplied_target():
+    c = controller()
+    c.stage = 'RR'
+    c.phase = 'RR_ABORT_STOP'
+    c.correction = np.array([24., -24., 0.])
+    c.last_applied = np.array([522.7, 577.3, 700., -200.])
+    snapshot = (0.,)*4 + (500.,600.,700.,-200.,0.)
+    output = c.apply(1., {}, snapshot, stage='RR', phase='RR_LOWERING')
+    np.testing.assert_allclose(output[4:8], c.last_applied)
+    np.testing.assert_allclose(c.release_correction, [22.7,-22.7,0.])

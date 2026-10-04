@@ -30,9 +30,12 @@ class SupportAllocationFeedback:
         self.transitions = transitions
         self.phase_counts = {}
         self.stage = None
+        self.phase = None
         self.correction = np.zeros(3)
         self.last_update_s = None
         self.last_applied = np.zeros(4)
+        self.last_application_s = None
+        self.abort_max_output_slew_n_s = 0.
         self.filtered = None
         self.target_att = None
         self.release_start_s = None
@@ -61,6 +64,7 @@ class SupportAllocationFeedback:
         support = np.array([i for i, c in enumerate(ORDER) if c != stage])
         if self.stage != stage:
             self.stage = stage
+            self.phase = None
             self.correction[:] = 0.
             self.filtered = None
             self.target_att = None
@@ -68,19 +72,23 @@ class SupportAllocationFeedback:
             self.release_start_s = None
             self.release_correction = None
             self.failure_start_s = None
-        active_phases = ('THREE_WHEEL_HOLD', 'CRAWL', 'STOP') if stage == 'FR' else ('RR_HOLD', 'RR_CRAWL', 'RR_STOP')
+        active_phases = ('THREE_WHEEL_HOLD', 'CRAWL', 'STOP') if stage == 'FR' else ('RR_HOLD', 'RR_CRAWL', 'RR_STOP', 'RR_ABORT_STOP')
         transition_phases = ('PRELOAD_SHIFT', 'LIFTING') if stage == 'FR' else ('RR_PRELOAD', 'RR_LIFTING', 'RR_POSTURE')
         transition = self.transitions and phase in transition_phases
         preload = phase in ('PRELOAD_SHIFT', 'RR_PRELOAD')
         lowering = phase in ('LOWERING', 'RETURN_TO_FOUR_WHEEL', 'RR_LOWERING', 'RR_RETURN')
-        if stage == 'RR' and phase == 'RR_ABORT_STOP':
+        if stage == 'RR' and phase == 'RR_ABORT_STOP' and self.phase != 'RR_ABORT_STOP':
             # RR's recovery snapshot already includes our last applied inputs.
             self.correction[:] = 0.
             self.release_start_s = None
             self.release_correction = None
+            self.failure_start_s = None
+            if self.target_att is not None:
+                self.target_att[0] = np.deg2rad(self.rear_limits.posture_target_roll_deg)
         elif lowering and self.release_start_s is None:
             self.release_start_s = now_s
-            self.release_correction = self.correction.copy()
+            self.release_correction = (self.last_applied[support] - base[4:8][support]
+                if self.phase == 'RR_ABORT_STOP' else self.correction.copy())
         if lowering:
             self.correction = self.release_correction * (1. - quintic_step(
                 now_s, self.release_start_s, self.config.release_s)[0])
@@ -111,7 +119,7 @@ class SupportAllocationFeedback:
             self.filtered = observed if self.filtered is None else self.filtered + alpha * (observed - self.filtered)
             if self.target_att is None and not transition:
                 self.target_att = self.filtered[4:].copy()
-                if self.transitions and stage == 'RR':
+                if stage == 'RR' and (self.transitions or phase == 'RR_ABORT_STOP'):
                     # Do not freeze a transient posture overshoot as the hold goal.
                     self.target_att[0] = np.deg2rad(self.rear_limits.posture_target_roll_deg)
             contacts = {c: (x[f'Xctc_{w}i'], x[f'Yctc_{w}i']) for c, w in zip(ORDER, WHEELS)}
@@ -136,6 +144,10 @@ class SupportAllocationFeedback:
                       else current_limits.travel_jounce_abort_mm)
             cfg = replace(self.config, attitude_limit_deg=att_bound,
                            travel_lower_m=rebound / 1000., travel_upper_m=jounce / 1000.)
+            if phase == 'RR_ABORT_STOP':
+                # Hard braking needs faster damping than steady crawl. Keep
+                # the correction magnitude, force, travel and contact bounds.
+                cfg = replace(cfg, force_slew_n_s=cfg.abort_force_slew_n_s)
             height = x[f'Z_{WHEELS[ORDER.index(stage)]}'] - cfg.tyre_radius_m
             if transition:
                 cfg = replace(cfg, clearance_floor_m=min(cfg.clearance_floor_m,
@@ -199,10 +211,20 @@ class SupportAllocationFeedback:
             self.failure_start_s = None
         if self.active:
             base[4 + support] += self.correction
+            if phase == 'RR_ABORT_STOP' and self.last_application_s is not None:
+                application_dt = max(0., now_s - self.last_application_s)
+                maximum_step = self.rear_limits.sim_force_slew_n_s * application_dt
+                step = np.clip(base[4:8] - self.last_applied, -maximum_step, maximum_step)
+                base[4:8] = self.last_applied + step
+                if application_dt > 0.:
+                    self.abort_max_output_slew_n_s = max(self.abort_max_output_slew_n_s,
+                                                        float(np.max(np.abs(step))) / application_dt)
         self.last_applied = base[4:8].copy()
+        self.last_application_s = now_s
         for i, c in enumerate(ORDER):
             self.telemetry[f'allocation_corr_{c.lower()}_n'] = float(
                 base[4 + i] - command[4 + i])
+        self.phase = phase
         return tuple(base)
 
     def summary(self):
@@ -214,4 +236,5 @@ class SupportAllocationFeedback:
                 'solve_p95_ms': float(np.percentile(samples, 95)) if samples.size else None,
                 'solve_max_ms': float(samples.max()) if samples.size else None,
                 'period_ms': self.period_s * 1000.,
+                'abort_max_native_output_slew_n_s': self.abort_max_output_slew_n_s,
                 'scope': 'local quasi-static support QP; existing feedforward retained'}
