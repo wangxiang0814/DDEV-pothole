@@ -223,6 +223,9 @@ class ClosedLoopRunConfig:
     stop_speed_kph: float = 0.1
     stop_dwell_s: float = 1.0
     stop_ramp_s: float = 2.2
+    max_stop_trial_ramp_s: float = 4.0
+    stop_support_slew_n_s: float = 400.0
+    max_stop_support_trial_slew_n_s: float = 1200.0
     stop_max_brake_nm: float = 80.0
     torque_release_s: float = 1.0
     max_crawl_s: float = 40.0
@@ -473,6 +476,16 @@ class RightSideModelConfig:
 
 
 RIGHT_SIDE_MODEL = RightSideModelConfig()
+
+
+@dataclass(frozen=True)
+class EnvironmentGainTransferConfig:
+    min_trial_friction: float = 0.5
+    max_trial_friction: float = 1.0
+    max_start_station_delta_m: float = 0.8
+
+
+ENVIRONMENT_GAIN_TRANSFER = EnvironmentGainTransferConfig()
 
 
 def rear_speed_trial_config(target_kph: float, min_pit_kph: float,

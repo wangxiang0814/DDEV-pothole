@@ -31,3 +31,14 @@ def test_checked_in_cases_select_matching_gain_bundle():
         cmd=build_command(m,name,Path('new_run'),Path('reference.par'))
         gain=cmd[cmd.index('--support-allocation-gains')+1]
         assert ('mu06' in gain)==('--road-friction' in cmd)
+
+
+def test_environment_reference_is_explicit_and_cannot_mix_pit_transfer():
+    from run_verified_right_side import build_command
+    m={'common':{},'cases':{'mu':{'requires_environment_reference':True,'options':{}}}}
+    with pytest.raises(ValueError):build_command(m,'mu',Path('new_run'))
+    cmd=build_command(m,'mu',Path('new_run'),Path('reference.par'))
+    assert '--support-allocation-environment-reference' in cmd
+    assert '--support-allocation-reference-model' not in cmd
+    m['cases']['mu']['requires_reference_model']=True
+    with pytest.raises(ValueError):build_command(m,'mu',Path('new_run'),Path('reference.par'))

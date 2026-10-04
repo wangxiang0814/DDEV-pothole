@@ -36,6 +36,7 @@ from ddevsim.static_wheel_lift.force_disturbance import SupportForcePulse
 from ddevsim.static_wheel_lift.config import SupportForcePulseConfig
 from ddevsim.static_wheel_lift.pit_scene_transfer import (
     replace_pit_geometry_parameters, validated_pit_scene_models)
+from ddevsim.static_wheel_lift.environment_gain_transfer import validated_environment_models
 
 STEERING_IMPORT = "IMP_STEER_SW"
 
@@ -479,6 +480,8 @@ def main() -> None:
     parser.add_argument('--support-allocation-gains', type=Path)
     parser.add_argument('--support-allocation-reference-model', type=Path,
                         help='Explicit source run_all.par for strictly verified pit width/depth gain reuse.')
+    parser.add_argument('--support-allocation-environment-reference',type=Path,
+                        help='Explicit source model for environment-only robustness trials; no vehicle change allowed.')
     parser.add_argument('--support-allocation-transitions', action='store_true')
     parser.add_argument('--rear-abort-exit', action='store_true',
                         help='Optional gated RR over-pit exit; requires active support allocation.')
@@ -522,11 +525,17 @@ def main() -> None:
     parser.add_argument("--front-lift-force-n", type=float)
     parser.add_argument("--front-support-feedback-limit-n", type=float)
     parser.add_argument("--front-brake-lead-m", type=float)
+    parser.add_argument("--front-stop-ramp-s", type=float,
+                        help="explicit bounded FR stopping-reference trial; acceptance unchanged")
+    parser.add_argument("--front-stop-support-slew-n-s", type=float)
     parser.add_argument("--pit-width-m", type=float)
     parser.add_argument("--pit-depth-m", type=float)
     parser.add_argument("--road-friction", type=float)
     parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
     args = parser.parse_args()
+    if args.support_allocation_environment_reference is not None:
+        if args.support_allocation_reference_model is not None or args.support_allocation_gains is None:
+            parser.error('environment reference requires gains and cannot combine with pit-scene transfer')
     disturbance = None
     if args.support_force_pulse_n is not None:
         try:
@@ -586,6 +595,16 @@ def main() -> None:
             parser.error("front support feedback limit exceeds the simulation trial range")
         front_run.CFG = replace(front_run.CFG,
                                 support_feedback_limit_n=args.front_support_feedback_limit_n)
+    if args.front_stop_support_slew_n_s is not None:
+        if (not np.isfinite(args.front_stop_support_slew_n_s) or
+                not 0.0 < args.front_stop_support_slew_n_s <= front_run.CFG.max_stop_support_trial_slew_n_s):
+            parser.error("front stop support slew exceeds configured trial range")
+        front_run.CFG = replace(front_run.CFG, stop_support_slew_n_s=args.front_stop_support_slew_n_s)
+    if args.front_stop_ramp_s is not None:
+        if (not np.isfinite(args.front_stop_ramp_s) or
+                not 0.0 < args.front_stop_ramp_s <= front_run.CFG.max_stop_trial_ramp_s):
+            parser.error("front stop ramp must be positive, finite and within configured trial range")
+        front_run.CFG = replace(front_run.CFG, stop_ramp_s=args.front_stop_ramp_s)
     if args.front_brake_lead_m is not None:
         if not np.isfinite(args.front_brake_lead_m) or args.front_brake_lead_m < 0.0:
             parser.error("front brake lead must be nonnegative and finite")
@@ -710,7 +729,10 @@ def main() -> None:
         bundle = json.loads(allocation_path.read_text(encoding='utf-8'))
         model_hash = hashlib.sha256(path.read_bytes()).hexdigest()
         transfer = None
-        if args.support_allocation_reference_model is None:
+        if args.support_allocation_environment_reference is not None:
+            models,transfer=validated_environment_models(bundle,
+                args.support_allocation_environment_reference.resolve(),path)
+        elif args.support_allocation_reference_model is None:
             models = validated_support_models(bundle, model_sha256=model_hash)
         else:
             variant = corner_module_scenario(width_m=scenario['width_m'],
@@ -853,6 +875,8 @@ def main() -> None:
         "lift_force_n": front_run.CFG.fr_lift_force_n,
         "support_feedback_limit_n": front_run.CFG.support_feedback_limit_n,
         "brake_lead_m": front_run.CFG.brake_start_before_far_edge_m,
+        "stop_ramp_s": front_run.CFG.stop_ramp_s,
+        "stop_support_slew_n_s": front_run.CFG.stop_support_slew_n_s,
     }
     result["front"] = front_result
     result["native"] = native

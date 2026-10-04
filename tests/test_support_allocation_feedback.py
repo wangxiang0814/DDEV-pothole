@@ -40,6 +40,7 @@ def test_rear_abort_snapshot_is_not_double_added_by_outer_feedback():
 
 
 def test_lift_transition_uses_height_progress_not_finished_clearance(monkeypatch):
+    from dataclasses import replace
     from types import SimpleNamespace
     import ddevsim.static_wheel_lift.support_allocation_feedback as module
     captured = []
@@ -47,7 +48,7 @@ def test_lift_transition_uses_height_progress_not_finished_clearance(monkeypatch
         captured.append(kw) or SimpleNamespace(status='OPTIMAL', force_n=np.zeros(4),
                                               cost=0., predicted_margin=.1)))
     c = SupportAllocationFeedback(mode_models={m: {'gains': {}} for m in ('FOUR_CONTACT', 'FR', 'RR')},
-                                  active=True, period_s=.02, front_limits=CLOSED_LOOP_RUN,
+                                  active=True, period_s=.02, front_limits=replace(CLOSED_LOOP_RUN, stop_support_slew_n_s=1200.),
                                   rear_limits=ROBUST_REAR_RUN, transitions=True)
     x = {'Roll_E': 0., 'Pitch': 0., 'AVx': 0., 'AVy': 0., 'XCG_TM': -.4, 'YCG_TM': .4}
     for w, xy, load in zip(('L1','R1','L2','R2'), ((1,1),(1,-1),(-1,1),(-1,-1)), (6000,0,2000,4000)):
@@ -63,10 +64,14 @@ def test_lift_transition_uses_height_progress_not_finished_clearance(monkeypatch
     assert captured[-1]['config'].clearance_floor_m == .01
     assert captured[-1]['dt_s'] <= .02  # A phase gap must not permit a large correction step.
     assert c.target_att is not None
+    assert captured[-1]['config'].force_slew_n_s == 400.
     target = c.target_att.copy()
     x['Roll_E'] = 4.
     c.apply(3., x, (0.,)*9, stage='FR', phase='STOP')
     np.testing.assert_array_equal(c.target_att, target)
+    assert captured[-1]['config'].force_slew_n_s == 1200.
+    assert captured[-1]['config'].lambda_floor == .05
+    assert captured[-1]['config'].correction_limit_n == 500.
 
 
 def test_loaded_preload_does_not_use_three_contact_gain_or_clearance_gate():

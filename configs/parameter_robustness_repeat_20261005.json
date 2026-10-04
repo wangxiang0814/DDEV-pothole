@@ -1,0 +1,116 @@
+{
+  "scope": "Fixed I_I mass/payload. Same low-mu gain bundle and expert settings across environment changes; explicit full-text environment reuse, not reidentification. Finite trials, discrete tested points. Candidate A: single common FR swing-force reserve -250 N; unchanged acceptance and timing. Candidate C: FR STOP support correction slew 1200 N/s; original motion timings and all acceptance retained. Candidate D: reduce swing-force reserve to -200 N; STOP feedback remains 1200 N/s. Repeated edge seeds and separately declared higher-speed motion profile; no acceptance relaxation.",
+  "common": {
+    "efficiency-profile": "efficient",
+    "lateral-ride-scale": 0,
+    "rear-control-profile": "robust",
+    "front-steering-feedback": true,
+    "front-target-speed-kph": 3.4,
+    "front-min-pit-speed-kph": 3,
+    "front-accel-ramp-s": 1,
+    "front-brake-lead-m": 0.5,
+    "rear-target-speed-kph": 3.6,
+    "rear-min-pit-speed-kph": 3,
+    "rear-accel-ramp-s": 2.5,
+    "measurement-noise": true,
+    "average-path-reference": true,
+    "support-allocation": "active",
+    "support-allocation-transitions": true,
+    "feedback-delay-s": 0.04,
+    "front-lift-force-n": -200,
+    "front-stop-support-slew-n-s": 1200
+  },
+  "cases": {
+    "far_seed20261017": {
+      "requires_environment_reference": true,
+      "options": {
+        "noise-seed": 20261017,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.55,
+        "vehicle-start-offset-m": -0.2
+      }
+    },
+    "far_seed20261018": {
+      "requires_environment_reference": true,
+      "options": {
+        "noise-seed": 20261018,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.55,
+        "vehicle-start-offset-m": -0.2
+      }
+    },
+    "baseline_seed20261017": {
+      "options": {
+        "noise-seed": 20261017,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3
+      }
+    },
+    "speed_spacing_trial": {
+      "options": {
+        "noise-seed": 20261011,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "front-target-speed-kph": 3.8,
+        "rear-target-speed-kph": 4.2,
+        "rear-accel-ramp-s": 2.5,
+        "front-stop-ramp-s": 2.4,
+        "front-brake-lead-m": 0.6
+      }
+    },
+    "speed_spacing_refined": {
+      "options": {
+        "noise-seed": 20261011,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "front-target-speed-kph": 3.8,
+        "rear-target-speed-kph": 4.2,
+        "rear-accel-ramp-s": 2.5,
+        "front-stop-ramp-s": 2.5,
+        "front-brake-lead-m": 0.65
+      }
+    },
+    "speed_spacing_final": {
+      "options": {
+        "noise-seed": 20261011,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "front-target-speed-kph": 3.8,
+        "rear-target-speed-kph": 4.2,
+        "rear-accel-ramp-s": 2.3,
+        "front-stop-ramp-s": 2.5,
+        "front-brake-lead-m": 0.65
+      }
+    },
+    "high_seed20261017": {
+      "options": {
+        "noise-seed": 20261017,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "front-target-speed-kph": 3.8,
+        "rear-target-speed-kph": 4.2,
+        "rear-accel-ramp-s": 2.3,
+        "front-stop-ramp-s": 2.5,
+        "front-brake-lead-m": 0.65
+      }
+    },
+    "high_seed20261018": {
+      "options": {
+        "noise-seed": 20261018,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "front-target-speed-kph": 3.8,
+        "rear-target-speed-kph": 4.2,
+        "rear-accel-ramp-s": 2.3,
+        "front-stop-ramp-s": 2.5,
+        "front-brake-lead-m": 0.65
+      }
+    }
+  }
+}

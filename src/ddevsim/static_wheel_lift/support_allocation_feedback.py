@@ -148,6 +148,10 @@ class SupportAllocationFeedback:
                       else current_limits.travel_jounce_abort_mm)
             cfg = replace(self.config, attitude_limit_deg=att_bound,
                            travel_lower_m=rebound / 1000., travel_upper_m=jounce / 1000.)
+            if stage == 'FR' and phase == 'STOP':
+                # Braking changes support loads faster than steady crawl. This
+                # explicit profile changes correction rate only, not safety bounds.
+                cfg = replace(cfg, force_slew_n_s=self.front_limits.stop_support_slew_n_s)
             if phase in ('RR_ABORT_STOP', 'RR_ABORT_EXIT'):
                 # Hard braking needs faster damping than steady crawl. Keep
                 # the simulated actuator force, travel and contact bounds.

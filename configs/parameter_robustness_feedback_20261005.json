@@ -1,0 +1,118 @@
+{
+  "scope": "Fixed I_I mass/payload. Same low-mu gain bundle and expert settings across environment changes; explicit full-text environment reuse, not reidentification. Finite trials, discrete tested points. Candidate A: single common FR swing-force reserve -250 N; unchanged acceptance and timing. Candidate C: FR STOP support correction slew 1200 N/s; original motion timings and all acceptance retained.",
+  "common": {
+    "efficiency-profile": "efficient",
+    "lateral-ride-scale": 0,
+    "rear-control-profile": "robust",
+    "front-steering-feedback": true,
+    "front-target-speed-kph": 3.4,
+    "front-min-pit-speed-kph": 3,
+    "front-accel-ramp-s": 1,
+    "front-brake-lead-m": 0.5,
+    "rear-target-speed-kph": 3.6,
+    "rear-min-pit-speed-kph": 3,
+    "rear-accel-ramp-s": 2.5,
+    "measurement-noise": true,
+    "average-path-reference": true,
+    "support-allocation": "active",
+    "support-allocation-transitions": true,
+    "feedback-delay-s": 0.04,
+    "front-lift-force-n": -250,
+    "front-stop-support-slew-n-s": 1200
+  },
+  "cases": {
+    "mu055_far": {
+      "requires_environment_reference": true,
+      "options": {
+        "noise-seed": 20261006,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.55,
+        "vehicle-start-offset-m": -0.2
+      }
+    },
+    "mu070_middle": {
+      "requires_environment_reference": true,
+      "options": {
+        "noise-seed": 20261006,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.7,
+        "vehicle-start-offset-m": 0.15
+      }
+    },
+    "mu095_near": {
+      "requires_environment_reference": true,
+      "options": {
+        "noise-seed": 20261006,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.95,
+        "vehicle-start-offset-m": 0.4
+      }
+    },
+    "delay60": {
+      "options": {
+        "noise-seed": 20261007,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "feedback-delay-s": 0.06
+      }
+    },
+    "delay80": {
+      "options": {
+        "noise-seed": 20261008,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "feedback-delay-s": 0.08
+      }
+    },
+    "bias_pos400": {
+      "options": {
+        "noise-seed": 20261009,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "support-force-pulse-n": 400
+      }
+    },
+    "bias_neg400": {
+      "options": {
+        "noise-seed": 20261010,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "support-force-pulse-n": -400
+      }
+    },
+    "speed_up": {
+      "options": {
+        "noise-seed": 20261011,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3,
+        "front-target-speed-kph": 3.8,
+        "rear-target-speed-kph": 4.2,
+        "rear-accel-ramp-s": 3.0
+      }
+    },
+    "seed_repeat": {
+      "options": {
+        "noise-seed": 20261012,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.6,
+        "vehicle-start-offset-m": 0.3
+      }
+    },
+    "combined": {
+      "requires_environment_reference": true,
+      "options": {
+        "noise-seed": 20261013,
+        "support-allocation-gains": "evidence/static_fr_ii/support_gains_mu06_close_20261004.json",
+        "road-friction": 0.55,
+        "vehicle-start-offset-m": 0.4,
+        "feedback-delay-s": 0.06,
+        "support-force-pulse-n": 400
+      }
+    }
+  }
+}

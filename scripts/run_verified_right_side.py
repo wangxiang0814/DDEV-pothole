@@ -15,9 +15,14 @@ def build_command(manifest,case,output,reference_model=None):
         raise ValueError('unknown validation case')
     selected=manifest['cases'][case]
     options={**manifest['common'],**selected['options']}
-    if 'output' in options or 'support-allocation-reference-model' in options:
+    if any(k in options for k in ('output','support-allocation-reference-model','support-allocation-environment-reference')):
         raise ValueError('output/reference must be explicit launcher arguments')
-    if selected.get('requires_reference_model'):
+    if selected.get('requires_reference_model') and selected.get('requires_environment_reference'):
+        raise ValueError('pit and environment transfer cannot be combined')
+    if selected.get('requires_environment_reference'):
+        if reference_model is None: raise ValueError('environment trial needs explicit original reference model')
+        options['support-allocation-environment-reference']=str(reference_model.resolve())
+    elif selected.get('requires_reference_model'):
         if reference_model is None: raise ValueError('boundary needs an explicit original reference model')
         options['support-allocation-reference-model']=str(reference_model.resolve())
     command=[sys.executable,str(ROOT/'scripts/run_right_side_full_cycle.py'),'--output',str(output.resolve())]
@@ -29,17 +34,18 @@ def build_command(manifest,case,output,reference_model=None):
 
 
 def main():
-    manifest=json.loads(MANIFEST.read_text(encoding='utf-8'))
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--case',choices=tuple(manifest['cases']),required=True)
+    parser.add_argument('--manifest',type=Path,default=MANIFEST)
+    parser.add_argument('--case',required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--reference-model',type=Path)
     parser.add_argument('--dry-run',action='store_true')
     args=parser.parse_args()
+    manifest=json.loads(args.manifest.read_text(encoding='utf-8'))
     output=args.output.resolve()
     command=build_command(manifest,args.case,output,args.reference_model)
     record={'case':args.case,'scope':manifest['scope'],'argv':command,
-            'manifest_sha256':hashlib.sha256(MANIFEST.read_bytes()).hexdigest()}
+            'manifest_sha256':hashlib.sha256(args.manifest.read_bytes()).hexdigest()}
     print(json.dumps(record,indent=2),flush=True)
     if args.dry_run: return
     if output.exists(): raise FileExistsError(output)
