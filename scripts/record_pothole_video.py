@@ -43,6 +43,9 @@ import numpy as np
 from PIL import ImageGrab
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'src'))
+from ddevsim.native_video import (
+    HistorySet, find_history, stage_history as stage_native_history, write_animator_par)
 
 VISUALIZER = r"F:\TruckSim2019\TruckSim2019.0_Prog\Programs\VsVisualizer\VsVisualizer.exe"
 # The resource root, NOT `..._Data`: relative MTL_FILE / 3D shape paths resolve here.
@@ -61,7 +64,7 @@ RUNS = {
 CROP = (640, 250, 2010, 1370)
 
 
-def stage_history(run_dir: Path) -> None:
+def stage_history(run_dir: Path) -> HistorySet:
     native = run_dir / "native"
     missing = [
         name for name in ("%s.vs" % HISTORY, "%s.vsb" % HISTORY, "%s_all.par" % HISTORY)
@@ -72,20 +75,11 @@ def stage_history(run_dir: Path) -> None:
             "history is incomplete in %s (missing %s); run "
             "scripts\\run_expert_pothole.py first" % (native, ", ".join(missing))
         )
-    STAGE.mkdir(parents=True, exist_ok=True)
-    for name in ("%s.vs" % HISTORY, "%s.vsb" % HISTORY, "%s_all.par" % HISTORY):
-        (STAGE / name).write_bytes((native / name).read_bytes())
+    return stage_native_history(find_history(native / (HISTORY + '.vs')), STAGE)
 
 
-def animator_par() -> Path:
-    path = STAGE / "animator.par"
-    text = (
-        "PARSFILE\nSET_RUN_SLOT 0\n"
-        "DATASET %s\\%s.vs\nPARSFILE %s\\%s_all.par\nEND\n"
-        % (STAGE, HISTORY, STAGE, HISTORY)
-    )
-    path.write_text(text, encoding="ascii")
-    return path
+def animator_par(history: HistorySet) -> Path:
+    return write_animator_par(STAGE, history)
 
 
 def guard_road(par: Path, must_cover_m: float) -> None:
@@ -130,8 +124,8 @@ def main(argv=None) -> int:
 
     run_rel, label = RUNS[args.model]
     run_dir = ROOT / run_rel
-    stage_history(run_dir)
-    par = animator_par()
+    staged = stage_history(run_dir)
+    par = animator_par(staged)
     guard_road(run_dir / "native" / ("%s_all.par" % HISTORY), must_cover_m=106.5)
 
     subprocess.run(["taskkill", "/F", "/IM", "VsVisualizer.exe"], capture_output=True)

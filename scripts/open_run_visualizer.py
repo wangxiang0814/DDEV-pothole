@@ -67,11 +67,13 @@ def main(argv=None) -> int:
     parser.add_argument("run", help="name under runs/, run directory, output directory, or .vs/.vsb file")
     parser.add_argument("--resolution", type=int, nargs=2, metavar=("W", "H"), default=(1280, 720))
     parser.add_argument("--dry-run", action="store_true", help="validate and stage without opening a window")
+    parser.add_argument("--show-driver", action="store_true",
+                        help="show the original driver mesh; default hides it in a playback-only copy")
     args = parser.parse_args(argv)
 
     source = resolve_source(args.run)
     history = find_history(source)
-    staged = stage_history(history, stage_directory(source))
+    staged = stage_history(history, stage_directory(source), show_driver=args.show_driver)
     animator = write_animator_par(staged.vs.parent, staged)
     visualizer = DEFAULT_VISUALIZER_32 if DEFAULT_VISUALIZER_32.exists() else default_visualizer()
     workdir = default_workdir()
@@ -82,6 +84,7 @@ def main(argv=None) -> int:
     print("Duration    : %.3f s (%d frames)" % (history.duration_s, history.samples))
     print("Staged at   : %s" % staged.vs.parent)
     print("Visualizer  : %s" % visualizer)
+    print("Driver      : %s (display copy only)" % ("shown" if args.show_driver else "hidden"))
     if args.dry_run:
         print("Validated and staged; no window opened.")
         return 0

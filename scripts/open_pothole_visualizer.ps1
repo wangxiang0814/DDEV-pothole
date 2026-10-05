@@ -87,20 +87,20 @@ if ($segment.Success -and $start.Success -and $sstart.Success) {
     Write-Host ("Road path covers 0-{0} m; vehicle starts at {1} m." -f $roadEnd, $vehicleStart)
 }
 
-New-Item -ItemType Directory -Path $stageRoot -Force | Out-Null
-Copy-Item -LiteralPath $history -Destination (Join-Path $stageRoot "$historyName.vs") -Force
-Copy-Item -LiteralPath $binary -Destination (Join-Path $stageRoot "$historyName.vsb") -Force
-Copy-Item -LiteralPath $mergedPar -Destination (Join-Path $stageRoot "${historyName}_all.par") -Force
-
+# Use the same playback-only driver filtering as the current Python launcher.
+# Literal script plus argv keeps filesystem paths out of executable Python text.
+$stageCode = @'
+import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from ddevsim.native_video import find_history, stage_history, write_animator_par
+stage = Path(sys.argv[3])
+history = stage_history(find_history(Path(sys.argv[2])), stage)
+write_animator_par(stage, history)
+'@
+& python -c $stageCode (Join-Path $projectRoot 'src') $history $stageRoot
+if ($LASTEXITCODE -ne 0) { throw 'Preparing driver-free animation failed.' }
 $animatorPath = Join-Path $stageRoot 'animator.par'
-$animator = @"
-PARSFILE
-SET_RUN_SLOT 0
-DATASET $stageRoot\$historyName.vs
-PARSFILE $stageRoot\${historyName}_all.par
-END
-"@
-Set-Content -LiteralPath $animatorPath -Value $animator -Encoding Ascii
 
 Start-Process -FilePath $visualizer `
     -WorkingDirectory $resourceRoot `

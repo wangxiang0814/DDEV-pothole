@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import struct
 import subprocess
 from dataclasses import dataclass, field
@@ -196,8 +197,43 @@ def resolve_stage_dir(preferred: Path) -> tuple:
     return fallback, True
 
 
-def stage_history(history: HistorySet, stage_dir: Path) -> HistorySet:
-    """Copy the ``.vs``/``.vsb``/``_all.par`` triple into ``stage_dir``."""
+def _without_driver_shapes(content: bytes) -> bytes:
+    """Remove standalone Animator/STL driver meshes, preserving ANSI bytes.
+
+    Removing the whole shape block also removes its material commands; deleting
+    just add_obj would apply those commands to the preceding vehicle shape.
+    """
+    objects = re.compile(rb'(?mi)^[ \t]*add_obj[ \t]+([^\r\n]+)')
+    blocks = re.compile(
+        rb'^[ \t]*ENTER_PARSFILE[ \t]+(?P<path>Animator[\\/]STL[\\/][^\r\n]+)\r?\n'
+        rb'(?P<body>.*?)^[ \t]*EXIT_PARSFILE[ \t]+(?P=path)[ \t]*(?:\r?\n|$)',
+        re.MULTILINE | re.IGNORECASE | re.DOTALL)
+
+    def is_driver(asset):
+        normalized = asset.replace(b'\\', b'/').lower()
+        return b'/drivers/' in normalized or b'/driver/' in normalized
+
+    def strip(block):
+        assets = objects.findall(block['body'])
+        if not any(is_driver(asset) for asset in assets):
+            return block[0]
+        if (not all(is_driver(asset) for asset in assets) or
+                re.search(rb'(?mi)^[ \t]*(?:ENTER|EXIT)_PARSFILE\b', block['body'])):
+            raise ValueError('driver shares an ambiguous shape block')
+        return b''
+
+    display = blocks.sub(strip, content)
+    if any(is_driver(asset) for asset in objects.findall(display)):
+        raise ValueError('driver shape is outside a complete standalone Animator/STL block')
+    return display
+
+
+def stage_history(history: HistorySet, stage_dir: Path, *, show_driver: bool = False) -> HistorySet:
+    """Stage history plus a separate display par; hide driver meshes by default.
+
+    The original merged model and binary history remain byte-identical, even
+    when staging into their source directory. Visibility affects playback only.
+    """
     import shutil
 
     stage_dir = Path(stage_dir)
@@ -206,10 +242,13 @@ def stage_history(history: HistorySet, stage_dir: Path) -> HistorySet:
         target = stage_dir / source.name
         if source.resolve() != target.resolve():
             shutil.copy2(str(source), str(target))
+    content = history.par.read_bytes()
+    display_par = stage_dir / (history.basename + '_display.par')
+    display_par.write_bytes(content if show_driver else _without_driver_shapes(content))
     return describe_history(
         stage_dir / history.vs.name,
         stage_dir / history.vsb.name,
-        stage_dir / history.par.name,
+        display_par,
     )
 
 
