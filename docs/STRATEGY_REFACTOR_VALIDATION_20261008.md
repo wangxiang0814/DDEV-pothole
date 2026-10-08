@@ -36,7 +36,9 @@
 
 使用单独的零输入基础设施诊断进程，各执行 2 s，均 COMPLETED、401 条 CSV、81 帧原生历史、无 DLL 错误。第一条原生反馈 Xo=99.1 m、Vx=0；坑入口 101.1 m。无闭环保持时，静态沉降期间最大纵向速度约 0.073 km/h。该诊断只验证初始化、求解与历史通路；明确记录 `strategy_status=NOT_IMPLEMENTED`、`task_status=UNASSESSED`，不评估浅坑通过成功。
 
-两类 `open_run_visualizer.py --dry-run` 和 `export_native_video.py --no-launch` 都通过。随后分别启动真实 Visualizer，两进程存在。各自 ASCII 暂存目录含不同路径哈希，显示副本引用各自 OBJ/MTL，驾驶员默认隐藏，原历史保留不变。图像外观未在本次工具中进行逐帧人工检查；AVI 最后导出仍使用 Visualizer 的 File > Export Video 对话框，本次未生成 AVI。
+两类 `open_run_visualizer.py --dry-run` 和 `export_native_video.py --no-launch` 都通过。随后分别启动真实 Visualizer，两进程存在。各自 ASCII 暂存目录含不同路径哈希，显示副本引用各自 OBJ/MTL，驾驶员默认隐藏，原历史保留不变。用户已查看两类浅坑场景并确认没有问题；工具未进行图像逐帧检查。AVI 最后导出仍使用 Visualizer 的 File > Export Video 对话框，本次未生成 AVI。
+
+用户最终确认：坑深范围后续决定，控制算法本次不开发，后续另行开展；现有 0.05 m 仅为显示/基础设施验证示例。
 
 ## 实施选择与后续边界
 
