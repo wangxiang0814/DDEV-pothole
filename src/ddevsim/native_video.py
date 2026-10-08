@@ -98,6 +98,11 @@ def find_history(source: Path) -> HistorySet:
     elif source.is_dir():
         candidates = sorted(source.glob("*.vs"))
         if not candidates:
+            for relative in ('model/output', 'native', 'output'):
+                directory = source / relative
+                if directory.is_dir() and any(directory.glob('*.vs')):
+                    return find_history(directory)
+        if not candidates:
             raise FileNotFoundError("no .vs history file in %s" % source)
         if len(candidates) > 1:
             names = ", ".join(candidate.stem for candidate in candidates)
@@ -193,7 +198,10 @@ def resolve_stage_dir(preferred: Path) -> tuple:
         return preferred, False
     import tempfile
 
-    fallback = Path(tempfile.gettempdir()) / "ddev_native_video" / preferred.name
+    import hashlib
+    suffix = hashlib.sha256(str(preferred.resolve()).encode('utf-8')).hexdigest()[:12]
+    slug = re.sub(r'[^A-Za-z0-9_-]+', '_', preferred.name) or 'video'
+    fallback = Path(tempfile.gettempdir()) / "ddev_native_video" / (slug + '_' + suffix)
     return fallback, True
 
 
@@ -243,6 +251,9 @@ def stage_history(history: HistorySet, stage_dir: Path, *, show_driver: bool = F
         if source.resolve() != target.resolve():
             shutil.copy2(str(source), str(target))
     content = history.par.read_bytes()
+    # Each run carries its own road mesh. Rewrite only the display copy, so replay
+    # never silently picks a different strategy's globally installed DDEV mesh.
+    content = _stage_local_scene(history, stage_dir, content)
     display_par = stage_dir / (history.basename + '_display.par')
     display_par.write_bytes(content if show_driver else _without_driver_shapes(content))
     return describe_history(
@@ -250,6 +261,31 @@ def stage_history(history: HistorySet, stage_dir: Path, *, show_driver: bool = F
         stage_dir / history.vsb.name,
         display_par,
     )
+
+
+def _stage_local_scene(history: HistorySet, stage_dir: Path, content: bytes) -> bytes:
+    import shutil
+    pattern = rb'(?mi)^add_obj[ \t]+[^\r\n]*DDEV_pothole_scene\.obj[ \t]*$'
+    if not re.search(pattern, content):
+        return content
+    parent = history.par.parent
+    candidates = (parent / 'visual_assets', parent.parent / 'visual_assets',
+                  parent.parent / 'model' / 'visual_assets')
+    source = next((p for p in candidates if (p / 'DDEV_pothole_scene.obj').is_file()), None)
+    if source is None:
+        # Retained historical runs may only have the installed mesh; keep their old behavior.
+        return content
+    destination = stage_dir / 'visual_assets'
+    destination.mkdir(parents=True, exist_ok=True)
+    for name in ('DDEV_pothole_scene.obj', 'DDEV_pothole_scene.mtl'):
+        asset = source / name
+        if not asset.is_file():
+            raise FileNotFoundError('incomplete local scene assets: ' + str(asset))
+        target = destination / name
+        if target.resolve() != asset.resolve():
+            shutil.copy2(str(asset), str(target))
+    mesh = (destination / 'DDEV_pothole_scene.obj').resolve()
+    return re.sub(pattern, lambda _: b'add_obj ' + str(mesh).replace('\\', '/').encode('mbcs'), content)
 
 
 def write_animator_par(
