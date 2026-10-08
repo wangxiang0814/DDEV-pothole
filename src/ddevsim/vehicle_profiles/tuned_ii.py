@@ -54,6 +54,8 @@ def vehicle_identity(run_all: Path) -> str:
     text = re.sub(r'ENTER_PARSFILE Procedures\\[^\n]+\n.*?EXIT_PARSFILE Procedures\\[^\n]+',
                   '', text, flags=re.DOTALL)
     text = re.sub(r'(?m)^(?:SSTART|TSTOP)\s+[-+0-9.eE]+\s*$', '', text)
+    text = re.sub(r'(?m)^SET_(?:AZIMUTH|ELEVATION|DISTANCE|FIELD_OF_VIEW|LOOKPOINT_[XYZ])\s+[-+0-9.eE]+\s*$',
+                  '', text)
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
 

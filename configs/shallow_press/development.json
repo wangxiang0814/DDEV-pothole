@@ -1,0 +1,11 @@
+{
+  "strategy_id": "shallow_press",
+  "vehicle_profile_id": "tuned_ii_20261005",
+  "controller_status": "NOT_IMPLEMENTED",
+  "control_period_s": 0.02,
+  "scenes": {
+    "right_track": "scenarios/shallow_press/right_track.json",
+    "wide": "scenarios/shallow_press/wide.json"
+  },
+  "scope": "Independent development boundary; pit dimensions must be explicit. No controller or PASS claim."
+}

@@ -1,0 +1,16 @@
+{
+  "strategy_id": "shallow_press",
+  "case_id": "wide",
+  "vehicle_profile_id": "tuned_ii_20261005",
+  "coverage": "both_tracks",
+  "geometry": {
+    "depth_m": null,
+    "length_m": null,
+    "width_m": null,
+    "center_y_m": 0.0,
+    "target_speed_kph": 0,
+    "approach_distance_m": 2.0,
+    "stop_s": 180.0
+  },
+  "display": {"show_driver": false}
+}
