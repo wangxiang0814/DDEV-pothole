@@ -33,3 +33,16 @@ def test_adapter_refuses_uninitialized_and_missing_observations():
                                  {'scenario': {'friction': .7}}, {}))
     with pytest.raises(ValueError):
         adapter.step(Observation(0., 0., True, {}))
+
+
+def test_rear_coupled_gain_uses_instance_configuration():
+    import json
+    from ddevsim.runtime.contracts import StrategyContext
+    from ddevsim.strategies.wheel_lift.adapter import WheelLiftStrategy
+    from ddevsim.strategies.wheel_lift.front import EVIDENCE
+    adapter = WheelLiftStrategy()
+    adapter.reset(StrategyContext('wheel_lift', 'v', 's', .02,
+                                 {'scenario': {'friction': .7},
+                                  'rear': {'preload_feedback_fl_per_fr': 0.}}, {}))
+    gain = json.loads((EVIDENCE / 'gain_matrix.json').read_text())['gains']['Fz_n']
+    assert adapter.controller.rear.unload_feedback.gain == pytest.approx(gain[3][1])

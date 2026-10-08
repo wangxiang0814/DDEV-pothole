@@ -32,7 +32,7 @@ class WheelLiftStrategy:
         self.controller = FullRightSideController(
             scenario=dict(context.config['scenario']),
             rr_gain_per_coupled_force=float(
-                gain[3][1] + REAR_CYCLE_RUN.preload_feedback_fl_per_fr * gain[3][0]),
+                gain[3][1] + rear.preload_feedback_fl_per_fr * gain[3][0]),
             front_config=front, rear_config=rear,
             front_steering_feedback=bool(context.config.get('front_steering_feedback', False)))
         self.context = context

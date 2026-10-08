@@ -31,6 +31,12 @@ class TunedIIProfile:
     control_period_s: float = .02
 
     def __post_init__(self):
+        # This profile describes the existing plant, rather than generating a
+        # new chassis or changing the integrator. Reject unsupported metadata.
+        for name, expected in (('track_m', 1.260), ('wheelbase_m', 1.925),
+                               ('tyre_radius_m', .263), ('solver_step_s', .0005)):
+            if getattr(self, name) != expected:
+                raise ValueError('fixed vehicle does not support overriding ' + name)
         for name in ('track_m', 'wheelbase_m', 'tyre_half_width_m', 'tyre_radius_m',
                      'tyre_low_speed_slip_m_s', 'solver_step_s', 'control_period_s'):
             value = getattr(self, name)

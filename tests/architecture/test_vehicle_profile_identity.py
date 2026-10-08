@@ -45,3 +45,11 @@ def test_new_recommended_manifest_keeps_original_case_options():
     old = json.loads((root / 'configs/recommended_right_side_20261005.json').read_text())
     assert new['common'] == old['common']
     assert new['cases'] == old['cases']
+
+
+@pytest.mark.parametrize('field,value', [('track_m', 2.), ('wheelbase_m', 2.5),
+                                       ('tyre_radius_m', .3), ('solver_step_s', .001)])
+def test_fixed_profile_rejects_unapplied_plant_overrides(field, value):
+    from ddevsim.vehicle_profiles.tuned_ii import DEFAULT_PROFILE
+    with pytest.raises(ValueError, match='fixed vehicle'):
+        replace(DEFAULT_PROFILE, **{field: value})

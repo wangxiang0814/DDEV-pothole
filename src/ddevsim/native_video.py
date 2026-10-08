@@ -265,7 +265,7 @@ def stage_history(history: HistorySet, stage_dir: Path, *, show_driver: bool = F
 
 def _stage_local_scene(history: HistorySet, stage_dir: Path, content: bytes) -> bytes:
     import shutil
-    pattern = rb'(?mi)^add_obj[ \t]+[^\r\n]*DDEV_pothole_scene\.obj[ \t]*$'
+    pattern = rb'(?mi)^add_obj[ \t]+[^\r\n]*DDEV_pothole_scene\.obj[ \t]*(?=\r?$)'
     if not re.search(pattern, content):
         return content
     parent = history.par.parent

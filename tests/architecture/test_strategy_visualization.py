@@ -8,14 +8,14 @@ import pytest
 from ddevsim.native_video import find_history, resolve_stage_dir, stage_history
 
 
-def history(run, mesh_text):
+def history(run, mesh_text, newline=b'\n'):
     output = run / 'model/output'
     output.mkdir(parents=True)
     (output / 'case.vs').write_text(json.dumps({'VsChannelGroup': {
         'XStep': .01, 'Channels': [{'Name Aliases': ['Xo'], 'Units': 'm'}]}}))
     (output / 'case.vsb').write_bytes(struct.pack('<6i2f', 1, 0, 0, 0, 4, 1, 0., 0.))
     (output / 'case_all.par').write_bytes(
-        b'PARSFILE\nadd_obj Animator\\3D_Shape_Files\\DDEV\\DDEV_pothole_scene.obj\nEND\n')
+        newline.join((b'PARSFILE', b'add_obj Animator\\3D_Shape_Files\\DDEV\\DDEV_pothole_scene.obj', b'END', b'')))
     assets = run / 'model/visual_assets'
     assets.mkdir()
     (assets / 'DDEV_pothole_scene.obj').write_text(mesh_text)
@@ -23,11 +23,12 @@ def history(run, mesh_text):
     return output
 
 
-def test_nested_strategy_runs_resolve_history_and_select_local_mesh(tmp_path):
+@pytest.mark.parametrize('newline', [b'\n', b'\r\n'])
+def test_nested_strategy_runs_resolve_history_and_select_local_mesh(tmp_path, newline):
     first = tmp_path / 'runs/wheel_lift/case/same'
     second = tmp_path / 'runs/shallow_press/case/same'
-    history(first, 'v 0 0 -0.2\n')
-    history(second, 'v 0 0 -0.05\n')
+    history(first, 'v 0 0 -0.2\n', newline)
+    history(second, 'v 0 0 -0.05\n', newline)
     for run, depth, stage in ((first, '-0.2', tmp_path / 'stage_a'),
                               (second, '-0.05', tmp_path / 'stage_b')):
         source = find_history(run)
