@@ -10,9 +10,8 @@ def test_preload_rate_override_applied_before_building_the_model(monkeypatch, tm
         pass
     seen = []
     def probe(*args, **kwargs):
-        seen.append(cycle.front_run.CFG.preload_max_reference_rate)
+        seen.append(kwargs['config'].preload_max_reference_rate)
         raise ProbeDone()
-    monkeypatch.setattr(cycle.front_run, 'CFG', cycle.CLOSED_LOOP_RUN)
     monkeypatch.setattr(cycle.front_run, '_prepare_model', probe)
     monkeypatch.setattr(sys, 'argv', ['run', '--output', str(tmp_path / 'run'),
         '--efficiency-profile', 'compact', '--front-preload-reference-rate', '4'])

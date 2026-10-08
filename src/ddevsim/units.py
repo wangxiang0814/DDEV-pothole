@@ -61,6 +61,11 @@ UNVERIFIED = "UNVERIFIED"
 
 #: Authoritative unit for each TruckSim channel the platform consumes.
 CHANNEL_UNITS: Dict[str, str] = {
+    # Native contact/total-CG XY used by contact_geometry.py and IO_MAPPING.md.
+    # These positions are metres in the straight-road global frame.
+    "Xctc_L1i": "m", "Xctc_R1i": "m", "Xctc_L2i": "m", "Xctc_R2i": "m",
+    "Yctc_L1i": "m", "Yctc_R1i": "m", "Yctc_L2i": "m", "Yctc_R2i": "m",
+    "XCG_TM": "m", "YCG_TM": "m",
     # --- commanded imports (from the TruckSim import contract) --------------
     "IMP_MYUSM_L1": "N-m", "IMP_MYUSM_R1": "N-m",
     "IMP_MYUSM_L2": "N-m", "IMP_MYUSM_R2": "N-m",

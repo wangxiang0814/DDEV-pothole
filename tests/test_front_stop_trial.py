@@ -10,9 +10,8 @@ def test_stop_ramp_applied_before_model_copy(monkeypatch, tmp_path):
         pass
     seen = []
     def probe(*args, **kwargs):
-        seen.append(cycle.front_run.CFG.stop_ramp_s)
+        seen.append(kwargs['config'].stop_ramp_s)
         raise ProbeDone()
-    monkeypatch.setattr(cycle.front_run, 'CFG', cycle.CLOSED_LOOP_RUN)
     monkeypatch.setattr(cycle.front_run, '_prepare_model', probe)
     monkeypatch.setattr(sys, 'argv', ['run', '--output', str(tmp_path / 'run'),
         '--front-stop-ramp-s', '2.6'])
@@ -48,9 +47,8 @@ def test_stop_support_slew_applied_before_model_copy(monkeypatch, tmp_path):
         pass
     seen = []
     def probe(*args, **kwargs):
-        seen.append(cycle.front_run.CFG.stop_support_slew_n_s)
+        seen.append(kwargs['config'].stop_support_slew_n_s)
         raise ProbeDone()
-    monkeypatch.setattr(cycle.front_run, 'CFG', cycle.CLOSED_LOOP_RUN)
     monkeypatch.setattr(cycle.front_run, '_prepare_model', probe)
     monkeypatch.setattr(sys, 'argv', ['run', '--output', str(tmp_path / 'run'),
         '--front-stop-support-slew-n-s', '1200'])
