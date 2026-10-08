@@ -1,5 +1,13 @@
 # TruckSim–Python 四角独立悬架研究工程
 
+## 独立专家策略架构（2026-10-08）
+
+抬轮策略已迁入 `src/ddevsim/strategies/wheel_lift/`，旧命令保留；控制配置通过实例传入，不再运行时修改全局 CFG。浅坑策略拥有独立 `strategies/shallow_press/`、配置与单侧/宽坑场景模板，控制律尚未实现。两者共用当前调参 I_I 车辆版本、原生求解和显示基础设施；每次运行独占模型/输出/显示资源。
+
+新抬轮入口：`python scripts/run_strategy.py --strategy wheel_lift --case seed_repeat --run-id trial_001`，默认最新推荐清单。浅坑准备：`python scripts/prepare_strategy_case.py --case wide --depth-m .05 --length-m .8 --width-m 1.8 --run-id scene_001`；这些尺寸仅是使用示例，正式工况需明确指定。单侧坑 FR→RR，宽坑 FL/FR→RL/RR。
+
+见[架构与接口](docs/ARCHITECTURE.md)、[开发/运行命令](docs/STRATEGY_DEVELOPMENT.md)和[本轮验证及限制](docs/STRATEGY_REFACTOR_VALIDATION_20261008.md)。重构前版本已留存在 `backup/pre-strategy-refactor-20261008`。以下记录为原策略进展和历史证据。
+
 ## 当前控制对象与进展
 
 **动画显示（2026-10-05）**：项目脚本现在默认隐藏驾驶员的3D形状，包括按轮次播放、原生视频准备、旧PowerShell动画入口和录像入口。统一生成独立的`*_display.par`显示副本；原始仿真参数和`.vs/.vsb`历史数据保持一致，车辆质量与控制结果不变。照常调用`open_run_visualizer.py`即可；仅显式添加`--show-driver`时恢复驾驶员显示。用户已在VS Visualizer中确认驾驶员移除，31项相关测试通过。

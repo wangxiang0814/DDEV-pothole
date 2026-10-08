@@ -1,0 +1,78 @@
+# 两种主动悬架专家策略架构
+
+本工程维护同一调参 I_I 车辆上的两套专家策略：`wheel_lift`（抬轮过深坑）和 `shallow_press`（下压过浅坑）。浅坑当前交付的是独立开发接口、单侧/宽坑场景准备和显示基础设施；控制律尚未实现。
+
+## 模块职责
+
+| 位置 | 职责 |
+|---|---|
+| `src/ddevsim/strategies/wheel_lift/` | 前轮、完整循环控制，旧 CLI，模型准备兼容层及策略验收 |
+| `src/ddevsim/static_wheel_lift/` | 保留原抬轮专属辨识、分配、反馈、状态与参数实现 |
+| `src/ddevsim/strategies/shallow_press/` | 浅坑独立控制接口、配置和明确的未实现状态 |
+| `src/ddevsim/runtime/` | 版本化 SI 合同、策略选择、输出认领、运行清单和进程管理 |
+| `src/ddevsim/vehicle_profiles/` | 两套策略共用的调参 I_I 车辆版本与中性参数生成规则 |
+| `src/ddevsim/scenarios/` | 坑槽覆盖/初始化校验、物理地形与显示资源同步生成 |
+| `src/ddevsim/native_video.py` | 原生历史读取、运行专属网格暂存、隐藏驾驶员和视频准备 |
+| `scripts/` | 用户命令及历史诊断入口；三个主要旧运行入口为兼容封装 |
+| `configs/wheel_lift/`, `configs/shallow_press/` | 各自参数清单，禁止相互覆盖 |
+| `scenarios/shallow_press/` | 右侧轮迹/左右轮迹模板，具体坑槽尺寸必须显式提供 |
+
+依赖方向：入口 → 运行管理/所选策略 → 公共合同与基础设施。两个策略互不导入，共享层不依赖专属状态机/增益。`tests/architecture/test_strategy_dependencies.py` 检查这一边界。
+
+## 车辆与场景身份
+
+`tuned_ii_20261005` 以 `evidence/static_fr_ii/model` 的隔离车型为源，明确使用原低速轮胎修订（0.2 m/s）、扩展回弹止挡、运动学端点保持、横向轮心移动系数 0 和第九路方向盘输入。载荷位置及质量来自同一源文件；不为浅坑另调车辆。
+
+车辆 recipe 哈希包括源文件 SHA256 和生成规则。实际车辆文本身份排除 Procedures 路面/初始化部分、外层 SSTART/TSTOP 和显示相机字段；每次运行还记录完整模型/场景 SHA256。**车辆身份不替代旧辨识的完整模型哈希校验，也不授予增益跨场景复用资格。**
+
+轮距 1.260 m、轴距 1.925 m、轮胎半径 0.263 m与当前车型一致。覆盖校验的轮胎半宽 0.10 m是显式的软件几何包络，不是经测量的实体轮胎规格，不改变 TruckSim 参数。后续接入实测接触包络时调整校验规则与版本。
+
+单侧坑覆盖右侧轮迹，FR 先过、RR 后过。宽坑覆盖左右轮迹，前轴 FL/FR 先过，后轴 RL/RR 后过。`length_m` 始终是纵向长度，`width_m` 始终是横向宽度。
+
+## 控制合同
+
+公共合同版本为 1，固定 FL/FR/RL/RR 顺序，所有物理量使用 SI。
+
+```python
+strategy.reset(StrategyContext(...))
+command = strategy.step(Observation(time_s, observed_at_s, valid, values_si))
+state = strategy.status()
+report = strategy.summary()
+```
+
+`ControlCommand` 返回四轮 N·m 转矩、四角 N 悬架附加力和可选方向盘角 rad。它不是前轮转角。原八路输入模型与九路完整循环分别声明能力，不能错配。公共观测沿用原生变量名，但使用合同中已验证的 SI 单位；例如 Vx 已为 m/s，Jnc 已为 m，Yaw 已为 rad。
+
+`WheelLiftStrategy` 在边界换算到旧控制器的原生单位，旧算法内部仍按 km/h、mm、deg 运算。不同实例分别保存配置、滤波器、状态机与时钟，原 CLI 使用局部配置变量。无效数据由原完整循环的 stale-feedback 分支安全保持；有效但缺少所需通道的数据明确拒绝。
+
+`ShallowPressStrategy.step()` 当前明确抛出 `NotImplementedError`。场景准备不等同控制仿真；其清单为 PREPARED / NOT_IMPLEMENTED / acceptance_pass=false。
+
+## 运行和显示隔离
+
+```text
+runs/<strategy>/<case>/<run_id>/
+  run_claim.json            独占目录身份
+  run_manifest.json         配置、来源、代码身份、生成哈希与实际状态
+  control_config.json       新抬轮入口冻结的有效选项
+  run.log                   独立 worker 输出
+  model/
+    run_all.par, simfile.sim, scenario.json
+    visual_assets/          本次物理地形对应的 OBJ/MTL
+    output/                 原生 .vs/.vsb/*_all.par
+  result.json               策略任务验收，准备阶段不存在
+```
+
+新运行目录通过原子 mkdir 认领，重复编号拒绝覆盖。`--claimed-output` 是新启动器向旧 worker 传递的内部选项，只接受尚未生成产物的认领目录；旧 CLI 的 `--output` 默认仍要求目录不存在。
+
+每次原生求解都使用独立子进程，因为 TruckSim DLL 与当前工作目录含进程全局状态。进程退出零、求解到终止时刻或异常后恢复都不能单独构成任务 PASS；必须有非空且全部通过的策略验收。进程启动失败、原生异常和缺失结果保留在运行清单中。
+
+原生播放/视频输入接受完整运行目录或历史文件。显示暂存复制该运行的 OBJ/MTL，把显示副本中的坑槽网格引用改到独立暂存资源；原 `.vs/.vsb/*_all.par` 保持字节不变。ASCII 视频暂存路径含源目录哈希，避免同名工况碰撞。旧历史缺少本地网格时保留其原有全局资源行为。
+
+原生 AVI 最后一步仍通过 VS Visualizer GUI 导出。现有工程回放视频不是原生场景；准备新浅坑场景后需要真实历史才能播放该场景的控制过程。
+
+## 兼容性与开发协作
+
+旧三个命令 `run_static_fr_closed_loop.py`、`run_right_side_full_cycle.py`、`run_verified_right_side.py` 保留。旧默认 verified 清单与最新 recommended 清单的差异也保留，新启动器默认使用最新推荐清单。原历史证据、模型、报告、配置清单不迁移。
+
+算法目录隔离不意味着任意同时编辑同一文件都不会发生 Git 冲突。并行开发时分别使用 feature 分支/工作区，在各策略目录调参；公共接口修改须协调、保持版本兼容并回归双方合同。
+
+当前固定车辆 profile 不支持仅改元数据的轮距、轴距、轮胎半径或积分步长覆盖；需要新车型时必须新增可生成并验证的 profile。

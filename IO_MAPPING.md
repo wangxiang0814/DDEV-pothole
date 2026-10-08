@@ -1,5 +1,7 @@
 # 当前 I_I TruckSim–Python I/O 映射
 
+2026-10-08 架构更新：共享策略合同使用 SI 值，旧抬轮适配器只在边界换算，算法内部仍保持原生单位。轮序 FL/FR/RL/RR 固定；四轮转矩/四角附加力是八路基础输入，完整循环显式使用第九路方向盘角。公共命令中的 `steering_wheel_angle_rad` 是方向盘角 rad；原生 `IMP_STEER_SW` 为 deg。两套策略分别维护控制、配置与验收，详见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+
 2026-10-04 后续：`--support-allocation-transitions` 可扩展卸载末段/抬升反馈；`--average-path-reference` 在初始化末窗冻结平均Yo/Yaw供FR/RR共用。控制通道与单位不变。分配日志新增 `support_qp_clearance_floor_m`、`support_qp_roll_target_deg/pitch_target_deg`、`support_qp_swing_gain_weight`，记录不同阶段实际预测门槛和目标。
 
 2026-10-04：在线三支撑分配通过原九路完整循环接口施加，不增加物理通道。`--support-allocation active/monitor` 必须配匹配车型 SHA256 的 `--support-allocation-gains`；标称与 μ=0.6/近起点的增益分别发布。最终 Fact 指令已包含基线与附加修正，日志另记分配参考/状态/耗时。求解 0.5 ms、控制 20 ms、原生记录 5 ms 不变。
