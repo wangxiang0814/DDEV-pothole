@@ -60,6 +60,7 @@ def _write_rows(path: Path, rows: list[dict]) -> None:
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--claimed-output', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast", "compact", "efficient"),
                         default="baseline")
@@ -203,7 +204,8 @@ def main(argv=None) -> None:
             brake_start_before_far_edge_m=args.front_brake_lead_m)
     output = args.output.resolve()
     model, scenario = front_run._prepare_model(
-        output, crawl=True, road_friction=args.road_friction, config=front_config)
+        output, crawl=True, road_friction=args.road_friction, config=front_config,
+        claimed_output=args.claimed_output)
     if (not np.isfinite(args.vehicle_start_offset_m) or
             abs(args.vehicle_start_offset_m) > RIGHT_SIDE_MODEL.max_start_offset_m):
         parser.error("vehicle start offset exceeds the configured trial range")
