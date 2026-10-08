@@ -73,6 +73,8 @@ def main():
     fig.suptitle('Passive suspension, equal torque PI: 3 km/h target, 0.8 m pit, 0.05 m edges\nDashed 100 mm: provisional research split; dotted 150 mm: reach warning. Neither is a validated safety limit.', fontsize=11)
     fig.savefig(output / 'depth_sweep.png', dpi=170)
     fig.savefig(output / 'depth_sweep.svg')
+    svg = output / 'depth_sweep.svg'
+    svg.write_text('\n'.join(line.rstrip() for line in svg.read_text(encoding='utf-8').splitlines()) + '\n', encoding='utf-8')
     plt.close(fig)
     print('Crossing diagnostics:', len(results), 'primary:', len(primary), 'static force probes:', len(statics))
     print('Vehicle identities:', sorted({r['vehicle_sha256'] for r in results}))
