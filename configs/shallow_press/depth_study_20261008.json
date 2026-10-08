@@ -1,0 +1,16 @@
+{
+  "status": "PROVISIONAL_RESEARCH_PARTITION_NOT_RUNTIME_POLICY",
+  "vehicle_profile_id": "tuned_ii_20261005",
+  "initial_development_depth_m": [0.02, 0.06],
+  "extended_shallow_candidate_max_m": 0.10,
+  "research_depth_split_m": 0.10,
+  "priority_identification_band_m": [0.08, 0.12],
+  "fixed_body_reach_warning_m": 0.15,
+  "fixed_body_min_extension_room_m": 0.171905138814,
+  "research_travel_reserve_m": 0.02,
+  "historic_right_track_lift_pass_depths_m": [0.20, 0.25],
+  "wide_deep_lift_status": "NOT_VALIDATED_BY_EXISTING_RIGHT_TRACK_EXPERT",
+  "chassis_clearance_status": "NOT_OBSERVABLE_WITH_CURRENT_CONTRACT",
+  "required_features": ["depth_m", "length_m", "width_m", "edge_transition_m", "coverage", "friction", "speed_mps", "payload", "actuator_capability", "chassis_clearance"],
+  "note": "Partition labels are not feasibility certificates. Unverified or uncovered cases require a safe fallback; shallow expert remains NOT_IMPLEMENTED."
+}
