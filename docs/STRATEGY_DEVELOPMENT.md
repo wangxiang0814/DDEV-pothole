@@ -59,3 +59,5 @@ git diff --check
 2026-10-08 坑深研究与被动蠕行诊断见 [SHALLOW_DEPTH_BASELINE_20261008.md](SHALLOW_DEPTH_BASELINE_20261008.md)。0.10 m仅是暂定研究分区，未实现控制切换器或浅坑专家；实验独立入口为 `scripts/run_shallow_depth_baseline.py`，原生结果为UNASSESSED。
 
 2026-10-11 新增约10 km/h、4–20 cm诊断及匹配3 km/h对照见 [SPEED_DEPTH_BASELINE_20261011.md](SPEED_DEPTH_BASELINE_20261011.md)。入口增加可选12 m起步、直行转向反馈与1 ms日志，旧默认不变。原宽坑16/20 cm的保护停止历史保留；按用户要求以 `--observe-after-attitude-limit` 关闭诊断姿态停止后完整重跑，最终汇总采用完整数据。工况名称及日后重放来源见 `evidence/speed_depth_baseline_20261011/case_index.md`。
+
+2026-10-11 底盘诊断扩展见 [CHASSIS_CONTACT_DIAGNOSTICS_20261011.md](CHASSIS_CONTACT_DIAGNOSTICS_20261011.md)：用户确认缺少真实尺寸，采用显式假定包络对18工况作90组历史净空分析；独立接触重跑直接施加原生车身参考点力。扩展模型不等于原车辆身份，不得借用旧辨识增益或标记实车触底验收通过；点模型、刚度及几何尚需标定。

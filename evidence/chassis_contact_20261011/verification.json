@@ -1,0 +1,19 @@
+{
+  "scope": "PARAMETRIC_DIAGNOSTIC_NOT_REAL_VEHICLE_CERTIFICATION",
+  "historical_rows_verified": 90,
+  "native_runs": 9,
+  "full_30s_runs": 7,
+  "short_interface_probes": 2,
+  "original_export_count": 126,
+  "zero_force_max_difference": 0.0,
+  "force_probe_impulse_ns": 99.99999999994407,
+  "force_probe_origin_rise_m": 0.004037416500000002,
+  "maximum_native_reference_error_m": 9.94394609078219e-07,
+  "code_identity_at_audit": {
+    "scripts\\summarize_chassis_contact.py": "105252fbbb94ecc38d96fe9e41f90d59fb06e6befd3e0189a5b2dc18953fe316",
+    "scripts\\analyze_chassis_clearance.py": "dd1084f0a1d1f9b8b2f798f44e05138f980f4f4c856773575570193c71c00473",
+    "scripts\\run_chassis_contact_diagnostic.py": "b2ad7b38b89e0b70add22876c2fec2669e7a0915efc9ef5199eee9c4b3484347",
+    "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7"
+  },
+  "provenance_note": "Audit hashes identify current code; original run manifests and records are preserved, including legacy metadata errata."
+}

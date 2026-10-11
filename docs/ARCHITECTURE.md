@@ -13,6 +13,7 @@
 | `src/ddevsim/vehicle_profiles/` | 两套策略共用的调参 I_I 车辆版本与中性参数生成规则 |
 | `src/ddevsim/scenarios/` | 坑槽覆盖/初始化校验、物理地形与显示资源同步生成 |
 | `src/ddevsim/native_video.py` | 原生历史读取、运行专属网格暂存、隐藏驾驶员和视频准备 |
+| `src/ddevsim/chassis_contact.py` | 中性底盘参数化净空、物理路面及可选诊断接触模型；专家不默认启用 |
 | `scripts/` | 用户命令及历史诊断入口；三个主要旧运行入口为兼容封装 |
 | `configs/wheel_lift/`, `configs/shallow_press/` | 各自参数清单，禁止相互覆盖 |
 | `scenarios/shallow_press/` | 右侧轮迹/左右轮迹模板，具体坑槽尺寸必须显式提供 |

@@ -1,0 +1,99 @@
+# 历史工况底盘净空敏感性
+
+假定簧载矩形底面；静态离地间隙10/15/20/25/30 cm。非真实底盘验收。
+
+| 坑型 | 运行名称 | 假定静态间隙 cm | 最小净空 mm | 首次几何相交 s |
+|---|---|---:|---:|---|
+| right_track | `speed_study_20261011_v03_d080` | 10 | 37.0 | 无 |
+| right_track | `speed_study_20261011_v03_d080` | 15 | 86.9 | 无 |
+| right_track | `speed_study_20261011_v03_d080` | 20 | 136.9 | 无 |
+| right_track | `speed_study_20261011_v03_d080` | 25 | 186.9 | 无 |
+| right_track | `speed_study_20261011_v03_d080` | 30 | 236.8 | 无 |
+| right_track | `speed_study_20261011_v03_d120` | 10 | -1.8 | 24.0045 |
+| right_track | `speed_study_20261011_v03_d120` | 15 | 48.0 | 无 |
+| right_track | `speed_study_20261011_v03_d120` | 20 | 97.9 | 无 |
+| right_track | `speed_study_20261011_v03_d120` | 25 | 147.8 | 无 |
+| right_track | `speed_study_20261011_v03_d120` | 30 | 197.6 | 无 |
+| right_track | `speed_study_20261011_v03_d200` | 10 | -65.3 | 21.5905 |
+| right_track | `speed_study_20261011_v03_d200` | 15 | -15.5 | 21.6895 |
+| right_track | `speed_study_20261011_v03_d200` | 20 | 34.4 | 无 |
+| right_track | `speed_study_20261011_v03_d200` | 25 | 84.3 | 无 |
+| right_track | `speed_study_20261011_v03_d200` | 30 | 134.1 | 无 |
+| right_track | `speed_study_20261011_v10_d040` | 10 | 72.0 | 无 |
+| right_track | `speed_study_20261011_v10_d040` | 15 | 122.0 | 无 |
+| right_track | `speed_study_20261011_v10_d040` | 20 | 172.0 | 无 |
+| right_track | `speed_study_20261011_v10_d040` | 25 | 222.0 | 无 |
+| right_track | `speed_study_20261011_v10_d040` | 30 | 272.0 | 无 |
+| right_track | `speed_study_20261011_v10_d080` | 10 | 41.5 | 无 |
+| right_track | `speed_study_20261011_v10_d080` | 15 | 91.5 | 无 |
+| right_track | `speed_study_20261011_v10_d080` | 20 | 141.5 | 无 |
+| right_track | `speed_study_20261011_v10_d080` | 25 | 191.4 | 无 |
+| right_track | `speed_study_20261011_v10_d080` | 30 | 241.4 | 无 |
+| right_track | `speed_study_20261011_v10_d100` | 10 | 23.2 | 无 |
+| right_track | `speed_study_20261011_v10_d100` | 15 | 73.2 | 无 |
+| right_track | `speed_study_20261011_v10_d100` | 20 | 123.1 | 无 |
+| right_track | `speed_study_20261011_v10_d100` | 25 | 173.1 | 无 |
+| right_track | `speed_study_20261011_v10_d100` | 30 | 223.1 | 无 |
+| right_track | `speed_study_20261011_v10_d120` | 10 | 5.1 | 无 |
+| right_track | `speed_study_20261011_v10_d120` | 15 | 55.0 | 无 |
+| right_track | `speed_study_20261011_v10_d120` | 20 | 105.0 | 无 |
+| right_track | `speed_study_20261011_v10_d120` | 25 | 154.9 | 无 |
+| right_track | `speed_study_20261011_v10_d120` | 30 | 204.9 | 无 |
+| right_track | `speed_study_20261011_v10_d160` | 10 | -12.9 | 11.2785 |
+| right_track | `speed_study_20261011_v10_d160` | 15 | 37.0 | 无 |
+| right_track | `speed_study_20261011_v10_d160` | 20 | 87.0 | 无 |
+| right_track | `speed_study_20261011_v10_d160` | 25 | 136.9 | 无 |
+| right_track | `speed_study_20261011_v10_d160` | 30 | 186.8 | 无 |
+| right_track | `speed_study_20261011_v10_d200` | 10 | -35.0 | 11.2515 |
+| right_track | `speed_study_20261011_v10_d200` | 15 | 14.9 | 无 |
+| right_track | `speed_study_20261011_v10_d200` | 20 | 64.8 | 无 |
+| right_track | `speed_study_20261011_v10_d200` | 25 | 114.7 | 无 |
+| right_track | `speed_study_20261011_v10_d200` | 30 | 164.6 | 无 |
+| wide | `speed_study_20261011_v03_d080` | 10 | -48.0 | 21.5835 |
+| wide | `speed_study_20261011_v03_d080` | 15 | 1.9 | 无 |
+| wide | `speed_study_20261011_v03_d080` | 20 | 51.8 | 无 |
+| wide | `speed_study_20261011_v03_d080` | 25 | 101.6 | 无 |
+| wide | `speed_study_20261011_v03_d080` | 30 | 151.5 | 无 |
+| wide | `speed_study_20261011_v03_d120` | 10 | -131.3 | 21.5275 |
+| wide | `speed_study_20261011_v03_d120` | 15 | -81.5 | 21.6125 |
+| wide | `speed_study_20261011_v03_d120` | 20 | -31.8 | 22.4405 |
+| wide | `speed_study_20261011_v03_d120` | 25 | 17.9 | 无 |
+| wide | `speed_study_20261011_v03_d120` | 30 | 67.6 | 无 |
+| wide | `speed_study_20261011_v03_d200` | 10 | -178.7 | 21.5045 |
+| wide | `speed_study_20261011_v03_d200` | 15 | -128.0 | 21.5475 |
+| wide | `speed_study_20261011_v03_d200` | 20 | -78.4 | 21.5955 |
+| wide | `speed_study_20261011_v03_d200` | 25 | -32.2 | 21.6585 |
+| wide | `speed_study_20261011_v03_d200` | 30 | 14.1 | 无 |
+| wide | `speed_study_20261011_v10_d040` | 10 | 30.2 | 无 |
+| wide | `speed_study_20261011_v10_d040` | 15 | 80.1 | 无 |
+| wide | `speed_study_20261011_v10_d040` | 20 | 130.1 | 无 |
+| wide | `speed_study_20261011_v10_d040` | 25 | 180.1 | 无 |
+| wide | `speed_study_20261011_v10_d040` | 30 | 230.0 | 无 |
+| wide | `speed_study_20261011_v10_d080` | 10 | -47.8 | 11.2035 |
+| wide | `speed_study_20261011_v10_d080` | 15 | 2.1 | 无 |
+| wide | `speed_study_20261011_v10_d080` | 20 | 52.0 | 无 |
+| wide | `speed_study_20261011_v10_d080` | 25 | 101.9 | 无 |
+| wide | `speed_study_20261011_v10_d080` | 30 | 151.8 | 无 |
+| wide | `speed_study_20261011_v10_d100` | 10 | -79.7 | 11.1895 |
+| wide | `speed_study_20261011_v10_d100` | 15 | -29.8 | 11.2485 |
+| wide | `speed_study_20261011_v10_d100` | 20 | 20.0 | 无 |
+| wide | `speed_study_20261011_v10_d100` | 25 | 69.8 | 无 |
+| wide | `speed_study_20261011_v10_d100` | 30 | 119.6 | 无 |
+| wide | `speed_study_20261011_v10_d120` | 10 | -110.0 | 11.1885 |
+| wide | `speed_study_20261011_v10_d120` | 15 | -60.2 | 11.2235 |
+| wide | `speed_study_20261011_v10_d120` | 20 | -10.5 | 11.2915 |
+| wide | `speed_study_20261011_v10_d120` | 25 | 39.3 | 无 |
+| wide | `speed_study_20261011_v10_d120` | 30 | 89.0 | 无 |
+| wide | `speed_study_full30_20261011_v10_d160` | 10 | -203.3 | 11.1875 |
+| wide | `speed_study_full30_20261011_v10_d160` | 15 | -157.4 | 11.2025 |
+| wide | `speed_study_full30_20261011_v10_d160` | 20 | -111.6 | 11.2415 |
+| wide | `speed_study_full30_20261011_v10_d160` | 25 | -65.9 | 11.2885 |
+| wide | `speed_study_full30_20261011_v10_d160` | 30 | -20.1 | 12.1465 |
+| wide | `speed_study_full30_20261011_v10_d200` | 10 | -302.3 | 11.1895 |
+| wide | `speed_study_full30_20261011_v10_d200` | 15 | -234.1 | 11.1925 |
+| wide | `speed_study_full30_20261011_v10_d200` | 20 | -165.8 | 11.2245 |
+| wide | `speed_study_full30_20261011_v10_d200` | 25 | -97.6 | 11.2585 |
+| wide | `speed_study_full30_20261011_v10_d200` | 30 | -39.0 | 11.2985 |
+
+出现首次几何相交后，旧轨迹没有底盘反力，后续穿透量与持续时间只用于定位问题，不能当作真实撞击压缩或冲击力。
+矩形底面没有桥壳、排气管及其他底部件；无相交仅适用于该假定包络。完整参数、位置与事件见JSON。

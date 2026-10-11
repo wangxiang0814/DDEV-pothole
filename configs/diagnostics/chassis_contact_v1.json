@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+  "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+  "underside_bounds_m": [-2.225, 0.3, -0.5, 0.5],
+  "static_min_clearance_sweep_m": [0.10, 0.15, 0.20, 0.25, 0.30],
+  "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+  "static_window_s": [4.0, 5.0],
+  "offline_spacing_m": 0.05,
+  "runtime_grid_shape": [5, 3],
+  "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+  "total_stiffness_n_m": 1000000.0,
+  "total_damping_n_s_m": 12000.0,
+  "friction": 0.3,
+  "slip_regularization_m_s": 0.05,
+  "sources": [
+    "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+    "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+    "Physical pit bilinear DZ map; visual mesh offsets excluded",
+    "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+  ]
+}

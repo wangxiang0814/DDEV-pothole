@@ -1,0 +1,958 @@
+[
+  {
+    "name": "chassis_contact_20261011_right_d200_h100",
+    "case": "right_track",
+    "run_path": "runs\\shallow_press\\right_track\\chassis_contact_20261011_right_d200_h100",
+    "options": {
+      "case": "right_track",
+      "depth_m": 0.2,
+      "speed_kph": 10.0,
+      "clearance_m": 0.1,
+      "run_id": "chassis_contact_20261011_right_d200_h100",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": false,
+      "duration_s": 30.0,
+      "force_probe_n": 0.0,
+      "grid_shape": null
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        5,
+        3
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 1000000.0,
+      "total_damping_n_s_m": 12000.0,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 29.999999999975433,
+        "configured_stop_s": 30.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 30001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\chassis_contact_20261011_right_d200_h100\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.923299523791267e-07,
+      "reference_point_count": 15,
+      "contact_enabled": true,
+      "force_probe_n": 0.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        -62.40365620060595,
+        3.4746554026056535,
+        208.37547024714777
+      ],
+      "total_force_peak_n": 4614.909700470178,
+      "maximum_point_penetration_m": 0.02742265459709728,
+      "contact_force_duration_s": 0.0765,
+      "first_applied_contact_force_s": 11.25200000000226,
+      "normal_impulse_ns": 208.37547024714777,
+      "normal_force_peak_n": 4420.345922589836,
+      "friction_work_j": -169.6391552309342,
+      "contact_obstruction_longest_s": 0.0,
+      "obstruction_candidate": false,
+      "rear_cleared": true,
+      "rear_exit_s": 12.0665,
+      "roll_peak_deg": 4.57078164,
+      "pitch_peak_deg": 3.45686863,
+      "lateral_peak_m": 0.0308430219,
+      "terminal_speed_kph": 6.0023622e-05,
+      "outcome": "REAR_CLEARED",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": true,
+    "metadata_erratum": null,
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "d274b662d6e1128c5b6b5ec3217afdd45a01b0735bdb72ef4d8fbd1dd2db2551",
+    "csv_sha256": "8cfad476165a50611eecfaacce1f3155b761924d6c46d97299128ec5b9251e50"
+  },
+  {
+    "name": "chassis_forcecheck_20261011_up1000",
+    "case": "right_track",
+    "run_path": "runs\\shallow_press\\right_track\\chassis_forcecheck_20261011_up1000",
+    "options": {
+      "case": "right_track",
+      "depth_m": 0.04,
+      "speed_kph": 10.0,
+      "clearance_m": 0.15,
+      "run_id": "chassis_forcecheck_20261011_up1000",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": true,
+      "duration_s": 6.0,
+      "force_probe_n": 1000.0
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        5,
+        3
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 1000000.0,
+      "total_damping_n_s_m": 12000.0,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 5.999999999999394,
+        "configured_stop_s": 6.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 6001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\chassis_forcecheck_20261011_up1000\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.835127727780914e-08,
+      "reference_point_count": 15,
+      "contact_enabled": false,
+      "force_probe_n": 1000.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        0.0,
+        0.0,
+        99.99999999994407
+      ],
+      "total_force_peak_n": 999.9999999999998,
+      "maximum_point_penetration_m": 0.0,
+      "contact_force_duration_s": 0.1,
+      "first_applied_contact_force_s": 5.000499999999948,
+      "normal_impulse_ns": 99.99999999994407,
+      "normal_force_peak_n": 999.9999999999998,
+      "friction_work_j": 0.0,
+      "contact_obstruction_longest_s": 0.0,
+      "obstruction_candidate": false,
+      "rear_cleared": false,
+      "rear_exit_s": null,
+      "roll_peak_deg": 0.769987613,
+      "pitch_peak_deg": 0.611754928,
+      "lateral_peak_m": 0.00240466389,
+      "terminal_speed_kph": 1.82959432,
+      "outcome": "DID_NOT_CLEAR_WITHIN_DURATION",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": false,
+    "metadata_erratum": "Legacy applied-force flag describes capability; contact_enabled and options determine application.",
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "40f81c66a392625149d031829d13e2c4fdeb7534b6703ccef84e8b85e56204bb",
+    "csv_sha256": "ef1eb47393ff90cf3d36990ff7908b310167878b89b51e73d64ee5a6b8805bf2"
+  },
+  {
+    "name": "chassis_forcecheck_20261011_zero",
+    "case": "right_track",
+    "run_path": "runs\\shallow_press\\right_track\\chassis_forcecheck_20261011_zero",
+    "options": {
+      "case": "right_track",
+      "depth_m": 0.04,
+      "speed_kph": 10.0,
+      "clearance_m": 0.15,
+      "run_id": "chassis_forcecheck_20261011_zero",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": true,
+      "duration_s": 6.0,
+      "force_probe_n": 0.0
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        5,
+        3
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 1000000.0,
+      "total_damping_n_s_m": 12000.0,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 5.999999999999394,
+        "configured_stop_s": 6.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 6001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\chassis_forcecheck_20261011_zero\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.826473203340012e-08,
+      "reference_point_count": 15,
+      "contact_enabled": false,
+      "force_probe_n": 0.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_force_peak_n": 0.0,
+      "maximum_point_penetration_m": 0.0,
+      "contact_force_duration_s": 0.0,
+      "first_applied_contact_force_s": null,
+      "normal_impulse_ns": 0.0,
+      "normal_force_peak_n": 0.0,
+      "friction_work_j": 0.0,
+      "contact_obstruction_longest_s": 0.0,
+      "obstruction_candidate": false,
+      "rear_cleared": false,
+      "rear_exit_s": null,
+      "roll_peak_deg": 0.752797825,
+      "pitch_peak_deg": 0.611754928,
+      "lateral_peak_m": 0.00240466389,
+      "terminal_speed_kph": 1.83087451,
+      "outcome": "DID_NOT_CLEAR_WITHIN_DURATION",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": false,
+    "metadata_erratum": "Legacy applied-force flag describes capability; contact_enabled and options determine application.",
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "40f81c66a392625149d031829d13e2c4fdeb7534b6703ccef84e8b85e56204bb",
+    "csv_sha256": "37d35611029223906fe54bd0d2418b95cc0c7584425cf5053d074218eb4074c7"
+  },
+  {
+    "name": "chassis_check_20261011_wide_d200_off",
+    "case": "wide",
+    "run_path": "runs\\shallow_press\\wide\\chassis_check_20261011_wide_d200_off",
+    "options": {
+      "case": "wide",
+      "depth_m": 0.2,
+      "speed_kph": 10.0,
+      "clearance_m": 0.15,
+      "run_id": "chassis_check_20261011_wide_d200_off",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": true,
+      "duration_s": 30.0,
+      "force_probe_n": 0.0
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        5,
+        3
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 1000000.0,
+      "total_damping_n_s_m": 12000.0,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 29.999999999975433,
+        "configured_stop_s": 30.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 30001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\chassis_check_20261011_wide_d200_off\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.840975112544648e-07,
+      "reference_point_count": 15,
+      "contact_enabled": false,
+      "force_probe_n": 0.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_force_peak_n": 0.0,
+      "maximum_point_penetration_m": 0.18235101675874713,
+      "contact_force_duration_s": 0.0,
+      "rear_cleared": true,
+      "rear_exit_s": 12.5215,
+      "roll_peak_deg": 15.9774458,
+      "pitch_peak_deg": 43.3463207,
+      "lateral_peak_m": 2.41256591,
+      "terminal_speed_kph": 0.000624172606,
+      "outcome": "REAR_CLEARED",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": false,
+    "metadata_erratum": "Legacy applied-force flag describes capability; contact_enabled and options determine application.",
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "9a9a57546129fa727ede77ec7baf75d195b0d17e6a4ee9acf0ec732c1eef20da",
+    "csv_sha256": "b137e3aa87869e6c5b794c6d60768002916590f6cafa5844a06c23e33bbffb12"
+  },
+  {
+    "name": "chassis_contact_20261011_wide_d080_h100",
+    "case": "wide",
+    "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d080_h100",
+    "options": {
+      "case": "wide",
+      "depth_m": 0.08,
+      "speed_kph": 10.0,
+      "clearance_m": 0.1,
+      "run_id": "chassis_contact_20261011_wide_d080_h100",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": false,
+      "duration_s": 30.0,
+      "force_probe_n": 0.0,
+      "grid_shape": null
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        5,
+        3
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 1000000.0,
+      "total_damping_n_s_m": 12000.0,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 29.999999999975433,
+        "configured_stop_s": 30.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 30001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d080_h100\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.939856229327352e-07,
+      "reference_point_count": 15,
+      "contact_enabled": true,
+      "force_probe_n": 0.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        -112.99104499038646,
+        1.1010542175679057,
+        376.7366195019483
+      ],
+      "total_force_peak_n": 4316.65002008262,
+      "maximum_point_penetration_m": 0.026263228154276924,
+      "contact_force_duration_s": 0.1865,
+      "first_applied_contact_force_s": 11.204000000002202,
+      "normal_impulse_ns": 376.7366195019483,
+      "normal_force_peak_n": 4134.655641256593,
+      "friction_work_j": -315.1086072170742,
+      "contact_obstruction_longest_s": 0.0,
+      "obstruction_candidate": false,
+      "rear_cleared": true,
+      "rear_exit_s": 12.0625,
+      "roll_peak_deg": 1.72445508,
+      "pitch_peak_deg": 3.40862439,
+      "lateral_peak_m": 0.0133640209,
+      "terminal_speed_kph": 8.80956756e-05,
+      "outcome": "REAR_CLEARED",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": true,
+    "metadata_erratum": null,
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "494617131e3936e6d0c6fa4da8a5cad3fe92d4ce893dea6a2bc34f9a87e1b80c",
+    "csv_sha256": "d1ebd7878c1d65c44b663e16c745901f1e1a81743173331e29682253f4034f4a"
+  },
+  {
+    "name": "chassis_contact_20261011_wide_d160_h150",
+    "case": "wide",
+    "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d160_h150",
+    "options": {
+      "case": "wide",
+      "depth_m": 0.16,
+      "speed_kph": 10.0,
+      "clearance_m": 0.15,
+      "run_id": "chassis_contact_20261011_wide_d160_h150",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": false,
+      "duration_s": 30.0,
+      "force_probe_n": 0.0
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        5,
+        3
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 1000000.0,
+      "total_damping_n_s_m": 12000.0,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 29.999999999975433,
+        "configured_stop_s": 30.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 30001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d160_h150\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.94394609078219e-07,
+      "reference_point_count": 15,
+      "contact_enabled": true,
+      "force_probe_n": 0.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        -735.9051996642728,
+        50.714847167496366,
+        2465.0831504069606
+      ],
+      "total_force_peak_n": 12408.445087029457,
+      "maximum_point_penetration_m": 0.059307164724557354,
+      "contact_force_duration_s": 0.4575,
+      "first_applied_contact_force_s": 11.2030000000022,
+      "normal_impulse_ns": 2465.0831504069606,
+      "normal_force_peak_n": 11885.234591990291,
+      "friction_work_j": -1762.9201957631788,
+      "contact_obstruction_longest_s": 0.0,
+      "obstruction_candidate": false,
+      "rear_cleared": true,
+      "rear_exit_s": 12.1715,
+      "roll_peak_deg": 5.46571312,
+      "pitch_peak_deg": 26.6691565,
+      "lateral_peak_m": 0.0979689537,
+      "terminal_speed_kph": 0.00194204841,
+      "outcome": "REAR_CLEARED",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": true,
+    "metadata_erratum": null,
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "465a12ee7c89f6fe6ac446b5a95ccc07e13de0eae2e0e3accee89f06cfcf0065",
+    "csv_sha256": "2ffc9c6cec8947982c4f2ee7ed7a4b65ba4b9535b4482510e224191147d80f5d"
+  },
+  {
+    "name": "chassis_contact_20261011_wide_d200_h150",
+    "case": "wide",
+    "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150",
+    "options": {
+      "case": "wide",
+      "depth_m": 0.2,
+      "speed_kph": 10.0,
+      "clearance_m": 0.15,
+      "run_id": "chassis_contact_20261011_wide_d200_h150",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": false,
+      "duration_s": 30.0,
+      "force_probe_n": 0.0
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        5,
+        3
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 1000000.0,
+      "total_damping_n_s_m": 12000.0,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 29.999999999975433,
+        "configured_stop_s": 30.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 30001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.922109832181969e-07,
+      "reference_point_count": 15,
+      "contact_enabled": true,
+      "force_probe_n": 0.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        -1430.0246751763311,
+        9.723441447461475,
+        4777.578240622965
+      ],
+      "total_force_peak_n": 19386.293333755653,
+      "maximum_point_penetration_m": 0.12673772003468423,
+      "contact_force_duration_s": 0.6565,
+      "first_applied_contact_force_s": 11.192500000002187,
+      "normal_impulse_ns": 4777.578240622965,
+      "normal_force_peak_n": 18568.98032782028,
+      "friction_work_j": -3763.8491023060706,
+      "contact_obstruction_longest_s": 0.0,
+      "obstruction_candidate": false,
+      "rear_cleared": true,
+      "rear_exit_s": 12.1435,
+      "roll_peak_deg": 8.01822879,
+      "pitch_peak_deg": 32.8124485,
+      "lateral_peak_m": 0.269702694,
+      "terminal_speed_kph": 0.0111678954,
+      "outcome": "REAR_CLEARED",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": true,
+    "metadata_erratum": null,
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "9a9a57546129fa727ede77ec7baf75d195b0d17e6a4ee9acf0ec732c1eef20da",
+    "csv_sha256": "3ec0aace995864a4f25fd4d0ca5e1b663b0f96fcfc21c8eeae6987150a97abd4"
+  },
+  {
+    "name": "chassis_contact_20261011_wide_d200_h150_grid45",
+    "case": "wide",
+    "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150_grid45",
+    "options": {
+      "case": "wide",
+      "depth_m": 0.2,
+      "speed_kph": 10.0,
+      "clearance_m": 0.15,
+      "run_id": "chassis_contact_20261011_wide_d200_h150_grid45",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": false,
+      "duration_s": 30.0,
+      "force_probe_n": 0.0,
+      "grid_shape": [
+        9,
+        5
+      ]
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        9,
+        5
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 1000000.0,
+      "total_damping_n_s_m": 12000.0,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 29.999999999975433,
+        "configured_stop_s": 30.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 30001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150_grid45\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.912506956438934e-07,
+      "reference_point_count": 45,
+      "contact_enabled": true,
+      "force_probe_n": 0.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        -1147.7125586693305,
+        -62.95323087269391,
+        3661.9541826896775
+      ],
+      "total_force_peak_n": 23314.294878256445,
+      "maximum_point_penetration_m": 0.15880519542809465,
+      "contact_force_duration_s": 0.583,
+      "first_applied_contact_force_s": 11.192500000002187,
+      "normal_impulse_ns": 3717.664207657782,
+      "normal_force_peak_n": 22331.381626485752,
+      "friction_work_j": -2725.2088392894016,
+      "contact_obstruction_longest_s": 0.0,
+      "obstruction_candidate": false,
+      "rear_cleared": true,
+      "rear_exit_s": 12.2485,
+      "roll_peak_deg": 11.7261659,
+      "pitch_peak_deg": 33.8722167,
+      "lateral_peak_m": 0.440872469,
+      "terminal_speed_kph": -0.00939117398,
+      "outcome": "REAR_CLEARED",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": true,
+    "metadata_erratum": null,
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "2fcda6fa0ef5396dbfdd3c72381f03477d3dd27bdfbd8e4718e16f30b9b57a8d",
+    "csv_sha256": "d9ff35a69c586cfee12821c67420b0210e729fdb3757776f76c17c9dc8feec32"
+  },
+  {
+    "name": "chassis_contact_20261011_wide_d200_h150_stiff10",
+    "case": "wide",
+    "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150_stiff10",
+    "options": {
+      "case": "wide",
+      "depth_m": 0.2,
+      "speed_kph": 10.0,
+      "clearance_m": 0.15,
+      "run_id": "chassis_contact_20261011_wide_d200_h150_stiff10",
+      "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+      "contact_off": false,
+      "duration_s": 30.0,
+      "force_probe_n": 0.0,
+      "grid_shape": null,
+      "stiffness_scale": 10.0
+    },
+    "contact_config": {
+      "schema_version": 1,
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+      "underside_bounds_m": [
+        -2.225,
+        0.3,
+        -0.5,
+        0.5
+      ],
+      "static_min_clearance_sweep_m": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+      "static_window_s": [
+        4.0,
+        5.0
+      ],
+      "offline_spacing_m": 0.05,
+      "runtime_grid_shape": [
+        5,
+        3
+      ],
+      "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "total_stiffness_n_m": 10000000.0,
+      "total_damping_n_s_m": 37947.33192202055,
+      "friction": 0.3,
+      "slip_regularization_m_s": 0.05,
+      "sources": [
+        "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+        "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+        "Physical pit bilinear DZ map; visual mesh offsets excluded",
+        "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+      ]
+    },
+    "result": {
+      "scope": "UNCALIBRATED_PARAMETRIC_CONTACT_DIAGNOSTIC",
+      "native": {
+        "status": "COMPLETED",
+        "solver_status": 1,
+        "solver_signalled_end": true,
+        "final_time_s": 29.999999999975433,
+        "configured_stop_s": 30.0,
+        "capped_at_s": null,
+        "reached_configured_stop": true,
+        "stopped_on_controller_complete": false,
+        "rows_written": 30001,
+        "csv": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150_stiff10\\native_1ms.csv",
+        "error_message": ""
+      },
+      "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+      "constitutive_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+      "native_reference_frame_error_m": 9.891322581596938e-07,
+      "reference_point_count": 15,
+      "contact_enabled": true,
+      "force_probe_n": 0.0,
+      "normal_and_friction_forces_applied_to_sprung_reference_points": true,
+      "impulse_world_ns": [
+        -1213.8750116691679,
+        -2.9219050160220563,
+        4048.427630751139
+      ],
+      "total_force_peak_n": 64268.351925680734,
+      "maximum_point_penetration_m": 0.04098886952222658,
+      "contact_force_duration_s": 0.131,
+      "first_applied_contact_force_s": 11.192500000002187,
+      "normal_impulse_ns": 4048.427630751139,
+      "normal_force_peak_n": 61558.85806112865,
+      "friction_work_j": -3129.2643997227397,
+      "contact_obstruction_longest_s": 0.0,
+      "obstruction_candidate": false,
+      "rear_cleared": true,
+      "rear_exit_s": 12.1395,
+      "roll_peak_deg": 2.40088762,
+      "pitch_peak_deg": 8.72817447,
+      "lateral_peak_m": 0.0281059864,
+      "terminal_speed_kph": 1.56874797e-05,
+      "outcome": "REAR_CLEARED",
+      "acceptance_pass": false,
+      "task_status": "UNASSESSED"
+    },
+    "contact_force_enabled": true,
+    "metadata_erratum": null,
+    "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+    "extended_model_sha256": "9a9a57546129fa727ede77ec7baf75d195b0d17e6a4ee9acf0ec732c1eef20da",
+    "csv_sha256": "55b4e9e9ba7a9e9191ca12ab36ec1eb2d3824fe9b9b5fa01a411968d67497ffd"
+  }
+]

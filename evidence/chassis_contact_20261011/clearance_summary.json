@@ -1,0 +1,3825 @@
+{
+  "scope": "PARAMETRIC_HYPOTHESIS_NOT_REAL_CHASSIS_CERTIFICATION",
+  "config": {
+    "schema_version": 1,
+    "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+    "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+    "underside_bounds_m": [
+      -2.225,
+      0.3,
+      -0.5,
+      0.5
+    ],
+    "static_min_clearance_sweep_m": [
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3
+    ],
+    "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+    "static_window_s": [
+      4.0,
+      5.0
+    ],
+    "offline_spacing_m": 0.05,
+    "runtime_grid_shape": [
+      5,
+      3
+    ],
+    "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+    "total_stiffness_n_m": 1000000.0,
+    "total_damping_n_s_m": 12000.0,
+    "friction": 0.3,
+    "slip_regularization_m_s": 0.05,
+    "sources": [
+      "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+      "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+      "Physical pit bilinear DZ map; visual mesh offsets excluded",
+      "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+    ]
+  },
+  "config_sha256": "23b54a050c7672460e8663961bea0edf8215bbde5ac1735f313a05e5db0c2605",
+  "algorithm": "Exact planar rectangle minimum over bilinear physical map; 1 ms sampled time",
+  "results": [
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.03697360601825027,
+      "minimum_time_s": 23.9075,
+      "minimum_location_m": [
+        101.01961878015571,
+        -0.5036358213922589,
+        0.03697360601825027
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f5da123b9e68738271b70fbe20a4a5f6eb8f95eb857a4c9032303f81b06a71b6"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.08693998688257407,
+      "minimum_time_s": 23.9075,
+      "minimum_location_m": [
+        101.01813068289009,
+        -0.5048864522536253,
+        0.08693998688257407
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f5da123b9e68738271b70fbe20a4a5f6eb8f95eb857a4c9032303f81b06a71b6"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.1369063677468978,
+      "minimum_time_s": 23.9075,
+      "minimum_location_m": [
+        101.01664258562447,
+        -0.5061370831149916,
+        0.1369063677468978
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f5da123b9e68738271b70fbe20a4a5f6eb8f95eb857a4c9032303f81b06a71b6"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.18687274861122155,
+      "minimum_time_s": 23.9075,
+      "minimum_location_m": [
+        101.01515448835885,
+        -0.5073877139763578,
+        0.18687274861122155
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f5da123b9e68738271b70fbe20a4a5f6eb8f95eb857a4c9032303f81b06a71b6"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.23683912947554528,
+      "minimum_time_s": 23.9075,
+      "minimum_location_m": [
+        101.01366639109322,
+        -0.5086383448377242,
+        0.23683912947554528
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f5da123b9e68738271b70fbe20a4a5f6eb8f95eb857a4c9032303f81b06a71b6"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 24.0045,
+      "min_gap_m": -0.0017900221656179383,
+      "minimum_time_s": 24.0205,
+      "minimum_location_m": [
+        101.09983817752594,
+        -0.5083888406935114,
+        -0.0017900221656179383
+      ],
+      "penetration_duration_s": 0.018000000000000016,
+      "events": [
+        {
+          "start_s": 24.0045,
+          "end_s": 24.0215,
+          "duration_s": 0.01799999999999946
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "070fec78a8288a1c7022a390771d554a5712210465c1a605e7dcb8b4c994ad15"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.048033745859251055,
+      "minimum_time_s": 24.0225,
+      "minimum_location_m": [
+        101.09956175681849,
+        -0.5116703983601046,
+        0.048033745859251055
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "070fec78a8288a1c7022a390771d554a5712210465c1a605e7dcb8b4c994ad15"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.09788428176730535,
+      "minimum_time_s": 24.0245,
+      "minimum_location_m": [
+        101.09927963005012,
+        -0.515006494370592,
+        0.09788428176730535
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "070fec78a8288a1c7022a390771d554a5712210465c1a605e7dcb8b4c994ad15"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.1477585156401665,
+      "minimum_time_s": 24.0255,
+      "minimum_location_m": [
+        101.09816049126415,
+        -0.5181723524132449,
+        0.1477585156401665
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "070fec78a8288a1c7022a390771d554a5712210465c1a605e7dcb8b4c994ad15"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.19763696449046225,
+      "minimum_time_s": 24.0255,
+      "minimum_location_m": [
+        101.09620505612564,
+        -0.5211277443347193,
+        0.19763696449046225
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "070fec78a8288a1c7022a390771d554a5712210465c1a605e7dcb8b4c994ad15"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.5905,
+      "min_gap_m": -0.06534707294600914,
+      "minimum_time_s": 21.7835,
+      "minimum_location_m": [
+        101.72275717102548,
+        -0.18000000000000005,
+        -0.06534707294600936
+      ],
+      "penetration_duration_s": 1.4600000000000013,
+      "events": [
+        {
+          "start_s": 21.5905,
+          "end_s": 22.3805,
+          "duration_s": 0.7910000000000027
+        },
+        {
+          "start_s": 23.9545,
+          "end_s": 24.6225,
+          "duration_s": 0.6689999999999993
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "08876180ef926a380493728ea614812cdc0e2dd2c9b40ce9e24a20fc3388a08c"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.6895,
+      "min_gap_m": -0.015476645883744722,
+      "minimum_time_s": 21.7835,
+      "minimum_location_m": [
+        101.72670064525984,
+        -0.18000000000000005,
+        -0.015476645883744944
+      ],
+      "penetration_duration_s": 0.5530000000000005,
+      "events": [
+        {
+          "start_s": 21.6895,
+          "end_s": 21.9125,
+          "duration_s": 0.22400000000000253
+        },
+        {
+          "start_s": 24.1495,
+          "end_s": 24.4775,
+          "duration_s": 0.3289999999999994
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "08876180ef926a380493728ea614812cdc0e2dd2c9b40ce9e24a20fc3388a08c"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.034393781178519704,
+      "minimum_time_s": 21.7835,
+      "minimum_location_m": [
+        101.7306441194942,
+        -0.18000000000000005,
+        0.03439378117851948
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "08876180ef926a380493728ea614812cdc0e2dd2c9b40ce9e24a20fc3388a08c"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.08426420824078405,
+      "minimum_time_s": 21.7835,
+      "minimum_location_m": [
+        101.73458759372856,
+        -0.18000000000000005,
+        0.08426420824078383
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "08876180ef926a380493728ea614812cdc0e2dd2c9b40ce9e24a20fc3388a08c"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.1341346353030485,
+      "minimum_time_s": 21.7835,
+      "minimum_location_m": [
+        101.73853106796292,
+        -0.18000000000000005,
+        0.13413463530304828
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "08876180ef926a380493728ea614812cdc0e2dd2c9b40ce9e24a20fc3388a08c"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d040",
+      "case": "right_track",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.07204095097823571,
+      "minimum_time_s": 13.1785,
+      "minimum_location_m": [
+        106.98359095056468,
+        0.4976126722241757,
+        0.07204095097823571
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d040",
+      "case": "right_track",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.12203198095696915,
+      "minimum_time_s": 13.1785,
+      "minimum_location_m": [
+        106.98447357196102,
+        0.49834453890472685,
+        0.12203198095696915
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d040",
+      "case": "right_track",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.17202301093570263,
+      "minimum_time_s": 13.1785,
+      "minimum_location_m": [
+        106.98535619335736,
+        0.4990764055852779,
+        0.17202301093570263
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d040",
+      "case": "right_track",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.22201404091443602,
+      "minimum_time_s": 13.1785,
+      "minimum_location_m": [
+        106.9862388147537,
+        0.4998082722658289,
+        0.22201404091443602
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d040",
+      "case": "right_track",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.2720050708931695,
+      "minimum_time_s": 13.1785,
+      "minimum_location_m": [
+        106.98712143615005,
+        0.5005401389463799,
+        0.2720050708931695
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.04149071996302525,
+      "minimum_time_s": 11.3125,
+      "minimum_location_m": [
+        102.25859178574305,
+        -0.5088976610805136,
+        0.04149071996302525
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "14ad04e28b55ffc4befdcadca64923bad02b1f2aa82b4a7cecc68d85d89cfb5b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.0914720266753139,
+      "minimum_time_s": 11.3125,
+      "minimum_location_m": [
+        102.26009393725124,
+        -0.5090715802588047,
+        0.0914720266753139
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "14ad04e28b55ffc4befdcadca64923bad02b1f2aa82b4a7cecc68d85d89cfb5b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.14145333338760246,
+      "minimum_time_s": 11.3125,
+      "minimum_location_m": [
+        102.26159608875943,
+        -0.509245499437096,
+        0.14145333338760246
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "14ad04e28b55ffc4befdcadca64923bad02b1f2aa82b4a7cecc68d85d89cfb5b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.19143464009989108,
+      "minimum_time_s": 11.3125,
+      "minimum_location_m": [
+        102.26309824026762,
+        -0.5094194186153872,
+        0.19143464009989108
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "14ad04e28b55ffc4befdcadca64923bad02b1f2aa82b4a7cecc68d85d89cfb5b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.2414159468121797,
+      "minimum_time_s": 11.3125,
+      "minimum_location_m": [
+        102.26460039177582,
+        -0.5095933377936783,
+        0.2414159468121797
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "14ad04e28b55ffc4befdcadca64923bad02b1f2aa82b4a7cecc68d85d89cfb5b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d100",
+      "case": "right_track",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.023190107144532124,
+      "minimum_time_s": 11.9665,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.49863880467006544,
+        0.023190107144532124
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "4bb2c3f71c022be6d4e3270ed55cd11a51384cf0b52ffee30a999337dcfe25f8"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d100",
+      "case": "right_track",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.07315590593396037,
+      "minimum_time_s": 11.9665,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.5011514117182768,
+        0.07315590593396037
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "4bb2c3f71c022be6d4e3270ed55cd11a51384cf0b52ffee30a999337dcfe25f8"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d100",
+      "case": "right_track",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.12312170472338903,
+      "minimum_time_s": 11.9665,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.5036640187664883,
+        0.12312170472338903
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "4bb2c3f71c022be6d4e3270ed55cd11a51384cf0b52ffee30a999337dcfe25f8"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d100",
+      "case": "right_track",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.17308750351281763,
+      "minimum_time_s": 11.9665,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.5061766258146997,
+        0.17308750351281763
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "4bb2c3f71c022be6d4e3270ed55cd11a51384cf0b52ffee30a999337dcfe25f8"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d100",
+      "case": "right_track",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.2230533023022462,
+      "minimum_time_s": 11.9665,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.5086892328629111,
+        0.2230533023022462
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "4bb2c3f71c022be6d4e3270ed55cd11a51384cf0b52ffee30a999337dcfe25f8"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.005099304647681992,
+      "minimum_time_s": 11.9675,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.49851347102892274,
+        0.005099304647681992
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "38acfb01e86fc703e47f6e02b7e117c68ea9c642e2444440567ef1e8371c4bae"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.055037555511190744,
+      "minimum_time_s": 11.9675,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.5016363368894785,
+        0.055037555511190744
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "38acfb01e86fc703e47f6e02b7e117c68ea9c642e2444440567ef1e8371c4bae"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.10497580637469897,
+      "minimum_time_s": 11.9675,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.5047592027500343,
+        0.10497580637469897
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "38acfb01e86fc703e47f6e02b7e117c68ea9c642e2444440567ef1e8371c4bae"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.1549140572382077,
+      "minimum_time_s": 11.9675,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.50788206861059,
+        0.1549140572382077
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "38acfb01e86fc703e47f6e02b7e117c68ea9c642e2444440567ef1e8371c4bae"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.20485230810171598,
+      "minimum_time_s": 11.9675,
+      "minimum_location_m": [
+        101.89999999999999,
+        -0.5110049344711457,
+        0.20485230810171598
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "38acfb01e86fc703e47f6e02b7e117c68ea9c642e2444440567ef1e8371c4bae"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d160",
+      "case": "right_track",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2785,
+      "min_gap_m": -0.01289773134899358,
+      "minimum_time_s": 11.3145,
+      "minimum_location_m": [
+        102.2519575793456,
+        -0.5079869327801683,
+        -0.01289773134899358
+      ],
+      "penetration_duration_s": 0.10199999999998877,
+      "events": [
+        {
+          "start_s": 11.2785,
+          "end_s": 11.3315,
+          "duration_s": 0.054000000000000714
+        },
+        {
+          "start_s": 11.9505,
+          "end_s": 11.9975,
+          "duration_s": 0.04800000000000049
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "c6f45c52f89e249beb97c0a29a9c42342c8ba4eab7dfbe537f64d6bc3faff684"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d160",
+      "case": "right_track",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.03703049173248227,
+      "minimum_time_s": 11.3145,
+      "minimum_location_m": [
+        102.25465486834304,
+        -0.5085480920202217,
+        0.03703049173248227
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "c6f45c52f89e249beb97c0a29a9c42342c8ba4eab7dfbe537f64d6bc3faff684"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d160",
+      "case": "right_track",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.08695871481395809,
+      "minimum_time_s": 11.3145,
+      "minimum_location_m": [
+        102.25735215734048,
+        -0.5091092512602751,
+        0.08695871481395809
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "c6f45c52f89e249beb97c0a29a9c42342c8ba4eab7dfbe537f64d6bc3faff684"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d160",
+      "case": "right_track",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.13688693789543388,
+      "minimum_time_s": 11.3145,
+      "minimum_location_m": [
+        102.26004944633792,
+        -0.5096704105003285,
+        0.13688693789543388
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "c6f45c52f89e249beb97c0a29a9c42342c8ba4eab7dfbe537f64d6bc3faff684"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d160",
+      "case": "right_track",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.1868151609769097,
+      "minimum_time_s": 11.3145,
+      "minimum_location_m": [
+        102.26274673533536,
+        -0.5102315697403818,
+        0.1868151609769097
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "c6f45c52f89e249beb97c0a29a9c42342c8ba4eab7dfbe537f64d6bc3faff684"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2515,
+      "min_gap_m": -0.035036681769178846,
+      "minimum_time_s": 11.3165,
+      "minimum_location_m": [
+        102.25058204231064,
+        -0.5065018592493165,
+        -0.035036681769178846
+      ],
+      "penetration_duration_s": 0.1469999999999838,
+      "events": [
+        {
+          "start_s": 11.2515,
+          "end_s": 11.3455,
+          "duration_s": 0.09499999999999931
+        },
+        {
+          "start_s": 11.9565,
+          "end_s": 12.0075,
+          "duration_s": 0.052000000000000046
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "6a5da83fc4fc69430e4caee367169b81feed4de9a0e3d7e4c1642b8d66a368b1"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.014860155795015983,
+      "minimum_time_s": 11.3165,
+      "minimum_location_m": [
+        102.2537661858605,
+        -0.5072664236012138,
+        0.014860155795015983
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "6a5da83fc4fc69430e4caee367169b81feed4de9a0e3d7e4c1642b8d66a368b1"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.06475699335921073,
+      "minimum_time_s": 11.3165,
+      "minimum_location_m": [
+        102.25695032941037,
+        -0.5080309879531111,
+        0.06475699335921073
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "6a5da83fc4fc69430e4caee367169b81feed4de9a0e3d7e4c1642b8d66a368b1"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.11465383092340556,
+      "minimum_time_s": 11.3165,
+      "minimum_location_m": [
+        102.26013447296025,
+        -0.5087955523050083,
+        0.11465383092340556
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "6a5da83fc4fc69430e4caee367169b81feed4de9a0e3d7e4c1642b8d66a368b1"
+    },
+    {
+      "run_path": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.16455066848760033,
+      "minimum_time_s": 11.3165,
+      "minimum_location_m": [
+        102.26331861651012,
+        -0.5095601166569056,
+        0.16455066848760033
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "6a5da83fc4fc69430e4caee367169b81feed4de9a0e3d7e4c1642b8d66a368b1"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.5835,
+      "min_gap_m": -0.04798148861088372,
+      "minimum_time_s": 23.9415,
+      "minimum_location_m": [
+        101.03774627386623,
+        0.49323576053862483,
+        -0.04798148861088372
+      ],
+      "penetration_duration_s": 0.5060000000000004,
+      "events": [
+        {
+          "start_s": 21.5835,
+          "end_s": 21.7805,
+          "duration_s": 0.19799999999999918
+        },
+        {
+          "start_s": 21.9585,
+          "end_s": 22.0645,
+          "duration_s": 0.1069999999999981
+        },
+        {
+          "start_s": 22.3085,
+          "end_s": 22.3385,
+          "duration_s": 0.031000000000001138
+        },
+        {
+          "start_s": 23.8635,
+          "end_s": 24.0325,
+          "duration_s": 0.17000000000000048
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "31fd37cee32241814c40a5c9c91076e5ce6caa9bc22cf46151c4576b6692a055"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.0018865059469252987,
+      "minimum_time_s": 23.9415,
+      "minimum_location_m": [
+        101.03418261264423,
+        0.49418505774137994,
+        0.0018865059469252987
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "31fd37cee32241814c40a5c9c91076e5ce6caa9bc22cf46151c4576b6692a055"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.05175450050473426,
+      "minimum_time_s": 23.9415,
+      "minimum_location_m": [
+        101.03061895142224,
+        0.495134354944135,
+        0.05175450050473426
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "31fd37cee32241814c40a5c9c91076e5ce6caa9bc22cf46151c4576b6692a055"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.10162249506254321,
+      "minimum_time_s": 23.9415,
+      "minimum_location_m": [
+        101.02705529020024,
+        0.49608365214689004,
+        0.10162249506254321
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "31fd37cee32241814c40a5c9c91076e5ce6caa9bc22cf46151c4576b6692a055"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.15149048962035222,
+      "minimum_time_s": 23.9415,
+      "minimum_location_m": [
+        101.02349162897823,
+        0.49703294934964515,
+        0.15149048962035222
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "31fd37cee32241814c40a5c9c91076e5ce6caa9bc22cf46151c4576b6692a055"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.5275,
+      "min_gap_m": -0.1312551523994916,
+      "minimum_time_s": 22.5595,
+      "minimum_location_m": [
+        102.09281365084598,
+        0.5011717350497776,
+        -0.1312551523994916
+      ],
+      "penetration_duration_s": 2.6630000000000025,
+      "events": [
+        {
+          "start_s": 21.5275,
+          "end_s": 23.6145,
+          "duration_s": 2.0879999999999996
+        },
+        {
+          "start_s": 24.9965,
+          "end_s": 25.2105,
+          "duration_s": 0.21499999999999864
+        },
+        {
+          "start_s": 25.3255,
+          "end_s": 25.6845,
+          "duration_s": 0.3599999999999982
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "39ddaa639c774d39a3717f24e757e796a1139508ef5e53ac68835e97580eef23"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.6125,
+      "min_gap_m": -0.08153740486272051,
+      "minimum_time_s": 22.5595,
+      "minimum_location_m": [
+        102.09802304990765,
+        0.5023656651097428,
+        -0.08153740486272051
+      ],
+      "penetration_duration_s": 1.1350000000000011,
+      "events": [
+        {
+          "start_s": 21.6125,
+          "end_s": 21.7885,
+          "duration_s": 0.17699999999999838
+        },
+        {
+          "start_s": 21.9715,
+          "end_s": 22.0385,
+          "duration_s": 0.06800000000000017
+        },
+        {
+          "start_s": 22.3355,
+          "end_s": 22.7715,
+          "duration_s": 0.43699999999999994
+        },
+        {
+          "start_s": 23.0955,
+          "end_s": 23.4485,
+          "duration_s": 0.353999999999998
+        },
+        {
+          "start_s": 25.0305,
+          "end_s": 25.1285,
+          "duration_s": 0.09899999999999898
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "39ddaa639c774d39a3717f24e757e796a1139508ef5e53ac68835e97580eef23"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 22.4405,
+      "min_gap_m": -0.031819657325949435,
+      "minimum_time_s": 22.5595,
+      "minimum_location_m": [
+        102.10323244896934,
+        0.5035595951697078,
+        -0.031819657325949435
+      ],
+      "penetration_duration_s": 0.4260000000000004,
+      "events": [
+        {
+          "start_s": 22.4405,
+          "end_s": 22.6825,
+          "duration_s": 0.24300000000000088
+        },
+        {
+          "start_s": 23.1775,
+          "end_s": 23.3235,
+          "duration_s": 0.1470000000000008
+        },
+        {
+          "start_s": 25.0785,
+          "end_s": 25.1135,
+          "duration_s": 0.03600000000000014
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "39ddaa639c774d39a3717f24e757e796a1139508ef5e53ac68835e97580eef23"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.01789809021082156,
+      "minimum_time_s": 22.5595,
+      "minimum_location_m": [
+        102.108441848031,
+        0.5047535252296729,
+        0.01789809021082156
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "39ddaa639c774d39a3717f24e757e796a1139508ef5e53ac68835e97580eef23"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.06761583774759261,
+      "minimum_time_s": 22.5595,
+      "minimum_location_m": [
+        102.11365124709269,
+        0.505947455289638,
+        0.06761583774759261
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "39ddaa639c774d39a3717f24e757e796a1139508ef5e53ac68835e97580eef23"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.5045,
+      "min_gap_m": -0.1787221136212579,
+      "minimum_time_s": 21.7395,
+      "minimum_location_m": [
+        101.1,
+        0.5113830692479425,
+        -0.1787221136212579
+      ],
+      "penetration_duration_s": 15.524000000000013,
+      "events": [
+        {
+          "start_s": 21.5045,
+          "end_s": 24.9965,
+          "duration_s": 3.4930000000000008
+        },
+        {
+          "start_s": 25.6965,
+          "end_s": 25.9145,
+          "duration_s": 0.21899999999999997
+        },
+        {
+          "start_s": 26.1625,
+          "end_s": 37.9735,
+          "duration_s": 11.812
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "72f1f98a7bb8eee5c234fb77215e64c2b1d2a4ae4ab8fb70e36bb76c614f4c30"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.5475,
+      "min_gap_m": -0.12798425385992457,
+      "minimum_time_s": 21.7395,
+      "minimum_location_m": [
+        101.1,
+        0.5119373839180136,
+        -0.12798425385992457
+      ],
+      "penetration_duration_s": 15.037000000000013,
+      "events": [
+        {
+          "start_s": 21.5475,
+          "end_s": 24.9695,
+          "duration_s": 3.4230000000000005
+        },
+        {
+          "start_s": 26.1935,
+          "end_s": 37.6065,
+          "duration_s": 11.413999999999996
+        },
+        {
+          "start_s": 37.7045,
+          "end_s": 37.9035,
+          "duration_s": 0.19999999999999807
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "72f1f98a7bb8eee5c234fb77215e64c2b1d2a4ae4ab8fb70e36bb76c614f4c30"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.5955,
+      "min_gap_m": -0.07844344772131753,
+      "minimum_time_s": 22.0095,
+      "minimum_location_m": [
+        101.90046979215633,
+        0.5083440535615011,
+        -0.07844344772131753
+      ],
+      "penetration_duration_s": 6.165000000000005,
+      "events": [
+        {
+          "start_s": 21.5955,
+          "end_s": 21.9525,
+          "duration_s": 0.3579999999999993
+        },
+        {
+          "start_s": 21.9855,
+          "end_s": 24.9405,
+          "duration_s": 2.9560000000000017
+        },
+        {
+          "start_s": 26.2195,
+          "end_s": 26.2575,
+          "duration_s": 0.03900000000000026
+        },
+        {
+          "start_s": 26.2695,
+          "end_s": 26.4315,
+          "duration_s": 0.16299999999999903
+        },
+        {
+          "start_s": 27.1685,
+          "end_s": 27.3105,
+          "duration_s": 0.14299999999999946
+        },
+        {
+          "start_s": 27.5485,
+          "end_s": 27.6705,
+          "duration_s": 0.12299999999999989
+        },
+        {
+          "start_s": 28.0305,
+          "end_s": 28.1555,
+          "duration_s": 0.126
+        },
+        {
+          "start_s": 28.3775,
+          "end_s": 28.4915,
+          "duration_s": 0.11499999999999722
+        },
+        {
+          "start_s": 28.7255,
+          "end_s": 28.8135,
+          "duration_s": 0.08900000000000097
+        },
+        {
+          "start_s": 29.2255,
+          "end_s": 29.3555,
+          "duration_s": 0.130999999999999
+        },
+        {
+          "start_s": 29.8975,
+          "end_s": 30.0285,
+          "duration_s": 0.13200000000000023
+        },
+        {
+          "start_s": 30.8975,
+          "end_s": 30.9815,
+          "duration_s": 0.08499999999999963
+        },
+        {
+          "start_s": 31.2515,
+          "end_s": 31.4095,
+          "duration_s": 0.15900000000000125
+        },
+        {
+          "start_s": 31.7685,
+          "end_s": 31.8685,
+          "duration_s": 0.10100000000000142
+        },
+        {
+          "start_s": 31.8785,
+          "end_s": 31.9925,
+          "duration_s": 0.11500000000000077
+        },
+        {
+          "start_s": 32.2695,
+          "end_s": 32.3885,
+          "duration_s": 0.11999999999999977
+        },
+        {
+          "start_s": 33.2465,
+          "end_s": 33.3805,
+          "duration_s": 0.13500000000000034
+        },
+        {
+          "start_s": 33.6415,
+          "end_s": 33.7455,
+          "duration_s": 0.1049999999999992
+        },
+        {
+          "start_s": 34.6245,
+          "end_s": 34.7445,
+          "duration_s": 0.12100000000000455
+        },
+        {
+          "start_s": 35.1535,
+          "end_s": 35.2975,
+          "duration_s": 0.14499999999999835
+        },
+        {
+          "start_s": 35.5535,
+          "end_s": 35.7115,
+          "duration_s": 0.15900000000000125
+        },
+        {
+          "start_s": 36.0815,
+          "end_s": 36.1975,
+          "duration_s": 0.11699999999999966
+        },
+        {
+          "start_s": 36.4615,
+          "end_s": 36.5835,
+          "duration_s": 0.12299999999999989
+        },
+        {
+          "start_s": 37.0795,
+          "end_s": 37.2315,
+          "duration_s": 0.15299999999999392
+        },
+        {
+          "start_s": 37.3735,
+          "end_s": 37.5245,
+          "duration_s": 0.15200000000000335
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "72f1f98a7bb8eee5c234fb77215e64c2b1d2a4ae4ab8fb70e36bb76c614f4c30"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 21.6585,
+      "min_gap_m": -0.03215576311561247,
+      "minimum_time_s": 22.0025,
+      "minimum_location_m": [
+        101.90024406457724,
+        0.5087627593753052,
+        -0.03215576311561247
+      ],
+      "penetration_duration_s": 0.6340000000000006,
+      "events": [
+        {
+          "start_s": 21.6585,
+          "end_s": 21.8485,
+          "duration_s": 0.19100000000000128
+        },
+        {
+          "start_s": 21.9925,
+          "end_s": 22.0765,
+          "duration_s": 0.08499999999999963
+        },
+        {
+          "start_s": 22.4825,
+          "end_s": 22.7675,
+          "duration_s": 0.2859999999999966
+        },
+        {
+          "start_s": 23.2505,
+          "end_s": 23.3015,
+          "duration_s": 0.052000000000001934
+        },
+        {
+          "start_s": 26.3365,
+          "end_s": 26.3555,
+          "duration_s": 0.019999999999998352
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "72f1f98a7bb8eee5c234fb77215e64c2b1d2a4ae4ab8fb70e36bb76c614f4c30"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.014083116795329531,
+      "minimum_time_s": 21.9955,
+      "minimum_location_m": [
+        101.90024320700871,
+        0.50905456432404,
+        0.014083116795329531
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "72f1f98a7bb8eee5c234fb77215e64c2b1d2a4ae4ab8fb70e36bb76c614f4c30"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d040",
+      "case": "wide",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.03015548136431935,
+      "minimum_time_s": 11.2995,
+      "minimum_location_m": [
+        102.22408423289971,
+        0.5007284177836013,
+        0.03015548136431935
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "873f3400b0143291f53ddc0fc8e0cf129f7a87351d89c26879ae91c659287ebd"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d040",
+      "case": "wide",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.08012833010480612,
+      "minimum_time_s": 11.2995,
+      "minimum_location_m": [
+        102.22574197544779,
+        0.5013481000463258,
+        0.08012833010480612
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "873f3400b0143291f53ddc0fc8e0cf129f7a87351d89c26879ae91c659287ebd"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d040",
+      "case": "wide",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.13010117884529282,
+      "minimum_time_s": 11.2995,
+      "minimum_location_m": [
+        102.22739971799587,
+        0.5019677823090503,
+        0.13010117884529282
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "873f3400b0143291f53ddc0fc8e0cf129f7a87351d89c26879ae91c659287ebd"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d040",
+      "case": "wide",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.18007402758577956,
+      "minimum_time_s": 11.2995,
+      "minimum_location_m": [
+        102.22905746054394,
+        0.5025874645717745,
+        0.18007402758577956
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "873f3400b0143291f53ddc0fc8e0cf129f7a87351d89c26879ae91c659287ebd"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d040",
+      "case": "wide",
+      "depth_m": 0.04,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.2300468763262663,
+      "minimum_time_s": 11.2995,
+      "minimum_location_m": [
+        102.23071520309202,
+        0.503207146834499,
+        0.2300468763262663
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "873f3400b0143291f53ddc0fc8e0cf129f7a87351d89c26879ae91c659287ebd"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2035,
+      "min_gap_m": -0.047773318431068024,
+      "minimum_time_s": 11.3115,
+      "minimum_location_m": [
+        102.23597864163932,
+        0.5036535925307396,
+        -0.047773318431068024
+      ],
+      "penetration_duration_s": 0.2779999999999694,
+      "events": [
+        {
+          "start_s": 11.2035,
+          "end_s": 11.3595,
+          "duration_s": 0.15700000000000047
+        },
+        {
+          "start_s": 11.8605,
+          "end_s": 11.9805,
+          "duration_s": 0.12099999999999911
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f33dc2008b356c15deef0e35bc30e928f5c9fe667b38e491f3219a36d36a6415"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.0021086837960712645,
+      "minimum_time_s": 11.3115,
+      "minimum_location_m": [
+        102.23940379493017,
+        0.5043405470036185,
+        0.0021086837960712645
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f33dc2008b356c15deef0e35bc30e928f5c9fe667b38e491f3219a36d36a6415"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.0519906860232105,
+      "minimum_time_s": 11.3115,
+      "minimum_location_m": [
+        102.24282894822103,
+        0.5050275014764976,
+        0.0519906860232105
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f33dc2008b356c15deef0e35bc30e928f5c9fe667b38e491f3219a36d36a6415"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.10187268825034976,
+      "minimum_time_s": 11.3115,
+      "minimum_location_m": [
+        102.2462541015119,
+        0.5057144559493765,
+        0.10187268825034976
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f33dc2008b356c15deef0e35bc30e928f5c9fe667b38e491f3219a36d36a6415"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.151754690477489,
+      "minimum_time_s": 11.3115,
+      "minimum_location_m": [
+        102.24967925480274,
+        0.5064014104222554,
+        0.151754690477489
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "f33dc2008b356c15deef0e35bc30e928f5c9fe667b38e491f3219a36d36a6415"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d100",
+      "case": "wide",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.1895,
+      "min_gap_m": -0.07967484940290775,
+      "minimum_time_s": 11.3135,
+      "minimum_location_m": [
+        102.23292052550961,
+        0.5050872766999452,
+        -0.07967484940290775
+      ],
+      "penetration_duration_s": 0.32999999999996366,
+      "events": [
+        {
+          "start_s": 11.1895,
+          "end_s": 11.3675,
+          "duration_s": 0.17899999999999894
+        },
+        {
+          "start_s": 11.8485,
+          "end_s": 11.9985,
+          "duration_s": 0.15100000000000025
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "79bb39785c9fdbd4d6abe5438df015eb304b3707785644ef8cd0d8376db23192"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d100",
+      "case": "wide",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2485,
+      "min_gap_m": -0.02984793584725609,
+      "minimum_time_s": 11.3135,
+      "minimum_location_m": [
+        102.2370667086279,
+        0.5057983173240925,
+        -0.02984793584725609
+      ],
+      "penetration_duration_s": 0.1389999999999847,
+      "events": [
+        {
+          "start_s": 11.2485,
+          "end_s": 11.3365,
+          "duration_s": 0.08899999999999908
+        },
+        {
+          "start_s": 11.9105,
+          "end_s": 11.9595,
+          "duration_s": 0.04999999999999938
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "79bb39785c9fdbd4d6abe5438df015eb304b3707785644ef8cd0d8376db23192"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d100",
+      "case": "wide",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.019978977708395546,
+      "minimum_time_s": 11.3135,
+      "minimum_location_m": [
+        102.2412128917462,
+        0.5065093579482396,
+        0.019978977708395546
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "79bb39785c9fdbd4d6abe5438df015eb304b3707785644ef8cd0d8376db23192"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d100",
+      "case": "wide",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.06980589126404724,
+      "minimum_time_s": 11.3135,
+      "minimum_location_m": [
+        102.2453590748645,
+        0.5072203985723868,
+        0.06980589126404724
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "79bb39785c9fdbd4d6abe5438df015eb304b3707785644ef8cd0d8376db23192"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d100",
+      "case": "wide",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.1196328048196989,
+      "minimum_time_s": 11.3135,
+      "minimum_location_m": [
+        102.24950525798279,
+        0.5079314391965339,
+        0.1196328048196989
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "79bb39785c9fdbd4d6abe5438df015eb304b3707785644ef8cd0d8376db23192"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.1885,
+      "min_gap_m": -0.11000891680314717,
+      "minimum_time_s": 11.3155,
+      "minimum_location_m": [
+        102.2292861511154,
+        0.5010963935491319,
+        -0.11000891680314717
+      ],
+      "penetration_duration_s": 0.35199999999996123,
+      "events": [
+        {
+          "start_s": 11.1885,
+          "end_s": 11.3725,
+          "duration_s": 0.18500000000000094
+        },
+        {
+          "start_s": 11.8435,
+          "end_s": 12.0095,
+          "duration_s": 0.16699999999999848
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "e8da527e074c51d20e078ce35b47d8411a655adfa03855b10ca273fa79433a4a"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2235,
+      "min_gap_m": -0.060245986125877726,
+      "minimum_time_s": 11.3155,
+      "minimum_location_m": [
+        102.23414675633849,
+        0.501761957202381,
+        -0.060245986125877726
+      ],
+      "penetration_duration_s": 0.2369999999999739,
+      "events": [
+        {
+          "start_s": 11.2235,
+          "end_s": 11.3505,
+          "duration_s": 0.12800000000000056
+        },
+        {
+          "start_s": 11.8805,
+          "end_s": 11.9885,
+          "duration_s": 0.10900000000000043
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "e8da527e074c51d20e078ce35b47d8411a655adfa03855b10ca273fa79433a4a"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2915,
+      "min_gap_m": -0.010483055448608253,
+      "minimum_time_s": 11.3155,
+      "minimum_location_m": [
+        102.23900736156159,
+        0.50242752085563,
+        -0.010483055448608253
+      ],
+      "penetration_duration_s": 0.032999999999996366,
+      "events": [
+        {
+          "start_s": 11.2915,
+          "end_s": 11.3235,
+          "duration_s": 0.03299999999999992
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "e8da527e074c51d20e078ce35b47d8411a655adfa03855b10ca273fa79433a4a"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.03927987522866119,
+      "minimum_time_s": 11.3155,
+      "minimum_location_m": [
+        102.24386796678468,
+        0.503093084508879,
+        0.03927987522866119
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "e8da527e074c51d20e078ce35b47d8411a655adfa03855b10ca273fa79433a4a"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "NO_INTERSECTION_FOR_ASSUMED_PLANE",
+      "first_intersection_s": null,
+      "min_gap_m": 0.08904280590593058,
+      "minimum_time_s": 11.3155,
+      "minimum_location_m": [
+        102.24872857200776,
+        0.5037586481621281,
+        0.08904280590593058
+      ],
+      "penetration_duration_s": 0.0,
+      "events": [],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "e8da527e074c51d20e078ce35b47d8411a655adfa03855b10ca273fa79433a4a"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d160",
+      "case": "wide",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.1875,
+      "min_gap_m": -0.20325699366342753,
+      "minimum_time_s": 12.1785,
+      "minimum_location_m": [
+        104.28432906004696,
+        0.48830352278145384,
+        -0.20325699366342753
+      ],
+      "penetration_duration_s": 1.1740000000001314,
+      "events": [
+        {
+          "start_s": 11.1875,
+          "end_s": 11.3755,
+          "duration_s": 0.18900000000000072
+        },
+        {
+          "start_s": 11.7505,
+          "end_s": 11.8825,
+          "duration_s": 0.13299999999999979
+        },
+        {
+          "start_s": 12.0595,
+          "end_s": 12.4305,
+          "duration_s": 0.37200000000000055
+        },
+        {
+          "start_s": 12.5025,
+          "end_s": 12.7815,
+          "duration_s": 0.28
+        },
+        {
+          "start_s": 12.8475,
+          "end_s": 13.0195,
+          "duration_s": 0.1730000000000007
+        },
+        {
+          "start_s": 13.5155,
+          "end_s": 13.5415,
+          "duration_s": 0.026999999999999913
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "230dba72ddbc2162ef7a1d5c70b86cf8b5f7bbff88043a44a18db549b55d832b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d160",
+      "case": "wide",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2025,
+      "min_gap_m": -0.15744329951148886,
+      "minimum_time_s": 12.1795,
+      "minimum_location_m": [
+        104.30392196067028,
+        0.4928265466096008,
+        -0.15744329951148886
+      ],
+      "penetration_duration_s": 0.6470000000000724,
+      "events": [
+        {
+          "start_s": 11.2025,
+          "end_s": 11.3625,
+          "duration_s": 0.16100000000000025
+        },
+        {
+          "start_s": 11.7685,
+          "end_s": 11.8665,
+          "duration_s": 0.09900000000000087
+        },
+        {
+          "start_s": 12.0765,
+          "end_s": 12.3265,
+          "duration_s": 0.2510000000000001
+        },
+        {
+          "start_s": 12.8615,
+          "end_s": 12.9965,
+          "duration_s": 0.1359999999999999
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "230dba72ddbc2162ef7a1d5c70b86cf8b5f7bbff88043a44a18db549b55d832b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d160",
+      "case": "wide",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2415,
+      "min_gap_m": -0.11164215121690173,
+      "minimum_time_s": 12.1805,
+      "minimum_location_m": [
+        104.32360124597544,
+        0.49731323169229147,
+        -0.11164215121690173
+      ],
+      "penetration_duration_s": 0.44700000000005,
+      "events": [
+        {
+          "start_s": 11.2415,
+          "end_s": 11.3485,
+          "duration_s": 0.10799999999999943
+        },
+        {
+          "start_s": 11.7865,
+          "end_s": 11.8475,
+          "duration_s": 0.062000000000000055
+        },
+        {
+          "start_s": 12.0955,
+          "end_s": 12.2815,
+          "duration_s": 0.18700000000000006
+        },
+        {
+          "start_s": 12.8795,
+          "end_s": 12.9685,
+          "duration_s": 0.09000000000000052
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "230dba72ddbc2162ef7a1d5c70b86cf8b5f7bbff88043a44a18db549b55d832b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d160",
+      "case": "wide",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2885,
+      "min_gap_m": -0.06585093012255289,
+      "minimum_time_s": 12.1805,
+      "minimum_location_m": [
+        104.34328723741865,
+        0.5013186704058876,
+        -0.06585093012255289
+      ],
+      "penetration_duration_s": 0.17500000000001958,
+      "events": [
+        {
+          "start_s": 11.2885,
+          "end_s": 11.3275,
+          "duration_s": 0.039999999999999813
+        },
+        {
+          "start_s": 12.1175,
+          "end_s": 12.2515,
+          "duration_s": 0.13500000000000045
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "230dba72ddbc2162ef7a1d5c70b86cf8b5f7bbff88043a44a18db549b55d832b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d160",
+      "case": "wide",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 12.1465,
+      "min_gap_m": -0.020074576342150152,
+      "minimum_time_s": 12.1815,
+      "minimum_location_m": [
+        104.36309614417509,
+        0.5057480174376869,
+        -0.020074576342150152
+      ],
+      "penetration_duration_s": 0.07100000000000795,
+      "events": [
+        {
+          "start_s": 12.1465,
+          "end_s": 12.2165,
+          "duration_s": 0.0710000000000004
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "230dba72ddbc2162ef7a1d5c70b86cf8b5f7bbff88043a44a18db549b55d832b"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.1895,
+      "min_gap_m": -0.3023113165162654,
+      "minimum_time_s": 12.0425,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.5570323312411066,
+        -0.3023113165162654
+      ],
+      "penetration_duration_s": 1.6960000000001898,
+      "events": [
+        {
+          "start_s": 11.1895,
+          "end_s": 11.3905,
+          "duration_s": 0.20199999999999885
+        },
+        {
+          "start_s": 11.5965,
+          "end_s": 11.8025,
+          "duration_s": 0.20699999999999963
+        },
+        {
+          "start_s": 11.9135,
+          "end_s": 12.1465,
+          "duration_s": 0.23399999999999888
+        },
+        {
+          "start_s": 12.7555,
+          "end_s": 12.9295,
+          "duration_s": 0.17500000000000138
+        },
+        {
+          "start_s": 12.9605,
+          "end_s": 13.1325,
+          "duration_s": 0.1730000000000007
+        },
+        {
+          "start_s": 13.4865,
+          "end_s": 13.7565,
+          "duration_s": 0.27100000000000146
+        },
+        {
+          "start_s": 13.9285,
+          "end_s": 14.0995,
+          "duration_s": 0.17200000000000126
+        },
+        {
+          "start_s": 14.6605,
+          "end_s": 14.9215,
+          "duration_s": 0.26199999999999934
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "ecb7695f02c6812a656cd8773ff7454836ca8c9489d267437caffc0a0fb25abc"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.1925,
+      "min_gap_m": -0.23405527783388225,
+      "minimum_time_s": 12.0425,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.5588766959071867,
+        -0.23405527783388225
+      ],
+      "penetration_duration_s": 1.1870000000001328,
+      "events": [
+        {
+          "start_s": 11.1925,
+          "end_s": 11.3805,
+          "duration_s": 0.18899999999999895
+        },
+        {
+          "start_s": 11.7615,
+          "end_s": 11.8085,
+          "duration_s": 0.04800000000000071
+        },
+        {
+          "start_s": 11.9345,
+          "end_s": 12.1315,
+          "duration_s": 0.19800000000000106
+        },
+        {
+          "start_s": 12.7685,
+          "end_s": 12.9175,
+          "duration_s": 0.15000000000000102
+        },
+        {
+          "start_s": 12.9725,
+          "end_s": 13.1065,
+          "duration_s": 0.13500000000000045
+        },
+        {
+          "start_s": 13.5135,
+          "end_s": 13.7335,
+          "duration_s": 0.22099999999999898
+        },
+        {
+          "start_s": 13.9405,
+          "end_s": 14.0815,
+          "duration_s": 0.14200000000000013
+        },
+        {
+          "start_s": 14.7395,
+          "end_s": 14.8425,
+          "duration_s": 0.10399999999999987
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "ecb7695f02c6812a656cd8773ff7454836ca8c9489d267437caffc0a0fb25abc"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2245,
+      "min_gap_m": -0.165823863235538,
+      "minimum_time_s": 12.0435,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.560302256979994,
+        -0.165823863235538
+      ],
+      "penetration_duration_s": 0.813000000000091,
+      "events": [
+        {
+          "start_s": 11.2245,
+          "end_s": 11.3685,
+          "duration_s": 0.14499999999999846
+        },
+        {
+          "start_s": 11.9545,
+          "end_s": 12.1155,
+          "duration_s": 0.16200000000000148
+        },
+        {
+          "start_s": 12.7815,
+          "end_s": 12.9045,
+          "duration_s": 0.12400000000000122
+        },
+        {
+          "start_s": 12.9875,
+          "end_s": 13.0855,
+          "duration_s": 0.09899999999999909
+        },
+        {
+          "start_s": 13.5415,
+          "end_s": 13.7085,
+          "duration_s": 0.1680000000000017
+        },
+        {
+          "start_s": 13.9525,
+          "end_s": 14.0665,
+          "duration_s": 0.1149999999999991
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "ecb7695f02c6812a656cd8773ff7454836ca8c9489d267437caffc0a0fb25abc"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2585,
+      "min_gap_m": -0.09760897538113711,
+      "minimum_time_s": 12.0435,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.562180825603127,
+        -0.09760897538113711
+      ],
+      "penetration_duration_s": 0.5530000000000619,
+      "events": [
+        {
+          "start_s": 11.2585,
+          "end_s": 11.3555,
+          "duration_s": 0.09799999999999964
+        },
+        {
+          "start_s": 11.9745,
+          "end_s": 12.0965,
+          "duration_s": 0.123
+        },
+        {
+          "start_s": 12.7965,
+          "end_s": 12.8915,
+          "duration_s": 0.09600000000000075
+        },
+        {
+          "start_s": 13.0105,
+          "end_s": 13.0585,
+          "duration_s": 0.049000000000000155
+        },
+        {
+          "start_s": 13.5755,
+          "end_s": 13.6795,
+          "duration_s": 0.10500000000000109
+        },
+        {
+          "start_s": 13.9685,
+          "end_s": 14.0495,
+          "duration_s": 0.08199999999999963
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "ecb7695f02c6812a656cd8773ff7454836ca8c9489d267437caffc0a0fb25abc"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2985,
+      "min_gap_m": -0.03903864651435493,
+      "minimum_time_s": 12.8475,
+      "minimum_location_m": [
+        104.78005000852441,
+        1.223210217848214,
+        -0.03903864651435493
+      ],
+      "penetration_duration_s": 0.2110000000000236,
+      "events": [
+        {
+          "start_s": 11.2985,
+          "end_s": 11.3365,
+          "duration_s": 0.03899999999999859
+        },
+        {
+          "start_s": 11.9965,
+          "end_s": 12.0715,
+          "duration_s": 0.07600000000000118
+        },
+        {
+          "start_s": 12.8145,
+          "end_s": 12.8765,
+          "duration_s": 0.0629999999999995
+        },
+        {
+          "start_s": 13.9925,
+          "end_s": 14.0245,
+          "duration_s": 0.03300000000000014
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_NO_CONTACT_TRAJECTORY",
+      "physical_contact_force": "NOT_PRESENT_IN_HISTORICAL_MODEL",
+      "csv_sha256": "ecb7695f02c6812a656cd8773ff7454836ca8c9489d267437caffc0a0fb25abc"
+    }
+  ]
+}

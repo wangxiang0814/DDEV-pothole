@@ -1,0 +1,323 @@
+{
+  "scope": "PARAMETRIC_HYPOTHESIS_NOT_REAL_CHASSIS_CERTIFICATION",
+  "config": {
+    "schema_version": 1,
+    "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+    "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+    "underside_bounds_m": [
+      -2.225,
+      0.3,
+      -0.5,
+      0.5
+    ],
+    "static_min_clearance_sweep_m": [
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3
+    ],
+    "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+    "static_window_s": [
+      4.0,
+      5.0
+    ],
+    "offline_spacing_m": 0.05,
+    "runtime_grid_shape": [
+      5,
+      3
+    ],
+    "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+    "total_stiffness_n_m": 1000000.0,
+    "total_damping_n_s_m": 12000.0,
+    "friction": 0.3,
+    "slip_regularization_m_s": 0.05,
+    "sources": [
+      "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+      "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+      "Physical pit bilinear DZ map; visual mesh offsets excluded",
+      "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+    ]
+  },
+  "config_sha256": "23b54a050c7672460e8663961bea0edf8215bbde5ac1735f313a05e5db0c2605",
+  "metric_code_sha256": "dd1084f0a1d1f9b8b2f798f44e05138f980f4f4c856773575570193c71c00473",
+  "geometry_code_sha256": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+  "algorithm": "Exact planar rectangle minimum over bilinear physical map; 1 ms sampled time",
+  "results": [
+    {
+      "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.1895,
+      "min_gap_m": -0.215962827678998,
+      "minimum_time_s": 11.9595,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.5082486935681323,
+        -0.215962827678998
+      ],
+      "penetration_duration_s": 1.4320000000001603,
+      "events": [
+        {
+          "start_s": 11.1895,
+          "end_s": 11.3535,
+          "duration_s": 0.1649999999999998
+        },
+        {
+          "start_s": 11.7165,
+          "end_s": 11.7585,
+          "duration_s": 0.04299999999999993
+        },
+        {
+          "start_s": 11.8715,
+          "end_s": 12.0445,
+          "duration_s": 0.17400000000000015
+        },
+        {
+          "start_s": 12.3325,
+          "end_s": 12.6215,
+          "duration_s": 0.2899999999999998
+        },
+        {
+          "start_s": 12.7905,
+          "end_s": 13.1925,
+          "duration_s": 0.40300000000000114
+        },
+        {
+          "start_s": 13.3765,
+          "end_s": 13.4845,
+          "duration_s": 0.10900000000000065
+        },
+        {
+          "start_s": 13.6595,
+          "end_s": 13.9065,
+          "duration_s": 0.248
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_FOR_THIS_ASSUMED_GEOMETRY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.15,
+      "csv_sha256": "3ec0aace995864a4f25fd4d0ca5e1b663b0f96fcfc21c8eeae6987150a97abd4"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.1925,
+      "min_gap_m": -0.15986115377111698,
+      "minimum_time_s": 11.9595,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.5092039419445128,
+        -0.15986115377111698
+      ],
+      "penetration_duration_s": 0.7480000000000837,
+      "events": [
+        {
+          "start_s": 11.1925,
+          "end_s": 11.3395,
+          "duration_s": 0.14799999999999858
+        },
+        {
+          "start_s": 11.8925,
+          "end_s": 12.0305,
+          "duration_s": 0.139
+        },
+        {
+          "start_s": 12.3505,
+          "end_s": 12.5705,
+          "duration_s": 0.22099999999999898
+        },
+        {
+          "start_s": 12.8815,
+          "end_s": 13.0735,
+          "duration_s": 0.1929999999999985
+        },
+        {
+          "start_s": 13.4055,
+          "end_s": 13.4515,
+          "duration_s": 0.04699999999999949
+        }
+      ],
+      "interpretation_after_first_intersection": "COMPLIANT_POINT_MODEL_TRAJECTORY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.15,
+      "csv_sha256": "3ec0aace995864a4f25fd4d0ca5e1b663b0f96fcfc21c8eeae6987150a97abd4"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.2,
+      "geometry": {
+        "local_z_m": 0.26089423946643064,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.2,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2285,
+      "min_gap_m": -0.1037708130623829,
+      "minimum_time_s": 11.9605,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.5099644091820187,
+        -0.1037708130623829
+      ],
+      "penetration_duration_s": 0.36500000000004085,
+      "events": [
+        {
+          "start_s": 11.2285,
+          "end_s": 11.3205,
+          "duration_s": 0.09299999999999886
+        },
+        {
+          "start_s": 11.9095,
+          "end_s": 12.0165,
+          "duration_s": 0.1080000000000012
+        },
+        {
+          "start_s": 12.3705,
+          "end_s": 12.5335,
+          "duration_s": 0.16400000000000037
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_FOR_THIS_ASSUMED_GEOMETRY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.15,
+      "csv_sha256": "3ec0aace995864a4f25fd4d0ca5e1b663b0f96fcfc21c8eeae6987150a97abd4"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.25,
+      "geometry": {
+        "local_z_m": 0.3108984165689689,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.25,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.9295,
+      "min_gap_m": -0.04769972845317105,
+      "minimum_time_s": 11.9605,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.5109357686381091,
+        -0.04769972845317105
+      ],
+      "penetration_duration_s": 0.1770000000000198,
+      "events": [
+        {
+          "start_s": 11.9295,
+          "end_s": 11.9985,
+          "duration_s": 0.06999999999999917
+        },
+        {
+          "start_s": 12.3935,
+          "end_s": 12.4995,
+          "duration_s": 0.10699999999999998
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_FOR_THIS_ASSUMED_GEOMETRY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.15,
+      "csv_sha256": "3ec0aace995864a4f25fd4d0ca5e1b663b0f96fcfc21c8eeae6987150a97abd4"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\chassis_contact_20261011_wide_d200_h150",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.3,
+      "geometry": {
+        "local_z_m": 0.3609025936715071,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.3,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 12.4375,
+      "min_gap_m": -0.0004387313183791819,
+      "minimum_time_s": 12.4425,
+      "minimum_location_m": [
+        104.88995966837464,
+        0.5501182626494263,
+        -0.0004387313183791819
+      ],
+      "penetration_duration_s": 0.011000000000001231,
+      "events": [
+        {
+          "start_s": 12.4375,
+          "end_s": 12.4475,
+          "duration_s": 0.010999999999999899
+        }
+      ],
+      "interpretation_after_first_intersection": "COUNTERFACTUAL_FOR_THIS_ASSUMED_GEOMETRY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.15,
+      "csv_sha256": "3ec0aace995864a4f25fd4d0ca5e1b663b0f96fcfc21c8eeae6987150a97abd4"
+    }
+  ]
+}
