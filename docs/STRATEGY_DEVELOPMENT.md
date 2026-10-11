@@ -57,3 +57,5 @@ git diff --check
 可恢复的重构前版本：`backup/pre-strategy-refactor-20261008`（647d168）。本机 bundle 位于 `.git/backups/pre-strategy-refactor-20261008.bundle`；它包含 Git 历史，不含被忽略的 runs 仿真产物。
 
 2026-10-08 坑深研究与被动蠕行诊断见 [SHALLOW_DEPTH_BASELINE_20261008.md](SHALLOW_DEPTH_BASELINE_20261008.md)。0.10 m仅是暂定研究分区，未实现控制切换器或浅坑专家；实验独立入口为 `scripts/run_shallow_depth_baseline.py`，原生结果为UNASSESSED。
+
+2026-10-11 新增约10 km/h、4–20 cm诊断及匹配3 km/h对照见 [SPEED_DEPTH_BASELINE_20261011.md](SPEED_DEPTH_BASELINE_20261011.md)。入口增加可选12 m起步、直行转向反馈与1 ms日志，旧默认不变。原宽坑16/20 cm的保护停止历史保留；按用户要求以 `--observe-after-attitude-limit` 关闭诊断姿态停止后完整重跑，最终汇总采用完整数据。工况名称及日后重放来源见 `evidence/speed_depth_baseline_20261011/case_index.md`。

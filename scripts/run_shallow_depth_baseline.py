@@ -25,7 +25,7 @@ WHEELS = ('L1', 'R1', 'L2', 'R2')
 
 
 class Baseline:
-    def __init__(self, names, speed_kph=3., torque_limit=250., probe_force=0., probe_corner='all', probe_ramp_s=10.):
+    def __init__(self, names, speed_kph=3., torque_limit=250., probe_force=0., probe_corner='all', probe_ramp_s=10., steering_feedback=False, observe_after_attitude_limit=False):
         self.index = {name: i for i, name in enumerate(names)}
         self.speed = speed_kph / 3.6
         self.limit = torque_limit
@@ -39,6 +39,11 @@ class Baseline:
         self.completed = False
         self.abort_reason = None
         self.end_station_m = 103.
+        self.steering_feedback = steering_feedback
+        self.steer_deg = 0.
+        self.lateral_reference = None
+        self.observe_after_attitude_limit = observe_after_attitude_limit
+        self.attitude_limit_first_s = None
 
     def __call__(self, t, exports):
         if t - self.last_tick < .02 - 1e-8:
@@ -49,7 +54,10 @@ class Baseline:
         if not all(math.isfinite(float(v)) for v in exports):
             raise ValueError('nonfinite native feedback')
         if abs(x('Roll_E')) > 20 or abs(x('Pitch')) > 20:
-            self.abort_reason = 'attitude exceeds diagnostic 20 degree stop'
+            if self.attitude_limit_first_s is None:
+                self.attitude_limit_first_s = t
+            if not self.observe_after_attitude_limit:
+                self.abort_reason = 'attitude exceeds diagnostic 20 degree stop'
         self.completed = min(x('X_L2'), x('X_R2')) > self.end_station_m
         target = self.speed * min(1., max(0., (t - 5.) / 3.))
         if self.completed or self.abort_reason:
@@ -66,7 +74,13 @@ class Baseline:
             self.integral = 0.
         force = self.probe * min(1., max(0., (t - 5.) / self.probe_ramp_s))
         forces = [force if self.corner in ('all', w) else 0. for w in WHEELS]
-        self.command = (self.torque,) * 4 + tuple(forces) + (0.,)
+        if self.steering_feedback:
+            if self.lateral_reference is None:
+                self.lateral_reference = x('Yo')
+            desired = 0. if t < 5. else float(np.clip(
+                -350. * (x('Yo') - self.lateral_reference) - 12. * x('Yaw') - 2. * x('AVz'), -80., 80.))
+            self.steer_deg += float(np.clip(desired-self.steer_deg, -120.*dt, 120.*dt))
+        self.command = (self.torque,) * 4 + tuple(forces) + (self.steer_deg,)
         return self.command
 
 
@@ -106,6 +120,8 @@ def summarize(csv_path, case, controller, native):
               'target_speed_kph': controller.speed * 3.6,
               'rear_cleared': bool(min(get('X_L2')[-1], get('X_R2')[-1]) > case.geometry.trailing_edge_m + .263),
               'abort_reason': controller.abort_reason,
+              'attitude_stop_enabled': not getattr(controller, 'observe_after_attitude_limit', False),
+              'attitude_20deg_first_s': getattr(controller, 'attitude_limit_first_s', None),
               'speed_min_kph': float(get('Vx')[crossing].min()),
               'speed_max_kph': float(get('Vx')[crossing].max()),
               'speed_rmse_kph': float(np.sqrt(np.mean((get('Vx')[crossing] - controller.speed * 3.6)**2))),
@@ -149,22 +165,30 @@ def main():
     p.add_argument('--depth-m', type=float, required=True)
     p.add_argument('--run-id', required=True)
     p.add_argument('--speed-kph', type=float, default=3.)
+    p.add_argument('--approach-distance-m', type=float)
+    p.add_argument('--steering-feedback', action='store_true')
+    p.add_argument('--observe-after-attitude-limit', action='store_true',
+                   help='Diagnostic only: record 20-degree exceedance without stopping the simulation')
+    p.add_argument('--log-decimation', type=int, default=10)
     p.add_argument('--length-m', type=float, default=.8)
     p.add_argument('--width-m', type=float)
     p.add_argument('--edge-m', type=float, default=.05)
     p.add_argument('--friction', type=float, default=.7)
     p.add_argument('--duration-s', type=float, default=30.)
+    p.add_argument('--full-duration', action='store_true',
+                   help='Observe until declared duration, including post-crossing braking and recovery')
     p.add_argument('--torque-limit-nm', type=float, default=250.)
     p.add_argument('--probe-force-n', type=float, default=0.)
     p.add_argument('--probe-corner', choices=['all', *WHEELS], default='all')
     p.add_argument('--probe-ramp-s', type=float, default=10.)
     a = p.parse_args()
-    if not (0 <= a.speed_kph <= 5 and 0 < a.torque_limit_nm <= 1000 and abs(a.probe_force_n) <= 18200 and 15 <= a.duration_s <= 120 and 0 < a.probe_ramp_s <= 30):
+    if not (0 <= a.speed_kph <= 12 and 0 < a.torque_limit_nm <= 1000 and abs(a.probe_force_n) <= 18200 and 15 <= a.duration_s <= 120 and 0 < a.probe_ramp_s <= 30 and 1 <= a.log_decimation <= 40):
         p.error('diagnostic settings outside declared software limits')
     case = load_case(ROOT / ('scenarios/shallow_press/' + a.case + '.json'),
                      depth_m=a.depth_m, length_m=a.length_m,
                      width_m=a.width_m if a.width_m is not None else (.9 if a.case == 'right_track' else 1.8),
-                     stop_s=a.duration_s, friction=a.friction)
+                     stop_s=a.duration_s, friction=a.friction,
+                     approach_distance_m=a.approach_distance_m)
     case = replace(case, geometry=replace(case.geometry, edge_transition_m=a.edge_m))
     validate_case(case)
     run = claim_run(ROOT / 'runs', 'shallow_press', a.case, a.run_id)
@@ -174,14 +198,15 @@ def main():
     manifest['diagnostic_code_sha256'] = sha256_file(Path(__file__))
     write_run_manifest(run, manifest)
     controller = Baseline(manifest['export_names'], a.speed_kph, a.torque_limit_nm,
-                          a.probe_force_n, a.probe_corner, a.probe_ramp_s)
+                          a.probe_force_n, a.probe_corner, a.probe_ramp_s, a.steering_feedback,
+                          a.observe_after_attitude_limit)
     controller.end_station_m = case.geometry.trailing_edge_m + .263 + .8
     native = None
     try:
         native = run_stepwise(run / 'model/simfile.sim', controller, run / 'native_5ms.csv',
-                              manifest['import_names'], manifest['export_names'], log_decimation=10,
+                              manifest['import_names'], manifest['export_names'], log_decimation=a.log_decimation,
                               stop_when=lambda t: controller.abort_reason is not None or
-                              (controller.completed and t > 15.))
+                              (not a.full_duration and controller.completed and t > 15.))
         validate_native_result(native)
     except Exception as error:
         manifest.update(run_status='DIAGNOSTIC_FAILED', task_status='UNASSESSED',

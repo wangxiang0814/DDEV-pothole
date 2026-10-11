@@ -1,0 +1,366 @@
+{
+  "video_export": "NOT_REQUESTED",
+  "playback": "DEFERRED_BY_USER",
+  "runs": [
+    {
+      "case_name": "RIGHT_v03kph_d08cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v03_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "speed_kph": 3.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d080",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v03_d080",
+      "native_vsb_sha256": "cb553a689c91c6073a4446f6d2df2fa2eb297028a0d1f45c6171cdff74f8da8b",
+      "simulation_end_s": 25.9205,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 21.0195,
+        "rear_exit": 24.9365,
+        "impact_peak": 24.6215,
+        "pitch_peak": 23.8995,
+        "roll_peak": 24.1225
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v03_d080"
+    },
+    {
+      "case_name": "RIGHT_v03kph_d12cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v03_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "speed_kph": 3.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d120",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v03_d120",
+      "native_vsb_sha256": "b830e3df3a54e7bc0da51fa1fa54a44b0095591c387f5a608b3b731235eec30d",
+      "simulation_end_s": 25.9205,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 21.0195,
+        "rear_exit": 24.9375,
+        "impact_peak": 22.3615,
+        "pitch_peak": 21.7525,
+        "roll_peak": 24.2225
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v03_d120"
+    },
+    {
+      "case_name": "RIGHT_v03kph_d20cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v03_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "speed_kph": 3.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v03_d200",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v03_d200",
+      "native_vsb_sha256": "dda72679a4c145a9942f64a13e84178d0eb6cd89ce182146be851485efecf522",
+      "simulation_end_s": 25.9405,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 21.0195,
+        "rear_exit": 24.9975,
+        "impact_peak": 22.3705,
+        "pitch_peak": 21.7935,
+        "roll_peak": 24.2835
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v03_d200"
+    },
+    {
+      "case_name": "RIGHT_v10kph_d04cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d040",
+      "case": "right_track",
+      "depth_m": 0.04,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d040",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v10_d040",
+      "native_vsb_sha256": "f35201db227760eb540ac4af086004cf134bdcd9cf2993b48ac52f97fb61e471",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0545,
+        "impact_peak": 11.8505,
+        "pitch_peak": 13.1785,
+        "roll_peak": 11.6385
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v10_d040"
+    },
+    {
+      "case_name": "RIGHT_v10kph_d08cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d080",
+      "case": "right_track",
+      "depth_m": 0.08,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d080",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v10_d080",
+      "native_vsb_sha256": "f0430a8eafec2d75646de2a672b0a86b88b5be5f504ab9d6c0311581d39eca5a",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0525,
+        "impact_peak": 11.9765,
+        "pitch_peak": 11.3135,
+        "roll_peak": 11.9825
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v10_d080"
+    },
+    {
+      "case_name": "RIGHT_v10kph_d10cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d100",
+      "case": "right_track",
+      "depth_m": 0.1,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d100",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v10_d100",
+      "native_vsb_sha256": "f702f2becea00799f45bf5403be5ef72666ae9867fddfb2e2851a4ee1bd292ac",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0455,
+        "impact_peak": 11.3315,
+        "pitch_peak": 11.3075,
+        "roll_peak": 11.9775
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v10_d100"
+    },
+    {
+      "case_name": "RIGHT_v10kph_d12cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d120",
+      "case": "right_track",
+      "depth_m": 0.12,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d120",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v10_d120",
+      "native_vsb_sha256": "522ee683fdc6193e3421f7682f0b2bab0f26987988c3adcb9980ad5f303187f0",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0455,
+        "impact_peak": 11.3275,
+        "pitch_peak": 11.3095,
+        "roll_peak": 11.9765
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v10_d120"
+    },
+    {
+      "case_name": "RIGHT_v10kph_d16cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d160",
+      "case": "right_track",
+      "depth_m": 0.16,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d160",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v10_d160",
+      "native_vsb_sha256": "448971399f2c47b6a5b3f46dc13e19450a90881a724cb17d88d312a91b963a86",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0495,
+        "impact_peak": 11.3215,
+        "pitch_peak": 11.3145,
+        "roll_peak": 11.9825
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v10_d160"
+    },
+    {
+      "case_name": "RIGHT_v10kph_d20cm_W900mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d200",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\right_track\\speed_study_20261011_v10_d200",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\right_track\\speed_study_20261011_v10_d200",
+      "native_vsb_sha256": "331313f0e00701dac8488c48317bb6ab17ea187f5e094a08a066b126641bb4eb",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0595,
+        "impact_peak": 11.3185,
+        "pitch_peak": 11.3165,
+        "roll_peak": 11.9925
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/right_track/speed_study_20261011_v10_d200"
+    },
+    {
+      "case_name": "WIDE_v03kph_d08cm_W1800mm_L800mm",
+      "run_id": "speed_study_20261011_v03_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "speed_kph": 3.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d080",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_20261011_v03_d080",
+      "native_vsb_sha256": "9f44971355b0dd3f00e35e16d52803e0cb50938274d3c9049ba55ff652c54974",
+      "simulation_end_s": 26.0005,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 21.0185,
+        "rear_exit": 25.0585,
+        "impact_peak": 24.6425,
+        "pitch_peak": 23.9445,
+        "roll_peak": 25.7865
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_20261011_v03_d080"
+    },
+    {
+      "case_name": "WIDE_v03kph_d12cm_W1800mm_L800mm",
+      "run_id": "speed_study_20261011_v03_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "speed_kph": 3.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d120",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_20261011_v03_d120",
+      "native_vsb_sha256": "c2aaaa646cc293b8b57a60eab3a67a24389d13ea816f9eb99b4c69bea592dbc0",
+      "simulation_end_s": 26.9005,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 21.0185,
+        "rear_exit": 26.0625,
+        "impact_peak": 23.6335,
+        "pitch_peak": 22.5365,
+        "roll_peak": 25.9765
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_20261011_v03_d120"
+    },
+    {
+      "case_name": "WIDE_v03kph_d20cm_W1800mm_L800mm",
+      "run_id": "speed_study_20261011_v03_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "speed_kph": 3.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_20261011_v03_d200",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_20261011_v03_d200",
+      "native_vsb_sha256": "1778e3e97420750a320db75eb5f84d00f9a68b87620b1cd28a7d716005c25752",
+      "simulation_end_s": 38.9005,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 21.0185,
+        "rear_exit": 38.3125,
+        "impact_peak": 24.9335,
+        "pitch_peak": 25.3315,
+        "roll_peak": 37.6795
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_20261011_v03_d200"
+    },
+    {
+      "case_name": "WIDE_v10kph_d04cm_W1800mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d040",
+      "case": "wide",
+      "depth_m": 0.04,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d040",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_20261011_v10_d040",
+      "native_vsb_sha256": "229e6a0a99f6a93d8b16400050359d849b19e9bac0298316c1f963f1b0b6b6e7",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0605,
+        "impact_peak": 11.9775,
+        "pitch_peak": 11.8645,
+        "roll_peak": 12.0525
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_20261011_v10_d040"
+    },
+    {
+      "case_name": "WIDE_v10kph_d08cm_W1800mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d080",
+      "case": "wide",
+      "depth_m": 0.08,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d080",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_20261011_v10_d080",
+      "native_vsb_sha256": "617e8b52d78c6ba5925fa3094922e565aca0cc922b7aa20155db9644c06c120f",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0695,
+        "impact_peak": 11.3215,
+        "pitch_peak": 11.3085,
+        "roll_peak": 12.4795
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_20261011_v10_d080"
+    },
+    {
+      "case_name": "WIDE_v10kph_d10cm_W1800mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d100",
+      "case": "wide",
+      "depth_m": 0.1,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d100",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_20261011_v10_d100",
+      "native_vsb_sha256": "8409b821dab7aef9d4478105f8e6e86769d3a97309d465ab587e6375fdb7a0e8",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0535,
+        "impact_peak": 11.3185,
+        "pitch_peak": 12.2435,
+        "roll_peak": 12.2115
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_20261011_v10_d100"
+    },
+    {
+      "case_name": "WIDE_v10kph_d12cm_W1800mm_L800mm",
+      "run_id": "speed_study_20261011_v10_d120",
+      "case": "wide",
+      "depth_m": 0.12,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_20261011_v10_d120",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_20261011_v10_d120",
+      "native_vsb_sha256": "3cac84531bec30d6a32032d1119a5211f3dc6e15d5dc04109026ecdb3e11c047",
+      "simulation_end_s": 14.9995,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0635,
+        "impact_peak": 11.3185,
+        "pitch_peak": 12.2965,
+        "roll_peak": 12.2325
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_20261011_v10_d120"
+    },
+    {
+      "case_name": "WIDE_v10kph_d16cm_W1800mm_L800mm_FULL30s",
+      "run_id": "speed_study_full30_20261011_v10_d160",
+      "case": "wide",
+      "depth_m": 0.16,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d160",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d160",
+      "native_vsb_sha256": "c4f567a96922528c3fa61551f3d4e1b752b1ae7376bf8412efa6175953017e5f",
+      "simulation_end_s": 30.0,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.0645,
+        "impact_peak": 11.3175,
+        "pitch_peak": 12.3225,
+        "roll_peak": 13.4305
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_full30_20261011_v10_d160"
+    },
+    {
+      "case_name": "WIDE_v10kph_d20cm_W1800mm_L800mm_FULL30s",
+      "run_id": "speed_study_full30_20261011_v10_d200",
+      "case": "wide",
+      "depth_m": 0.2,
+      "speed_kph": 10.0,
+      "source_run": "runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d200",
+      "absolute_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\shallow_press\\wide\\speed_study_full30_20261011_v10_d200",
+      "native_vsb_sha256": "ddecbd8ecb986dc713cdfbd8aa52f6285a56e9b423b269b234b4fe461b968df7",
+      "simulation_end_s": 30.0,
+      "crossing_outcome": "REAR_CLEARED",
+      "critical_times_s": {
+        "front_entry": 10.9125,
+        "rear_exit": 12.5215,
+        "impact_peak": 11.3225,
+        "pitch_peak": 12.0145,
+        "roll_peak": 14.3105
+      },
+      "replay_command": "F:/anaconda3/python.exe scripts/open_run_visualizer.py runs/shallow_press/wide/speed_study_full30_20261011_v10_d200"
+    }
+  ]
+}

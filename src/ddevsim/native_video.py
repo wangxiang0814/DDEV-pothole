@@ -327,6 +327,7 @@ def create_vsrap(
     visualizer: Path = DEFAULT_VISUALIZER_64,
     overwrite: bool = True,
     timeout_s: float = 90.0,
+    workdir: Optional[Path] = None,
 ) -> Dict[str, object]:
     """Create a ``.vsrap`` package non-interactively via ``-vsrap`` (opt-in).
 
@@ -359,7 +360,9 @@ def create_vsrap(
         with stdout_path.open("wb") as out, stderr_path.open("wb") as err:
             completed = subprocess.run(
                 [str(visualizer)] + arguments,
-                cwd=str(animator_par.parent),
+                # Relative vehicle meshes/materials/shaders resolve against
+                # TruckSim Resources, just as they do in interactive playback.
+                cwd=str(default_workdir() if workdir is None else workdir),
                 stdout=out,
                 stderr=err,
                 timeout=timeout_s,
@@ -477,7 +480,7 @@ def export_native_video(
     resolution: Sequence[int] = (1280, 720),
     create_vsrap_package: bool = False,
     launch: bool = True,
-    workdir: Path = DEFAULT_TRUCKSIM_DATA,
+    workdir: Optional[Path] = None,
     ascii_stage: bool = True,
 ) -> Dict[str, object]:
     """Run the automatable part of the native video export for one history.
@@ -496,6 +499,7 @@ def export_native_video(
     could not be opened and no scene ever loaded.  Staging the history under an
     ASCII path is therefore required, not merely a convenience.
     """
+    workdir = default_workdir() if workdir is None else Path(workdir)
     history = find_history(source)
     stage_dir = Path(stage_dir)
     if ascii_stage:
@@ -526,7 +530,7 @@ def export_native_video(
 
     if create_vsrap_package:
         vsrap = stage_dir / (history.basename + ".vsrap")
-        report["vsrap"] = create_vsrap(animator_par, vsrap, visualizer=visualizer)
+        report["vsrap"] = create_vsrap(animator_par, vsrap, visualizer=visualizer, workdir=workdir)
 
     if launch:
         report["launch"] = launch_visualizer(

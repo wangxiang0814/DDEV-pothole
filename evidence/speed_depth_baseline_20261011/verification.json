@@ -1,0 +1,30 @@
+{
+  "conditions": 18,
+  "executed_runs": 22,
+  "final_sources_all_rear_cleared": true,
+  "full30_wide_depths_m": [
+    0.16,
+    0.2
+  ],
+  "source_csv_and_native_hashes_verified": true,
+  "plant_identity_unchanged": true,
+  "pre_stop_prefix_checks": [
+    {
+      "depth_mm": 160,
+      "identical_prefix_samples": 11719,
+      "maximum_channel_difference": 0.0
+    },
+    {
+      "depth_mm": 200,
+      "identical_prefix_samples": 11599,
+      "maximum_channel_difference": 0.0
+    }
+  ],
+  "full_test_command": "PYTHONPATH=src F:/anaconda3/python.exe -m pytest -q",
+  "full_test_result": "498 passed, 10 dependency deprecation warnings",
+  "independent_review": "no substantive issue; nullable rear-exit index formatting corrected",
+  "video_export": "NOT_REQUESTED",
+  "playback": "DEFERRED_BY_USER",
+  "expert_control_implemented": false,
+  "chassis_contact": "NOT_OBSERVABLE"
+}
