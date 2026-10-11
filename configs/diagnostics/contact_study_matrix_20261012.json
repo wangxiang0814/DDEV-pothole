@@ -1,0 +1,20 @@
+{
+  "scope": "UNCALIBRATED_CONTACT_CONVERGENCE_AND_PASSIVE_PROBLEM_STUDY",
+  "duration_s": 30,
+  "speed_kph": 10,
+  "runs": [
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[9,5],"step_s":0.00025,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_wide_d200_h150_g45_dt250"},
+    {"case":"wide","depth_m":0.08,"clearance_m":0.10,"grid_shape":[9,5],"step_s":0.00025,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_wide_d080_h100_g45_dt250"},
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[9,5],"step_s":0.000125,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_wide_d200_h150_g45_dt125"},
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[11,9],"step_s":0.00025,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_wide_d200_h150_g99_dt250"},
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[5,3],"step_s":0.00025,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_wide_d200_h150_g15_dt250"},
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[5,3],"step_s":0.00025,"stiffness_scale":3,"contact_off":false,"run_id":"contact_study_20261012_wide_d200_h150_g15_k3_dt250"},
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[5,3],"step_s":0.00025,"stiffness_scale":10,"contact_off":false,"run_id":"contact_study_20261012_wide_d200_h150_g15_k10_dt250"},
+    {"case":"right_track","depth_m":0.20,"clearance_m":0.10,"grid_shape":[9,5],"step_s":0.00025,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_right_d200_h100_g45_dt250"},
+    {"case":"wide","depth_m":0.10,"clearance_m":0.15,"grid_shape":[5,3],"step_s":0.0005,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_wide_d100_h150_g15_dt500"},
+    {"case":"wide","depth_m":0.16,"clearance_m":0.15,"grid_shape":[9,5],"step_s":0.00025,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_wide_d160_h150_g45_dt250"},
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[11,9],"step_s":0.000125,"stiffness_scale":1,"contact_off":false,"run_id":"contact_study_20261012_wide_d200_h150_g99_dt125"},
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[5,3],"step_s":0.00025,"stiffness_scale":1,"contact_off":true,"run_id":"contact_study_20261012_wide_d200_h150_off_dt250"},
+    {"case":"wide","depth_m":0.20,"clearance_m":0.15,"grid_shape":[5,3],"step_s":0.000125,"stiffness_scale":1,"contact_off":true,"run_id":"contact_study_20261012_wide_d200_h150_off_dt125"}
+  ]
+}

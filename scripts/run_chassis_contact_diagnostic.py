@@ -1,5 +1,5 @@
 """Isolated TruckSim diagnostic extension: assumed underside contact forces."""
-import argparse, json, sys, hashlib
+import argparse, json, sys, hashlib, re
 from pathlib import Path
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
@@ -13,8 +13,18 @@ from analyze_chassis_clearance import resolve_geometry
 from analyze_speed_depth_baseline import read_channels
 
 
+def configure_timestep(text, step_s):
+    if step_s not in (.0005, .00025, .000125):
+        raise ValueError('supported native steps: 0.5/0.25/0.125 ms')
+    updated, count = re.subn(r'(?mi)^tstep\s+[-+0-9.eE]+\s*$',
+                            'tstep '+format(step_s, '.9g'), text)
+    if count != 1:
+        raise ValueError('exactly one native tstep required')
+    return updated, int(round(.001 / step_s))
+
+
 class ContactDiagnostic:
-    def __init__(self,names,points,scene,config,speed,enabled,probe_force):
+    def __init__(self,names,points,scene,config,speed,enabled,probe_force,step_s=.0005):
         self.index={n:i for i,n in enumerate(names)}
         self.points=points;self.scene=scene;self.config=config;self.enabled=enabled
         self.base=Baseline(names,speed_kph=speed,steering_feedback=True,observe_after_attitude_limit=True)
@@ -22,13 +32,14 @@ class ContactDiagnostic:
         self.previous=None;self.previous_time=None
         self.probe_force=probe_force;self.impulse=np.zeros(3)
         self.contact_steps=0;self.peak_force=0.;self.penetration_peak=0.
+        self.step_s=step_s;self.contact_duration_s=0.
         self.first_contact_s=None;self.normal_impulse_ns=0.;self.friction_work_j=0.
         self.obstruction_s=0.;self.obstruction_longest_s=0.;self.normal_peak_n=0.
 
     def __call__(self,t,values):
         x=lambda n: float(values[self.index[n]])
         points=np.array([[x('%s_RP%d'%(axis,i)) for axis in 'XYZ'] for i in range(1,len(self.points)+1)])
-        dt=.0005 if self.previous_time is None else t-self.previous_time
+        dt=self.step_s if self.previous_time is None else t-self.previous_time
         v=np.zeros_like(points) if self.previous is None else (points-self.previous)/dt
         self.previous=points;self.previous_time=t
         force,gap=contact_forces(points,v,self.scene,
@@ -42,6 +53,7 @@ class ContactDiagnostic:
         self.peak_force=max(self.peak_force,float(np.linalg.norm(force.sum(axis=0))))
         self.penetration_peak=max(self.penetration_peak,float(max(0,-gap.min())))
         self.contact_steps+=int(np.any(np.linalg.norm(force,axis=1)>1.))
+        self.contact_duration_s+=dt if np.any(np.linalg.norm(force,axis=1)>1.) else 0.
         _,normal=road_surface(points,self.scene)
         fn=np.sum(force*normal,axis=1)
         tangent=force-fn[:,None]*normal
@@ -72,6 +84,7 @@ def main():
     p.add_argument('--force-probe-n',type=float,default=0.)
     p.add_argument('--grid-shape',type=int,nargs=2,metavar=('NX','NY'))
     p.add_argument('--stiffness-scale',type=float,default=1.)
+    p.add_argument('--step-s',type=float,choices=[.0005,.00025,.000125],default=.0005)
     a=p.parse_args()
     if not (0<a.clearance_m<=.5 and 0<=a.speed_kph<=12 and 6<=a.duration_s<=120 and abs(a.force_probe_n)<=2000 and .1<=a.stiffness_scale<=20):
         p.error('invalid diagnostic limits')
@@ -93,6 +106,7 @@ def main():
     prepare_case(case,run)
     model=run/'model';par=model/'run_all.par';sim=model/'simfile.sim'
     text,spec,imports,exports=instrument_reference_points(par.read_text(encoding='utf-8'),sim.read_text(encoding='utf-8'),points)
+    text,decimation=configure_timestep(text,a.step_s)
     par.write_text(text,encoding='utf-8');sim.write_text(spec,encoding='utf-8')
     scene=json.loads((model/'scenario.json').read_text(encoding='utf-8'))
     manifest=json.loads((run/'run_manifest.json').read_text(encoding='utf-8'))
@@ -106,9 +120,9 @@ def main():
     manifest['diagnostic_options']={k:str(v) if isinstance(v,Path) else v for k,v in vars(a).items()}
     manifest['generated_assets'].update({'model/run_all.par':sha256_file(par),'model/simfile.sim':sha256_file(sim)})
     write_run_manifest(run,manifest)
-    control=ContactDiagnostic(exports,points,scene,config,a.speed_kph,not a.contact_off,a.force_probe_n)
+    control=ContactDiagnostic(exports,points,scene,config,a.speed_kph,not a.contact_off,a.force_probe_n,step_s=a.step_s)
     try:
-        native=run_stepwise(sim,control,run/'native_1ms.csv',imports,exports,log_decimation=2)
+        native=run_stepwise(sim,control,run/'native_1ms.csv',imports,exports,log_decimation=decimation)
         validate_native_result(native)
         v=read_channels(run/'native_1ms.csv');time=v['time_s']
         # Validate full trajectory, not just a flat-road initial frame.
@@ -130,7 +144,7 @@ def main():
                     independent_force_probe_enabled=bool(a.force_probe_n),
                     impulse_world_ns=control.impulse.tolist(),total_force_peak_n=control.peak_force,
                     maximum_point_penetration_m=control.penetration_peak,
-                    contact_force_duration_s=control.contact_steps*.0005,
+                    contact_force_duration_s=control.contact_duration_s,
                     first_applied_contact_force_s=control.first_contact_s,
                     normal_impulse_ns=control.normal_impulse_ns,normal_force_peak_n=control.normal_peak_n,
                     friction_work_j=control.friction_work_j,

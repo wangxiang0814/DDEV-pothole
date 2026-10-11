@@ -1,0 +1,2988 @@
+{
+  "scope": "UNMEASURED_GEOMETRY_AND_UNCALIBRATED_COMPLIANT_CONTACT",
+  "runs": [
+    {
+      "run_name": "chassis_contact_20261011_right_d200_h100",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "options": {
+        "case": "right_track",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.1,
+        "run_id": "chassis_contact_20261011_right_d200_h100",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": null
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 4420.345922589836,
+        "normal_impulse_ns": 208.37547024714777,
+        "point_penetration_m": 0.02742265459709728,
+        "crossing_pitch_deg": 3.45686863,
+        "crossing_roll_deg": 4.57078164,
+        "crossing_lateral_m": 0.02932241769952,
+        "az_10ms_m_s2": 57.673807292179404,
+        "full_pitch_deg": 3.45686863,
+        "full_roll_deg": 4.57078164,
+        "full_lateral_m": 0.0308430219,
+        "rear_exit_s": 12.0665
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.2525,
+        "duration_s": 0.0760000000000085,
+        "episodes": [
+          {
+            "start_s": 11.2525,
+            "end_s": 11.3225,
+            "duration_s": 0.0710000000000004
+          },
+          {
+            "start_s": 11.9825,
+            "end_s": 11.9865,
+            "duration_s": 0.004999999999999671
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "8cfad476165a50611eecfaacce1f3155b761924d6c46d97299128ec5b9251e50",
+      "extended_model_sha256": "d274b662d6e1128c5b6b5ec3217afdd45a01b0735bdb72ef4d8fbd1dd2db2551",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_right_d200_h100_g45_dt250",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "options": {
+        "case": "right_track",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.1,
+        "run_id": "contact_study_20261012_right_d200_h100_g45_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          9,
+          5
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          9,
+          5
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 4345.849090096533,
+        "normal_impulse_ns": 151.53009894019237,
+        "point_penetration_m": 0.029963728277676877,
+        "crossing_pitch_deg": 3.53459926,
+        "crossing_roll_deg": 4.75758561,
+        "crossing_lateral_m": 0.03286465809949,
+        "az_10ms_m_s2": 57.962739924857246,
+        "full_pitch_deg": 3.53459926,
+        "full_roll_deg": 4.75758561,
+        "full_lateral_m": 0.0344821679,
+        "rear_exit_s": 12.06225
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.25225,
+        "duration_s": 0.11400000000001276,
+        "episodes": [
+          {
+            "start_s": 11.25225,
+            "end_s": 11.32625,
+            "duration_s": 0.07499999999999996
+          },
+          {
+            "start_s": 11.96325,
+            "end_s": 12.00125,
+            "duration_s": 0.03900000000000037
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "3d7105db83ff874222e85ae4656907c8d52912e1845d57107ab363b54238a83e",
+      "extended_model_sha256": "81e57913d1487a872d82aa39ea3ce9d7bf459b6f6d108ed27eb17894bc11b34c",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "chassis_check_20261011_wide_d200_off",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "chassis_check_20261011_wide_d200_off",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": true,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "REFERENCE_POINTS_NO_CONTACT_FORCE",
+      "metrics": {
+        "normal_force_peak_n": 0.0,
+        "normal_impulse_ns": 0.0,
+        "point_penetration_m": 0.18235101675874713,
+        "crossing_pitch_deg": 43.3463207,
+        "crossing_roll_deg": 12.5889566,
+        "crossing_lateral_m": 1.44582433420048,
+        "az_10ms_m_s2": 142.40149901700448,
+        "full_pitch_deg": 43.3463207,
+        "full_roll_deg": 15.9774458,
+        "full_lateral_m": 2.41256591,
+        "rear_exit_s": 12.5215
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": null,
+        "duration_s": 0.0,
+        "episodes": [],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "b137e3aa87869e6c5b794c6d60768002916590f6cafa5844a06c23e33bbffb12",
+      "extended_model_sha256": "9a9a57546129fa727ede77ec7baf75d195b0d17e6a4ee9acf0ec732c1eef20da",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "chassis_contact_20261011_wide_d080_h100",
+      "case": "wide",
+      "depth_m": 0.08,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.08,
+        "speed_kph": 10.0,
+        "clearance_m": 0.1,
+        "run_id": "chassis_contact_20261011_wide_d080_h100",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": null
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 4134.655641256593,
+        "normal_impulse_ns": 376.7366195019483,
+        "point_penetration_m": 0.026263228154276924,
+        "crossing_pitch_deg": 3.40862439,
+        "crossing_roll_deg": 1.72445508,
+        "crossing_lateral_m": 0.014884625100480001,
+        "az_10ms_m_s2": 28.690590507099497,
+        "full_pitch_deg": 3.40862439,
+        "full_roll_deg": 1.72445508,
+        "full_lateral_m": 0.0133640209,
+        "rear_exit_s": 12.0625
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.2045,
+        "duration_s": 0.18600000000002082,
+        "episodes": [
+          {
+            "start_s": 11.2045,
+            "end_s": 11.3235,
+            "duration_s": 0.11999999999999988
+          },
+          {
+            "start_s": 11.8685,
+            "end_s": 11.9335,
+            "duration_s": 0.06600000000000139
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "d1ebd7878c1d65c44b663e16c745901f1e1a81743173331e29682253f4034f4a",
+      "extended_model_sha256": "494617131e3936e6d0c6fa4da8a5cad3fe92d4ce893dea6a2bc34f9a87e1b80c",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "chassis_contact_20261011_wide_d160_h150",
+      "case": "wide",
+      "depth_m": 0.16,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.16,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "chassis_contact_20261011_wide_d160_h150",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 11885.234591990291,
+        "normal_impulse_ns": 2465.0831504069606,
+        "point_penetration_m": 0.059307164724557354,
+        "crossing_pitch_deg": 26.6691565,
+        "crossing_roll_deg": 4.24182003,
+        "crossing_lateral_m": 0.07882391139952,
+        "az_10ms_m_s2": 101.20528111308334,
+        "full_pitch_deg": 26.6691565,
+        "full_roll_deg": 5.46571312,
+        "full_lateral_m": 0.0979689537,
+        "rear_exit_s": 12.1715
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.2035,
+        "duration_s": 0.45800000000005126,
+        "episodes": [
+          {
+            "start_s": 11.2035,
+            "end_s": 11.3245,
+            "duration_s": 0.12200000000000055
+          },
+          {
+            "start_s": 11.8935,
+            "end_s": 11.9755,
+            "duration_s": 0.08300000000000085
+          },
+          {
+            "start_s": 12.1075,
+            "end_s": 12.2835,
+            "duration_s": 0.17700000000000027
+          },
+          {
+            "start_s": 12.9485,
+            "end_s": 13.0235,
+            "duration_s": 0.07600000000000118
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "2ffc9c6cec8947982c4f2ee7ed7a4b65ba4b9535b4482510e224191147d80f5d",
+      "extended_model_sha256": "465a12ee7c89f6fe6ac446b5a95ccc07e13de0eae2e0e3accee89f06cfcf0065",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "chassis_contact_20261011_wide_d200_h150",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "chassis_contact_20261011_wide_d200_h150",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 18568.98032782028,
+        "normal_impulse_ns": 4777.578240622965,
+        "point_penetration_m": 0.12673772003468423,
+        "crossing_pitch_deg": 32.8124485,
+        "crossing_roll_deg": 5.34379388,
+        "crossing_lateral_m": 0.07828086449952,
+        "az_10ms_m_s2": 117.10074441327396,
+        "full_pitch_deg": 32.8124485,
+        "full_roll_deg": 8.01822879,
+        "full_lateral_m": 0.269702694,
+        "rear_exit_s": 12.1435
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.1925,
+        "duration_s": 0.6560000000000734,
+        "episodes": [
+          {
+            "start_s": 11.1925,
+            "end_s": 11.3305,
+            "duration_s": 0.139
+          },
+          {
+            "start_s": 11.8935,
+            "end_s": 11.9825,
+            "duration_s": 0.09000000000000052
+          },
+          {
+            "start_s": 12.3515,
+            "end_s": 12.5585,
+            "duration_s": 0.20800000000000085
+          },
+          {
+            "start_s": 12.8825,
+            "end_s": 13.0625,
+            "duration_s": 0.18099999999999983
+          },
+          {
+            "start_s": 13.4055,
+            "end_s": 13.4425,
+            "duration_s": 0.03800000000000092
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "3ec0aace995864a4f25fd4d0ca5e1b663b0f96fcfc21c8eeae6987150a97abd4",
+      "extended_model_sha256": "9a9a57546129fa727ede77ec7baf75d195b0d17e6a4ee9acf0ec732c1eef20da",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "chassis_contact_20261011_wide_d200_h150_grid45",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "chassis_contact_20261011_wide_d200_h150_grid45",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          9,
+          5
+        ]
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          9,
+          5
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 22331.381626485752,
+        "normal_impulse_ns": 3717.664207657782,
+        "point_penetration_m": 0.15880519542809465,
+        "crossing_pitch_deg": 33.8722167,
+        "crossing_roll_deg": 9.70441897,
+        "crossing_lateral_m": 0.44239307320048,
+        "az_10ms_m_s2": 133.2188473921424,
+        "full_pitch_deg": 33.8722167,
+        "full_roll_deg": 11.7261659,
+        "full_lateral_m": 0.440872469,
+        "rear_exit_s": 12.2485
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.1925,
+        "duration_s": 0.5790000000000648,
+        "episodes": [
+          {
+            "start_s": 11.1925,
+            "end_s": 11.3405,
+            "duration_s": 0.1489999999999998
+          },
+          {
+            "start_s": 11.7955,
+            "end_s": 11.7955,
+            "duration_s": 0.001000000000000112
+          },
+          {
+            "start_s": 11.9165,
+            "end_s": 12.0435,
+            "duration_s": 0.12800000000000078
+          },
+          {
+            "start_s": 12.4105,
+            "end_s": 12.6195,
+            "duration_s": 0.20999999999999974
+          },
+          {
+            "start_s": 13.1385,
+            "end_s": 13.1765,
+            "duration_s": 0.03900000000000037
+          },
+          {
+            "start_s": 13.4685,
+            "end_s": 13.5195,
+            "duration_s": 0.05200000000000027
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "d9ff35a69c586cfee12821c67420b0210e729fdb3757776f76c17c9dc8feec32",
+      "extended_model_sha256": "2fcda6fa0ef5396dbfdd3c72381f03477d3dd27bdfbd8e4718e16f30b9b57a8d",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "chassis_contact_20261011_wide_d200_h150_stiff10",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "chassis_contact_20261011_wide_d200_h150_stiff10",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": null,
+        "stiffness_scale": 10.0
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 10000000.0,
+        "total_damping_n_s_m": 37947.33192202055,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 61558.85806112865,
+        "normal_impulse_ns": 4048.427630751139,
+        "point_penetration_m": 0.04098886952222658,
+        "crossing_pitch_deg": 8.72817447,
+        "crossing_roll_deg": 1.48169914,
+        "crossing_lateral_m": 0.02962659060048,
+        "az_10ms_m_s2": 80.57076708633083,
+        "full_pitch_deg": 8.72817447,
+        "full_roll_deg": 2.40088762,
+        "full_lateral_m": 0.0281059864,
+        "rear_exit_s": 12.1395
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.1925,
+        "duration_s": 0.13200000000001477,
+        "episodes": [
+          {
+            "start_s": 11.1925,
+            "end_s": 11.2505,
+            "duration_s": 0.05899999999999994
+          },
+          {
+            "start_s": 11.8835,
+            "end_s": 11.9555,
+            "duration_s": 0.07300000000000106
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "55b4e9e9ba7a9e9191ca12ab36ec1eb2d3824fe9b9b5fa01a411968d67497ffd",
+      "extended_model_sha256": "9a9a57546129fa727ede77ec7baf75d195b0d17e6a4ee9acf0ec732c1eef20da",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d080_h100_g45_dt250",
+      "case": "wide",
+      "depth_m": 0.08,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.08,
+        "speed_kph": 10.0,
+        "clearance_m": 0.1,
+        "run_id": "contact_study_20261012_wide_d080_h100_g45_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          9,
+          5
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          9,
+          5
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 5578.63077846939,
+        "normal_impulse_ns": 288.55172387508287,
+        "point_penetration_m": 0.03303566686789078,
+        "crossing_pitch_deg": 3.58098819,
+        "crossing_roll_deg": 1.69191055,
+        "crossing_lateral_m": 0.01217191260051,
+        "az_10ms_m_s2": 36.3392640309055,
+        "full_pitch_deg": 3.58098819,
+        "full_roll_deg": 1.69191055,
+        "full_lateral_m": 0.0105544028,
+        "rear_exit_s": 12.06125
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.20325,
+        "duration_s": 0.2180000000000244,
+        "episodes": [
+          {
+            "start_s": 11.20325,
+            "end_s": 11.32825,
+            "duration_s": 0.1260000000000001
+          },
+          {
+            "start_s": 11.86925,
+            "end_s": 11.93625,
+            "duration_s": 0.06800000000000028
+          },
+          {
+            "start_s": 11.94425,
+            "end_s": 11.96725,
+            "duration_s": 0.0239999999999998
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "64cf4e14acb15831fd265fe767a952812bbc23894051a128eee2d3ad535e88dc",
+      "extended_model_sha256": "681eb446c55c3b9c8a96d3256434400c9c3a5bb205cb8b3dd82b610d9184ee42",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d100_h150_g15_dt500",
+      "case": "wide",
+      "depth_m": 0.1,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.1,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d100_h150_g15_dt500",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          5,
+          3
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.0005
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 3753.474145502163,
+        "normal_impulse_ns": 172.54153499937576,
+        "point_penetration_m": 0.023470615684552,
+        "crossing_pitch_deg": 5.09906038,
+        "crossing_roll_deg": 2.20405683,
+        "crossing_lateral_m": 0.013782497000480001,
+        "az_10ms_m_s2": 76.2517754355672,
+        "full_pitch_deg": 5.09906038,
+        "full_roll_deg": 2.20405683,
+        "full_lateral_m": 0.0122618928,
+        "rear_exit_s": 12.0565
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.2485,
+        "duration_s": 0.07300000000000817,
+        "episodes": [
+          {
+            "start_s": 11.2485,
+            "end_s": 11.3205,
+            "duration_s": 0.07299999999999929
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "b672daa8152b0953108df5e48c05565a988d3fcdad4ad92f92bd45c50b03c0a5",
+      "extended_model_sha256": "8f1a641d2d6a439e19d80dc6aa1069fb80b736e4b59a3538a0148c0756f6a4be",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d160_h150_g45_dt250",
+      "case": "wide",
+      "depth_m": 0.16,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.16,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d160_h150_g45_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          9,
+          5
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          9,
+          5
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 11261.329005436211,
+        "normal_impulse_ns": 2103.9611406374265,
+        "point_penetration_m": 0.09691876071005781,
+        "crossing_pitch_deg": 24.3988808,
+        "crossing_roll_deg": 5.38035134,
+        "crossing_lateral_m": 0.13353167419949,
+        "az_10ms_m_s2": 108.93487079665016,
+        "full_pitch_deg": 24.3988808,
+        "full_roll_deg": 6.61142556,
+        "full_lateral_m": 0.152707432,
+        "rear_exit_s": 12.14125
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.20025,
+        "duration_s": 0.49100000000005495,
+        "episodes": [
+          {
+            "start_s": 11.20025,
+            "end_s": 11.32925,
+            "duration_s": 0.12999999999999967
+          },
+          {
+            "start_s": 11.87125,
+            "end_s": 11.94725,
+            "duration_s": 0.07700000000000062
+          },
+          {
+            "start_s": 12.06025,
+            "end_s": 12.26225,
+            "duration_s": 0.20300000000000007
+          },
+          {
+            "start_s": 12.87225,
+            "end_s": 12.95225,
+            "duration_s": 0.08100000000000018
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "47dba8d284afd93607daf018f026ad998a3410f9ea0d038216440a2420871eb8",
+      "extended_model_sha256": "6572cbc9679d1fcb11f79614819197a11b28f7e4074d7d7dd95ace05f92c7bef",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_g15_dt250",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_g15_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          5,
+          3
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 14191.873691771902,
+        "normal_impulse_ns": 3676.7556629641504,
+        "point_penetration_m": 0.08779997002230194,
+        "crossing_pitch_deg": 24.5348149,
+        "crossing_roll_deg": 5.09141924,
+        "crossing_lateral_m": 0.55770661019949,
+        "az_10ms_m_s2": 107.30265317686809,
+        "full_pitch_deg": 24.5348149,
+        "full_roll_deg": 5.10770408,
+        "full_lateral_m": 0.693953106,
+        "rear_exit_s": 12.26525
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.19225,
+        "duration_s": 0.43200000000004835,
+        "episodes": [
+          {
+            "start_s": 11.19225,
+            "end_s": 11.32525,
+            "duration_s": 0.134000000000001
+          },
+          {
+            "start_s": 11.84825,
+            "end_s": 11.91325,
+            "duration_s": 0.06599999999999961
+          },
+          {
+            "start_s": 12.15125,
+            "end_s": 12.30525,
+            "duration_s": 0.15500000000000003
+          },
+          {
+            "start_s": 12.85525,
+            "end_s": 12.93125,
+            "duration_s": 0.07700000000000062
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "ffe250c3718b6eefde153c7588a30cc2bb5a56bb8c13c44d4890dce59a90d624",
+      "extended_model_sha256": "0b72ae3d5d2a24f1f3601ea1d29e9d8046c96b6c14a974744e6b8b71774a237b",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_g15_k10_dt250",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_g15_k10_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          5,
+          3
+        ],
+        "stiffness_scale": 10.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 10000000.0,
+        "total_damping_n_s_m": 37947.33192202055,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 64084.39682659904,
+        "normal_impulse_ns": 4069.927541504872,
+        "point_penetration_m": 0.037687556881312145,
+        "crossing_pitch_deg": 8.78126102,
+        "crossing_roll_deg": 2.23163472,
+        "crossing_lateral_m": 0.05017255110051,
+        "az_10ms_m_s2": 81.28428377924996,
+        "full_pitch_deg": 8.78126102,
+        "full_roll_deg": 2.23163472,
+        "full_lateral_m": 0.0485550413,
+        "rear_exit_s": 12.15725
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.19225,
+        "duration_s": 0.12900000000001444,
+        "episodes": [
+          {
+            "start_s": 11.19225,
+            "end_s": 11.25125,
+            "duration_s": 0.060000000000001164
+          },
+          {
+            "start_s": 11.90925,
+            "end_s": 11.97725,
+            "duration_s": 0.06899999999999973
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "53e60129b627c22b0671a4f1c7c7acdc7c7053f1b5bfb25224f2e51459e0da46",
+      "extended_model_sha256": "0b72ae3d5d2a24f1f3601ea1d29e9d8046c96b6c14a974744e6b8b71774a237b",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_g15_k3_dt250",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_g15_k3_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          5,
+          3
+        ],
+        "stiffness_scale": 3.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 3000000.0,
+        "total_damping_n_s_m": 20784.609690826528,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 30350.06607423105,
+        "normal_impulse_ns": 4355.611337223013,
+        "point_penetration_m": 0.06270509300061156,
+        "crossing_pitch_deg": 25.1204538,
+        "crossing_roll_deg": 2.86865697,
+        "crossing_lateral_m": 0.04372734580051,
+        "az_10ms_m_s2": 84.90860271520866,
+        "full_pitch_deg": 25.1204538,
+        "full_roll_deg": 2.99455539,
+        "full_lateral_m": 0.0433381355,
+        "rear_exit_s": 12.17425
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.19225,
+        "duration_s": 0.2760000000000309,
+        "episodes": [
+          {
+            "start_s": 11.19225,
+            "end_s": 11.29825,
+            "duration_s": 0.10699999999999998
+          },
+          {
+            "start_s": 11.89725,
+            "end_s": 12.00625,
+            "duration_s": 0.1100000000000001
+          },
+          {
+            "start_s": 12.96425,
+            "end_s": 13.02225,
+            "duration_s": 0.05899999999999994
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "f9e34418142a57072b035f29d1d2d900993362082a34ce790be44f39bcc3da56",
+      "extended_model_sha256": "0b72ae3d5d2a24f1f3601ea1d29e9d8046c96b6c14a974744e6b8b71774a237b",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_g45_dt125",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_g45_dt125",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          9,
+          5
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.000125
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          9,
+          5
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 20054.317980306136,
+        "normal_impulse_ns": 3879.795875959553,
+        "point_penetration_m": 0.16136848712869006,
+        "crossing_pitch_deg": 36.9252704,
+        "crossing_roll_deg": 8.68941426,
+        "crossing_lateral_m": 0.19597332748266,
+        "az_10ms_m_s2": 127.82319037504732,
+        "full_pitch_deg": 36.9252704,
+        "full_roll_deg": 8.68941426,
+        "full_lateral_m": 0.342390407,
+        "rear_exit_s": 12.185125
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.193125,
+        "duration_s": 0.6780000000000759,
+        "episodes": [
+          {
+            "start_s": 11.193125,
+            "end_s": 11.340125,
+            "duration_s": 0.14800000000000035
+          },
+          {
+            "start_s": 11.893125,
+            "end_s": 11.992125,
+            "duration_s": 0.10000000000000031
+          },
+          {
+            "start_s": 12.357125,
+            "end_s": 12.588125,
+            "duration_s": 0.23199999999999998
+          },
+          {
+            "start_s": 12.924125,
+            "end_s": 13.067125,
+            "duration_s": 0.1440000000000008
+          },
+          {
+            "start_s": 13.313125,
+            "end_s": 13.366125,
+            "duration_s": 0.054000000000000936
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "b7923e2b5d74dc4c67ddfb6e0288b3d9f67673b521d3b4187b3bd244f860385d",
+      "extended_model_sha256": "b90bb22787c0e7b09e06509a9bf88750cad55094e2e664792046601da4e803cc",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_g45_dt250",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_g45_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          9,
+          5
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          9,
+          5
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 12816.74300433887,
+        "normal_impulse_ns": 3093.8005182547345,
+        "point_penetration_m": 0.12901322291317258,
+        "crossing_pitch_deg": 27.3985221,
+        "crossing_roll_deg": 7.07863761,
+        "crossing_lateral_m": 0.18994807319949,
+        "az_10ms_m_s2": 122.65520662336199,
+        "full_pitch_deg": 27.3985221,
+        "full_roll_deg": 10.5813993,
+        "full_lateral_m": 0.191565583,
+        "rear_exit_s": 12.11025
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.19225,
+        "duration_s": 0.5480000000000613,
+        "episodes": [
+          {
+            "start_s": 11.19225,
+            "end_s": 11.33425,
+            "duration_s": 0.14300000000000135
+          },
+          {
+            "start_s": 11.81025,
+            "end_s": 11.89625,
+            "duration_s": 0.08700000000000041
+          },
+          {
+            "start_s": 12.15925,
+            "end_s": 12.34525,
+            "duration_s": 0.18700000000000006
+          },
+          {
+            "start_s": 12.86525,
+            "end_s": 12.94725,
+            "duration_s": 0.08300000000000085
+          },
+          {
+            "start_s": 13.37525,
+            "end_s": 13.42225,
+            "duration_s": 0.04800000000000071
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "1e3bccb66e2932774555c6a68e6c7d3f2afa02264519a709718bbb57bbd582df",
+      "extended_model_sha256": "68a1fc1b7ea6959abffea57f64b41baaa6d45cf96700eb1bf0b9d31b0793efbb",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_g99_dt125",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_g99_dt125",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          11,
+          9
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.000125
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          11,
+          9
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 22381.373876955546,
+        "normal_impulse_ns": 3779.558140794084,
+        "point_penetration_m": 0.1782589849053306,
+        "crossing_pitch_deg": 38.352179,
+        "crossing_roll_deg": 8.26537258,
+        "crossing_lateral_m": 0.18544969048266,
+        "az_10ms_m_s2": 128.96096188954718,
+        "full_pitch_deg": 38.352179,
+        "full_roll_deg": 11.9474684,
+        "full_lateral_m": 0.312765473,
+        "rear_exit_s": 12.173125
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.193125,
+        "duration_s": 0.5300000000000593,
+        "episodes": [
+          {
+            "start_s": 11.193125,
+            "end_s": 11.342125,
+            "duration_s": 0.14999999999999925
+          },
+          {
+            "start_s": 11.897125,
+            "end_s": 12.008125,
+            "duration_s": 0.11199999999999899
+          },
+          {
+            "start_s": 12.417125,
+            "end_s": 12.646125,
+            "duration_s": 0.22999999999999932
+          },
+          {
+            "start_s": 13.245125,
+            "end_s": 13.282125,
+            "duration_s": 0.03800000000000092
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "d7c6b32e893442336a7b8843e25f13d93790da7b2d29bc4f0b103cbafb02ac27",
+      "extended_model_sha256": "5f6739fdcc2240176ce5fe133dcb2e28630f934f1baf7c60a2f44fc438727c87",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_g99_dt250",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_g99_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": false,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          11,
+          9
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          11,
+          9
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "ASSUMED_CONTACT_DIAGNOSTIC",
+      "metrics": {
+        "normal_force_peak_n": 15480.352251193743,
+        "normal_impulse_ns": 2865.9758888415618,
+        "point_penetration_m": 0.13532628334343116,
+        "crossing_pitch_deg": 27.9207875,
+        "crossing_roll_deg": 6.98544971,
+        "crossing_lateral_m": 0.29247515319948997,
+        "az_10ms_m_s2": 124.80104633067609,
+        "full_pitch_deg": 27.9207875,
+        "full_roll_deg": 11.0989824,
+        "full_lateral_m": 0.4115972,
+        "rear_exit_s": 12.10525
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": 11.19225,
+        "duration_s": 0.5710000000000639,
+        "episodes": [
+          {
+            "start_s": 11.19225,
+            "end_s": 11.33625,
+            "duration_s": 0.14500000000000024
+          },
+          {
+            "start_s": 11.82325,
+            "end_s": 11.90125,
+            "duration_s": 0.07899999999999952
+          },
+          {
+            "start_s": 12.17625,
+            "end_s": 12.36925,
+            "duration_s": 0.19399999999999973
+          },
+          {
+            "start_s": 12.88325,
+            "end_s": 12.96625,
+            "duration_s": 0.0840000000000003
+          },
+          {
+            "start_s": 13.37325,
+            "end_s": 13.44125,
+            "duration_s": 0.06899999999999973
+          }
+        ],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "66eb9d06314e4efe057b40bb657a0b404b9cd75a533b31ab9ef3d349625e3e2d",
+      "extended_model_sha256": "cfad2adc18e5b30d73dc1f9a6949a15ff3e0347b0326449df7e851fd6b395d5c",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_off_dt125",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_off_dt125",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": true,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          5,
+          3
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.000125
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "REFERENCE_POINTS_NO_CONTACT_FORCE",
+      "metrics": {
+        "normal_force_peak_n": 0.0,
+        "normal_impulse_ns": 0.0,
+        "point_penetration_m": 0.22848194929603285,
+        "crossing_pitch_deg": 42.2142272,
+        "crossing_roll_deg": 11.4321195,
+        "crossing_lateral_m": 0.36819402048266,
+        "az_10ms_m_s2": 137.7774587006993,
+        "full_pitch_deg": 42.2142272,
+        "full_roll_deg": 19.9227463,
+        "full_lateral_m": 0.409248285,
+        "rear_exit_s": 12.083125
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": null,
+        "duration_s": 0.0,
+        "episodes": [],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "1b09bd08181fb75b1823ced1bdfc59a575245b5abbba750c88bfef547f540975",
+      "extended_model_sha256": "8cbc2be7e242c1fc7f5cf19c70d296d77561a4105b7bc93cdba8d34587192cfa",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    },
+    {
+      "run_name": "contact_study_20261012_wide_d200_h150_off_dt250",
+      "case": "wide",
+      "depth_m": 0.2,
+      "options": {
+        "case": "wide",
+        "depth_m": 0.2,
+        "speed_kph": 10.0,
+        "clearance_m": 0.15,
+        "run_id": "contact_study_20261012_wide_d200_h150_off_dt250",
+        "config": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\configs\\diagnostics\\chassis_contact_v1.json",
+        "contact_off": true,
+        "duration_s": 30.0,
+        "force_probe_n": 0.0,
+        "grid_shape": [
+          5,
+          3
+        ],
+        "stiffness_scale": 1.0,
+        "step_s": 0.00025
+      },
+      "contact_config": {
+        "schema_version": 1,
+        "geometry_status": "ASSUMED_PARAMETRIC_NOT_MEASURED",
+        "description": "Sprung underside plane only; not CAD, axle housing or exhaust geometry. Forward/rear overhangs are assumptions; 1m width is a diagnostic hypothesis, not proof from W_FRAME.",
+        "underside_bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "static_min_clearance_sweep_m": [
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "calibration_run": "runs/shallow_press/right_track/speed_study_20261011_v10_d040",
+        "static_window_s": [
+          4.0,
+          5.0
+        ],
+        "offline_spacing_m": 0.05,
+        "runtime_grid_shape": [
+          5,
+          3
+        ],
+        "contact_model_status": "UNCALIBRATED_COMPLIANT_SURFACE_POINTS",
+        "total_stiffness_n_m": 1000000.0,
+        "total_damping_n_s_m": 12000.0,
+        "friction": 0.3,
+        "slip_regularization_m_s": 0.05,
+        "sources": [
+          "Native run_all.par: exported sprung reference Xo/Yo/Zo, YAW_PITCH_ROLL",
+          "TruckSim2019 Output/Points reference-point example and LastRun_echo.par: inertial force axes=1; local point inputs mm",
+          "Physical pit bilinear DZ map; visual mesh offsets excluded",
+          "User confirmed physical underside dimensions unavailable; hypotheses require later replacement"
+        ]
+      },
+      "source_type": "REFERENCE_POINTS_NO_CONTACT_FORCE",
+      "metrics": {
+        "normal_force_peak_n": 0.0,
+        "normal_impulse_ns": 0.0,
+        "point_penetration_m": 0.16443607894129605,
+        "crossing_pitch_deg": 31.0213165,
+        "crossing_roll_deg": 5.47161597,
+        "crossing_lateral_m": 0.18148542580051,
+        "az_10ms_m_s2": 118.473412565634,
+        "full_pitch_deg": 31.0213165,
+        "full_roll_deg": 5.67969891,
+        "full_lateral_m": 0.350677027,
+        "rear_exit_s": 11.86625
+      },
+      "aggregate_contact_events": {
+        "definition": "Sum of applied point-force magnitudes >10 N; sampled CSV, not native-step force duration",
+        "csv_dt_s": 0.001000000000000112,
+        "first_s": null,
+        "duration_s": 0.0,
+        "episodes": [],
+        "legacy_native_per_point_events_not_used_for_grid_convergence": true
+      },
+      "csv_sha256": "2851224efc992bf206e7c201b271d3d09f1738f83b871eba25613341e26de3fe",
+      "extended_model_sha256": "0b72ae3d5d2a24f1f3601ea1d29e9d8046c96b6c14a974744e6b8b71774a237b",
+      "base_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc"
+    }
+  ],
+  "comparisons": [
+    {
+      "kind": "step_g45_500_to_250",
+      "first_run": "chassis_contact_20261011_wide_d200_h150_grid45",
+      "second_run": "contact_study_20261012_wide_d200_h150_g45_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 22331.381626485752,
+          "second": 12816.74300433887,
+          "absolute_change": -9514.638622146882,
+          "relative_change": -0.42606582885414523
+        },
+        "normal_impulse_ns": {
+          "first": 3717.664207657782,
+          "second": 3093.8005182547345,
+          "absolute_change": -623.8636894030474,
+          "relative_change": -0.16781066136042894
+        },
+        "point_penetration_m": {
+          "first": 0.15880519542809465,
+          "second": 0.12901322291317258,
+          "absolute_change": -0.029791972514922077,
+          "relative_change": -0.187600742120629
+        },
+        "crossing_pitch_deg": {
+          "first": 33.8722167,
+          "second": 27.3985221,
+          "absolute_change": -6.473694600000002,
+          "relative_change": -0.19112107888705143
+        },
+        "crossing_roll_deg": {
+          "first": 9.70441897,
+          "second": 7.07863761,
+          "absolute_change": -2.6257813600000004,
+          "relative_change": -0.27057584468655727
+        },
+        "crossing_lateral_m": {
+          "first": 0.44239307320048,
+          "second": 0.18994807319949,
+          "absolute_change": -0.25244500000099,
+          "relative_change": -0.5706350648184518
+        },
+        "az_10ms_m_s2": {
+          "first": 133.2188473921424,
+          "second": 122.65520662336199,
+          "absolute_change": -10.563640768780417,
+          "relative_change": -0.07929539232301966
+        },
+        "full_pitch_deg": {
+          "first": 33.8722167,
+          "second": 27.3985221,
+          "absolute_change": -6.473694600000002,
+          "relative_change": -0.19112107888705143
+        },
+        "full_roll_deg": {
+          "first": 11.7261659,
+          "second": 10.5813993,
+          "absolute_change": -1.1447666000000005,
+          "relative_change": -0.09762497049440522
+        },
+        "full_lateral_m": {
+          "first": 0.440872469,
+          "second": 0.191565583,
+          "absolute_change": -0.24930688599999998,
+          "relative_change": -0.565485267350636
+        },
+        "rear_exit_s": {
+          "first": 12.2485,
+          "second": 12.11025,
+          "absolute_change": -0.13824999999999932,
+          "relative_change": -0.011287096379148412
+        }
+      },
+      "numerical_screen_pass": false,
+      "note": "Solver and controller/CSV initial sample phases change with native step"
+    },
+    {
+      "kind": "step_g45_250_to_125",
+      "first_run": "contact_study_20261012_wide_d200_h150_g45_dt250",
+      "second_run": "contact_study_20261012_wide_d200_h150_g45_dt125",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 12816.74300433887,
+          "second": 20054.317980306136,
+          "absolute_change": 7237.574975967265,
+          "relative_change": 0.5646968947974629
+        },
+        "normal_impulse_ns": {
+          "first": 3093.8005182547345,
+          "second": 3879.795875959553,
+          "absolute_change": 785.9953577048186,
+          "relative_change": 0.2540549570236067
+        },
+        "point_penetration_m": {
+          "first": 0.12901322291317258,
+          "second": 0.16136848712869006,
+          "absolute_change": 0.03235526421551749,
+          "relative_change": 0.25079029486220156
+        },
+        "crossing_pitch_deg": {
+          "first": 27.3985221,
+          "second": 36.9252704,
+          "absolute_change": 9.526748300000001,
+          "relative_change": 0.347710298578477
+        },
+        "crossing_roll_deg": {
+          "first": 7.07863761,
+          "second": 8.68941426,
+          "absolute_change": 1.6107766499999991,
+          "relative_change": 0.22755461414276285
+        },
+        "crossing_lateral_m": {
+          "first": 0.18994807319949,
+          "second": 0.19597332748266,
+          "absolute_change": 0.006025254283169995,
+          "relative_change": 0.03172053383685585
+        },
+        "az_10ms_m_s2": {
+          "first": 122.65520662336199,
+          "second": 127.82319037504732,
+          "absolute_change": 5.167983751685327,
+          "relative_change": 0.04213423868384717
+        },
+        "full_pitch_deg": {
+          "first": 27.3985221,
+          "second": 36.9252704,
+          "absolute_change": 9.526748300000001,
+          "relative_change": 0.347710298578477
+        },
+        "full_roll_deg": {
+          "first": 10.5813993,
+          "second": 8.68941426,
+          "absolute_change": -1.8919850399999998,
+          "relative_change": -0.1788029150360104
+        },
+        "full_lateral_m": {
+          "first": 0.191565583,
+          "second": 0.342390407,
+          "absolute_change": 0.150824824,
+          "relative_change": 0.7873273561879849
+        },
+        "rear_exit_s": {
+          "first": 12.11025,
+          "second": 12.185125,
+          "absolute_change": 0.07487499999999869,
+          "relative_change": 0.006182779050803963
+        }
+      },
+      "numerical_screen_pass": false,
+      "note": "Solver and controller/CSV initial sample phases change with native step"
+    },
+    {
+      "kind": "step_g99_250_to_125",
+      "first_run": "contact_study_20261012_wide_d200_h150_g99_dt250",
+      "second_run": "contact_study_20261012_wide_d200_h150_g99_dt125",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 15480.352251193743,
+          "second": 22381.373876955546,
+          "absolute_change": 6901.021625761803,
+          "relative_change": 0.4457922864920365
+        },
+        "normal_impulse_ns": {
+          "first": 2865.9758888415618,
+          "second": 3779.558140794084,
+          "absolute_change": 913.5822519525223,
+          "relative_change": 0.31876829651968763
+        },
+        "point_penetration_m": {
+          "first": 0.13532628334343116,
+          "second": 0.1782589849053306,
+          "absolute_change": 0.04293270156189943,
+          "relative_change": 0.3172532378868692
+        },
+        "crossing_pitch_deg": {
+          "first": 27.9207875,
+          "second": 38.352179,
+          "absolute_change": 10.4313915,
+          "relative_change": 0.37360663627413804
+        },
+        "crossing_roll_deg": {
+          "first": 6.98544971,
+          "second": 8.26537258,
+          "absolute_change": 1.2799228699999992,
+          "relative_change": 0.18322698224678782
+        },
+        "crossing_lateral_m": {
+          "first": 0.29247515319948997,
+          "second": 0.18544969048266,
+          "absolute_change": -0.10702546271682997,
+          "relative_change": -0.36593010225326933
+        },
+        "az_10ms_m_s2": {
+          "first": 124.80104633067609,
+          "second": 128.96096188954718,
+          "absolute_change": 4.159915558871091,
+          "relative_change": 0.03333237726107577
+        },
+        "full_pitch_deg": {
+          "first": 27.9207875,
+          "second": 38.352179,
+          "absolute_change": 10.4313915,
+          "relative_change": 0.37360663627413804
+        },
+        "full_roll_deg": {
+          "first": 11.0989824,
+          "second": 11.9474684,
+          "absolute_change": 0.8484859999999994,
+          "relative_change": 0.07644718852784192
+        },
+        "full_lateral_m": {
+          "first": 0.4115972,
+          "second": 0.312765473,
+          "absolute_change": -0.09883172699999998,
+          "relative_change": -0.24011758826347696
+        },
+        "rear_exit_s": {
+          "first": 12.10525,
+          "second": 12.173125,
+          "absolute_change": 0.0678750000000008,
+          "relative_change": 0.005607071312034101
+        }
+      },
+      "numerical_screen_pass": false,
+      "note": "Solver and controller/CSV initial sample phases change with native step"
+    },
+    {
+      "kind": "grid_15_to_45_dt250",
+      "first_run": "contact_study_20261012_wide_d200_h150_g15_dt250",
+      "second_run": "contact_study_20261012_wide_d200_h150_g45_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 14191.873691771902,
+          "second": 12816.74300433887,
+          "absolute_change": -1375.1306874330312,
+          "relative_change": -0.09689564023038748
+        },
+        "normal_impulse_ns": {
+          "first": 3676.7556629641504,
+          "second": 3093.8005182547345,
+          "absolute_change": -582.9551447094159,
+          "relative_change": -0.15855150522551867
+        },
+        "point_penetration_m": {
+          "first": 0.08779997002230194,
+          "second": 0.12901322291317258,
+          "absolute_change": 0.04121325289087063,
+          "relative_change": 0.46939939592692476
+        },
+        "crossing_pitch_deg": {
+          "first": 24.5348149,
+          "second": 27.3985221,
+          "absolute_change": 2.8637072000000003,
+          "relative_change": 0.11672014692884437
+        },
+        "crossing_roll_deg": {
+          "first": 5.09141924,
+          "second": 7.07863761,
+          "absolute_change": 1.9872183700000008,
+          "relative_change": 0.3903073536721759
+        },
+        "crossing_lateral_m": {
+          "first": 0.55770661019949,
+          "second": 0.18994807319949,
+          "absolute_change": -0.36775853699999994,
+          "relative_change": -0.6594121896250321
+        },
+        "az_10ms_m_s2": {
+          "first": 107.30265317686809,
+          "second": 122.65520662336199,
+          "absolute_change": 15.3525534464939,
+          "relative_change": 0.14307710939065155
+        },
+        "full_pitch_deg": {
+          "first": 24.5348149,
+          "second": 27.3985221,
+          "absolute_change": 2.8637072000000003,
+          "relative_change": 0.11672014692884437
+        },
+        "full_roll_deg": {
+          "first": 5.10770408,
+          "second": 10.5813993,
+          "absolute_change": 5.473695219999999,
+          "relative_change": 1.0716547267162742
+        },
+        "full_lateral_m": {
+          "first": 0.693953106,
+          "second": 0.191565583,
+          "absolute_change": -0.502387523,
+          "relative_change": -0.723950247727546
+        },
+        "rear_exit_s": {
+          "first": 12.26525,
+          "second": 12.11025,
+          "absolute_change": -0.15499999999999936,
+          "relative_change": -0.012637329039359112
+        }
+      },
+      "numerical_screen_pass": false,
+      "note": "Solver and controller/CSV initial sample phases change with native step"
+    },
+    {
+      "kind": "grid_45_to_99_dt250",
+      "first_run": "contact_study_20261012_wide_d200_h150_g45_dt250",
+      "second_run": "contact_study_20261012_wide_d200_h150_g99_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 12816.74300433887,
+          "second": 15480.352251193743,
+          "absolute_change": 2663.6092468548723,
+          "relative_change": 0.20782263059758294
+        },
+        "normal_impulse_ns": {
+          "first": 3093.8005182547345,
+          "second": 2865.9758888415618,
+          "absolute_change": -227.82462941317272,
+          "relative_change": -0.07363908179241384
+        },
+        "point_penetration_m": {
+          "first": 0.12901322291317258,
+          "second": 0.13532628334343116,
+          "absolute_change": 0.006313060430258588,
+          "relative_change": 0.04893343711370851
+        },
+        "crossing_pitch_deg": {
+          "first": 27.3985221,
+          "second": 27.9207875,
+          "absolute_change": 0.5222653999999984,
+          "relative_change": 0.019061809176926313
+        },
+        "crossing_roll_deg": {
+          "first": 7.07863761,
+          "second": 6.98544971,
+          "absolute_change": -0.09318790000000021,
+          "relative_change": -0.013164666018267915
+        },
+        "crossing_lateral_m": {
+          "first": 0.18994807319949,
+          "second": 0.29247515319948997,
+          "absolute_change": 0.10252707999999996,
+          "relative_change": 0.5397637273862868
+        },
+        "az_10ms_m_s2": {
+          "first": 122.65520662336199,
+          "second": 124.80104633067609,
+          "absolute_change": 2.145839707314096,
+          "relative_change": 0.017494892931070895
+        },
+        "full_pitch_deg": {
+          "first": 27.3985221,
+          "second": 27.9207875,
+          "absolute_change": 0.5222653999999984,
+          "relative_change": 0.019061809176926313
+        },
+        "full_roll_deg": {
+          "first": 10.5813993,
+          "second": 11.0989824,
+          "absolute_change": 0.5175831000000013,
+          "relative_change": 0.04891442854821681
+        },
+        "full_lateral_m": {
+          "first": 0.191565583,
+          "second": 0.4115972,
+          "absolute_change": 0.22003161699999998,
+          "relative_change": 1.1485968071832608
+        },
+        "rear_exit_s": {
+          "first": 12.11025,
+          "second": 12.10525,
+          "absolute_change": -0.005000000000000782,
+          "relative_change": -0.00041287339237429296
+        }
+      },
+      "numerical_screen_pass": false,
+      "note": "Solver and controller/CSV initial sample phases change with native step"
+    },
+    {
+      "kind": "grid_45_to_99_dt125",
+      "first_run": "contact_study_20261012_wide_d200_h150_g45_dt125",
+      "second_run": "contact_study_20261012_wide_d200_h150_g99_dt125",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 20054.317980306136,
+          "second": 22381.373876955546,
+          "absolute_change": 2327.05589664941,
+          "relative_change": 0.1160376482977202
+        },
+        "normal_impulse_ns": {
+          "first": 3879.795875959553,
+          "second": 3779.558140794084,
+          "absolute_change": -100.23773516546908,
+          "relative_change": -0.025835827030636818
+        },
+        "point_penetration_m": {
+          "first": 0.16136848712869006,
+          "second": 0.1782589849053306,
+          "absolute_change": 0.016890497776640534,
+          "relative_change": 0.104670360844187
+        },
+        "crossing_pitch_deg": {
+          "first": 36.9252704,
+          "second": 38.352179,
+          "absolute_change": 1.4269085999999973,
+          "relative_change": 0.038643145589530935
+        },
+        "crossing_roll_deg": {
+          "first": 8.68941426,
+          "second": 8.26537258,
+          "absolute_change": -0.4240416800000002,
+          "relative_change": -0.04879980022957269
+        },
+        "crossing_lateral_m": {
+          "first": 0.19597332748266,
+          "second": 0.18544969048266,
+          "absolute_change": -0.010523637000000002,
+          "relative_change": -0.053699333144869674
+        },
+        "az_10ms_m_s2": {
+          "first": 127.82319037504732,
+          "second": 128.96096188954718,
+          "absolute_change": 1.1377715144998604,
+          "relative_change": 0.008901135319510594
+        },
+        "full_pitch_deg": {
+          "first": 36.9252704,
+          "second": 38.352179,
+          "absolute_change": 1.4269085999999973,
+          "relative_change": 0.038643145589530935
+        },
+        "full_roll_deg": {
+          "first": 8.68941426,
+          "second": 11.9474684,
+          "absolute_change": 3.2580541400000005,
+          "relative_change": 0.37494519682388816
+        },
+        "full_lateral_m": {
+          "first": 0.342390407,
+          "second": 0.312765473,
+          "absolute_change": -0.02962493399999999,
+          "relative_change": -0.08652384352579127
+        },
+        "rear_exit_s": {
+          "first": 12.185125,
+          "second": 12.173125,
+          "absolute_change": -0.011999999999998678,
+          "relative_change": -0.0009848072957806078
+        }
+      },
+      "numerical_screen_pass": false,
+      "note": "Solver and controller/CSV initial sample phases change with native step"
+    },
+    {
+      "kind": "stiffness_1_to_3_dt250",
+      "first_run": "contact_study_20261012_wide_d200_h150_g15_dt250",
+      "second_run": "contact_study_20261012_wide_d200_h150_g15_k3_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 14191.873691771902,
+          "second": 30350.06607423105,
+          "absolute_change": 16158.192382459149,
+          "relative_change": 1.1385524373590832
+        },
+        "normal_impulse_ns": {
+          "first": 3676.7556629641504,
+          "second": 4355.611337223013,
+          "absolute_change": 678.8556742588626,
+          "relative_change": 0.18463442678472095
+        },
+        "point_penetration_m": {
+          "first": 0.08779997002230194,
+          "second": 0.06270509300061156,
+          "absolute_change": -0.025094877021690387,
+          "relative_change": -0.28581874248153016
+        },
+        "crossing_pitch_deg": {
+          "first": 24.5348149,
+          "second": 25.1204538,
+          "absolute_change": 0.5856388999999993,
+          "relative_change": 0.023869709324768507
+        },
+        "crossing_roll_deg": {
+          "first": 5.09141924,
+          "second": 2.86865697,
+          "absolute_change": -2.2227622699999996,
+          "relative_change": -0.4365702695502246
+        },
+        "crossing_lateral_m": {
+          "first": 0.55770661019949,
+          "second": 0.04372734580051,
+          "absolute_change": -0.51397926439898,
+          "relative_change": -0.9215943562424895
+        },
+        "az_10ms_m_s2": {
+          "first": 107.30265317686809,
+          "second": 84.90860271520866,
+          "absolute_change": -22.394050461659432,
+          "relative_change": -0.20869987645829302
+        },
+        "full_pitch_deg": {
+          "first": 24.5348149,
+          "second": 25.1204538,
+          "absolute_change": 0.5856388999999993,
+          "relative_change": 0.023869709324768507
+        },
+        "full_roll_deg": {
+          "first": 5.10770408,
+          "second": 2.99455539,
+          "absolute_change": -2.1131486900000005,
+          "relative_change": -0.4137179164850913
+        },
+        "full_lateral_m": {
+          "first": 0.693953106,
+          "second": 0.0433381355,
+          "absolute_change": -0.6506149705000001,
+          "relative_change": -0.9375488990173927
+        },
+        "rear_exit_s": {
+          "first": 12.26525,
+          "second": 12.17425,
+          "absolute_change": -0.0909999999999993,
+          "relative_change": -0.007419335113430163
+        }
+      },
+      "numerical_screen_pass": null,
+      "note": "Constitutive sensitivity, not numerical convergence"
+    },
+    {
+      "kind": "stiffness_3_to_10_dt250",
+      "first_run": "contact_study_20261012_wide_d200_h150_g15_k3_dt250",
+      "second_run": "contact_study_20261012_wide_d200_h150_g15_k10_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 30350.06607423105,
+          "second": 64084.39682659904,
+          "absolute_change": 33734.33075236799,
+          "relative_change": 1.111507654377411
+        },
+        "normal_impulse_ns": {
+          "first": 4355.611337223013,
+          "second": 4069.927541504872,
+          "absolute_change": -285.683795718141,
+          "relative_change": -0.06558982737433205
+        },
+        "point_penetration_m": {
+          "first": 0.06270509300061156,
+          "second": 0.037687556881312145,
+          "absolute_change": -0.02501753611929941,
+          "relative_change": -0.3989713581806731
+        },
+        "crossing_pitch_deg": {
+          "first": 25.1204538,
+          "second": 8.78126102,
+          "absolute_change": -16.339192779999998,
+          "relative_change": -0.6504338221788015
+        },
+        "crossing_roll_deg": {
+          "first": 2.86865697,
+          "second": 2.23163472,
+          "absolute_change": -0.6370222499999998,
+          "relative_change": -0.22206288749818692
+        },
+        "crossing_lateral_m": {
+          "first": 0.04372734580051,
+          "second": 0.05017255110051,
+          "absolute_change": 0.0064452052999999995,
+          "relative_change": 0.14739530108696486
+        },
+        "az_10ms_m_s2": {
+          "first": 84.90860271520866,
+          "second": 81.28428377924996,
+          "absolute_change": -3.624318935958698,
+          "relative_change": -0.04268494381087627
+        },
+        "full_pitch_deg": {
+          "first": 25.1204538,
+          "second": 8.78126102,
+          "absolute_change": -16.339192779999998,
+          "relative_change": -0.6504338221788015
+        },
+        "full_roll_deg": {
+          "first": 2.99455539,
+          "second": 2.23163472,
+          "absolute_change": -0.7629206699999997,
+          "relative_change": -0.25476926309250864
+        },
+        "full_lateral_m": {
+          "first": 0.0433381355,
+          "second": 0.0485550413,
+          "absolute_change": 0.005216905799999998,
+          "relative_change": 0.12037679378246435
+        },
+        "rear_exit_s": {
+          "first": 12.17425,
+          "second": 12.15725,
+          "absolute_change": -0.017000000000001236,
+          "relative_change": -0.0013963899213504927
+        }
+      },
+      "numerical_screen_pass": null,
+      "note": "Constitutive sensitivity, not numerical convergence"
+    },
+    {
+      "kind": "off_step_500_to_250",
+      "first_run": "chassis_check_20261011_wide_d200_off",
+      "second_run": "contact_study_20261012_wide_d200_h150_off_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 0.0,
+          "second": 0.0,
+          "absolute_change": 0.0,
+          "relative_change": null
+        },
+        "normal_impulse_ns": {
+          "first": 0.0,
+          "second": 0.0,
+          "absolute_change": 0.0,
+          "relative_change": null
+        },
+        "point_penetration_m": {
+          "first": 0.18235101675874713,
+          "second": 0.16443607894129605,
+          "absolute_change": -0.01791493781745107,
+          "relative_change": -0.09824424418292538
+        },
+        "crossing_pitch_deg": {
+          "first": 43.3463207,
+          "second": 31.0213165,
+          "absolute_change": -12.325004199999999,
+          "relative_change": -0.2843379553549974
+        },
+        "crossing_roll_deg": {
+          "first": 12.5889566,
+          "second": 5.47161597,
+          "absolute_change": -7.117340629999999,
+          "relative_change": -0.5653638229239745
+        },
+        "crossing_lateral_m": {
+          "first": 1.44582433420048,
+          "second": 0.18148542580051,
+          "absolute_change": -1.2643389083999699,
+          "relative_change": -0.8744761576440966
+        },
+        "az_10ms_m_s2": {
+          "first": 142.40149901700448,
+          "second": 118.473412565634,
+          "absolute_change": -23.928086451370476,
+          "relative_change": -0.1680325461216751
+        },
+        "full_pitch_deg": {
+          "first": 43.3463207,
+          "second": 31.0213165,
+          "absolute_change": -12.325004199999999,
+          "relative_change": -0.2843379553549974
+        },
+        "full_roll_deg": {
+          "first": 15.9774458,
+          "second": 5.67969891,
+          "absolute_change": -10.297746889999999,
+          "relative_change": -0.6445177169682528
+        },
+        "full_lateral_m": {
+          "first": 2.41256591,
+          "second": 0.350677027,
+          "absolute_change": -2.061888883,
+          "relative_change": -0.8546456179512211
+        },
+        "rear_exit_s": {
+          "first": 12.5215,
+          "second": 11.86625,
+          "absolute_change": -0.6552499999999988,
+          "relative_change": -0.05232999241304946
+        }
+      },
+      "numerical_screen_pass": null,
+      "note": "Solver and controller/CSV initial sample phases change with native step"
+    },
+    {
+      "kind": "off_step_250_to_125",
+      "first_run": "contact_study_20261012_wide_d200_h150_off_dt250",
+      "second_run": "contact_study_20261012_wide_d200_h150_off_dt125",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 0.0,
+          "second": 0.0,
+          "absolute_change": 0.0,
+          "relative_change": null
+        },
+        "normal_impulse_ns": {
+          "first": 0.0,
+          "second": 0.0,
+          "absolute_change": 0.0,
+          "relative_change": null
+        },
+        "point_penetration_m": {
+          "first": 0.16443607894129605,
+          "second": 0.22848194929603285,
+          "absolute_change": 0.0640458703547368,
+          "relative_change": 0.3894879442947632
+        },
+        "crossing_pitch_deg": {
+          "first": 31.0213165,
+          "second": 42.2142272,
+          "absolute_change": 11.192910700000002,
+          "relative_change": 0.3608135296256689
+        },
+        "crossing_roll_deg": {
+          "first": 5.47161597,
+          "second": 11.4321195,
+          "absolute_change": 5.96050353,
+          "relative_change": 1.0893497574903819
+        },
+        "crossing_lateral_m": {
+          "first": 0.18148542580051,
+          "second": 0.36819402048266,
+          "absolute_change": 0.18670859468214998,
+          "relative_change": 1.0287801009838737
+        },
+        "az_10ms_m_s2": {
+          "first": 118.473412565634,
+          "second": 137.7774587006993,
+          "absolute_change": 19.304046135065292,
+          "relative_change": 0.1629399011729395
+        },
+        "full_pitch_deg": {
+          "first": 31.0213165,
+          "second": 42.2142272,
+          "absolute_change": 11.192910700000002,
+          "relative_change": 0.3608135296256689
+        },
+        "full_roll_deg": {
+          "first": 5.67969891,
+          "second": 19.9227463,
+          "absolute_change": 14.243047390000001,
+          "relative_change": 2.5077116966399196
+        },
+        "full_lateral_m": {
+          "first": 0.350677027,
+          "second": 0.409248285,
+          "absolute_change": 0.058571258000000015,
+          "relative_change": 0.16702336762995318
+        },
+        "rear_exit_s": {
+          "first": 11.86625,
+          "second": 12.083125,
+          "absolute_change": 0.21687499999999993,
+          "relative_change": 0.018276624881491618
+        }
+      },
+      "numerical_screen_pass": null,
+      "note": "Solver and controller/CSV initial sample phases change with native step"
+    },
+    {
+      "kind": "wide08_grid_and_step",
+      "first_run": "chassis_contact_20261011_wide_d080_h100",
+      "second_run": "contact_study_20261012_wide_d080_h100_g45_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 4134.655641256593,
+          "second": 5578.63077846939,
+          "absolute_change": 1443.9751372127967,
+          "relative_change": 0.3492370979591296
+        },
+        "normal_impulse_ns": {
+          "first": 376.7366195019483,
+          "second": 288.55172387508287,
+          "absolute_change": -88.18489562686545,
+          "relative_change": -0.23407572044216796
+        },
+        "point_penetration_m": {
+          "first": 0.026263228154276924,
+          "second": 0.03303566686789078,
+          "absolute_change": 0.006772438713613854,
+          "relative_change": 0.2578677180821343
+        },
+        "crossing_pitch_deg": {
+          "first": 3.40862439,
+          "second": 3.58098819,
+          "absolute_change": 0.17236379999999984,
+          "relative_change": 0.0505669678670579
+        },
+        "crossing_roll_deg": {
+          "first": 1.72445508,
+          "second": 1.69191055,
+          "absolute_change": -0.032544530000000016,
+          "relative_change": -0.01887235589807304
+        },
+        "crossing_lateral_m": {
+          "first": 0.014884625100480001,
+          "second": 0.01217191260051,
+          "absolute_change": -0.002712712499970002,
+          "relative_change": -0.18224929964023898
+        },
+        "az_10ms_m_s2": {
+          "first": 28.690590507099497,
+          "second": 36.3392640309055,
+          "absolute_change": 7.648673523806,
+          "relative_change": 0.26659170789507913
+        },
+        "full_pitch_deg": {
+          "first": 3.40862439,
+          "second": 3.58098819,
+          "absolute_change": 0.17236379999999984,
+          "relative_change": 0.0505669678670579
+        },
+        "full_roll_deg": {
+          "first": 1.72445508,
+          "second": 1.69191055,
+          "absolute_change": -0.032544530000000016,
+          "relative_change": -0.01887235589807304
+        },
+        "full_lateral_m": {
+          "first": 0.0133640209,
+          "second": 0.0105544028,
+          "absolute_change": -0.002809618100000001,
+          "relative_change": -0.21023748174473456
+        },
+        "rear_exit_s": {
+          "first": 12.0625,
+          "second": 12.06125,
+          "absolute_change": -0.0012500000000006395,
+          "relative_change": -0.00010362694300523437
+        }
+      },
+      "numerical_screen_pass": null,
+      "note": "Grid and step changed together: corroboration only"
+    },
+    {
+      "kind": "right20_grid_and_step",
+      "first_run": "chassis_contact_20261011_right_d200_h100",
+      "second_run": "contact_study_20261012_right_d200_h100_g45_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 4420.345922589836,
+          "second": 4345.849090096533,
+          "absolute_change": -74.49683249330337,
+          "relative_change": -0.016853168009452173
+        },
+        "normal_impulse_ns": {
+          "first": 208.37547024714777,
+          "second": 151.53009894019237,
+          "absolute_change": -56.8453713069554,
+          "relative_change": -0.27280260598588135
+        },
+        "point_penetration_m": {
+          "first": 0.02742265459709728,
+          "second": 0.029963728277676877,
+          "absolute_change": 0.0025410736805795975,
+          "relative_change": 0.09266330039574554
+        },
+        "crossing_pitch_deg": {
+          "first": 3.45686863,
+          "second": 3.53459926,
+          "absolute_change": 0.07773062999999958,
+          "relative_change": 0.02248585014930104
+        },
+        "crossing_roll_deg": {
+          "first": 4.57078164,
+          "second": 4.75758561,
+          "absolute_change": 0.1868039699999997,
+          "relative_change": 0.04086915208664392
+        },
+        "crossing_lateral_m": {
+          "first": 0.02932241769952,
+          "second": 0.03286465809949,
+          "absolute_change": 0.0035422403999699967,
+          "relative_change": 0.12080314919011545
+        },
+        "az_10ms_m_s2": {
+          "first": 57.673807292179404,
+          "second": 57.962739924857246,
+          "absolute_change": 0.28893263267784164,
+          "relative_change": 0.005009772134759362
+        },
+        "full_pitch_deg": {
+          "first": 3.45686863,
+          "second": 3.53459926,
+          "absolute_change": 0.07773062999999958,
+          "relative_change": 0.02248585014930104
+        },
+        "full_roll_deg": {
+          "first": 4.57078164,
+          "second": 4.75758561,
+          "absolute_change": 0.1868039699999997,
+          "relative_change": 0.04086915208664392
+        },
+        "full_lateral_m": {
+          "first": 0.0308430219,
+          "second": 0.0344821679,
+          "absolute_change": 0.0036391459999999994,
+          "relative_change": 0.11798928171820931
+        },
+        "rear_exit_s": {
+          "first": 12.0665,
+          "second": 12.06225,
+          "absolute_change": -0.004249999999998977,
+          "relative_change": -0.00035221480959673286
+        }
+      },
+      "numerical_screen_pass": null,
+      "note": "Grid and step changed together: corroboration only"
+    },
+    {
+      "kind": "wide16_grid_and_step",
+      "first_run": "chassis_contact_20261011_wide_d160_h150",
+      "second_run": "contact_study_20261012_wide_d160_h150_g45_dt250",
+      "changes": {
+        "normal_force_peak_n": {
+          "first": 11885.234591990291,
+          "second": 11261.329005436211,
+          "absolute_change": -623.9055865540795,
+          "relative_change": -0.0524941751654227
+        },
+        "normal_impulse_ns": {
+          "first": 2465.0831504069606,
+          "second": 2103.9611406374265,
+          "absolute_change": -361.1220097695341,
+          "relative_change": -0.1464948594979104
+        },
+        "point_penetration_m": {
+          "first": 0.059307164724557354,
+          "second": 0.09691876071005781,
+          "absolute_change": 0.03761159598550046,
+          "relative_change": 0.6341830057157766
+        },
+        "crossing_pitch_deg": {
+          "first": 26.6691565,
+          "second": 24.3988808,
+          "absolute_change": -2.270275699999999,
+          "relative_change": -0.0851273905119571
+        },
+        "crossing_roll_deg": {
+          "first": 4.24182003,
+          "second": 5.38035134,
+          "absolute_change": 1.1385313099999994,
+          "relative_change": 0.26840632133089326
+        },
+        "crossing_lateral_m": {
+          "first": 0.07882391139952,
+          "second": 0.13353167419949,
+          "absolute_change": 0.05470776279997,
+          "relative_change": 0.6940503437171877
+        },
+        "az_10ms_m_s2": {
+          "first": 101.20528111308334,
+          "second": 108.93487079665016,
+          "absolute_change": 7.7295896835668145,
+          "relative_change": 0.07637535905789376
+        },
+        "full_pitch_deg": {
+          "first": 26.6691565,
+          "second": 24.3988808,
+          "absolute_change": -2.270275699999999,
+          "relative_change": -0.0851273905119571
+        },
+        "full_roll_deg": {
+          "first": 5.46571312,
+          "second": 6.61142556,
+          "absolute_change": 1.1457124399999996,
+          "relative_change": 0.20961810743553982
+        },
+        "full_lateral_m": {
+          "first": 0.0979689537,
+          "second": 0.152707432,
+          "absolute_change": 0.054738478300000004,
+          "relative_change": 0.5587329070352214
+        },
+        "rear_exit_s": {
+          "first": 12.1715,
+          "second": 12.14125,
+          "absolute_change": -0.030250000000000554,
+          "relative_change": -0.002485314053321329
+        }
+      },
+      "numerical_screen_pass": null,
+      "note": "Grid and step changed together: corroboration only"
+    }
+  ],
+  "numerical_screen": "5% changes in total force peak, impulse, point penetration, 10ms Az; pitch/roll max(5%,1deg); lateral max(10%,0.01m). Diagnostic screen, not certification.",
+  "limitations": [
+    "99-point spacing remains 0.2525m longitudinal and 0.125m lateral, larger than the 0.05m pit edge.",
+    "First control tick and CSV origin shift with step; CSV remains 1ms. Native accumulated force metrics retain each integration step.",
+    "Legacy per-point contact times/durations are not used for grid convergence; fixed 10N aggregate CSV events supplied instead.",
+    "Post-exit includes speed-PI stopping and steering recovery. Force and geometry assumptions do not represent measured real chassis.",
+    "First axle crossing phases do not classify a later return into the pit."
+  ]
+}

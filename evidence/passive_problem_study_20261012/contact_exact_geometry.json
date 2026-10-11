@@ -1,0 +1,266 @@
+{
+  "results": [
+    {
+      "run_path": "runs\\shallow_press\\right_track\\contact_study_20261012_right_d200_h100_g45_dt250",
+      "case": "right_track",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.25225,
+      "min_gap_m": -0.029961752316037038,
+      "minimum_time_s": 11.31125,
+      "minimum_location_m": [
+        102.23552339766583,
+        -0.5057183027789525,
+        -0.029961752316037038
+      ],
+      "penetration_duration_s": 0.14400000000001612,
+      "events": [
+        {
+          "start_s": 11.25225,
+          "end_s": 11.33825,
+          "duration_s": 0.08700000000000041
+        },
+        {
+          "start_s": 11.96025,
+          "end_s": 12.01625,
+          "duration_s": 0.056999999999999273
+        }
+      ],
+      "interpretation_after_first_intersection": "COMPLIANT_POINT_MODEL_TRAJECTORY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.1,
+      "csv_sha256": "3d7105db83ff874222e85ae4656907c8d52912e1845d57107ab363b54238a83e"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\contact_study_20261012_wide_d080_h100_g45_dt250",
+      "case": "wide",
+      "depth_m": 0.08,
+      "nominal_static_clearance_m": 0.1,
+      "geometry": {
+        "local_z_m": 0.16088588526135414,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.1,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.20225,
+      "min_gap_m": -0.033034521980889575,
+      "minimum_time_s": 11.29825,
+      "minimum_location_m": [
+        102.19874073038825,
+        0.5046274909737776,
+        -0.033034521980889575
+      ],
+      "penetration_duration_s": 0.2600000000000291,
+      "events": [
+        {
+          "start_s": 11.20225,
+          "end_s": 11.34025,
+          "duration_s": 0.139
+        },
+        {
+          "start_s": 11.86125,
+          "end_s": 11.98125,
+          "duration_s": 0.12099999999999933
+        }
+      ],
+      "interpretation_after_first_intersection": "COMPLIANT_POINT_MODEL_TRAJECTORY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.1,
+      "csv_sha256": "64cf4e14acb15831fd265fe767a952812bbc23894051a128eee2d3ad535e88dc"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\contact_study_20261012_wide_d100_h150_g15_dt500",
+      "case": "wide",
+      "depth_m": 0.1,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.2485,
+      "min_gap_m": -0.023468851668982188,
+      "minimum_time_s": 11.3065,
+      "minimum_location_m": [
+        102.21693963395947,
+        0.5067286938678486,
+        -0.023468851668982188
+      ],
+      "penetration_duration_s": 0.13000000000001455,
+      "events": [
+        {
+          "start_s": 11.2485,
+          "end_s": 11.3295,
+          "duration_s": 0.08199999999999963
+        },
+        {
+          "start_s": 11.9145,
+          "end_s": 11.9615,
+          "duration_s": 0.04799999999999893
+        }
+      ],
+      "interpretation_after_first_intersection": "COMPLIANT_POINT_MODEL_TRAJECTORY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.15,
+      "csv_sha256": "b672daa8152b0953108df5e48c05565a988d3fcdad4ad92f92bd45c50b03c0a5"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\contact_study_20261012_wide_d160_h150_g45_dt250",
+      "case": "wide",
+      "depth_m": 0.16,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.20025,
+      "min_gap_m": -0.10476776257645548,
+      "minimum_time_s": 11.90825,
+      "minimum_location_m": [
+        101.89999999999999,
+        0.5120071153194319,
+        -0.10476776257645548
+      ],
+      "penetration_duration_s": 0.5730000000000641,
+      "events": [
+        {
+          "start_s": 11.20025,
+          "end_s": 11.34125,
+          "duration_s": 0.14200000000000013
+        },
+        {
+          "start_s": 11.83725,
+          "end_s": 11.95925,
+          "duration_s": 0.12300000000000177
+        },
+        {
+          "start_s": 12.05925,
+          "end_s": 12.27425,
+          "duration_s": 0.21599999999999997
+        },
+        {
+          "start_s": 12.87225,
+          "end_s": 12.96325,
+          "duration_s": 0.09200000000000119
+        }
+      ],
+      "interpretation_after_first_intersection": "COMPLIANT_POINT_MODEL_TRAJECTORY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.15,
+      "csv_sha256": "47dba8d284afd93607daf018f026ad998a3410f9ea0d038216440a2420871eb8"
+    },
+    {
+      "run_path": "runs\\shallow_press\\wide\\contact_study_20261012_wide_d200_h150_g45_dt125",
+      "case": "wide",
+      "depth_m": 0.2,
+      "nominal_static_clearance_m": 0.15,
+      "geometry": {
+        "local_z_m": 0.2108900623638924,
+        "calibration_origin_m": [
+          89.10560718359999,
+          -0.0015206042004800003,
+          -0.0452238391768
+        ],
+        "calibration_attitude_deg": [
+          -0.698537711761,
+          -0.24599721496799998,
+          -0.002720673792941
+        ],
+        "requested_static_min_clearance_m": 0.15,
+        "calibration_csv_sha256": "89fecf3c97748ce94c0c13619ab1e7055c4dd92e544de3ee78d7b1804f9e9434"
+      },
+      "status": "ASSUMED_GEOMETRIC_INTERSECTION",
+      "first_intersection_s": 11.193125,
+      "min_gap_m": -0.1613663822160072,
+      "minimum_time_s": 12.460125,
+      "minimum_location_m": [
+        104.59907928497152,
+        0.5046697155769138,
+        -0.1613663822160072
+      ],
+      "penetration_duration_s": 0.7570000000000847,
+      "events": [
+        {
+          "start_s": 11.193125,
+          "end_s": 11.351125,
+          "duration_s": 0.15899999999999959
+        },
+        {
+          "start_s": 11.890125,
+          "end_s": 12.019125,
+          "duration_s": 0.13000000000000145
+        },
+        {
+          "start_s": 12.356125,
+          "end_s": 12.601125,
+          "duration_s": 0.24599999999999933
+        },
+        {
+          "start_s": 12.923125,
+          "end_s": 13.079125,
+          "duration_s": 0.15699999999999892
+        },
+        {
+          "start_s": 13.313125,
+          "end_s": 13.377125,
+          "duration_s": 0.06500000000000017
+        }
+      ],
+      "interpretation_after_first_intersection": "COMPLIANT_POINT_MODEL_TRAJECTORY",
+      "physical_contact_force": "ASSUMED_POINT_FORCE_EXTENSION_PRESENT",
+      "source_contact_clearance_m": 0.15,
+      "csv_sha256": "b7923e2b5d74dc4c67ddfb6e0288b3d9f67673b521d3b4187b3bd244f860385d"
+    }
+  ],
+  "metric_code_sha256": "dd1084f0a1d1f9b8b2f798f44e05138f980f4f4c856773575570193c71c00473",
+  "geometry_code_sha256": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7"
+}

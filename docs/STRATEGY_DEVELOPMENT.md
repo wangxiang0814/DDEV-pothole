@@ -61,3 +61,5 @@ git diff --check
 2026-10-11 新增约10 km/h、4–20 cm诊断及匹配3 km/h对照见 [SPEED_DEPTH_BASELINE_20261011.md](SPEED_DEPTH_BASELINE_20261011.md)。入口增加可选12 m起步、直行转向反馈与1 ms日志，旧默认不变。原宽坑16/20 cm的保护停止历史保留；按用户要求以 `--observe-after-attitude-limit` 关闭诊断姿态停止后完整重跑，最终汇总采用完整数据。工况名称及日后重放来源见 `evidence/speed_depth_baseline_20261011/case_index.md`。
 
 2026-10-11 底盘诊断扩展见 [CHASSIS_CONTACT_DIAGNOSTICS_20261011.md](CHASSIS_CONTACT_DIAGNOSTICS_20261011.md)：用户确认缺少真实尺寸，采用显式假定包络对18工况作90组历史净空分析；独立接触重跑直接施加原生车身参考点力。扩展模型不等于原车辆身份，不得借用旧辨识增益或标记实车触底验收通过；点模型、刚度及几何尚需标定。
+
+2026-10-12 分阶段问题与数值敏感性研究见 [PASSIVE_PROBLEM_STUDY_20261012.md](PASSIVE_PROBLEM_STUDY_20261012.md)。接触诊断新增 `--step-s`（0.0005/0.00025/0.000125），仅修改本次隔离模型并保持1 ms日志；`scripts/analyze_passive_problem_study.py`校验冻结矩阵后生成原基准、接触与零反力对照的阶段指标、事件和工况索引。下压专家仍未实现。

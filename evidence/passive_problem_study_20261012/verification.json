@@ -1,0 +1,126 @@
+{
+  "new_native_full30_runs": 13,
+  "original_baseline_runs": 18,
+  "total_phase_sources": 38,
+  "full_reference_point_diagnostic_runs": 20,
+  "contact_on_runs": 17,
+  "contact_off_runs": 3,
+  "planned_checks": [
+    {
+      "name": "contact_study_20261012_wide_d200_h150_g45_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "e49843c6c97bf404e56129069a0e6d684e86f61c187c551f11a9d187e34e964f"
+    },
+    {
+      "name": "contact_study_20261012_wide_d080_h100_g45_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "b3beabbd0682f2a3894ae179f575471a38a639815c97410286ecde9df361c784"
+    },
+    {
+      "name": "contact_study_20261012_wide_d200_h150_g45_dt125",
+      "actual_step_s": 0.000125,
+      "first_csv_sample_s": 0.000125,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "2afa1052adff369db17861cb59d658f3ff6ce53638ec7bc39ede9dea8b86c035"
+    },
+    {
+      "name": "contact_study_20261012_wide_d200_h150_g99_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "c9a495570366a24d2532d3119dcc8d6329746519cebeec97260e43e405c6951d"
+    },
+    {
+      "name": "contact_study_20261012_wide_d200_h150_g15_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "6e086ee59a92f5181ab7cfcf97ae3fd533ef763a42577215926a64d84ffb4a29"
+    },
+    {
+      "name": "contact_study_20261012_wide_d200_h150_g15_k3_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "e28de3123ed48c248981473e4fcd36cfb24567a177243e26324b42f94437ddb3"
+    },
+    {
+      "name": "contact_study_20261012_wide_d200_h150_g15_k10_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "05d32d0c9a43d4ba93a269cd7bf1d75757d0665042eaae4c0b3c15ad396e6f40"
+    },
+    {
+      "name": "contact_study_20261012_right_d200_h100_g45_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "65e442932e6e52630f1a571ef3a260d5ae2667c48851132eaa3838452f5e2efa"
+    },
+    {
+      "name": "contact_study_20261012_wide_d100_h150_g15_dt500",
+      "actual_step_s": 0.0005,
+      "first_csv_sample_s": 0.0005,
+      "native_time_s": 29.999999999975433,
+      "rear_cleared": true,
+      "manifest_sha256": "ce7e77f9b83e600f8be791df615b913f2b5e4cafa4a69ed63d0bc4d1b9688c00"
+    },
+    {
+      "name": "contact_study_20261012_wide_d160_h150_g45_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "523cd34c29f94c356a4e0e3798da4f0c7205069394fb998dddcb15ae48c65032"
+    },
+    {
+      "name": "contact_study_20261012_wide_d200_h150_g99_dt125",
+      "actual_step_s": 0.000125,
+      "first_csv_sample_s": 0.000125,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "bae8c904b9427e624c0b54b26444ce6d7a5ef11913ce6d4dedf932cb131eaf13"
+    },
+    {
+      "name": "contact_study_20261012_wide_d200_h150_off_dt250",
+      "actual_step_s": 0.00025,
+      "first_csv_sample_s": 0.00025,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "b4c5385a65be2a5651216744c572e5f15a31f554eb1999cb6e66cfc8cd2e4c86"
+    },
+    {
+      "name": "contact_study_20261012_wide_d200_h150_off_dt125",
+      "actual_step_s": 0.000125,
+      "first_csv_sample_s": 0.000125,
+      "native_time_s": 30.0,
+      "rear_cleared": true,
+      "manifest_sha256": "0dd0cac4b4317a63062deb43a887513970f55ef1dfda3ecac59cb6dc965ffb1c"
+    }
+  ],
+  "full_test_suite": "507 passed, 10 third-party deprecation warnings, 61.30s",
+  "final_focused_tests": "47 passed",
+  "numerical_step_grid_comparisons_passed": 0,
+  "numerical_step_grid_comparisons_checked": 6,
+  "independent_review": "Matrix completeness, censored windows and aggregate event thresholds corrected; independent baseline recomputation matched all 18 source identities.",
+  "code_sha256": {
+    "scripts\\analyze_passive_problem_study.py": "69865fd2b7a3b7fd7d47cd38f1187c33c7b4ffbf4ba030105b254ac0ab23da0d",
+    "scripts\\run_chassis_contact_diagnostic.py": "14124f79bf3cf9eabff0ddb4e12c55c392d30e6bf52dbf72e61274df2ef8b5ea",
+    "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7"
+  },
+  "videos": "No visualizer playback or video saving performed",
+  "assumptions": "No measured underside geometry; quantitative deep-wide-pit trajectories and contact loads not converged or physically calibrated"
+}
