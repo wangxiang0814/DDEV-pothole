@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-12",
+  "status": "DESIGN_ONLY_NOT_RUNTIME_CONFIG",
+  "instruction": "Align expert two simulated actuator capability with expert one. Do not import expert-one algorithm state or gains.",
+  "vehicle_profile_id": "tuned_ii_20261005",
+  "base_commit": "0f1955c",
+  "wheel_order": [
+    "FL",
+    "FR",
+    "RL",
+    "RR"
+  ],
+  "sources": [
+    {
+      "path": "src/ddevsim/static_wheel_lift/config.py",
+      "sha256": "5626cb788be24ce38ade0f22df0cfc491bc49899b65850a969ff5ea400200c3d"
+    },
+    {
+      "path": "src/ddevsim/static_wheel_lift/closed_loop.py",
+      "sha256": "3932651578ccd6c173ca61c9ef4a4d7fa7a2145de03a576bf25ad87197bc502c"
+    },
+    {
+      "path": "configs/wheel_lift/recommended.json",
+      "sha256": "cfc6fe9c4604aa8a82b503ac9c10d5494be7c5d83d2ffe64074c138ab08c7c3b"
+    }
+  ],
+  "limits": {
+    "suspension_additional_force_abs_max_n": 18200,
+    "suspension_total_command_slew_outer_envelope_n_s": 45400,
+    "suspension_coordinate_jnc_lower_m": -0.149,
+    "suspension_coordinate_jnc_upper_m": 0.155,
+    "wheel_torque_abs_max_nm": 500,
+    "wheel_torque_slew_nm_s": 1000,
+    "steering_wheel_angle_abs_max_deg": 220,
+    "steering_wheel_slew_deg_s": 400,
+    "control_period_s": 0.02,
+    "nominal_feedback_delay_s": 0.04,
+    "robustness_feedback_delays_s": [
+      0.06,
+      0.08
+    ]
+  },
+  "strategy_local_correction_rates_not_hardware_limits": {
+    "support_qp_n_s": 400.0,
+    "support_qp_abort_n_s": 1200.0,
+    "recommended_front_stop_support_n_s": 1200,
+    "rear_preload_feedback_n_s": 1000.0
+  },
+  "unknown_hardware_specifications": [
+    "rated_force",
+    "actuator_stroke_and_motion_ratio",
+    "actuator_speed",
+    "force_bandwidth",
+    "power_and_thermal_limits",
+    "motor_torque_speed_map"
+  ],
+  "interpretation": [
+    "These are software limits, not verified physical ratings.",
+    "304 mm is the interval of suspension coordinate Jnc, not physical actuator stroke.",
+    "45400 N/s is the existing total-command acceptance envelope; slower local corrections are not global actuator ratings.",
+    "40 ms is feedback delay, not actuator time constant.",
+    "500 Nm/1000 Nm/s are outer crawl controller bounds; adhesion and phase-specific braking constraints may be tighter.",
+    "No controller or shared vehicle parameters have been changed."
+  ]
+}

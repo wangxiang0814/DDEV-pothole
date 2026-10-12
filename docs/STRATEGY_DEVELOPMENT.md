@@ -63,3 +63,5 @@ git diff --check
 2026-10-11 底盘诊断扩展见 [CHASSIS_CONTACT_DIAGNOSTICS_20261011.md](CHASSIS_CONTACT_DIAGNOSTICS_20261011.md)：用户确认缺少真实尺寸，采用显式假定包络对18工况作90组历史净空分析；独立接触重跑直接施加原生车身参考点力。扩展模型不等于原车辆身份，不得借用旧辨识增益或标记实车触底验收通过；点模型、刚度及几何尚需标定。
 
 2026-10-12 分阶段问题与数值敏感性研究见 [PASSIVE_PROBLEM_STUDY_20261012.md](PASSIVE_PROBLEM_STUDY_20261012.md)。接触诊断新增 `--step-s`（0.0005/0.00025/0.000125），仅修改本次隔离模型并保持1 ms日志；`scripts/analyze_passive_problem_study.py`校验冻结矩阵后生成原基准、接触与零反力对照的阶段指标、事件和工况索引。下压专家仍未实现。
+
+2026-10-12 经典下压控制的文献研究和详细设计见 [SHALLOW_PRESS_CLASSICAL_DESIGN_20261012.md](SHALLOW_PRESS_CLASSICAL_DESIGN_20261012.md)。用户确认自适应降速（先 1–3 km/h）、首阶段已知坑形、能力参数与专家一对齐。文献来源与能力快照位于 `evidence/shallow_press_design_20261012/`，是设计证据，不是运行配置或控制验证结果；`shallow_press` 仍为 NOT_IMPLEMENTED。
