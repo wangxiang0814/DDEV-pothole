@@ -1,0 +1,30 @@
+{
+  "scope": "RESEARCH_PREDICTOR_GATE_NOT_EXPERT_ACCEPTANCE",
+  "date": "2026-10-13",
+  "vehicle_profile_id": "tuned_ii_20261005",
+  "wheel_order": ["FL", "FR", "RL", "RR"],
+  "control_period_s": 0.02,
+  "plant_step_s": 0.0005,
+  "known_geometry": {"length_m": 0.8, "right_width_m": 0.9, "wide_width_m": 1.8, "edge_m": 0.05, "mu": 0.7, "approach_m": 2},
+  "limits": {"force_n": 18200, "force_rate_n_s": 45400, "torque_nm": 500, "torque_rate_nm_s": 1000, "steering_wheel_deg": 220, "steering_rate_deg_s": 400},
+  "predictor": {"type": "classical_scaled_MIMO_ARX2", "ridge": 0.0001, "horizon_s": [0.02, 0.1, 0.2, 0.4], "evaluation_stride_s": 0.02, "future_inputs": "known_applied_sequence_for_plant_prediction_validation_only", "future_road": "configured_map_at_constant_current_speed_from_initial_wheel_positions_no_future_pose_truth"},
+  "gates": {"jounce_rmse_m": 0.005, "jounce_max_m": 0.015, "attitude_rmse_deg": 0.5, "attitude_max_deg": 1.5, "load_rmse_n": 250, "load_max_n": 750, "speed_rmse_m_s": 0.05, "speed_max_m_s": 0.15, "false_support_samples_allowed": 0},
+  "training": [
+    {"case": "right_track", "depth_m": 0.000001, "speed_kph": 0, "seed": 101, "amplitude_n": 250, "duration_s": 30},
+    {"case": "right_track", "depth_m": 0.000001, "speed_kph": 0, "seed": 102, "amplitude_n": 500, "duration_s": 30},
+    {"case": "right_track", "depth_m": 0.02, "speed_kph": 2, "seed": 111, "duration_s": 45},
+    {"case": "right_track", "depth_m": 0.06, "speed_kph": 2, "seed": 112, "duration_s": 45},
+    {"case": "wide", "depth_m": 0.02, "speed_kph": 2, "seed": 113, "duration_s": 45},
+    {"case": "wide", "depth_m": 0.06, "speed_kph": 2, "seed": 114, "duration_s": 45},
+    {"case": "right_track", "depth_m": 0.04, "speed_kph": 1, "seed": 115, "duration_s": 45},
+    {"case": "right_track", "depth_m": 0.04, "speed_kph": 3, "seed": 116, "duration_s": 45},
+    {"case": "wide", "depth_m": 0.04, "speed_kph": 1, "seed": 117, "duration_s": 45},
+    {"case": "wide", "depth_m": 0.04, "speed_kph": 3, "seed": 118, "duration_s": 45}
+  ],
+  "holdout": {"cases": ["right_track", "wide"], "depths_m": [0.02, 0.04, 0.06], "speeds_kph": [1, 2, 3], "seed": 201, "excite": false, "duration_s": 45},
+  "step_sensitivity": [
+    {"case": "right_track", "depth_m": 0.04, "speed_kph": 2, "seed": 201, "step_s": 0.00025, "duration_s": 45},
+    {"case": "wide", "depth_m": 0.04, "speed_kph": 2, "seed": 201, "step_s": 0.00025, "duration_s": 45}
+  ],
+  "note": "No hardware power/bandwidth guarantee. Ideal native actuator channel and zero-delay truth used for initial model gate; 40/60/80 ms feedback closed-loop testing requires passing predictor first. All native runs continue to full duration."
+}

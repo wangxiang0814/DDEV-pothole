@@ -65,3 +65,5 @@ git diff --check
 2026-10-12 分阶段问题与数值敏感性研究见 [PASSIVE_PROBLEM_STUDY_20261012.md](PASSIVE_PROBLEM_STUDY_20261012.md)。接触诊断新增 `--step-s`（0.0005/0.00025/0.000125），仅修改本次隔离模型并保持1 ms日志；`scripts/analyze_passive_problem_study.py`校验冻结矩阵后生成原基准、接触与零反力对照的阶段指标、事件和工况索引。下压专家仍未实现。
 
 2026-10-12 经典下压控制的文献研究和详细设计见 [SHALLOW_PRESS_CLASSICAL_DESIGN_20261012.md](SHALLOW_PRESS_CLASSICAL_DESIGN_20261012.md)。用户确认自适应降速（先 1–3 km/h）、首阶段已知坑形、能力参数与专家一对齐。文献来源与能力快照位于 `evidence/shallow_press_design_20261012/`，是设计证据，不是运行配置或控制验证结果；`shallow_press` 仍为 NOT_IMPLEMENTED。
+
+2026-10-13 MPC前置模型验证见 [SHALLOW_MPC_VALIDATION_20261013.md](SHALLOW_MPC_VALIDATION_20261013.md)。完成30条独立原生矩阵运行、67状态原生线性化及多步预测/步长对照；局部平地模型有用，但当前统一预测器18条过坑验证均未通过轮载/接触门控。新增辨识/预测研究模块不启用专家入口；MPC闭环尚未释放，`shallow_press`仍为NOT_IMPLEMENTED。正式证据采用 `evidence/shallow_mpc_validation_20261013/verified_analysis/`。
