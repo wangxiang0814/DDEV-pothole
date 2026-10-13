@@ -1,0 +1,82 @@
+{
+  "scope": "All 126 native exports plus9 commands and timing at every20ms interval; not a full1ms moving CSV comparison",
+  "moving": [
+    {
+      "case": "right_track",
+      "depth_cm": 2,
+      "new_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\physical_right_track_d2_v2_20261013_001",
+      "old_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\mpc_model_holdout_20261013_v02_d020",
+      "old_trace_sha256": "a015920702a848621e98eef234a5d68aa2c5a101b3a7bcce7d476baacd31b234",
+      "new_trace_sha256": "1ffa891a3b07066c75d95f96cb6a6cb8dbf50a002991af022f5d65aee8ea1b2f",
+      "repeat_trace_sha256": "3a070426997695d1795db3bd83e3c9ce541660acb30197564fd4025d7be37d10",
+      "samples": 2250,
+      "maximum_difference": 0.0,
+      "derivative_repeat_maximum_difference": 0.0
+    },
+    {
+      "case": "right_track",
+      "depth_cm": 4,
+      "new_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\physical_right_track_d4_v2_20261013_001",
+      "old_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\mpc_model_holdout_20261013_v02_d040",
+      "old_trace_sha256": "090641b8fbef07d5000a8bad6fa2d68fa9fcf614d1e3f9fd9db861e22a315a9f",
+      "new_trace_sha256": "888562d91c264a12ce30af1d9fa24269e0fceccbfb7ca1a45b1c9e7cac763666",
+      "repeat_trace_sha256": "a282937b50708e3fb49f9be1a2ec6edcf46349dd03902064ece1b787e1565cfc",
+      "samples": 2250,
+      "maximum_difference": 0.0,
+      "derivative_repeat_maximum_difference": 0.0
+    },
+    {
+      "case": "right_track",
+      "depth_cm": 6,
+      "new_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\physical_right_track_d6_v2_20261013_001",
+      "old_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\right_track\\mpc_model_holdout_20261013_v02_d060",
+      "old_trace_sha256": "62516e2cdbf86075b320c48e741e77fa3501b53cd048e422fc3f170954957552",
+      "new_trace_sha256": "264cd60c0ca49e92666bfd30b334c1786cf8de672f4ea5dfa4e8c46836132ddf",
+      "repeat_trace_sha256": "0d9b555fba9a1a89ac1a05fef0f3115ff8cbb6d3d4a97d7d121ce85d78943099",
+      "samples": 2250,
+      "maximum_difference": 0.0,
+      "derivative_repeat_maximum_difference": 0.0
+    },
+    {
+      "case": "wide",
+      "depth_cm": 2,
+      "new_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\physical_wide_d2_v2_20261013_001",
+      "old_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\mpc_model_holdout_20261013_v02_d020",
+      "old_trace_sha256": "bcfad72338f79e3502bb11053eda61fb903c81669df5a94496d40a8b19894e1a",
+      "new_trace_sha256": "4a6e6bf884c4861e724fa31076e7992a561ce7fbcf2212bd6f2851af055d3044",
+      "repeat_trace_sha256": "8a9effce0135cffaf11f8844fdbe090895d07a109f654c5cec3bef0495dec425",
+      "samples": 2250,
+      "maximum_difference": 0.0,
+      "derivative_repeat_maximum_difference": 0.0
+    },
+    {
+      "case": "wide",
+      "depth_cm": 4,
+      "new_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\physical_wide_d4_v2_20261013_001",
+      "old_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\mpc_model_holdout_20261013_v02_d040",
+      "old_trace_sha256": "e79130699bd0e7eb3ab09006a10bb27e552d3d94258964897ea9be5c2b97a9a6",
+      "new_trace_sha256": "aaf7e506443b0882e8bb7096055a6dc076bac10150f2fd3b1273596a49fdcaec",
+      "repeat_trace_sha256": "db0c3d779733704678200d4e12cf75a5d7bd4b981717144b64d94278362974c9",
+      "samples": 2250,
+      "maximum_difference": 0.0,
+      "derivative_repeat_maximum_difference": 0.0
+    },
+    {
+      "case": "wide",
+      "depth_cm": 6,
+      "new_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\physical_wide_d6_v2_20261013_001",
+      "old_run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\mpc_model_holdout_20261013_v02_d060",
+      "old_trace_sha256": "1c7b6615919e89d6c8d04d94550dbff0375a48ccf35bc991550fdbde457ef336",
+      "new_trace_sha256": "f3355ff0f81d199885935a131ca121136e1cf41c2b9a5dad637a99f91385d44f",
+      "repeat_trace_sha256": "dc34accba91bc63d57aa51d68ea71490df269e4f484bb5c44839ec53177e4c9f",
+      "samples": 2250,
+      "maximum_difference": 0.0,
+      "derivative_repeat_maximum_difference": 0.0
+    }
+  ],
+  "stationary": {
+    "new": "physical_flat_20261013_004",
+    "old": "mpc_native_extract_20261013_007",
+    "all_1ms_export_maximum_difference": 0
+  }
+}

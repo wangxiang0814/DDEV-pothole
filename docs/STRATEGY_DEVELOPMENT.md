@@ -1,5 +1,7 @@
 # 策略开发与运行入口
 
+2026-10-13 继续进行带路面高度/坡度和单边接触的物理MPC预测验证，见 [SHALLOW_PHYSICAL_MPC_20261013.md](SHALLOW_PHYSICAL_MPC_20261013.md)。新增12次完整坑槽运行、2次参考提取；所测预测器仍未通过联合门槛，未发布MPC闭环，专家二继续 NOT_IMPLEMENTED。下一主控制路线建议采用已知坑形预瞄前馈与反馈，完整混合MPC保留研究。
+
 所有命令从本 Git 项目根目录执行。使用能运行现有 requirements.txt 的 Python 环境；本轮验证环境为 F:\anaconda3\python.exe（Python 3.8.5）。
 
 ## 抬轮策略
