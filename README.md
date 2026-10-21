@@ -1,5 +1,17 @@
 # TruckSim–Python 四角独立悬架研究工程
 
+## 五相机 VLA 示范采集（2026-10-21）
+
+新增独立的前视、FL/FR/RL/RR 轮侧 RGB 采集和实际状态/动作记录，复用 TruckSim 2019 原生 Camera/Shared Buffer。相机固定在车身表面，镜头外伸约 20 mm，并按实际车身 OBJ 网格自动核验；640×480、10 FPS 目标均可配置。保留真实车身遮挡，不用悬浮视角或裁剪掉车身来冒充车载相机。
+
+采集采用“求解时记录实际状态/动作，结束后原生渲染并按仿真时间关联”的两阶段方式；不是实时视觉闭环。原生动画历史分辨率 25 ms，状态记录步长 0.5 ms。包含四轮转矩、四角附加悬架力及现有方向盘角，共 9 路真实动作；无 VLA/RL 训练代码。浅坑专家目前仍 NOT_IMPLEMENTED。
+
+运行：`python scripts/run_strategy.py --strategy wheel_lift --case seed_repeat --run-id vla_001 --demonstration-config configs/demonstration/five_camera.json`。不传采集配置即可关闭。已有轨迹可用 `scripts/capture_demonstration.py` 重新采图，不必重跑控制。
+
+**完整表面安装版本原生采集 PASS：**0–78.15 s，783 组五路同步图像（3915 张 RGB），实测约 10 FPS，最大间隔 0.145 s；覆盖 FR→RR 抬轮、蠕行、落轮与恢复。554 项 Python 测试通过。已完成开/关状态动作记录的两轮原生完整循环，均为专家 PASS，模型参数、原生轨迹 CSV 和动画二进制逐字节一致。图像采集 PASS 与专家 PASS 独立判定，预览/缺帧/中断不能标为训练样本。
+
+见[采集说明、字段、相机安装与命令](docs/VLA_CAPTURE.md)、[安装位置与样例证据](evidence/vla_capture_20261021/)、[原生接口调查](docs/VLA_CAPTURE_DESIGN.md)。大体积图片留在本机 `runs/`。
+
 ## 独立专家策略架构（2026-10-08）
 
 抬轮策略已迁入 `src/ddevsim/strategies/wheel_lift/`，旧命令保留；控制配置通过实例传入，不再运行时修改全局 CFG。浅坑策略拥有独立 `strategies/shallow_press/`、配置与单侧/宽坑场景模板，控制律尚未实现。两者共用当前调参 I_I 车辆版本、原生求解和显示基础设施；每次运行独占模型/输出/显示资源。

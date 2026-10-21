@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "criteria": {
+    "expert_pass": true,
+    "collection_pass": true,
+    "full_episode": true,
+    "strictly_increasing": true,
+    "maximum_gap": true,
+    "start_covered": true,
+    "end_covered": true,
+    "history_unchanged": true,
+    "record_count": true
+  },
+  "frame_groups": 783,
+  "rgb_images": 3915,
+  "maximum_gap_s": 0.1446026699999976
+}

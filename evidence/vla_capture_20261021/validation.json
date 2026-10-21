@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-21",
+  "status": "PASS",
+  "baseline_off": "runs\\wheel_lift\\seed_repeat\\vla_off_20261020",
+  "recording_on": "runs\\wheel_lift\\seed_repeat\\vla_on_20261021",
+  "off_status": "PASS",
+  "on_status": "PASS",
+  "same_dynamics": {
+    "native_5ms.csv": {
+      "off_sha256": "a76a859eb4fee23f8e9fd742e253a9a8a38493e2ddc41c2b938d0971161aa446",
+      "on_sha256": "a76a859eb4fee23f8e9fd742e253a9a8a38493e2ddc41c2b938d0971161aa446",
+      "identical": true
+    },
+    "model/run_all.par": {
+      "off_sha256": "1e51e0a92f0c16dcbd2cd8f52658e8f24bc2fcb465ae7067c6ccc2bd3334bacb",
+      "on_sha256": "1e51e0a92f0c16dcbd2cd8f52658e8f24bc2fcb465ae7067c6ccc2bd3334bacb",
+      "identical": true
+    },
+    "model/output/contact_mpc_stationary_probe.vsb": {
+      "off_sha256": "45a79ff19ceb47862d62a3b0025d270b10f709c33a24bd75643d62ddec0216d9",
+      "on_sha256": "45a79ff19ceb47862d62a3b0025d270b10f709c33a24bd75643d62ddec0216d9",
+      "identical": true
+    }
+  },
+  "scope": "fixed tuned I_I seed_repeat; recording does not modify commands; native two-pass rendering",
+  "episode": "runs\\wheel_lift\\seed_repeat\\vla_on_20261021\\demonstration\\episode_body_mounted",
+  "image_collection": "PASS",
+  "frame_groups": 783,
+  "rgb_images": 3915,
+  "maximum_gap_s": 0.1446026699999976,
+  "achieved_fps": 10.00639795265515,
+  "first_time_s": 0.0,
+  "last_time_s": 78.15,
+  "full_test_log": "tmp/vla_final_tests_verified.txt"
+}

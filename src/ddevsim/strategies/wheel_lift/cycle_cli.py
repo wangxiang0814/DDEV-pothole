@@ -60,6 +60,7 @@ def _write_rows(path: Path, rows: list[dict]) -> None:
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--demonstration-config', type=Path)
     parser.add_argument('--claimed-output', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast", "compact", "efficient"),
@@ -124,6 +125,10 @@ def main(argv=None) -> None:
     parser.add_argument("--road-friction", type=float)
     parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
     args = parser.parse_args(argv)
+    capture_enabled = False
+    if args.demonstration_config:
+        from ddevsim.demonstration.cameras import load_config
+        capture_enabled = load_config(args.demonstration_config)['enabled']
     if args.support_allocation_environment_reference is not None:
         if args.support_allocation_reference_model is not None or args.support_allocation_gains is None:
             parser.error('environment reference requires gains and cannot combine with pit-scene transfer')
@@ -360,6 +365,7 @@ def main(argv=None) -> None:
                           output / "native_5ms.csv",
                           (*front_run.IMPORT_NAMES, STEERING_IMPORT),
                           front_run.EXPORTS, log_decimation=10,
+                          demonstration_dir=(output / 'demonstration' if capture_enabled else None),
                           stop_at_s=args.stop_at,
                           stop_when=(lambda now_s: (
                               (controller.front.mode == "COMPLETE" and

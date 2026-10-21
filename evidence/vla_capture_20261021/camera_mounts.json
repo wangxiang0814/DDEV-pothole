@@ -1,0 +1,102 @@
+{
+  "front": {
+    "surface_anchor_body_m": [
+      0.20611028571428563,
+      0,
+      1.55
+    ],
+    "lens_position_body_m": [
+      0.22611,
+      0,
+      1.55
+    ],
+    "standoff_m": 0.01999971428571437,
+    "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\body.obj",
+    "asset_sha256": "bc6fee92248f3e201fcc763ad8fc8c747a18f87bc735553a5bb9dd024816b63b",
+    "asset_offset_m": [
+      0.0,
+      0.0,
+      0.263
+    ]
+  },
+  "wheel_FL": {
+    "surface_anchor_body_m": [
+      0,
+      0.7573962406015038,
+      0.6
+    ],
+    "lens_position_body_m": [
+      0,
+      0.777396,
+      0.6
+    ],
+    "standoff_m": 0.019999759398496186,
+    "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\body.obj",
+    "asset_sha256": "bc6fee92248f3e201fcc763ad8fc8c747a18f87bc735553a5bb9dd024816b63b",
+    "asset_offset_m": [
+      0.0,
+      0.0,
+      0.263
+    ]
+  },
+  "wheel_FR": {
+    "surface_anchor_body_m": [
+      0,
+      -0.7573962406015038,
+      0.6
+    ],
+    "lens_position_body_m": [
+      0,
+      -0.777396,
+      0.6
+    ],
+    "standoff_m": 0.019999759398496186,
+    "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\body.obj",
+    "asset_sha256": "bc6fee92248f3e201fcc763ad8fc8c747a18f87bc735553a5bb9dd024816b63b",
+    "asset_offset_m": [
+      0.0,
+      0.0,
+      0.263
+    ]
+  },
+  "wheel_RL": {
+    "surface_anchor_body_m": [
+      -1.925,
+      0.7172,
+      0.6
+    ],
+    "lens_position_body_m": [
+      -1.925,
+      0.7372,
+      0.6
+    ],
+    "standoff_m": 0.020000000000000018,
+    "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\bed.obj",
+    "asset_sha256": "1a5840987666cd7f176b1e65dedd22b1db50dec9f76a6fd08bcaca0b45feaf53",
+    "asset_offset_m": [
+      -0.58,
+      0.0,
+      0.263
+    ]
+  },
+  "wheel_RR": {
+    "surface_anchor_body_m": [
+      -1.925,
+      -0.705,
+      0.6
+    ],
+    "lens_position_body_m": [
+      -1.925,
+      -0.725,
+      0.6
+    ],
+    "standoff_m": 0.020000000000000018,
+    "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\bed.obj",
+    "asset_sha256": "1a5840987666cd7f176b1e65dedd22b1db50dec9f76a6fd08bcaca0b45feaf53",
+    "asset_offset_m": [
+      -0.58,
+      0.0,
+      0.263
+    ]
+  }
+}

@@ -36,6 +36,7 @@ def run_stepwise(
     log_decimation: int = 20,
     stop_at_s: float | None = None,
     stop_when: Callable[[float], bool] | None = None,
+    demonstration_dir: Path | None = None,
 ) -> Dict[str, Any]:
     """Integrate a TruckSim case step by step with an external controller.
 
@@ -62,6 +63,18 @@ def run_stepwise(
     stopped_when = False
     initialized = False
     terminated = False
+    recorder = None
+    recording_error = None
+
+    def disable_recorder(exc):
+        nonlocal recorder, recording_error
+        recording_error = repr(exc)
+        if recorder is not None:
+            try:
+                recorder.close()
+            except Exception:
+                pass
+        recorder = None
     try:
         dll = ctypes.cdll.LoadLibrary(str(dll_path))
         dll.vs_set_opt_error_dialog.argtypes = [ctypes.c_int]
@@ -98,6 +111,12 @@ def run_stepwise(
         imports = (ctypes.c_double * n_import.value)()
         exports = (ctypes.c_double * n_export.value)()
         dll.vs_copy_export_vars(exports)
+        if demonstration_dir is not None:
+            try:
+                from .demonstration.recording import TransitionRecorder
+                recorder = TransitionRecorder(demonstration_dir, import_names, export_names)
+            except Exception as exc:
+                disable_recorder(exc)
         t_current = t_start.value
         limit_s = t_stop.value if stop_at_s is None else min(t_stop.value, float(stop_at_s))
         if limit_s <= t_start.value:
@@ -109,12 +128,18 @@ def run_stepwise(
             step_index = 0
             status = 0
             while status == 0 and t_current < limit_s:
+                t_before = t_current
                 t_current = min(limit_s, t_current + t_step.value)
                 values = tuple(float(value) for value in command(t_current, tuple(exports)))
                 if len(values) != n_import.value:
                     raise ValueError("command returned %d values, expected %d" % (len(values), n_import.value))
                 for index, value in enumerate(values):
                     imports[index] = value
+                if recorder is not None:
+                    try:
+                        recorder.append(t_before, t_current, tuple(exports), values)
+                    except Exception as exc:
+                        disable_recorder(exc)
                 status = int(dll.vs_integrate_io(ctypes.c_double(t_current), imports, exports))
                 if step_index % max(1, log_decimation) == 0 or status != 0:
                     row = {"time_s": "%.9g" % t_current}
@@ -126,6 +151,11 @@ def run_stepwise(
                 if status == 0 and stop_when is not None and stop_when(t_current):
                     stopped_when = True
                     break
+        if recorder is not None:
+            try:
+                recorder.finish(t_current, tuple(exports))
+            except Exception as exc:
+                disable_recorder(exc)
         dll.vs_terminate_run(ctypes.c_double(t_current))
         terminated = True
         reached_limit = t_current >= limit_s - 1.5 * t_step.value
@@ -145,9 +175,18 @@ def run_stepwise(
             "rows_written": rows_written,
             "csv": str(csv_path),
             "error_message": _decode_message(dll.vs_get_error_message()),
+            **({'demonstration_recording': {
+                'status': 'ERROR' if recording_error else 'COMPLETE',
+                'error': recording_error}} if demonstration_dir is not None else {}),
         }
     finally:
         try:
+            if recorder is not None:
+                try:
+                    recorder.close()
+                except Exception:
+                    # Recording cleanup must never skip native termination.
+                    pass
             if initialized and not terminated:
                 dll.vs_terminate_run(ctypes.c_double(t_current))
         finally:

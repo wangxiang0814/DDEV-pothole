@@ -1,0 +1,716 @@
+{
+  "schema_version": 1,
+  "collection_status": "PASS",
+  "trainable": true,
+  "source_run": "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\wheel_lift\\seed_repeat\\vla_on_20261021",
+  "strategy_id": "wheel_lift",
+  "task_instruction": "保持车身稳定并直行，依次抬起右前轮和右后轮越过右侧深坑，停车后安全落轮。",
+  "expert_status": "PASS",
+  "expert_criteria": {
+    "native_completed": true,
+    "fr_stage_pass": true,
+    "rr_fsm_complete": true,
+    "rr_no_abort": true,
+    "rr_no_sustained_feedback_saturation": true,
+    "rr_forces_within_sim_limits": true,
+    "rr_hold_at_least_5_s": true,
+    "rr_hold_unloaded": true,
+    "rr_support_loaded": true,
+    "rr_zmp_safe": true,
+    "rr_com_safe": true,
+    "rr_clear_over_pit": true,
+    "rr_pit_speed": true,
+    "rr_straight": true,
+    "rr_stopped_before_lowering": true,
+    "rr_recovery_attitude_safe": true,
+    "rr_recovery_support_loaded": true,
+    "rr_recovery_travel_safe": true,
+    "rr_recovery_straight": true,
+    "rr_recovery_stopped_on_solid_ground": true,
+    "four_wheel_recovered": true
+  },
+  "scene": {
+    "start_station_m": 101.1,
+    "length_m": 0.8,
+    "width_m": 0.9,
+    "depth_m": 0.2,
+    "friction": 0.6,
+    "vehicle_start_offset_m": 0.3,
+    "approach_distance_m": 1.7000000000000028
+  },
+  "config": {
+    "enabled": true,
+    "schema_version": 1,
+    "backend": "native_history_shared_buffer",
+    "fps": 10,
+    "playback_speed": 0.1,
+    "max_gap_s": 0.2,
+    "start_end_tolerance_s": 0.15,
+    "frame_timeout_s": 30,
+    "connection_timeout_s": 45,
+    "task_instruction": "保持车身稳定并直行，依次抬起右前轮和右后轮越过右侧深坑，停车后安全落轮。",
+    "cameras": [
+      {
+        "name": "front",
+        "position_m": [
+          0.22611,
+          0,
+          1.55
+        ],
+        "yaw_pitch_roll_deg": [
+          0,
+          22,
+          0
+        ],
+        "horizontal_fov_deg": 90,
+        "width": 640,
+        "height": 480,
+        "mount": {
+          "surface_asset": "body.obj",
+          "asset_offset_m": [
+            0,
+            0,
+            0.263
+          ],
+          "surface_axis": 0,
+          "outward_sign": 1,
+          "lens_standoff_m": 0.02,
+          "max_standoff_m": 0.025
+        },
+        "clip_near_m": 0.005,
+        "clip_far_m": 200
+      },
+      {
+        "name": "wheel_FL",
+        "position_m": [
+          0,
+          0.777396,
+          0.6
+        ],
+        "yaw_pitch_roll_deg": [
+          90,
+          85,
+          0
+        ],
+        "horizontal_fov_deg": 100,
+        "width": 640,
+        "height": 480,
+        "mount": {
+          "surface_asset": "body.obj",
+          "asset_offset_m": [
+            0,
+            0,
+            0.263
+          ],
+          "surface_axis": 1,
+          "outward_sign": 1,
+          "lens_standoff_m": 0.02,
+          "max_standoff_m": 0.025
+        },
+        "clip_near_m": 0.005,
+        "clip_far_m": 200
+      },
+      {
+        "name": "wheel_FR",
+        "position_m": [
+          0,
+          -0.777396,
+          0.6
+        ],
+        "yaw_pitch_roll_deg": [
+          -90,
+          85,
+          0
+        ],
+        "horizontal_fov_deg": 100,
+        "width": 640,
+        "height": 480,
+        "mount": {
+          "surface_asset": "body.obj",
+          "asset_offset_m": [
+            0,
+            0,
+            0.263
+          ],
+          "surface_axis": 1,
+          "outward_sign": -1,
+          "lens_standoff_m": 0.02,
+          "max_standoff_m": 0.025
+        },
+        "clip_near_m": 0.005,
+        "clip_far_m": 200
+      },
+      {
+        "name": "wheel_RL",
+        "position_m": [
+          -1.925,
+          0.7372,
+          0.6
+        ],
+        "yaw_pitch_roll_deg": [
+          90,
+          85,
+          0
+        ],
+        "horizontal_fov_deg": 100,
+        "width": 640,
+        "height": 480,
+        "mount": {
+          "surface_asset": "bed.obj",
+          "asset_offset_m": [
+            -0.58,
+            0,
+            0.263
+          ],
+          "surface_axis": 1,
+          "outward_sign": 1,
+          "lens_standoff_m": 0.02,
+          "max_standoff_m": 0.025
+        },
+        "clip_near_m": 0.005,
+        "clip_far_m": 200
+      },
+      {
+        "name": "wheel_RR",
+        "position_m": [
+          -1.925,
+          -0.725,
+          0.6
+        ],
+        "yaw_pitch_roll_deg": [
+          -90,
+          85,
+          0
+        ],
+        "horizontal_fov_deg": 100,
+        "width": 640,
+        "height": 480,
+        "mount": {
+          "surface_asset": "bed.obj",
+          "asset_offset_m": [
+            -0.58,
+            0,
+            0.263
+          ],
+          "surface_axis": 1,
+          "outward_sign": -1,
+          "lens_standoff_m": 0.02,
+          "max_standoff_m": 0.025
+        },
+        "clip_near_m": 0.005,
+        "clip_far_m": 200
+      }
+    ]
+  },
+  "source_hashes": {
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\wheel_lift\\seed_repeat\\vla_on_20261021\\model\\output\\contact_mpc_stationary_probe.vs": "b7cc3d04be4885b4bc1fee9198b66bd3ba21531d020a646cd6743619ff688d58",
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\wheel_lift\\seed_repeat\\vla_on_20261021\\model\\output\\contact_mpc_stationary_probe.vsb": "45a79ff19ceb47862d62a3b0025d270b10f709c33a24bd75643d62ddec0216d9",
+    "F:\\1tongji\\1 分布式电驱\\Research\\TruckSim仿真\\runs\\wheel_lift\\seed_repeat\\vla_on_20261021\\model\\output\\contact_mpc_stationary_probe_all.par": "1e51e0a92f0c16dcbd2cd8f52658e8f24bc2fcb465ae7067c6ccc2bd3334bacb"
+  },
+  "surface_mount_verification": {
+    "front": {
+      "surface_anchor_body_m": [
+        0.20611028571428563,
+        0,
+        1.55
+      ],
+      "lens_position_body_m": [
+        0.22611,
+        0,
+        1.55
+      ],
+      "standoff_m": 0.01999971428571437,
+      "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\body.obj",
+      "asset_sha256": "bc6fee92248f3e201fcc763ad8fc8c747a18f87bc735553a5bb9dd024816b63b",
+      "asset_offset_m": [
+        0.0,
+        0.0,
+        0.263
+      ]
+    },
+    "wheel_FL": {
+      "surface_anchor_body_m": [
+        0,
+        0.7573962406015038,
+        0.6
+      ],
+      "lens_position_body_m": [
+        0,
+        0.777396,
+        0.6
+      ],
+      "standoff_m": 0.019999759398496186,
+      "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\body.obj",
+      "asset_sha256": "bc6fee92248f3e201fcc763ad8fc8c747a18f87bc735553a5bb9dd024816b63b",
+      "asset_offset_m": [
+        0.0,
+        0.0,
+        0.263
+      ]
+    },
+    "wheel_FR": {
+      "surface_anchor_body_m": [
+        0,
+        -0.7573962406015038,
+        0.6
+      ],
+      "lens_position_body_m": [
+        0,
+        -0.777396,
+        0.6
+      ],
+      "standoff_m": 0.019999759398496186,
+      "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\body.obj",
+      "asset_sha256": "bc6fee92248f3e201fcc763ad8fc8c747a18f87bc735553a5bb9dd024816b63b",
+      "asset_offset_m": [
+        0.0,
+        0.0,
+        0.263
+      ]
+    },
+    "wheel_RL": {
+      "surface_anchor_body_m": [
+        -1.925,
+        0.7172,
+        0.6
+      ],
+      "lens_position_body_m": [
+        -1.925,
+        0.7372,
+        0.6
+      ],
+      "standoff_m": 0.020000000000000018,
+      "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\bed.obj",
+      "asset_sha256": "1a5840987666cd7f176b1e65dedd22b1db50dec9f76a6fd08bcaca0b45feaf53",
+      "asset_offset_m": [
+        -0.58,
+        0.0,
+        0.263
+      ]
+    },
+    "wheel_RR": {
+      "surface_anchor_body_m": [
+        -1.925,
+        -0.705,
+        0.6
+      ],
+      "lens_position_body_m": [
+        -1.925,
+        -0.725,
+        0.6
+      ],
+      "standoff_m": 0.020000000000000018,
+      "asset": "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Animator\\3D_Shape_Files\\Trucks\\LD_Utility_Truck\\bed.obj",
+      "asset_sha256": "1a5840987666cd7f176b1e65dedd22b1db50dec9f76a6fd08bcaca0b45feaf53",
+      "asset_offset_m": [
+        -0.58,
+        0.0,
+        0.263
+      ]
+    }
+  },
+  "preview_only": false,
+  "provenance_hashes": {
+    "demonstration\\transitions.bin": "c2e2bab68c86b9e565bb85e70ac9bee8ce7f8f3daba82d365b65d30a09b9ab97",
+    "demonstration\\transitions.json": "8a0971d9d3966d9ff645be604a14fbf61f7554e1714e6b65b5c99de59c8c7895",
+    "result.json": "23a13b415179d90e6b2555cecc4433c40486e261a2f119c70879fc2a67470552",
+    "model\\run_all.par": "1e51e0a92f0c16dcbd2cd8f52658e8f24bc2fcb465ae7067c6ccc2bd3334bacb",
+    "control_config.json": "b9e2a864c175484fa7394cc67c5655d0d3835aeca263779ad79e69ea35bb3132"
+  },
+  "capture_backend": "VS Visualizer native history + VS Shared Buffer API v2",
+  "capture_mode": "post-run rendering; simulation-time joined",
+  "state_source": {
+    "version": 1,
+    "dtype": "<f8",
+    "columns": [
+      "observation_time_s",
+      "action_end_time_s",
+      "Vx",
+      "Roll_E",
+      "Pitch",
+      "Yaw",
+      "AVx",
+      "AVy",
+      "AVz",
+      "Ax",
+      "Ay",
+      "Az",
+      "AVy_L1",
+      "AVy_R1",
+      "AVy_L2",
+      "AVy_R2",
+      "Jnc_L1",
+      "Jnc_R1",
+      "Jnc_L2",
+      "Jnc_R2",
+      "JncR_L1",
+      "JncR_R1",
+      "JncR_L2",
+      "JncR_R2",
+      "FsExt_L1",
+      "FsExt_R1",
+      "FsExt_L2",
+      "FsExt_R2",
+      "IMP_MYUSM_L1",
+      "IMP_MYUSM_R1",
+      "IMP_MYUSM_L2",
+      "IMP_MYUSM_R2",
+      "IMP_FS_L1",
+      "IMP_FS_R1",
+      "IMP_FS_L2",
+      "IMP_FS_R2",
+      "IMP_STEER_SW"
+    ],
+    "sensors": [
+      "Vx",
+      "Roll_E",
+      "Pitch",
+      "Yaw",
+      "AVx",
+      "AVy",
+      "AVz",
+      "Ax",
+      "Ay",
+      "Az",
+      "AVy_L1",
+      "AVy_R1",
+      "AVy_L2",
+      "AVy_R2",
+      "Jnc_L1",
+      "Jnc_R1",
+      "Jnc_L2",
+      "Jnc_R2",
+      "JncR_L1",
+      "JncR_R1",
+      "JncR_L2",
+      "JncR_R2",
+      "FsExt_L1",
+      "FsExt_R1",
+      "FsExt_L2",
+      "FsExt_R2"
+    ],
+    "actions": [
+      "IMP_MYUSM_L1",
+      "IMP_MYUSM_R1",
+      "IMP_MYUSM_L2",
+      "IMP_MYUSM_R2",
+      "IMP_FS_L1",
+      "IMP_FS_R1",
+      "IMP_FS_L2",
+      "IMP_FS_R2",
+      "IMP_STEER_SW"
+    ],
+    "units": {
+      "Vx": {
+        "native_unit": "km/h",
+        "si_unit": "m/s",
+        "si_factor": 0.2777777777777778
+      },
+      "Roll_E": {
+        "native_unit": "deg",
+        "si_unit": "rad",
+        "si_factor": 0.017453292519943295
+      },
+      "Pitch": {
+        "native_unit": "deg",
+        "si_unit": "rad",
+        "si_factor": 0.017453292519943295
+      },
+      "Yaw": {
+        "native_unit": "deg",
+        "si_unit": "rad",
+        "si_factor": 0.017453292519943295
+      },
+      "AVx": {
+        "native_unit": "deg/s",
+        "si_unit": "rad/s",
+        "si_factor": 0.017453292519943295
+      },
+      "AVy": {
+        "native_unit": "deg/s",
+        "si_unit": "rad/s",
+        "si_factor": 0.017453292519943295
+      },
+      "AVz": {
+        "native_unit": "deg/s",
+        "si_unit": "rad/s",
+        "si_factor": 0.017453292519943295
+      },
+      "Ax": {
+        "native_unit": "g",
+        "si_unit": "m/s^2",
+        "si_factor": 9.80665
+      },
+      "Ay": {
+        "native_unit": "g",
+        "si_unit": "m/s^2",
+        "si_factor": 9.80665
+      },
+      "Az": {
+        "native_unit": "g",
+        "si_unit": "m/s^2",
+        "si_factor": 9.80665
+      },
+      "AVy_L1": {
+        "native_unit": "rpm",
+        "si_unit": "rad/s",
+        "si_factor": 0.10471975511965977
+      },
+      "AVy_R1": {
+        "native_unit": "rpm",
+        "si_unit": "rad/s",
+        "si_factor": 0.10471975511965977
+      },
+      "AVy_L2": {
+        "native_unit": "rpm",
+        "si_unit": "rad/s",
+        "si_factor": 0.10471975511965977
+      },
+      "AVy_R2": {
+        "native_unit": "rpm",
+        "si_unit": "rad/s",
+        "si_factor": 0.10471975511965977
+      },
+      "Jnc_L1": {
+        "native_unit": "mm",
+        "si_unit": "m",
+        "si_factor": 0.001
+      },
+      "Jnc_R1": {
+        "native_unit": "mm",
+        "si_unit": "m",
+        "si_factor": 0.001
+      },
+      "Jnc_L2": {
+        "native_unit": "mm",
+        "si_unit": "m",
+        "si_factor": 0.001
+      },
+      "Jnc_R2": {
+        "native_unit": "mm",
+        "si_unit": "m",
+        "si_factor": 0.001
+      },
+      "JncR_L1": {
+        "native_unit": "mm/s",
+        "si_unit": "m/s",
+        "si_factor": 0.001
+      },
+      "JncR_R1": {
+        "native_unit": "mm/s",
+        "si_unit": "m/s",
+        "si_factor": 0.001
+      },
+      "JncR_L2": {
+        "native_unit": "mm/s",
+        "si_unit": "m/s",
+        "si_factor": 0.001
+      },
+      "JncR_R2": {
+        "native_unit": "mm/s",
+        "si_unit": "m/s",
+        "si_factor": 0.001
+      },
+      "FsExt_L1": {
+        "native_unit": "N",
+        "si_unit": "N",
+        "si_factor": 1.0
+      },
+      "FsExt_R1": {
+        "native_unit": "N",
+        "si_unit": "N",
+        "si_factor": 1.0
+      },
+      "FsExt_L2": {
+        "native_unit": "N",
+        "si_unit": "N",
+        "si_factor": 1.0
+      },
+      "FsExt_R2": {
+        "native_unit": "N",
+        "si_unit": "N",
+        "si_factor": 1.0
+      },
+      "IMP_MYUSM_L1": {
+        "native_unit": "N-m",
+        "si_unit": "N*m",
+        "si_factor": 1.0
+      },
+      "IMP_MYUSM_R1": {
+        "native_unit": "N-m",
+        "si_unit": "N*m",
+        "si_factor": 1.0
+      },
+      "IMP_MYUSM_L2": {
+        "native_unit": "N-m",
+        "si_unit": "N*m",
+        "si_factor": 1.0
+      },
+      "IMP_MYUSM_R2": {
+        "native_unit": "N-m",
+        "si_unit": "N*m",
+        "si_factor": 1.0
+      },
+      "IMP_FS_L1": {
+        "native_unit": "N",
+        "si_unit": "N",
+        "si_factor": 1.0
+      },
+      "IMP_FS_R1": {
+        "native_unit": "N",
+        "si_unit": "N",
+        "si_factor": 1.0
+      },
+      "IMP_FS_L2": {
+        "native_unit": "N",
+        "si_unit": "N",
+        "si_factor": 1.0
+      },
+      "IMP_FS_R2": {
+        "native_unit": "N",
+        "si_unit": "N",
+        "si_factor": 1.0
+      },
+      "IMP_STEER_SW": {
+        "native_unit": "deg",
+        "si_unit": "rad",
+        "si_factor": 0.017453292519943295
+      }
+    },
+    "unavailable_sensors": [
+      "Vy"
+    ],
+    "observation_source": "plant_truth_sensor_like_channels; no added sensor noise",
+    "action_semantics": "actual command submitted to vs_integrate_io over (observation_time, action_end_time]",
+    "policy_excluded": "global CoM/contact geometry/wheel loads/FSM/scene ground truth",
+    "wheel_order": [
+      "FL",
+      "FR",
+      "RL",
+      "RR"
+    ],
+    "complete": true,
+    "count": 156322,
+    "final_time_s": 78.16100000019118,
+    "final_observation": [
+      5.3637425939274074e-05,
+      -1.7791892786877215,
+      0.1950889460811516,
+      -0.955012185436528,
+      0.09477978780176356,
+      -0.0001129075886922707,
+      -0.060108966186123006,
+      0.00031097426197805594,
+      0.0010402081814897002,
+      7.979852953624757e-05,
+      7.361414967370848e-05,
+      -0.0009873597047740039,
+      0.0001905036480556989,
+      -0.0002901647423678175,
+      54.846039645261065,
+      19.127983207423263,
+      47.9159589240583,
+      13.001830350338274,
+      -0.8144530190364855,
+      0.7297046006402028,
+      -0.4743391623739761,
+      0.37906475205216716,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "initial_state_si": {
+    "Vx": 0.0,
+    "Roll_E": 0.0,
+    "Pitch": 0.010648023378853629,
+    "Yaw": 0.0,
+    "AVx": 0.0,
+    "AVy": 0.0,
+    "AVz": 0.0,
+    "Ax": 0.00023240667116214094,
+    "Ay": -1.6920230716349953e-05,
+    "Az": -0.038535723815685104,
+    "AVy_L1": 0.0,
+    "AVy_R1": 0.0,
+    "AVy_L2": 0.0,
+    "AVy_R2": 0.0,
+    "Jnc_L1": 0.06602429729580915,
+    "Jnc_R1": 0.06602429729580915,
+    "Jnc_L2": 0.04552607758686777,
+    "Jnc_R2": 0.04552607758686777,
+    "JncR_L1": 0.0,
+    "JncR_R1": 0.0,
+    "JncR_L2": 0.0,
+    "JncR_R2": 0.0,
+    "FsExt_L1": 0.0,
+    "FsExt_R1": 0.0,
+    "FsExt_L2": 0.0,
+    "FsExt_R2": 0.0
+  },
+  "coordinate_systems": {
+    "world_body_native": "x forward, y left, z up; metres; body origin Xo/Yo/Zo",
+    "body_extrinsics": "translation followed by intrinsic yaw-pitch-roll, degrees",
+    "camera_native": "x optical forward, y left, z up",
+    "camera_optical": "x right=-native_y, y down=-native_z, z forward=native_x",
+    "pixels": "RGB uint8, top-left origin; integer pixel-centre coordinates",
+    "distortion": "ideal pinhole; zero distortion"
+  },
+  "timing": {
+    "image_time": "native mFrameSimTime",
+    "state": "linear interpolation between solver-step sensor observations",
+    "action": "actual input held for containing solver interval",
+    "render_pose": "native history linear interpolation; original XStep retained",
+    "native_history_step_s": 0.025,
+    "requested_fps": 10
+  },
+  "action_conventions": {
+    "wheel_order": [
+      "FL",
+      "FR",
+      "RL",
+      "RR"
+    ],
+    "torque": "IMP_MYUSM_* signed external wheel moment, N*m; native sign retained",
+    "force": "IMP_FS_* signed ADD spring-seat force, N; positive adds spring force; not a height target",
+    "steering": "IMP_STEER_SW steering-wheel angle, rad in SI record; not road-wheel angle; native deg sign retained",
+    "reference": "IO_MAPPING.md and repository unit/interface validation"
+  },
+  "quality_criteria": {
+    "five_cameras_all_samples": true,
+    "source_history_unchanged": true,
+    "start_covered": true,
+    "end_covered": true,
+    "cadence_gap": true,
+    "body_mounts_verified": true
+  },
+  "frame_groups": 783,
+  "total_rgb_images": 3915,
+  "first_time_s": 0.0,
+  "last_time_s": 78.15,
+  "maximum_gap_s": 0.1446026699999976,
+  "achieved_fps": 10.00639795265515,
+  "phases": [
+    "CRAWL",
+    "INIT_SETTLE",
+    "LIFTING",
+    "LOWERING",
+    "PRELOAD_SHIFT",
+    "RETURN_TO_FOUR_WHEEL",
+    "RR_COMPLETE",
+    "RR_CRAWL",
+    "RR_HOLD",
+    "RR_LIFTING",
+    "RR_LOWERING",
+    "RR_POSTURE",
+    "RR_PRELOAD",
+    "RR_RETURN",
+    "RR_SETTLE",
+    "RR_STOP",
+    "STOP",
+    "THREE_WHEEL_HOLD"
+  ],
+  "max_mount_error_m": 8.819920810019547e-05,
+  "rejected_poll_groups": 15863
+}

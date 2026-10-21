@@ -23,6 +23,8 @@ def main(argv=None):
     parser.add_argument('--manifest', type=Path)
     parser.add_argument('--reference-model', type=Path)
     parser.add_argument('--dry-run', action='store_true')
+    parser.add_argument('--demonstration-config', type=Path,
+                        help='optional five-camera demonstration configuration')
     args = parser.parse_args(argv)
     if not load_strategy(args.strategy).implemented:
         parser.error('shallow_press control law is not implemented; use prepare_strategy_case.py to prepare scenes')
@@ -40,6 +42,10 @@ def main(argv=None):
     except ValueError as exc:
         parser.error(str(exc))
     command.append('--claimed-output')
+    if args.demonstration_config:
+        from ddevsim.demonstration.cameras import load_config
+        capture_config = load_config(args.demonstration_config)
+        command += ['--demonstration-config', str(args.demonstration_config.resolve())]
     record = {'strategy_id': args.strategy, 'case_id': args.case, 'run_id': run_id,
               'output': str(proposed), 'argv': command, 'manifest_sha256': sha256_file(path),
               'effective_options': {**manifest['common'], **manifest['cases'][args.case]['options']},
@@ -48,6 +54,9 @@ def main(argv=None):
               'solver_step_s': .0005, 'control_period_s': .02,
               'source_assets': {}, 'scope': manifest['scope']}
     options = record['effective_options']
+    if args.demonstration_config:
+        record['source_assets'][str(args.demonstration_config.resolve())] = sha256_file(args.demonstration_config)
+        record['demonstration_config'] = capture_config
     for name in ('support-allocation-gains', 'contact-gain-bundle'):
         if name in options:
             asset = ROOT / options[name]
@@ -76,6 +85,23 @@ def main(argv=None):
         write_run_manifest(run_dir, record)
     print('Run directory:', run_dir)
     print('Worker exit:', code, '(details in run.log)')
+    if args.demonstration_config and capture_config['enabled'] and (run_dir / 'result.json').exists():
+        from ddevsim.demonstration.capture import capture_episode
+        record = json.loads((run_dir / 'run_manifest.json').read_text(encoding='utf-8'))
+        try:
+            collected = capture_episode(run_dir, capture_config)
+            record['demonstration'] = {
+                'status': collected['collection_status'],
+                'trainable': collected['trainable'],
+                'episode': 'demonstration/episode/episode.json',
+            }
+            if collected['collection_status'] != 'PASS':
+                code = code or 2
+        except Exception as exc:
+            record['demonstration'] = {'status': 'ERROR', 'trainable': False, 'error': repr(exc)}
+            code = code or 2
+            print('Demonstration collection failed:', exc)
+        write_run_manifest(run_dir, record)
     return code
 
 
