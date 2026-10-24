@@ -2,8 +2,10 @@
 
 Scope: independent acquisition for the existing tuned I_I vehicle. No controller,
 plant, integration-step, acceptance-threshold or training-code changes.
-The installed shallow_press strategy is NOT_IMPLEMENTED; only wheel_lift can
-currently supply an accepted expert episode.
+The shallow_press research controller is implemented with its own worker and
+recording configuration; only wheel_lift currently supplies fully accepted
+expert episodes. A shallow SIMULATION_PASS or comparison plant is not a fully
+accepted, trainable episode. Strategy and plant identities travel with captures.
 
 ## Implementation plan and synchronization contract
 

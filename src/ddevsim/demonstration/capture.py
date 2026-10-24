@@ -32,7 +32,18 @@ def phase_rows(run):
         if path.exists():
             with path.open(encoding='utf-8', newline='') as src:
                 rows.extend((float(r['time_s']), r['mode']) for r in csv.DictReader(src))
+    path=run/'control_diagnostics.json'
+    if path.exists():
+        rows.extend((float(r['time_s']),r['phase']) for r in json.loads(path.read_text(encoding='utf-8')))
     return sorted(rows)
+
+
+def episode_identity(run,result):
+    manifest=run/'run_manifest.json'
+    record=json.loads(manifest.read_text(encoding='utf-8')) if manifest.exists() else {}
+    return dict(strategy_id=record.get('strategy_id',result.get('strategy_id','wheel_lift')),
+                scene=result.get('scene',result.get('scenario')),plant=result.get('plant',record.get('plant')),
+                input_provenance_sha256=result.get('input_provenance_sha256'))
 
 
 def preview_grid(frames, path, label):
@@ -93,9 +104,9 @@ def capture_episode(run_dir, config, *, capture_name='episode', preview_duration
         'WindowFullScreen=0\nDynamicShadowQuality=1\n' % cfg['playback_speed'], encoding='ascii')
     meta = {
         'schema_version': 1, 'collection_status': 'RUNNING', 'trainable': False,
-        'source_run': str(run), 'strategy_id': 'wheel_lift',
+        'source_run': str(run), **episode_identity(run,result),
         'task_instruction': cfg['task_instruction'], 'expert_status': result.get('status'),
-        'expert_criteria': result.get('criteria'), 'scene': result.get('scenario'),
+        'expert_criteria': result.get('criteria'),
         'config': cfg, 'source_hashes': original_hashes,
         'surface_mount_verification': mounts,
         'preview_only': preview_duration_s is not None,

@@ -1,11 +1,12 @@
 {
   "strategy_id": "shallow_press",
   "vehicle_profile_id": "tuned_ii_20261005",
-  "controller_status": "NOT_IMPLEMENTED",
+  "controller_status": "IMPLEMENTED_RESEARCH_NOT_FULLY_ACCEPTED",
   "control_period_s": 0.02,
   "scenes": {
     "right_track": "scenarios/shallow_press/right_track.json",
     "wide": "scenarios/shallow_press/wide.json"
   },
-  "scope": "Independent development boundary; pit dimensions must be explicit. No controller or PASS claim."
+  "scope": "Independent SI controller and worker; original plant retained, external tire comparison is explicitly unadopted. Real geometry/power unknown.",
+  "route": "PREVIEW_FEEDFORWARD_FEEDBACK"
 }

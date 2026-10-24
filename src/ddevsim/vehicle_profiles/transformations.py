@@ -4,9 +4,10 @@ from pathlib import Path
 import re
 
 def configure_crawl_text(content: str, tyre_low_speed_slip_m_s: float = .2) -> str:
-    # The stock Pacejka low-speed regularizer is 2 m/s: at a sub-1 km/h
-    # crawl it suppresses usable longitudinal tyre force.  This isolated
-    # simulation-only copy resolves slip at the intended speed instead.
+    # Compatibility note (native echo audit 2026-10-24): VLOW_* is in km/h.
+    # The historical argument name says m_s, but its value was written directly
+    # as native km/h. Preserve the original numeric recipe and all expert-one
+    # identities; new SI comparisons must explicitly convert in a new plant.
     for key in ("VLOW_KAPPA", "VLOW_ALPHA"):
         content, changed = re.subn(rf"(?m)^{key} 2$",
                                    f"{key} {tyre_low_speed_slip_m_s:g}",

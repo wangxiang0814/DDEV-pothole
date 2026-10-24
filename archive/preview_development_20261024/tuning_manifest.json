@@ -1,0 +1,19 @@
+{
+  "files": {
+    "configs/shallow_press/preview_candidate.json": "7627eecfd9ed6c2c6bac1ad00adae83c6adb5f7f01c4720d8f84a5927961d44b",
+    "configs/shallow_press/preview_development.json": "26fd5585ae2ff994bb9483c423d7abec783b2821407444c69b5c49a3ffa8bf67",
+    "configs/shallow_press/preview_dob.json": "165d9130a343e5c7b7dd2402bc5fec66e131798deaab2dbe0153d285101df61a",
+    "configs/shallow_press/preview_exit.json": "af2accecc260fd214689345c0f5a1101a76b12f64df7cdb305e037beb93bdbda",
+    "configs/shallow_press/preview_exit_lead.json": "fddcb733516021f0efb2804be1ff510941e0cab26b89fca4888fde5e154a09cc",
+    "configs/shallow_press/preview_grade.json": "4ba9235fa7a03fac6b44ad73512067940ec655d05700d45e85847963692444c2",
+    "configs/shallow_press/preview_motor200.json": "3cef8f6319761f5cd44bea5dc6fd96967a9bd21bbdaaf757b13ae48eb34d9460",
+    "configs/shallow_press/preview_motor40.json": "3c09a85ae5fe8156bd722c122b8d42b0cbb9aa0adfdbbcbfee3f415c6d31ea4f",
+    "configs/shallow_press/preview_motor400.json": "2d36e10be48274f5b31978df5a4ee1fe46be1fa53218431726d6657eb92a46ec",
+    "configs/shallow_press/preview_soft.json": "303da6822f91fd5a58ac8d088e7dfff0a59ec02c2bc6dd2aa29deafe4ea25c4a",
+    "configs/shallow_press/preview_speed_damping.json": "cc431d973b1020adf7e51d0d30d844bc6b77312b2d1d177fd891cf648802e3e9",
+    "configs/shallow_press/preview_support.json": "2069b4d40bbd1de88f5f923c67e97df2f9ac2eae55a46769135f3c93e73cc014",
+    "configs/shallow_press/preview_traction_dev.json": "4766e8b54b7a9b7e250ec949445767d221c8799d64eb6de01aeca11d871d8959",
+    "configs/shallow_press/preview_tuning.json": "4393475c0f711e3747d12500f92b65fb8702a40ebd37724e76b77031279ea409"
+  },
+  "archive_sha256": "3e8ab38a7014de9c62bb68c3f9bf16d5635141cf05fdf7e6c33dc9b70dd67948"
+}

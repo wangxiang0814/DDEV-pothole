@@ -1,0 +1,164 @@
+{
+  "enabled": true,
+  "schema_version": 1,
+  "backend": "native_history_shared_buffer",
+  "fps": 10,
+  "playback_speed": 0.1,
+  "max_gap_s": 0.2,
+  "start_end_tolerance_s": 0.15,
+  "frame_timeout_s": 30,
+  "connection_timeout_s": 45,
+  "task_instruction": "从坑前静止起步，协调四角主动悬架、四轮转矩和转向，沿目标轮迹平顺通过浅坑，前后轴依次驶出后停车。",
+  "cameras": [
+    {
+      "name": "front",
+      "position_m": [
+        0.22611,
+        0,
+        1.55
+      ],
+      "yaw_pitch_roll_deg": [
+        0,
+        22,
+        0
+      ],
+      "horizontal_fov_deg": 90,
+      "width": 640,
+      "height": 480,
+      "mount": {
+        "surface_asset": "body.obj",
+        "asset_offset_m": [
+          0,
+          0,
+          0.263
+        ],
+        "surface_axis": 0,
+        "outward_sign": 1,
+        "lens_standoff_m": 0.02,
+        "max_standoff_m": 0.025
+      },
+      "clip_near_m": 0.005,
+      "clip_far_m": 200
+    },
+    {
+      "name": "wheel_FL",
+      "position_m": [
+        0,
+        0.777396,
+        0.6
+      ],
+      "yaw_pitch_roll_deg": [
+        90,
+        85,
+        0
+      ],
+      "horizontal_fov_deg": 100,
+      "width": 640,
+      "height": 480,
+      "mount": {
+        "surface_asset": "body.obj",
+        "asset_offset_m": [
+          0,
+          0,
+          0.263
+        ],
+        "surface_axis": 1,
+        "outward_sign": 1,
+        "lens_standoff_m": 0.02,
+        "max_standoff_m": 0.025
+      },
+      "clip_near_m": 0.005,
+      "clip_far_m": 200
+    },
+    {
+      "name": "wheel_FR",
+      "position_m": [
+        0,
+        -0.777396,
+        0.6
+      ],
+      "yaw_pitch_roll_deg": [
+        -90,
+        85,
+        0
+      ],
+      "horizontal_fov_deg": 100,
+      "width": 640,
+      "height": 480,
+      "mount": {
+        "surface_asset": "body.obj",
+        "asset_offset_m": [
+          0,
+          0,
+          0.263
+        ],
+        "surface_axis": 1,
+        "outward_sign": -1,
+        "lens_standoff_m": 0.02,
+        "max_standoff_m": 0.025
+      },
+      "clip_near_m": 0.005,
+      "clip_far_m": 200
+    },
+    {
+      "name": "wheel_RL",
+      "position_m": [
+        -1.925,
+        0.7372,
+        0.6
+      ],
+      "yaw_pitch_roll_deg": [
+        90,
+        85,
+        0
+      ],
+      "horizontal_fov_deg": 100,
+      "width": 640,
+      "height": 480,
+      "mount": {
+        "surface_asset": "bed.obj",
+        "asset_offset_m": [
+          -0.58,
+          0,
+          0.263
+        ],
+        "surface_axis": 1,
+        "outward_sign": 1,
+        "lens_standoff_m": 0.02,
+        "max_standoff_m": 0.025
+      },
+      "clip_near_m": 0.005,
+      "clip_far_m": 200
+    },
+    {
+      "name": "wheel_RR",
+      "position_m": [
+        -1.925,
+        -0.725,
+        0.6
+      ],
+      "yaw_pitch_roll_deg": [
+        -90,
+        85,
+        0
+      ],
+      "horizontal_fov_deg": 100,
+      "width": 640,
+      "height": 480,
+      "mount": {
+        "surface_asset": "bed.obj",
+        "asset_offset_m": [
+          -0.58,
+          0,
+          0.263
+        ],
+        "surface_axis": 1,
+        "outward_sign": -1,
+        "lens_standoff_m": 0.02,
+        "max_standoff_m": 0.025
+      },
+      "clip_near_m": 0.005,
+      "clip_far_m": 200
+    }
+  ]
+}

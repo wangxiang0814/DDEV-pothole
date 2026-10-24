@@ -1,10 +1,18 @@
 # TruckSim–Python 四角独立悬架研究工程
 
+## 专家二预瞄前馈与反馈（2026-10-24，研究验证中）
+
+已加入独立浅坑控制器：已知坑形预瞄、悬架前馈与姿态/轮端反馈、轮载分配与防滑、直行转向反馈、后轴退出与停车判定。MPC原型及证据退出活动目录并作[可恢复归档](archive/mpc_20261013/README.md)。专家一控制代码、参数与历史保持原样。
+
+当前原始PAC52轮胎在陡坑沿存在轮速异常，另建MF-Tyre5.2比较版本，尚未替换默认车型。单侧/宽坑4 cm已有通过研究筛查的开发试验；完整冻结矩阵与更深工况仍在验证。真实底盘几何和执行器功率等未给定，不能宣称完整安全通过。见[设计与执行计划](docs/superpowers/specs/2026-10-24-shallow-preview-feedback-design.md)、[架构](docs/ARCHITECTURE.md)。
+
+入口：`python scripts/run_strategy.py --strategy shallow_press --case right_track --depth-m .04 --tire-model mf52_compare --delay-s .04 --run-id preview_trial_001`。每次生成独立运行目录，原生历史可用 `scripts/open_run_visualizer.py` 播放；该命令的MF52版本属于待决定是否采用的模型比较。
+
 ## 五相机 VLA 示范采集（2026-10-21）
 
 新增独立的前视、FL/FR/RL/RR 轮侧 RGB 采集和实际状态/动作记录，复用 TruckSim 2019 原生 Camera/Shared Buffer。相机固定在车身表面，镜头外伸约 20 mm，并按实际车身 OBJ 网格自动核验；640×480、10 FPS 目标均可配置。保留真实车身遮挡，不用悬浮视角或裁剪掉车身来冒充车载相机。
 
-采集采用“求解时记录实际状态/动作，结束后原生渲染并按仿真时间关联”的两阶段方式；不是实时视觉闭环。原生动画历史分辨率 25 ms，状态记录步长 0.5 ms。包含四轮转矩、四角附加悬架力及现有方向盘角，共 9 路真实动作；无 VLA/RL 训练代码。浅坑专家目前仍 NOT_IMPLEMENTED。
+采集采用“求解时记录实际状态/动作，结束后原生渲染并按仿真时间关联”的两阶段方式；不是实时视觉闭环。原生动画历史分辨率 25 ms，状态记录步长 0.5 ms。包含四轮转矩、四角附加悬架力及现有方向盘角，共 9 路真实动作；无 VLA/RL 训练代码。浅坑已有研究控制器，研究筛查不能自动生成已通过完整安全验收的训练示范。
 
 运行：`python scripts/run_strategy.py --strategy wheel_lift --case seed_repeat --run-id vla_001 --demonstration-config configs/demonstration/five_camera.json`。不传采集配置即可关闭。已有轨迹可用 `scripts/capture_demonstration.py` 重新采图，不必重跑控制。
 
@@ -14,7 +22,7 @@
 
 ## 独立专家策略架构（2026-10-08）
 
-抬轮策略已迁入 `src/ddevsim/strategies/wheel_lift/`，旧命令保留；控制配置通过实例传入，不再运行时修改全局 CFG。浅坑策略拥有独立 `strategies/shallow_press/`、配置与单侧/宽坑场景模板，控制律尚未实现。两者共用当前调参 I_I 车辆版本、原生求解和显示基础设施；每次运行独占模型/输出/显示资源。
+抬轮策略已迁入 `src/ddevsim/strategies/wheel_lift/`，旧命令保留；控制配置通过实例传入，不再运行时修改全局 CFG。浅坑策略拥有独立 `strategies/shallow_press/`、控制器、配置与单侧/宽坑场景模板。两者共用基础车辆、原生求解和显示基础设施；每次运行独占模型/输出/显示资源，车型对照显式分开。
 
 新抬轮入口：`python scripts/run_strategy.py --strategy wheel_lift --case seed_repeat --run-id trial_001`，默认最新推荐清单。浅坑准备：`python scripts/prepare_strategy_case.py --case wide --depth-m .05 --length-m .8 --width-m 1.8 --run-id scene_001`；这些尺寸仅是使用示例，正式工况需明确指定。单侧坑 FR→RR，宽坑 FL/FR→RL/RR。
 

@@ -31,7 +31,7 @@ def test_preparation_keeps_vehicle_and_synchronizes_physics_and_mesh(tmp_path, c
     shared = build_vehicle(tmp_path / 'shared', DEFAULT_PROFILE)
     assert result['vehicle']['vehicle_sha256'] == shared['vehicle_sha256']
     assert vehicle_identity(run_dir / 'model/run_all.par') == shared['vehicle_sha256']
-    assert result['task_status'] == 'NOT_IMPLEMENTED'
+    assert result['task_status'] == 'UNASSESSED'
     with pytest.raises(FileExistsError):
         prepare_case(make_case(coverage), run_dir, DEFAULT_PROFILE)
 
@@ -53,5 +53,17 @@ def test_shallow_run_rejects_before_solver_launch_or_output_claim(tmp_path):
                               '--run-id', 'must_not_launch'], cwd=tmp_path,
                              capture_output=True, text=True)
     assert process.returncode != 0
-    assert 'not implemented' in process.stderr
+    assert '--depth-m' in process.stderr
     assert not (root / 'runs/shallow_press/right_track/must_not_launch').exists()
+
+
+def test_preview_launcher_dry_run_is_independent_and_does_not_claim(tmp_path):
+    root=Path(__file__).resolve().parents[2]
+    process=subprocess.run([sys.executable,str(root/'scripts/run_strategy.py'),
+        '--strategy','shallow_press','--case','wide','--depth-m','.04',
+        '--run-id','preview_dry_run_no_claim','--dry-run'],cwd=tmp_path,capture_output=True,text=True)
+    assert process.returncode==0,process.stderr
+    record=json.loads(process.stdout)
+    assert record['route']=='PREVIEW_FEEDFORWARD_FEEDBACK'
+    assert record['scene']['depth_m']==.04
+    assert not (root/'runs/shallow_press/wide/preview_dry_run_no_claim').exists()

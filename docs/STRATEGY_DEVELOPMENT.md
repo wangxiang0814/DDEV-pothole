@@ -1,6 +1,8 @@
 # 策略开发与运行入口
 
-2026-10-13 继续进行带路面高度/坡度和单边接触的物理MPC预测验证，见 [SHALLOW_PHYSICAL_MPC_20261013.md](SHALLOW_PHYSICAL_MPC_20261013.md)。新增12次完整坑槽运行、2次参考提取；所测预测器仍未通过联合门槛，未发布MPC闭环，专家二继续 NOT_IMPLEMENTED。下一主控制路线建议采用已知坑形预瞄前馈与反馈，完整混合MPC保留研究。
+2026-10-24更新：MPC已退出主开发路线，专属代码与证据移至[可校验归档](../archive/mpc_20261013/README.md)。以下带2026-10-13日期的段落为历史记录。当前预瞄前馈与反馈开发见[实现设计](superpowers/specs/2026-10-24-shallow-preview-feedback-design.md)。
+
+当前专家二已有独立的预瞄前馈与反馈控制器、原生 worker、研究筛查和播放接口。`implemented=True`表示代码可运行；`SIMULATION_PASS`只表示明确参数与模型下通过研究筛查，完整实车能力与底盘安全验收仍未完成。
 
 所有命令从本 Git 项目根目录执行。使用能运行现有 requirements.txt 的 Python 环境；本轮验证环境为 F:\anaconda3\python.exe（Python 3.8.5）。
 
@@ -34,14 +36,25 @@ python scripts/prepare_strategy_case.py --case wide --depth-m .05 --length-m .8 
 
 可显式传 `--approach-distance-m`、`--friction`、`--stop-s` 或自定义 `--template`。初始化速度为零，校验轮胎包络在坑前固地、单侧排除左轮、宽坑覆盖两侧。生成 model/、地形/显示网格和运行清单。
 
-当前调用 `run_strategy.py --strategy shallow_press ...` 会明确拒绝原生控制仿真。准备命令本身不生成控制结果或原生历史。本次两个示例额外生成了明确标注的 2 s 静态基础设施诊断历史，不能作为下压通过策略的控制结果。
+准备命令仅生成场景，状态为`PREPARED/UNASSESSED`，不生成控制通过结论。当前控制仿真使用独立入口：
 
-## 实现浅坑控制律
+```powershell
+python scripts/run_strategy.py --strategy shallow_press --case right_track --depth-m .04 --run-id press_trial_001 --config configs/shallow_press/preview_feedback_20261024.json --tire-model mf52_compare --delay-s .04 --duration-s 40
+python scripts/open_run_visualizer.py runs/shallow_press/right_track/press_trial_001
+```
+
+`mf52_compare`是尚未采纳的独立轮胎模型对照，不能当作与原车型物理等价。省略此参数使用原内部PAC52模型；当前没有原内部模型的合格通过结论。两类运行的车型身份、模型修改、代码、配置和生成资源哈希均随运行保存。初始静止、前后轮驶出、停车保持和完整时长是独立判据；历史视频可直接播放，无需导出文件。
+
+五相机研究采集可加`--demonstration-config configs/shallow_press/five_camera.json`。实际九路控制量、策略和对照模型身份随episode保存；未完成完整验收的episode不能标记为已接受训练样本。
+
+固定参数批量验证入口为`scripts/run_shallow_preview_matrix.py --plan <frozen_plan.json> --workers 2`。计划冻结配置和代码哈希；参数漂移、重复目录或不匹配的续跑均拒绝。每个求解器在独立子进程中运行，线程仅负责调度。`--resume`只复用同一计划且结果哈希完整的已完成运行；批量进程成功不代表各工况筛查通过，需读取`matrix_summary.json`中的逐项结论。
+
+## 浅坑控制开发约束
 
 1. 只在 `strategies/shallow_press/` 实现状态机、悬架/转矩控制、配置和专属验收；补齐公共 reset/step/status/summary 协议。
 2. 使用同一 `tuned_ii_20261005` 车辆版本、九路能力和 SI 观测合同。浅坑调深度、宽度不能偷偷变质量、载荷、止挡或低速轮胎参数。
 3. 配置通过实例传入，不改模块全局对象。增益和参考数据按车辆与工况核验，不能自动借用抬轮的三支撑增益。
-4. 实现静止初始化、蠕行进入、下压/接触跟踪、爬出、停车/恢复及异常处理的控制行为；然后将 implemented 改为 true，并在新入口增加其独立 worker。
+4. 已实现静止初始化、蠕行进入、下压/接触跟踪、爬出、停车保持及反馈失效时的受限卸载。状态属于实例；车身外环20 ms、电机轮速环2 ms，均与原生积分步长分离。
 5. 根据实际可观测量分别验收底盘/悬架触底、姿态稳定、低速滑移、路径、爬出与平顺性。缺少底盘接触观测时记录未评估，不能用 Jnc 行程代替底盘净空。阈值在这一开发阶段明确。
 6. 先验证单侧，再验证宽坑；后轴尚未通过不能判全任务完成。记录失败与异常恢复，任务成功和恢复成功分开。
 
@@ -68,4 +81,4 @@ git diff --check
 
 2026-10-12 经典下压控制的文献研究和详细设计见 [SHALLOW_PRESS_CLASSICAL_DESIGN_20261012.md](SHALLOW_PRESS_CLASSICAL_DESIGN_20261012.md)。用户确认自适应降速（先 1–3 km/h）、首阶段已知坑形、能力参数与专家一对齐。文献来源与能力快照位于 `evidence/shallow_press_design_20261012/`，是设计证据，不是运行配置或控制验证结果；`shallow_press` 仍为 NOT_IMPLEMENTED。
 
-2026-10-13 MPC前置模型验证见 [SHALLOW_MPC_VALIDATION_20261013.md](SHALLOW_MPC_VALIDATION_20261013.md)。完成30条独立原生矩阵运行、67状态原生线性化及多步预测/步长对照；局部平地模型有用，但当前统一预测器18条过坑验证均未通过轮载/接触门控。新增辨识/预测研究模块不启用专家入口；MPC闭环尚未释放，`shallow_press`仍为NOT_IMPLEMENTED。正式证据采用 `evidence/shallow_mpc_validation_20261013/verified_analysis/`。
+2026-10-13 MPC前置模型验证见 [SHALLOW_MPC_VALIDATION_20261013.md](../archive/mpc_20261013/README.md)。完成30条独立原生矩阵运行、67状态原生线性化及多步预测/步长对照；局部平地模型有用，但当前统一预测器18条过坑验证均未通过轮载/接触门控。新增辨识/预测研究模块不启用专家入口；MPC闭环尚未释放，`shallow_press`仍为NOT_IMPLEMENTED。正式证据采用 `evidence/shallow_mpc_validation_20261013/verified_analysis/`。

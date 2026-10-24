@@ -41,14 +41,12 @@ def test_missing_observations_are_not_zero_filled():
         Observation(1., .96, False, {}).require(('Vx',))
 
 
-def test_unknown_strategy_rejected_and_shallow_control_explicitly_unimplemented():
+def test_unknown_strategy_rejected_and_shallow_requires_explicit_scene():
     from ddevsim.runtime.registry import load_strategy
     from ddevsim.runtime.contracts import Observation, StrategyContext
     with pytest.raises(ValueError):
         load_strategy('typo')
     controller = load_strategy('shallow_press')()
-    controller.reset(StrategyContext('shallow_press', 'vehicle', 'scene', .02, {}, {}))
-    assert not controller.status().completed
-    with pytest.raises(NotImplementedError, match='shallow_press'):
-        controller.step(Observation(0., 0., True, {}))
-    assert controller.summary()['task_status'] == 'NOT_IMPLEMENTED'
+    with pytest.raises(ValueError,match='scenario'):
+        controller.reset(StrategyContext('shallow_press', 'vehicle', 'scene', .02, {}, {}))
+    assert controller.summary()['task_status']=='NOT_INITIALIZED'

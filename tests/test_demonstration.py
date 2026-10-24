@@ -174,3 +174,16 @@ def test_mount_audit_rejects_floating_lens(tmp_path):
     camera['position_m'][1] = 1.3
     with pytest.raises(ValueError, match='floating away'):
         verify_mounts({'cameras': [camera]}, history, tmp_path)
+
+
+def test_shallow_capture_uses_its_own_identity_and_phase_log(tmp_path):
+    from ddevsim.demonstration.capture import phase_rows,episode_identity
+    (tmp_path/'run_manifest.json').write_text(json.dumps({'strategy_id':'shallow_press'}))
+    (tmp_path/'control_diagnostics.json').write_text(json.dumps([
+        {'time_s':3,'phase':'APPROACH'},{'time_s':7,'phase':'CROSSING'}]))
+    assert phase_rows(tmp_path)==[(3.,'APPROACH'),(7.,'CROSSING')]
+    plant={'parent_profile_id':'tuned_ii_20261005','comparison':{'adopted':False}}
+    identity=episode_identity(tmp_path,{'scene':{'depth_m':.04},'status':'SIMULATION_PASS','plant':plant})
+    assert identity['strategy_id']=='shallow_press'
+    assert identity['scene']=={'depth_m':.04}
+    assert identity['plant']==plant

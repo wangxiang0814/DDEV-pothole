@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 from pathlib import Path
 import sys
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
@@ -25,7 +26,34 @@ def main(argv=None):
     parser.add_argument('--dry-run', action='store_true')
     parser.add_argument('--demonstration-config', type=Path,
                         help='optional five-camera demonstration configuration')
-    args = parser.parse_args(argv)
+    args,extra = parser.parse_known_args(argv)
+    if args.strategy=='shallow_press':
+        if args.manifest or args.reference_model:
+            parser.error('shallow_press uses --config and explicit --depth-m, not wheel_lift manifests')
+        run_id=args.run_id or datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+        command=[sys.executable,str(ROOT/'scripts/run_shallow_preview.py'),
+                 '--case',args.case,'--run-id',run_id]+extra
+        if args.demonstration_config:
+            command+=['--demonstration-config',str(args.demonstration_config.resolve())]
+        # Validate geometry/options in a separate process before claiming output.
+        checked=subprocess.run(command+['--dry-run'],cwd=ROOT,capture_output=True,text=True)
+        if checked.returncode:
+            print(checked.stderr,file=sys.stderr);return checked.returncode
+        if args.dry_run:
+            print(checked.stdout,end='');return 0
+        run=claim_run(ROOT/'runs',args.strategy,args.case,run_id)
+        command+=['--claimed-output']
+        with (run/'run.log').open('x',encoding='utf-8') as log:
+            process=subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)
+        record=json.loads((run/'run_manifest.json').read_text(encoding='utf-8'))
+        record.update(argv=command,process_exit_code=process.returncode)
+        if process.returncode and record.get('run_status')!='ERROR':
+            record.update(run_status='ERROR',task_status='ERROR',acceptance_pass=False)
+        write_run_manifest(run,record)
+        print('Run directory:',run)
+        print('Simulation screen:',record.get('task_status'),'Full safety acceptance:',record.get('acceptance_pass',False))
+        return process.returncode or (0 if record.get('simulation_pass') else 1)
+    if extra:parser.error('unrecognized arguments: '+' '.join(extra))
     if not load_strategy(args.strategy).implemented:
         parser.error('shallow_press control law is not implemented; use prepare_strategy_case.py to prepare scenes')
     # Import only after strategy selection. All options retain the verified launcher semantics.

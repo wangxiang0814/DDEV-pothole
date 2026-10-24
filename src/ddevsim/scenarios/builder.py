@@ -56,7 +56,7 @@ def prepare_case(case, run_dir: Path, profile=DEFAULT_PROFILE) -> dict:
                         model / 'visual_assets/DDEV_pothole_scene.obj',
                         model / 'visual_assets/DDEV_pothole_scene.mtl')}
     result = {'strategy_id': case.strategy_id, 'case_id': case.case_id,
-              'run_status': 'PREPARED', 'task_status': 'NOT_IMPLEMENTED',
+              'run_status': 'PREPARED', 'task_status': 'UNASSESSED', 'task_kind': 'SCENE_PREPARATION',
               'acceptance_pass': False, 'vehicle': vehicle,
               'scenario_sha256': sha256_file(scenario_path), 'generated_assets': hashes,
               'import_names': inputs, 'export_names': exports, 'wheel_order': ['FL', 'FR', 'RL', 'RR'],

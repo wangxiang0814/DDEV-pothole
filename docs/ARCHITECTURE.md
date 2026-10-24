@@ -1,6 +1,6 @@
 # 两种主动悬架专家策略架构
 
-本工程维护同一调参 I_I 车辆上的两套专家策略：`wheel_lift`（抬轮过深坑）和 `shallow_press`（下压过浅坑）。浅坑当前交付的是独立开发接口、单侧/宽坑场景准备和显示基础设施；控制律尚未实现。
+本工程维护两套独立专家：`wheel_lift`（抬轮过深坑）和 `shallow_press`（预瞄前馈与反馈下压过浅坑）。两者保留同一调参 I_I 基础车辆；浅坑已有研究控制器、专属 worker 和验收。原始轮胎模型与专家二独立轮胎对照必须分开记录，尚未自动采用新车型或宣告完整安全验收。
 
 ## 模块职责
 
@@ -8,7 +8,7 @@
 |---|---|
 | `src/ddevsim/strategies/wheel_lift/` | 前轮、完整循环控制，旧 CLI，模型准备兼容层及策略验收 |
 | `src/ddevsim/static_wheel_lift/` | 保留原抬轮专属辨识、分配、反馈、状态与参数实现 |
-| `src/ddevsim/strategies/shallow_press/` | 浅坑独立控制接口、配置和明确的未实现状态 |
+| `src/ddevsim/strategies/shallow_press/` | 空间预瞄、悬架前馈/反馈、轮载分配、逐轮防滑、独立车型对照与研究筛查 |
 | `src/ddevsim/runtime/` | 版本化 SI 合同、策略选择、输出认领、运行清单和进程管理 |
 | `src/ddevsim/vehicle_profiles/` | 两套策略共用的调参 I_I 车辆版本与中性参数生成规则 |
 | `src/ddevsim/scenarios/` | 坑槽覆盖/初始化校验、物理地形与显示资源同步生成 |
@@ -45,7 +45,11 @@ report = strategy.summary()
 
 `WheelLiftStrategy` 在边界换算到旧控制器的原生单位，旧算法内部仍按 km/h、mm、deg 运算。不同实例分别保存配置、滤波器、状态机与时钟，原 CLI 使用局部配置变量。无效数据由原完整循环的 stale-feedback 分支安全保持；有效但缺少所需通道的数据明确拒绝。
 
-`ShallowPressStrategy.step()` 当前明确抛出 `NotImplementedError`。场景准备不等同控制仿真；其清单为 PREPARED / NOT_IMPLEMENTED / acceptance_pass=false。
+`ShallowPressStrategy.step()` 实现20 ms SI外环，输出四轮转矩、四角力和方向盘角设定。专家专属 `CrawlActuation` 实现显式2 ms轮速差反馈、失载/重接地协调与逐积分步连续幅值/变化率约束；`NativePreviewBridge` 负责时钟、观测时延和原生单位边界。积分细化不改变控制采样周期，车身与电机反馈时延分别声明。公共接口没有改变，专家一不经过这些模块。
+
+浅坑研究结果 `SIMULATION_PASS` 与完整安全 `PASS` 分开：真实底盘几何、执行器实体行程/带宽/功率仍未知，因此 `acceptance_pass=false`。场景准备不运行控制，清单为 PREPARED / UNASSESSED。独立轮胎比较的父车型、实际变更、`adopted=false` 同时进入运行清单、结果和示范元数据。最终模型/端口哈希在生成修改后刷新，冻结输入另存 `input_provenance.json`，避免结果与清单哈希循环依赖。
+
+MPC专属旧代码、脚本、测试与研究证据已退出活动目录，保留于[校验归档](../archive/mpc_20261013/README.md)和备份tag。原生历史不删除。
 
 ## 运行和显示隔离
 
@@ -76,4 +80,4 @@ runs/<strategy>/<case>/<run_id>/
 
 算法目录隔离不意味着任意同时编辑同一文件都不会发生 Git 冲突。并行开发时分别使用 feature 分支/工作区，在各策略目录调参；公共接口修改须协调、保持版本兼容并回归双方合同。
 
-当前固定车辆 profile 不支持仅改元数据的轮距、轴距、轮胎半径或积分步长覆盖；需要新车型时必须新增可生成并验证的 profile。
+基础 profile 不支持仅改元数据的轮距、轴距、轮胎半径或积分步长覆盖。专家二研究 worker 可在本轮隔离副本显式改变积分步长或轮胎模型，并保留父车型和变更身份；这些对照不属于专家一已验证车型。历史 `tyre_low_speed_slip_m_s` 名称错误：数值实际直接写入原生 km/h；保留原数值与身份，新的SI比较显式换算。

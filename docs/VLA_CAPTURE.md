@@ -4,7 +4,7 @@
 
 独立模块 `src/ddevsim/demonstration/` 复用现有 TruckSim 2019、原生车辆/路面显示与 Python 控制入口，不修改专家控制律、车辆、求解步长或验收线。只采集示范数据，不包含 VLA 训练代码。
 
-当前可运行专家是 `wheel_lift`。仓库中的 `shallow_press` 仍为 `NOT_IMPLEMENTED`；场景和预测器研究不是已完成的浅坑专家。不能据此生成浅坑专家成功示范。
+已验收专家为 `wheel_lift`；`shallow_press` 已有独立研究控制器和记录入口，尚无完整安全PASS。浅坑使用 `configs/shallow_press/five_camera.json` 的专属任务指令；其 `SIMULATION_PASS`、独立轮胎对照及未知真实几何不能变成可训练成功示范。采集元数据保留实际策略、车型比较和输入来源身份。
 
 采用**两阶段、按仿真时间对齐**的原生方案：
 

@@ -24,7 +24,7 @@ class TunedIIProfile:
     # It affects scene validation only, never TruckSim vehicle parameters.
     tyre_half_width_m: float = .10
     tyre_radius_m: float = .263
-    tyre_low_speed_slip_m_s: float = .2
+    tyre_low_speed_slip_m_s: float = .2  # Legacy name: raw native km/h; preserve recipe identity.
     lateral_ride_scale: float = 0.
     steering_enabled: bool = True
     solver_step_s: float = .0005
