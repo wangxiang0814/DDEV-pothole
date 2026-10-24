@@ -1,0 +1,44 @@
+[
+  {
+    "run_id": "preview_joint_nolevel40_wide_d04_v30_20261024_001",
+    "returncode": 0,
+    "status": "SIMULATION_PASS",
+    "failed": [],
+    "slip": 0.3486835289058291,
+    "load": 2.3730677684740074,
+    "rms": 1.3119231016122836,
+    "pitch": 1.30644753
+  },
+  {
+    "run_id": "preview_joint_nolevel20_wide_d04_v30_20261024_001",
+    "returncode": 0,
+    "status": "SIMULATION_PASS",
+    "failed": [],
+    "slip": 0.33781453773170633,
+    "load": 2.3292364060601125,
+    "rms": 1.330675243517873,
+    "pitch": 1.33184626
+  },
+  {
+    "run_id": "preview_joint_damper10k_wide_d04_v30_20261024_001",
+    "returncode": 0,
+    "status": "SIMULATION_PASS",
+    "failed": [],
+    "slip": 0.3452925857302459,
+    "load": 2.316343301291381,
+    "rms": 1.3117549029391404,
+    "pitch": 1.27301116
+  },
+  {
+    "run_id": "preview_joint_damper12k_wide_d04_v30_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.35567249069939777,
+    "load": 2.3114331361864933,
+    "rms": 1.3158713259539403,
+    "pitch": 1.3550910800000002
+  }
+]

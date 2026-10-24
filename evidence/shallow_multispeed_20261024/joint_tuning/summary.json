@@ -1,0 +1,48 @@
+[
+  {
+    "run_id": "preview_joint_p120_a40000_wide_d04_v30_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.3563253378869329,
+    "load": 2.392939843690274,
+    "rms": 1.307132753028552,
+    "pitch": 1.19800859
+  },
+  {
+    "run_id": "preview_joint_p150_a40000_wide_d04_v30_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.36294755010959856,
+    "load": 2.3744660129334187,
+    "rms": 1.3054930574376855,
+    "pitch": 1.19161821
+  },
+  {
+    "run_id": "preview_joint_p100_a20000_wide_d04_v30_20261024_001",
+    "returncode": 0,
+    "status": "SIMULATION_PASS",
+    "failed": [],
+    "slip": 0.3454058582865368,
+    "load": 2.336997347380361,
+    "rms": 1.3167673159436228,
+    "pitch": 1.30028703
+  },
+  {
+    "run_id": "preview_joint_p150_a20000_wide_d04_v30_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.3540398102212027,
+    "load": 2.311237627570576,
+    "rms": 1.3093979693115396,
+    "pitch": 1.28755575
+  }
+]

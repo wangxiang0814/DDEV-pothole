@@ -7,6 +7,18 @@ Coefficient transfer does not establish tire/vehicle equivalence or validation.
 import re
 
 
+def research_baseline_metadata(record):
+    """User adoption on2026-10-24 is scoped to expert-two research only.
+
+    Coefficients and assumptions remain exactly those of the comparison;
+    adoption neither establishes physical equivalence nor real safety.
+    """
+    return dict(record,adopted=True,baseline_id='expert2_mf52_research_20261024',
+        adoption_scope='EXPERT2_RESEARCH_ONLY',adoption_date='2026-10-24',
+        adoption_basis='USER_SELECTED_AFTER_22_CASE_COMPARISON',
+        real_vehicle_validated=False)
+
+
 def make_mf52_tir(source):
     blocks=re.findall(r'BEGIN_PACEJKA_52_DATA\n(.*?)END_PACEJKA_52_DATA',source,re.S)
     if len(blocks)!=4 or len(set(blocks))!=1:raise ValueError('four identical legacy tires required')

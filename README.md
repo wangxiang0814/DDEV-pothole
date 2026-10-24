@@ -4,9 +4,9 @@
 
 已加入独立浅坑控制器：已知坑形预瞄、悬架前馈与姿态/轮端反馈、轮载分配与防滑、直行转向反馈、后轴退出与停车判定。MPC原型及证据退出活动目录并作[可恢复归档](archive/mpc_20261013/README.md)。专家一控制代码、参数与历史保持原样。
 
-当前原始PAC52轮胎在陡坑沿存在轮速异常，另建MF-Tyre5.2比较版本，尚未替换默认车型。单侧/宽坑4 cm已有通过研究筛查的开发试验；完整冻结矩阵与更深工况仍在验证。真实底盘几何和执行器功率等未给定，不能宣称完整安全通过。见[设计与执行计划](docs/superpowers/specs/2026-10-24-shallow-preview-feedback-design.md)、[架构](docs/ARCHITECTURE.md)。
+用户已批准MF-Tyre5.2为专家二研究基线（`mf52_research`），原内部PAC52保留对照，专家一车型不变。最新V2统一参数30项矩阵18项通过：单侧4 cm在1/1.5/2/2.5/3 km/h通过；宽坑4 cm在1/3 km/h通过，中间速度未通过；两类2 cm在3/5 km/h通过。宽坑3 km/h裕量较薄、80 ms时延未通过，不能宣称连续速度鲁棒或完整安全。见[最新调优、控制流程和失败边界](docs/SHALLOW_MULTISPEED_TUNING_20261024.md)、[工况索引](evidence/shallow_multispeed_v2_20261024/case_index.md)、[首批低速历史报告](docs/SHALLOW_PREVIEW_FEEDBACK_20261024.md)。
 
-入口：`python scripts/run_strategy.py --strategy shallow_press --case right_track --depth-m .04 --tire-model mf52_compare --delay-s .04 --run-id preview_trial_001`。每次生成独立运行目录，原生历史可用 `scripts/open_run_visualizer.py` 播放；该命令的MF52版本属于待决定是否采用的模型比较。
+入口：`python scripts/run_strategy.py --strategy shallow_press --case right_track --depth-m .04 --config configs/shallow_press/preview_multispeed_v2_20261024.json --speed-kph 3 --crossing-kph 3 --approach-distance-m 12 --delay-s .04 --duration-s 40 --run-id preview_trial_001`。每次独立目录，原生历史可直接播放。参数必须显式传入，不传`--config`不等于最新候选。用户允许的更快转矩扫描只标诊断，原±500 Nm／1000 Nm/s基线保留，扫描不计入正常通过。
 
 ## 五相机 VLA 示范采集（2026-10-21）
 

@@ -1,0 +1,70 @@
+[
+  {
+    "case": "wide",
+    "target_kph": 5,
+    "before_run": "preview_derivative20_wide_d04_v50_20261024_002",
+    "after_run": "preview_multispeed_validation_wide_d04_v50_20261024_001",
+    "before_status": "FAIL",
+    "after_status": "FAIL",
+    "before": {
+      "az_rms_m_s2": 1.816844810303491,
+      "az_10ms_peak_m_s2": 6.330614512828413,
+      "pitch_peak_deg": 1.8230000600000003,
+      "roll_peak_deg": 1.08855838,
+      "crossing_mean_kph": 4.95389311436174,
+      "loaded_slip_proxy_peak_m_s": 0.6285376509742624
+    },
+    "after": {
+      "az_rms_m_s2": 1.2047775170992885,
+      "az_10ms_peak_m_s2": 4.8808088696656124,
+      "pitch_peak_deg": 1.09671938,
+      "roll_peak_deg": 0.772870944,
+      "crossing_mean_kph": 4.982846954641824,
+      "loaded_slip_proxy_peak_m_s": 0.8553483700063131
+    },
+    "percent_change": {
+      "az_rms_m_s2": -33.688474091629274,
+      "az_10ms_peak_m_s2": -22.901499376164857,
+      "pitch_peak_deg": -39.83986045507866,
+      "roll_peak_deg": -29.000505788215058,
+      "loaded_slip_proxy_peak_m_s": 36.08546260999379
+    },
+    "source_scope": "COMPOSITE_BODY_CONTROL_AND_REFERENCE_ENHANCEMENT_NOT_SINGLE_FACTOR",
+    "same_parent_vehicle": true,
+    "same_tire": true
+  },
+  {
+    "case": "right_track",
+    "target_kph": 3,
+    "before_run": "preview_derivative20_right_track_d04_v30_20261024_002",
+    "after_run": "preview_multispeed_validation_right_track_d04_v30_20261024_001",
+    "before_status": "SIMULATION_PASS",
+    "after_status": "SIMULATION_PASS",
+    "before": {
+      "az_rms_m_s2": 0.6707663377070863,
+      "az_10ms_peak_m_s2": 2.6044141167469936,
+      "pitch_peak_deg": 0.802987698,
+      "roll_peak_deg": 1.16829375,
+      "crossing_mean_kph": 2.98602111973553,
+      "loaded_slip_proxy_peak_m_s": 0.2949239002583005
+    },
+    "after": {
+      "az_rms_m_s2": 0.6193879670101994,
+      "az_10ms_peak_m_s2": 2.407354644275558,
+      "pitch_peak_deg": 0.613557452,
+      "roll_peak_deg": 1.06749979,
+      "crossing_mean_kph": 2.987388192394794,
+      "loaded_slip_proxy_peak_m_s": 0.2943239681780525
+    },
+    "percent_change": {
+      "az_rms_m_s2": -7.6596525211023785,
+      "az_10ms_peak_m_s2": -7.566364780635193,
+      "pitch_peak_deg": -23.59067847139048,
+      "roll_peak_deg": -8.62745007409308,
+      "loaded_slip_proxy_peak_m_s": -0.20341928196478953
+    },
+    "source_scope": "COMPOSITE_BODY_CONTROL_AND_REFERENCE_ENHANCEMENT_NOT_SINGLE_FACTOR",
+    "same_parent_vehicle": true,
+    "same_tire": true
+  }
+]

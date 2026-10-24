@@ -1,0 +1,50 @@
+[
+  {
+    "run_id": "preview_joint_d6k_wide_d04_v20_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.4176613232845444,
+    "load": 2.2704310298765176,
+    "rms": 1.1328734096857869,
+    "pitch": 1.35108895
+  },
+  {
+    "run_id": "preview_joint_d7k_wide_d04_v20_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.3887515413748497,
+    "load": 2.263576483627362,
+    "rms": 1.1324662646898074,
+    "pitch": 1.34222904
+  },
+  {
+    "run_id": "preview_joint_preview30_wide_d04_v20_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.368034286975255,
+    "load": 2.200276503505922,
+    "rms": 1.1325770376821491,
+    "pitch": 1.31170686
+  },
+  {
+    "run_id": "preview_joint_preview40_wide_d04_v20_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.4220641833922113,
+    "load": 2.2538422910469995,
+    "rms": 1.1171040077767131,
+    "pitch": 1.32394004
+  }
+]

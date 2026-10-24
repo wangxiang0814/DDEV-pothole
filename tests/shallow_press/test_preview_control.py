@@ -12,7 +12,7 @@ SCENE=dict(start_station_m=101.1,length_m=.8,width_m=.9,depth_m=.04,
 
 
 def observation(t,x=99.):
-    d=dict(Xo=x,Yo=0.,Zo=.5,Vx=0.,Roll_E=0.,Pitch=0.,Yaw=0.,AVx=0.,AVy=0.,AVz=0.,Az_SM=0.)
+    d=dict(Xo=x,Yo=0.,Zo=.5,Vx=0.,Roll_E=0.,Pitch=0.,Yaw=0.,AVx=0.,AVy=0.,AVz=0.,Az_SM=0.,XCG_TM=x-.9625,YCG_TM=.08)
     for i,w in enumerate(('L1','R1','L2','R2')):
         d.update({'X_'+w:x-(1.925 if i>1 else 0),'Y_'+w:.63 if i%2==0 else -.63,
           'Jnc_'+w:.04,'JncR_'+w:0.,'Fz_'+w:3300.,'CmpT_'+w+'i':.015,
@@ -127,5 +127,55 @@ def test_exit_assist_covers_contact_uncertainty_after_geometric_lip():
     # can persist through the exit. The bounded exit window must not disappear
     # precisely when the vehicle slows to a crawl at the lip.
     assert s.records[-1]['climb_torque_feedforward_nm'][1]>0
+
+
+def test_modal_controller_uses_center_of_mass_heave_instead_of_origin_height():
+    s=controller(body_modal_blend=1.,groundhook_gain=0.,grade_torque_gain=0.)
+    for t in np.arange(0,3.2,.02):s.step(observation(float(t)))
+    o=observation(3.2);d=dict(o.values_si)
+    d['Pitch']=.02;d['Zo']=.5-.9625*.02
+    s.previous_z=d['Zo'];s.filtered_vz=0.
+    s.step(Observation(3.2,3.2,True,d))
+    forces=np.asarray(s.records[-1]['feedback_n'])
+    assert abs(forces.sum())<1e-6
+    assert forces[:2].sum()>0 and forces[2:].sum()<0
+
+
+def test_torque_preview_is_independent_of_suspension_filter_preview_at_speed():
+    s=controller(cruise_kph=3.6,crossing_kph=3.6,preview_s=.5,torque_preview_s=0.)
+    for t in np.arange(0,3.2,.02):s.step(observation(float(t)))
+    s.speed_reference=1.
+    o=observation(3.2,101.94);d=dict(o.values_si);d['Vx']=.8
+    s.step(Observation(3.2,3.2,True,d))
+    assert s.records[-1]['geometric_road_m'][1]==0
+    assert s.records[-1]['climb_torque_feedforward_nm'][1]>0
+
+
+def test_body_leveling_precedes_crawl_and_has_smooth_reference():
+    s=controller(body_modal_blend=1.,body_leveling_s=2.,attitude_damping_gain=8000.)
+    for t in np.arange(0,5,.02):
+        o=observation(float(t));d=dict(o.values_si);d['Roll_E']=.02;d['Pitch']=.01
+        s.step(Observation(float(t),float(t),True,d))
+    assert s.status().phase=='LEVELING'
+    assert s.speed_reference==0
+    middle=min(s.records,key=lambda r:abs(r['time_s']-4.))
+    assert middle['body_reference_rad']==pytest.approx([.01,.005])
+    s.step(observation(5.))
+    assert s.records[-1]['body_reference_rad']==pytest.approx([0.,0.])
+    assert s.speed_reference>0
+    with pytest.raises(ValueError):controller(body_leveling_s=2.)
+
+
+def test_preview_schedule_uses_requested_speed_without_transient_gain_switches():
+    schedule=[[3.,.35,8.],[5.,.15,20.]]
+    a=controller(cruise_kph=4.,crossing_kph=4.,preview_schedule=schedule)
+    b=controller(cruise_kph=1.,crossing_kph=1.,preview_schedule=schedule)
+    assert a.preview_s==pytest.approx(.25)
+    assert a.reference_bandwidth==pytest.approx(14.)
+    assert b.preview_s==pytest.approx(.35)
+    assert b.reference_bandwidth==8.
+    schedule[0][1]=999
+    assert a.config.preview_schedule[0][1]==.35
+    with pytest.raises(ValueError):controller(preview_schedule=[[5,.2,8],[3,.1,20]])
 
 

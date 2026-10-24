@@ -18,7 +18,7 @@ from ddevsim.scenarios.builder import prepare_case
 from ddevsim.strategies.shallow_press.config import ShallowPressConfig
 from ddevsim.strategies.shallow_press.controller import ShallowPressStrategy
 from ddevsim.strategies.shallow_press.native import NativePreviewBridge,release_constant_brake,contact_patch_comparison,low_speed_comparison
-from ddevsim.strategies.shallow_press.assessment import assess
+from ddevsim.strategies.shallow_press.assessment import assess,read_native_log,capability_diagnostic
 
 
 def freeze_run_inputs(run,manifest):
@@ -36,6 +36,7 @@ def freeze_run_inputs(run,manifest):
         recipe_sha256=hashlib.sha256(json.dumps(recipe,sort_keys=True).encode('utf-8')).hexdigest())
     manifest['plant']=plant
     provenance={k:manifest[k] for k in ('plant','generated_assets','source_sha256','effective_config','diagnostic_options')}
+    if 'capability' in manifest:provenance['capability']=manifest['capability']
     with (run/'input_provenance.json').open('x',encoding='utf-8') as stream:
         json.dump(provenance,stream,ensure_ascii=False,indent=2)
     manifest['input_provenance_sha256']=sha256_file(run/'input_provenance.json')
@@ -62,8 +63,10 @@ def main(argv=None):
                    help='independent comparison plant only; 0 preserves shared point contact')
     p.add_argument('--tyre-low-speed-m-s',type=float,default=None,
                    help='independent comparison only; SI converted to native km/h')
-    p.add_argument('--tire-model',choices=['internal','mf52_compare'],default='internal')
+    p.add_argument('--tire-model',choices=['internal','mf52_compare','mf52_research'],default='mf52_research',
+                   help='user-adopted expert-two research baseline; internal retains original plant')
     p.add_argument('--config',type=Path)
+    p.add_argument('--diagnostic-torque-rate-nm-s',type=float)
     p.add_argument('--probe',action='store_true')
     p.add_argument('--coast-contact-probe',action='store_true',
                    help='diagnostic: remove all commands before entry, never an expert acceptance run')
@@ -81,7 +84,7 @@ def main(argv=None):
         from ddevsim.demonstration.cameras import load_config
         capture=load_config(a.demonstration_config)
     config=json.loads(a.config.read_text(encoding='utf-8')) if a.config else {}
-    config.update({k:v for k,v in dict(cruise_kph=a.speed_kph,crossing_kph=a.crossing_kph,mode=a.mode).items() if v is not None})
+    config.update({k:v for k,v in dict(cruise_kph=a.speed_kph,crossing_kph=a.crossing_kph,mode=a.mode,diagnostic_torque_rate_nm_s=a.diagnostic_torque_rate_nm_s).items() if v is not None})
     config=ShallowPressConfig(**config)
     case=load_case(ROOT/('scenarios/shallow_press/'+a.case+'.json'),depth_m=a.depth_m,
                   length_m=a.length_m,width_m=a.width_m if a.width_m is not None else (.9 if a.case=='right_track' else 1.8),
@@ -120,10 +123,11 @@ def execute_run(a,config,case,run,capture):
         if vehicle_identity(model)!=manifest['vehicle']['vehicle_sha256']:
             raise ValueError('brake release unexpectedly changed vehicle hardware identity')
         manifest['procedure_brake_release_mpa']=0.
-    if a.tire_model=='mf52_compare':
-        from ddevsim.strategies.shallow_press.tire_comparison import make_mf52_tir,install_mf52_comparison
+    if a.tire_model in ('mf52_compare','mf52_research'):
+        from ddevsim.strategies.shallow_press.tire_comparison import make_mf52_tir,install_mf52_comparison,research_baseline_metadata
         model=run/'model/run_all.par';source=model.read_text(encoding='utf-8')
         tir,record=make_mf52_tir(source);(run/'model/tire_comparison.tir').write_text(tir,encoding='ascii')
+        if a.tire_model=='mf52_research':record=research_baseline_metadata(record)
         stage=Path(tempfile.gettempdir())/'DDEV_tire_comparison'/hashlib.sha256(str(run).encode('utf-8')).hexdigest()[:16]
         stage.mkdir(parents=True,exist_ok=False);tire=stage/'tire_comparison.tir';tire.write_text(tir,encoding='ascii')
         from ddevsim.solver_api import parse_simfile
@@ -163,7 +167,7 @@ def execute_run(a,config,case,run,capture):
     bridge=NativePreviewBridge(strategy,manifest['export_names'],step_s=a.step_s,delay_s=a.delay_s,motor_delay_s=a.motor_delay_s)
     (run/'control_config.json').write_text(json.dumps(asdict(config),indent=2)+'\n',encoding='utf-8')
     sources=[Path(__file__).resolve()]+[ROOT/'src/ddevsim/strategies/shallow_press'/n for n in
-        ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py')]
+        ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py','body_control.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('units.py','cosim.py','chassis_contact.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('solver_api.py','pothole_case.py','visual_mesh.py',
         'scenarios/pit.py','scenarios/builder.py','scenarios/parameters.py','vehicle_profiles/tuned_ii.py',
@@ -172,7 +176,7 @@ def execute_run(a,config,case,run,capture):
     for f in sources:
         dest=run/'source'/f.relative_to(ROOT); dest.parent.mkdir(parents=True,exist_ok=True); dest.write_bytes(f.read_bytes())
     manifest.update(run_status='RUNNING',task_status='UNASSESSED',route='PREVIEW_FEEDFORWARD_FEEDBACK',
-        effective_config=asdict(config),diagnostic_options={**vars(a),'config':str(a.config) if a.config else None,
+        effective_config=asdict(config),capability=config.capability_metadata(),diagnostic_options={**vars(a),'config':str(a.config) if a.config else None,
             'demonstration_config':str(a.demonstration_config) if a.demonstration_config else None},
         source_sha256=code,final_model_sha256=sha256_file(run/'model/run_all.par'))
     plant=freeze_run_inputs(run,manifest)
@@ -197,11 +201,12 @@ def execute_run(a,config,case,run,capture):
             manifest['import_names'],manifest['export_names'],log_decimation=round(.001/a.step_s),
             demonstration_dir=(run/'demonstration') if capture and capture['enabled'] else None)
         if native['error_message'] or not native['reached_configured_stop']:raise RuntimeError(str(native))
-        import numpy as np
         if a.probe: result=dict(status='PROBE_ONLY',simulation_pass=False,acceptance_pass=False)
         else:
-            values=np.genfromtxt(run/'native_1ms.csv',delimiter=',',names=True,encoding='utf-8')
+            values=read_native_log(run/'native_1ms.csv')
             result=assess(values,asdict(case.geometry),strategy.summary(),config.settle_s,config.crossing_kph)
+            if config.diagnostic_torque_rate_nm_s is not None:
+                result=capability_diagnostic(result,values,config.actuation_torque_rate_nm_s)
             with (run/'control_intervals.csv').open('x',newline='',encoding='utf-8') as f:
                 w=csv.DictWriter(f,fieldnames=list(bridge.rows[0])); w.writeheader(); w.writerows(bridge.rows)
             (run/'control_diagnostics.json').write_text(json.dumps(strategy.records,indent=2,allow_nan=False)+'\n',encoding='utf-8')
@@ -209,7 +214,7 @@ def execute_run(a,config,case,run,capture):
                 result.update(status='CONTACT_COAST_PROBE_ONLY',simulation_pass=False,
                               coast_started_s=coast_started[0],acceptance_pass=False)
         result.update(strategy_id='shallow_press',native=native,scene=asdict(case.geometry),config=asdict(config),
-            plant=plant,input_provenance_sha256=manifest['input_provenance_sha256'],
+            plant=plant,capability=config.capability_metadata(),input_provenance_sha256=manifest['input_provenance_sha256'],
             native_csv_sha256=sha256_file(run/'native_1ms.csv'),model_sha256=manifest['final_model_sha256'])
         (run/'result.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n',encoding='utf-8')
         manifest.update(run_status='COMPLETED',task_status=result['status'],acceptance_pass=False,
@@ -227,7 +232,7 @@ def execute_run(a,config,case,run,capture):
         except Exception as exc:
             manifest['demonstration']=dict(status='ERROR',trainable=False,error=repr(exc))
         write_run_manifest(run,manifest)
-    print(json.dumps(dict(run=str(run),status=result['status'],metrics=result.get('metrics'),criteria=result.get('criteria'))))
+    print(json.dumps(dict(run=str(run),status=result['status'],diagnostic_motion_pass=result.get('diagnostic_motion_pass'),metrics=result.get('metrics'),criteria=result.get('criteria'))))
     return 0
 
 

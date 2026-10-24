@@ -39,11 +39,11 @@ python scripts/prepare_strategy_case.py --case wide --depth-m .05 --length-m .8 
 准备命令仅生成场景，状态为`PREPARED/UNASSESSED`，不生成控制通过结论。当前控制仿真使用独立入口：
 
 ```powershell
-python scripts/run_strategy.py --strategy shallow_press --case right_track --depth-m .04 --run-id press_trial_001 --config configs/shallow_press/preview_feedback_20261024.json --tire-model mf52_compare --delay-s .04 --duration-s 40
+python scripts/run_strategy.py --strategy shallow_press --case right_track --depth-m .04 --run-id press_trial_001 --config configs/shallow_press/preview_feedback_20261024.json --tire-model mf52_research --delay-s .04 --duration-s 40
 python scripts/open_run_visualizer.py runs/shallow_press/right_track/press_trial_001
 ```
 
-`mf52_compare`是尚未采纳的独立轮胎模型对照，不能当作与原车型物理等价。省略此参数使用原内部PAC52模型；当前没有原内部模型的合格通过结论。两类运行的车型身份、模型修改、代码、配置和生成资源哈希均随运行保存。初始静止、前后轮驶出、停车保持和完整时长是独立判据；历史视频可直接播放，无需导出文件。
+用户2026-10-24批准独立MF52作为专家二研究基线，默认`mf52_research`，基线身份为`expert2_mf52_research_20261024`，不能当作与原车型物理等价。`--tire-model internal`显式使用原内部PAC52；当前没有原内部模型的合格通过结论。`mf52_compare`保留原未采纳对照语义；采纳前的历史记录不改写。各类运行的车型身份、模型修改、代码、配置和生成资源哈希均随运行保存。初始静止、前后轮驶出、停车保持和完整时长是独立判据；历史视频可直接播放，无需导出文件。
 
 五相机研究采集可加`--demonstration-config configs/shallow_press/five_camera.json`。实际九路控制量、策略和对照模型身份随episode保存；未完成完整验收的episode不能标记为已接受训练样本。
 
@@ -82,3 +82,5 @@ git diff --check
 2026-10-12 经典下压控制的文献研究和详细设计见 [SHALLOW_PRESS_CLASSICAL_DESIGN_20261012.md](SHALLOW_PRESS_CLASSICAL_DESIGN_20261012.md)。用户确认自适应降速（先 1–3 km/h）、首阶段已知坑形、能力参数与专家一对齐。文献来源与能力快照位于 `evidence/shallow_press_design_20261012/`，是设计证据，不是运行配置或控制验证结果；`shallow_press` 仍为 NOT_IMPLEMENTED。
 
 2026-10-13 MPC前置模型验证见 [SHALLOW_MPC_VALIDATION_20261013.md](../archive/mpc_20261013/README.md)。完成30条独立原生矩阵运行、67状态原生线性化及多步预测/步长对照；局部平地模型有用，但当前统一预测器18条过坑验证均未通过轮载/接触门控。新增辨识/预测研究模块不启用专家入口；MPC闭环尚未释放，`shallow_press`仍为NOT_IMPLEMENTED。正式证据采用 `evidence/shallow_mpc_validation_20261013/verified_analysis/`。
+
+2026-10-24 多速度调优见[SHALLOW_MULTISPEED_TUNING_20261024.md](SHALLOW_MULTISPEED_TUNING_20261024.md)。新候选需显式传入`--config configs/shallow_press/preview_multispeed_v2_20261024.json`。两类坑保持同一配置，并按请求速度调度预瞄整形；实际通过范围读取该版本矩阵，不能拼接旧配置结果。用户批准的更快转矩扫描单独标识，不能覆盖专家一1000 Nm/s能力基线或统计为普通通过。

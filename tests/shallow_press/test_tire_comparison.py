@@ -26,3 +26,24 @@ def test_external_paths_are_windows_absolute_and_replacement_is_literal():
     assert changed.count('DELFT_TYRE_DATA C:\\Temp\\tire.tir\n')==4
     assert changed.count('OPT_TIRE_MODEL 8\n')==4
     assert 'BEGIN_PACEJKA_52_DATA' not in changed
+
+
+def test_research_adoption_is_explicit_and_keeps_historical_comparison_record():
+    from ddevsim.strategies.shallow_press.tire_comparison import research_baseline_metadata
+    original=dict(modification='MF_TYRE_52_EXTERNAL_COMPARISON',adopted=False)
+    selected=research_baseline_metadata(original)
+    assert selected['adopted'] is True
+    assert selected['baseline_id']=='expert2_mf52_research_20261024'
+    assert selected['adoption_scope']=='EXPERT2_RESEARCH_ONLY'
+    assert not original['adopted']
+
+
+def test_worker_defaults_to_user_adopted_research_model_and_keeps_internal_option():
+    import subprocess,sys,json
+    root=Path(__file__).resolve().parents[2]
+    base=[sys.executable,str(root/'scripts/run_shallow_preview.py'),'--case','right_track',
+          '--depth-m','.04','--run-id','adoption_preflight','--dry-run']
+    response=subprocess.run(base,cwd=str(root),capture_output=True,check=True)
+    assert json.loads(response.stdout)['tire_model']=='mf52_research'
+    response=subprocess.run(base+['--tire-model','internal'],cwd=str(root),capture_output=True,check=True)
+    assert json.loads(response.stdout)['tire_model']=='internal'

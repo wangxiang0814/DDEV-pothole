@@ -1,0 +1,248 @@
+{
+  "scope": "DEVELOPMENT_CANDIDATES_NOT_RELEASED",
+  "archive": "multispeed_tuning_configs.zip",
+  "sha256": "72264cc7831c96c6e1cd95a9eab0823dc6614b9ff3cc23a7586edfd817f0fba4",
+  "count": 48,
+  "entries": [
+    {
+      "name": "descent05.json",
+      "sha256": "76d4dbd3023f70eeff76324b1867e484ee973cc2cf07534b1d08b101c6ec9a30",
+      "size": 847
+    },
+    {
+      "name": "enhanced_motor1000.json",
+      "sha256": "50d7080f3b0153d12fa2833c095398cce30f76f6596aa921e3d5dd72f1b653b7",
+      "size": 843
+    },
+    {
+      "name": "enhanced_motor400.json",
+      "sha256": "a741f1939e689e3606e2ece53885806b1c6e8a510faa4424a595cb2212e5788b",
+      "size": 842
+    },
+    {
+      "name": "enhanced_sky4000.json",
+      "sha256": "9fabcbab050f45025be252bff2b2d50878feb3aa4647a91479a6759da6cd09be",
+      "size": 840
+    },
+    {
+      "name": "enhanced_sky8000.json",
+      "sha256": "bea095ef94bb477b75d135863f29821eb76278a6ff9ad0c51a7e006ce468f376",
+      "size": 840
+    },
+    {
+      "name": "fast_reference16.json",
+      "sha256": "479be30fa44b1b7f417d3d1c3b0e15c89de5770beeb20f5d1db481722998f12c",
+      "size": 903
+    },
+    {
+      "name": "fast_reference20.json",
+      "sha256": "b819d7915281ca1af9e3b657629da60a6c85277c329b329005aec0e14c41cf36",
+      "size": 904
+    },
+    {
+      "name": "groundhook0.json",
+      "sha256": "d4cfa494e629abc82ef7ff590efca34fdcc8f3d5491080767c454c7d25d46ccd",
+      "size": 811
+    },
+    {
+      "name": "groundhook1000.json",
+      "sha256": "f1fe228a1e44d1e919b068ccbe855eb110a5d24fa0ec17d77eb9603abecf34ec",
+      "size": 814
+    },
+    {
+      "name": "groundhook4000.json",
+      "sha256": "6fda0dcd3d2c622e2d90eaab783feb8ed4d09068b15a315d1db098cd0895f84d",
+      "size": 814
+    },
+    {
+      "name": "groundhook8000.json",
+      "sha256": "ac2f6f299681a7bcca497488aad6deffe85035c465bfc444db1909431882f18a",
+      "size": 814
+    },
+    {
+      "name": "joint_d6k.json",
+      "sha256": "cfe76a288333b4772c8efcc453a2f8112af62d371e71b2f61109fe2be83ace65",
+      "size": 1137
+    },
+    {
+      "name": "joint_d7k.json",
+      "sha256": "129a17729873d865a0807e61f61bc4572b289320d442f8d8d007316187f970cd",
+      "size": 1137
+    },
+    {
+      "name": "joint_damper10k.json",
+      "sha256": "954deb8fdd2286aae457c8151832422fa7bdf08f81bfb282394b3bf0896a580a",
+      "size": 1138
+    },
+    {
+      "name": "joint_damper12k.json",
+      "sha256": "aefb4288e11130ffb9f8de47f60bc35b2bb47311ede1932a13023bb739b76271",
+      "size": 1138
+    },
+    {
+      "name": "joint_ground3k.json",
+      "sha256": "8a739a0c6d28b5f2978e3d9bd4e108ebd1a2ecf07714e5bf3550a419e69fedcf",
+      "size": 1135
+    },
+    {
+      "name": "joint_nolevel20.json",
+      "sha256": "889126070a900e2d6a3af305f641314645e0104267e5d68380f4e3dbbbc30a07",
+      "size": 1135
+    },
+    {
+      "name": "joint_nolevel40.json",
+      "sha256": "2ebc115e42010d119b65ec3db1dce108aea22c998d3fc2cade0e8905a8b93ef3",
+      "size": 1135
+    },
+    {
+      "name": "joint_p100_a20000.json",
+      "sha256": "9755e2e3981ec437597c293faf2df900179beb0b77343a381489aa28158070d9",
+      "size": 1135
+    },
+    {
+      "name": "joint_p120_a40000.json",
+      "sha256": "71168d9d8624cf4cd5998e6bd6f64eea2e79a42aa3570d99dbe0a4d830fb7079",
+      "size": 1135
+    },
+    {
+      "name": "joint_p150_a20000.json",
+      "sha256": "f684a031bc6fe4ab7cbe9d24fbc4c03af19f4266dd4d158ee09c16a959e70f60",
+      "size": 1135
+    },
+    {
+      "name": "joint_p150_a40000.json",
+      "sha256": "b68d1fe87bc71cd3596117686eab163c6cc810ccfc5cdbe12a4b35af6668c3f8",
+      "size": 1135
+    },
+    {
+      "name": "joint_preview30.json",
+      "sha256": "b034ba8ae1ff3e1ab1a740534d52670ad248581c17d929c568f1ee3ebbf239d5",
+      "size": 1030
+    },
+    {
+      "name": "joint_preview40.json",
+      "sha256": "9943f4744a75d5e2fb6cdddedc597ffdc3b6dc30cd1512ee954949e1dd2276d5",
+      "size": 1030
+    },
+    {
+      "name": "joint_shape12.json",
+      "sha256": "f016db6004d8f8177b0c69e93e90e8531ac9c66fdedf57bc57dd1985e2a21a92",
+      "size": 1030
+    },
+    {
+      "name": "joint_shape16.json",
+      "sha256": "6affda2e44072d2cd304580f9ee93fb8cd6ca49a95a5e1029955ceb0b2b4ac9a",
+      "size": 1029
+    },
+    {
+      "name": "joint_shape20.json",
+      "sha256": "71d37746fdb6cc1174d8cd81232ec94905f1937c4edcc1aafb29633752e99cfe",
+      "size": 1030
+    },
+    {
+      "name": "leveled_fast.json",
+      "sha256": "7aebb636287b10bb5223b0bc56ce6749e18b76ed1b06bd33e13bd03b062548db",
+      "size": 963
+    },
+    {
+      "name": "leveled_slow.json",
+      "sha256": "e61c38fdb92289c15cd922cd97d26935908bd5d9b3fa5f4f55f31ba0d4e2270b",
+      "size": 935
+    },
+    {
+      "name": "load05.json",
+      "sha256": "78b7b9ea0e1e2e1f8a33662ff8840391a7e9352aaa6ee4af5c66982dc1178689",
+      "size": 816
+    },
+    {
+      "name": "load10.json",
+      "sha256": "850af638b88a9573cae87e74a4ee14515088c5b7c20838a7a82ffc3d8c825a87",
+      "size": 816
+    },
+    {
+      "name": "modal.json",
+      "sha256": "091a634cf56b9bb6f9c2a071ab96824e957b74f1136c8f9fa7fdaec5a48dd8e9",
+      "size": 844
+    },
+    {
+      "name": "modal_motor1000.json",
+      "sha256": "0cd3204a09531ff72d3a72fff7778675dc20f00eb7601e0a4da213790696bb84",
+      "size": 843
+    },
+    {
+      "name": "modal_motor400.json",
+      "sha256": "e1d55bd03ba350f7f0122de83df19a1ae432a861ba803e5074c4df20825f3331",
+      "size": 842
+    },
+    {
+      "name": "motor_derivative15.json",
+      "sha256": "467fd9a8e5bcd0b437c7f031e1ae76396eeb4778cf525635430aeb15b0519691",
+      "size": 876
+    },
+    {
+      "name": "motor_derivative15_sky4000.json",
+      "sha256": "afb93aa8b96ec30fedd8b5edc7c74be362db286f92dd6c069d43c17cdb637ce4",
+      "size": 874
+    },
+    {
+      "name": "motor_derivative20.json",
+      "sha256": "857977bbaf2932fb305504d4bbae99d003cf9f6f9f761b282595d2317395c599",
+      "size": 876
+    },
+    {
+      "name": "motor_derivative5.json",
+      "sha256": "7e1a1e0fd9a7ea801b7869946040b73cfe1f175c6b98b06d12cc2a7b55f4deb9",
+      "size": 875
+    },
+    {
+      "name": "preview350.json",
+      "sha256": "e751294a5b8bafcefd0ebed685fac745005f92baeb715aaf9be2bf3849a9c2d7",
+      "size": 817
+    },
+    {
+      "name": "preview500.json",
+      "sha256": "47c74bbff3bb3c25b7ac8eadaa36ce095108cf9a2706127e239c8eb0ca6d6fc8",
+      "size": 816
+    },
+    {
+      "name": "preview_damper4000.json",
+      "sha256": "87b06b081fc190f6c415396c7164e8972fdb588fbe7fcd88837ef6b65fedce02",
+      "size": 844
+    },
+    {
+      "name": "preview_damper8000.json",
+      "sha256": "f67c5c31b9ca39affd1160eed5ac94895a6b004a657e54887a72654ba4a5c47b",
+      "size": 844
+    },
+    {
+      "name": "spring20000.json",
+      "sha256": "49035eb856c579a998ba2bba430b26cc045f3f6065d21a72614c2b3062428efd",
+      "size": 815
+    },
+    {
+      "name": "spring40000.json",
+      "sha256": "8082a497847ed4eec7142d835bafc37b880e4f6e8c1bdb7fdc2573fdde95ee55",
+      "size": 815
+    },
+    {
+      "name": "torque_actual.json",
+      "sha256": "1fbc716488f2923f3d939af3ef460373dd4faa9fada823336225bf5829424dc0",
+      "size": 872
+    },
+    {
+      "name": "torque_off.json",
+      "sha256": "9ecac4db7149b27272030bdb25e3b1c8d4b64c0fcb73256da616164eacff5657",
+      "size": 844
+    },
+    {
+      "name": "travel30000.json",
+      "sha256": "b33874e72532140cbec2a532e887823fe25706b923e63f6766c5a59431528f47",
+      "size": 818
+    },
+    {
+      "name": "travel60000.json",
+      "sha256": "62a8614a582ec01b0caae7579d277457ffe1276d0901b24f4d03f09dc87e5ca4",
+      "size": 818
+    }
+  ]
+}

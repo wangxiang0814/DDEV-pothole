@@ -5,9 +5,10 @@ from ddevsim.runtime.contracts import ControlCommand,StrategyStatus
 from .config import ShallowPressConfig
 from .preview import wheel_support_height,exit_relief,grade_torque_feedforward,climb_resistance_envelope
 from .traction import allocate_torque
+from .body_control import modal_feedback
 
 WHEELS=('L1','R1','L2','R2')
-REQUIRED=('Xo','Yo','Zo','Vx','Roll_E','Pitch','Yaw','AVx','AVy','AVz','Az_SM')+tuple(
+REQUIRED=('Xo','Yo','Zo','Vx','Roll_E','Pitch','Yaw','AVx','AVy','AVz','Az_SM','XCG_TM','YCG_TM')+tuple(
     p+w+s for p,s in (('X_',''),('Y_',''),('Jnc_',''),('JncR_',''),('Fz_',''),('Fx_',''),('CmpT_','i'),('AVy_',''),('RRE_','i')) for w in WHEELS)
 
 
@@ -20,6 +21,11 @@ class ShallowPressStrategy:
         if context.strategy_id!='shallow_press' or context.vehicle_id!='tuned_ii_20261005' or 'scenario' not in context.config:
             raise ValueError('shallow_press requires same-vehicle scenario context')
         self.config=ShallowPressConfig(**dict(context.config.get('controller',{})))
+        self.preview_s=self.config.preview_s;self.reference_bandwidth=self.config.reference_bandwidth
+        if self.config.preview_schedule:
+            schedule=np.asarray(self.config.preview_schedule)
+            self.preview_s=float(np.interp(self.config.crossing_kph,schedule[:,0],schedule[:,1]))
+            self.reference_bandwidth=float(np.interp(self.config.crossing_kph,schedule[:,0],schedule[:,2]))
         if abs(context.control_period_s-self.config.control_period_s)>1e-10: raise ValueError('control periods differ')
         self.scene=dict(context.config['scenario'])
         wheel_support_height(np.zeros((4,2)),self.scene)
@@ -33,7 +39,7 @@ class ShallowPressStrategy:
     def _project(self,desired,dt):
         c=self.config
         cap=np.array([c.torque_limit_nm]*4+[c.force_limit_n]*4+[math.radians(220)])
-        rate=np.array([c.torque_rate_nm_s]*4+[c.force_rate_n_s]*4+[math.radians(400)])
+        rate=np.array([c.actuation_torque_rate_nm_s]*4+[c.force_rate_n_s]*4+[math.radians(400)])
         self.command=np.clip(self.command+np.clip(desired-self.command,-rate*dt,rate*dt),-cap,cap)
         return ControlCommand(tuple(self.command[:4]),tuple(self.command[4:8]),float(self.command[8]))
 
@@ -79,6 +85,15 @@ class ShallowPressStrategy:
         target=c.cruise_kph/3.6
         if xs[:2].max()>start-1.0 and min(xs[2:])<end+.263+.3: target=min(target,c.crossing_kph/3.6)
         if behind and rear_clear: target=0.
+        reference_roll=self.origin['Roll_E'];reference_pitch=self.origin['Pitch']
+        reference_roll_rate=0.;reference_pitch_rate=0.
+        if c.body_leveling_s:
+            progress=float(np.clip((t-c.settle_s)/c.body_leveling_s,0,1))
+            transition=progress*progress*(3-2*progress)
+            reference_roll*=1-transition;reference_pitch*=1-transition
+            reference_roll_rate=-self.origin['Roll_E']*6*progress*(1-progress)/c.body_leveling_s
+            reference_pitch_rate=-self.origin['Pitch']*6*progress*(1-progress)/c.body_leveling_s
+            if t<c.settle_s+c.body_leveling_s:target=0.;self.phase='LEVELING'
         if max(abs(x['Roll_E']),abs(x['Pitch']))>math.radians(8):
             self.failures.add('ATTITUDE'); target=min(target,.15)
         self.speed_reference+=float(np.clip(target-self.speed_reference,-c.acceleration_m_s2*dt,c.acceleration_m_s2*dt))
@@ -96,12 +111,14 @@ class ShallowPressStrategy:
         coast=np.clip((edge_distance-.04)/.20,0,1)
         effective*=np.where(covered,coast,1.)
         velocity=max(x['Vx'],0)*np.array([math.cos(x['Yaw']),math.sin(x['Yaw'])])
-        points=np.column_stack((xs,ys))+c.preview_s*velocity
-        grade_torque=grade_torque_feedforward(points,self.scene,self.filtered_load,radii,c.grade_torque_gain)
+        points=np.column_stack((xs,ys))+self.preview_s*velocity
+        torque_preview=self.preview_s if c.torque_preview_s is None else c.torque_preview_s
+        torque_points=np.column_stack((xs,ys))+torque_preview*velocity
+        grade_torque=grade_torque_feedforward(torque_points,self.scene,self.filtered_load,radii,c.grade_torque_gain)
         # Preview climbing resistance only. The existing speed feedback owns
         # downhill braking; signed grade FF previously overbraked entry.
         assist_weight=float(np.clip((self.speed_reference-x['Vx'])/max(.2*self.speed_reference,.03),0,1))
-        resistance=climb_resistance_envelope(points,self.scene,self.filtered_load,radii,c.grade_torque_gain,
+        resistance=climb_resistance_envelope(torque_points,self.scene,self.filtered_load,radii,c.grade_torque_gain,
             c.climb_geometry_lag_m,[math.cos(x['Yaw']),math.sin(x['Yaw'])])
         climb_torque=resistance*assist_weight
         if c.mode in ('full','traction'):total+=float(climb_torque.sum())
@@ -110,14 +127,27 @@ class ShallowPressStrategy:
                                     self.scene['friction'],radii,c.slip_gain)
         else: torques=np.full(4,total/4)
         geometric=wheel_support_height(points,self.scene)
-        rdd=np.clip(c.reference_bandwidth**2*(geometric-self.r)-2*c.reference_bandwidth*self.rd,-1.5,1.5)
+        rdd=np.clip(self.reference_bandwidth**2*(geometric-self.r)-2*self.reference_bandwidth*self.rd,-1.5,1.5)
         self.rd=np.clip(self.rd+rdd*dt,-.25,.25); self.r+=self.rd*dt
         relative_x=xs-x['Xo']; relative_y=ys-x['Yo']
         corner_v=self.filtered_vz+x['AVx']*relative_y-x['AVy']*relative_x
-        attitude=relative_y*(x['Roll_E']-self.origin['Roll_E'])-relative_x*(x['Pitch']-self.origin['Pitch'])
+        attitude=relative_y*(x['Roll_E']-reference_roll)-relative_x*(x['Pitch']-reference_pitch)
         ff=-c.spring_n_m*self.r-c.damper_n_s_m*self.rd-c.wheel_mass_kg*rdd
         ff+=exit_relief(points,self.scene,c.exit_relief_n)
         feedback=-c.height_gain*(x['Zo']-self.origin['Zo'])-c.attitude_gain*attitude-c.skyhook_gain*corner_v
+        if c.body_modal_blend:
+            cosine=math.cos(x['Yaw']);sine=math.sin(x['Yaw'])
+            dx=xs-x['XCG_TM'];dy=ys-x['YCG_TM']
+            cx=cosine*(x['XCG_TM']-x['Xo'])+sine*(x['YCG_TM']-x['Yo'])
+            cy=-sine*(x['XCG_TM']-x['Xo'])+cosine*(x['YCG_TM']-x['Yo'])
+            roll=x['Roll_E']-self.origin['Roll_E'];pitch=x['Pitch']-self.origin['Pitch']
+            heave=x['Zo']-self.origin['Zo']+cy*roll-cx*pitch
+            heave_rate=self.filtered_vz+cy*x['AVx']-cx*x['AVy']
+            modal=modal_feedback(cosine*dx+sine*dy,-sine*dx+cosine*dy,
+                heave,heave_rate,x['Roll_E']-reference_roll,x['Pitch']-reference_pitch,
+                x['AVx']-reference_roll_rate,x['AVy']-reference_pitch_rate,
+                c.height_gain,c.attitude_gain,c.skyhook_gain,c.attitude_damping_gain)
+            feedback=(1-c.body_modal_blend)*feedback+c.body_modal_blend*modal
         feedback+=c.travel_gain*(j-self.j0-self.r)+c.load_gain*(self.fz0-self.filtered_load)
         feedback+=c.groundhook_gain*(corner_v+jr-self.rd)
         force=np.clip(ff+feedback,-c.force_working_limit_n,c.force_working_limit_n)
@@ -126,6 +156,7 @@ class ShallowPressStrategy:
                       -math.radians(220),math.radians(220))
         command=self._project(np.r_[torques,force,steer],dt)
         self.records.append(dict(time_s=t,phase=self.phase,speed_reference_m_s=self.speed_reference,
+            body_reference_rad=[reference_roll,reference_pitch],
             geometric_road_m=geometric.tolist(),road_reference_m=self.r.tolist(),
             grade_torque_feedforward_nm=grade_torque.tolist(),
             climb_torque_feedforward_nm=climb_torque.tolist(),
@@ -140,5 +171,7 @@ class ShallowPressStrategy:
     def summary(self):
         if self.context is None: return dict(task_status='NOT_INITIALIZED')
         return dict(strategy_id='shallow_press',implemented=True,task_status='UNASSESSED',phase=self.phase,
+            reference_settings=dict(preview_s=self.preview_s,reference_bandwidth=self.reference_bandwidth,
+                torque_preview_s=self.preview_s if self.config.torque_preview_s is None else self.config.torque_preview_s),
             completed=self.completed,wheel_entered=self.entered.tolist(),wheel_crossed=self.crossed.tolist(),
             failure_reasons=sorted(self.failures),unassessed=['REAL_CHASSIS_GEOMETRY','REAL_ACTUATOR_POWER'])

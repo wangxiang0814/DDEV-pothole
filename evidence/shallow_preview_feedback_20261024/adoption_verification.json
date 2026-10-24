@@ -1,0 +1,32 @@
+{
+  "user_decision_date": "2026-10-24",
+  "scope": "EXPERT2_RESEARCH_ONLY",
+  "rows": [
+    {
+      "case": "right_track",
+      "old": "runs\\shallow_press\\right_track\\preview_frozen_validation_right_track_d04_v10_20261024_001",
+      "adopted_run": "runs\\shallow_press\\right_track\\preview_adopted_right_track_d04_v10_20261024_001",
+      "status": "SIMULATION_PASS",
+      "baseline_id": "expert2_mf52_research_20261024",
+      "adopted": true,
+      "native_csv_identical": true,
+      "tire_file_identical": true,
+      "metrics_identical": true,
+      "result_sha256": "1a3787b66055113951c8b25d3b7b0575e31c330f89eafa0e5625b771d6aeccb2",
+      "input_provenance_sha256": "0cb564d89feb0b73fa4d337914cccc7ac2b03734d17cf1f687f3d223617aa45e"
+    },
+    {
+      "case": "wide",
+      "old": "runs\\shallow_press\\wide\\preview_frozen_validation_wide_d04_v10_20261024_001",
+      "adopted_run": "runs\\shallow_press\\wide\\preview_adopted_wide_d04_v10_20261024_001",
+      "status": "SIMULATION_PASS",
+      "baseline_id": "expert2_mf52_research_20261024",
+      "adopted": true,
+      "native_csv_identical": true,
+      "tire_file_identical": true,
+      "metrics_identical": true,
+      "result_sha256": "0b6f4580c60328263ce402ad46bd03e57e3bc9e01a8edc4e3e6b31ba73b80f74",
+      "input_provenance_sha256": "a08662588001b7b007c2ff7bbf375a0ab3ee7448ccce9a70e442c919eb624875"
+    }
+  ]
+}

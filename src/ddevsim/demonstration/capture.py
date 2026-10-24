@@ -43,6 +43,7 @@ def episode_identity(run,result):
     record=json.loads(manifest.read_text(encoding='utf-8')) if manifest.exists() else {}
     return dict(strategy_id=record.get('strategy_id',result.get('strategy_id','wheel_lift')),
                 scene=result.get('scene',result.get('scenario')),plant=result.get('plant',record.get('plant')),
+                capability=result.get('capability',record.get('capability')),
                 input_provenance_sha256=result.get('input_provenance_sha256'))
 
 

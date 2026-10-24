@@ -1,0 +1,26 @@
+[
+  {
+    "run_id": "preview_joint_nolevel20_wide_d04_v20_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.38703595307988303,
+    "load": 2.1970977333440365,
+    "rms": 1.1576303404909236,
+    "pitch": 1.33884598
+  },
+  {
+    "run_id": "preview_joint_damper10k_wide_d04_v20_20261024_001",
+    "returncode": 0,
+    "status": "FAIL",
+    "failed": [
+      "loaded_wheel_speed_error"
+    ],
+    "slip": 0.4729083097242992,
+    "load": 2.216179728620759,
+    "rms": 1.126250969037547,
+    "pitch": 1.29122219
+  }
+]

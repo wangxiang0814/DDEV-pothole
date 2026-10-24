@@ -108,6 +108,8 @@ def main():
             status=result['status'],failed_criteria=[k for k,v in result['criteria'].items() if not v],
             metrics=result['metrics'],exit_progress=result['exit_progress'],
             chassis_diagnostic=result['chassis_diagnostic'],plant=result['plant'],
+            capability=result.get('capability'),diagnostic_motion_pass=result.get('diagnostic_motion_pass'),
+            diagnostic_failed_criteria=[k for k,v in result.get('diagnostic_criteria',{}).items() if not v],
             result_sha256=sha(run/'result.json'),input_provenance_sha256=manifest['input_provenance_sha256'],
             native_history_sha256={str(p.relative_to(run)):sha(p) for p in sorted((run/'model/output').glob('*.vs*'))}))
     output=dict(scope=plan['scope'],plan_sha256=sha(plan_path),source_sha256=reference,
@@ -115,7 +117,7 @@ def main():
         full_acceptance=False,rows=rows)
     (evidence/'verified_analysis.json').write_text(json.dumps(output,indent=2)+'\n',encoding='utf-8')
     lines=['# 固定参数验证工况索引','',
-        '所有视频为原生历史，未导出视频文件。MF52为未采纳的独立对照；SIMULATION_PASS仅指参数化研究筛查。', '',
+        '所有视频为原生历史，未导出视频文件。MF52采纳身份以各运行plant元数据为准；SIMULATION_PASS仅指参数化研究筛查，能力扫描不计入基线通过。', '',
         '|工况名称|类别|坑深cm|目标km/h|筛查|未通过项目|', '|---|---|---:|---:|---|---|']
     for row in rows:
         lines.append('|%s|%s/%s|%g|%g|%s|%s|'%(
@@ -124,6 +126,18 @@ def main():
     lines+=['','播放：`python scripts/open_run_visualizer.py runs/shallow_press/<case>/<run_id>`。',
             '详细速度、出坑停顿、姿态、轮速误差、轮载、净空假设及哈希见`verified_analysis.json`。']
     (evidence/'case_index.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+    if any(row['diagnostic_motion_pass'] is not None for row in rows):
+        lines=['# 独立转矩能力扫描','',
+            '原能力基线保持1000 Nm/s。以下只放宽该次诊断的转矩变化率，转矩幅值仍为±500 Nm；全部simulation_pass=false。', '',
+            '|工况名称|变化率Nm/s|实际均速km/h|轮速误差m/s|最大轮载/静载|诊断联合筛查|诊断未通过项目|',
+            '|---|---:|---:|---:|---:|---|---|']
+        for row in rows:
+            m=row['metrics']
+            lines.append('|%s|%g|%.3f|%.3f|%.3f|%s|%s|' % (row['run_id'],
+                row['capability']['actual_torque_rate_nm_s'],m['crossing_mean_kph'],
+                m['loaded_slip_proxy_peak_m_s'],max(m['wheel_load_peak_ratio_to_static']),
+                row['diagnostic_motion_pass'],', '.join(row['diagnostic_failed_criteria']) or '—'))
+        (evidence/'case_index.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     if bool(args.before_run)!=bool(args.after_run):parser.error('comparison requires both before/after runs')
     if args.before_run:plot_comparison(args.before_run.resolve(),args.after_run.resolve(),evidence)
     print(json.dumps(dict(count=len(rows),passing=output['passing'],full_acceptance=False)))

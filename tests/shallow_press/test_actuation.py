@@ -43,3 +43,37 @@ def test_slip_feedback_does_not_duplicate_body_speed_controller_braking():
     # A slip loop must not apply a second speed error to the rolling wheels.
     for t in np.arange(0,.2,.0005):u=a.step(float(t),float(t),d,np.zeros(9),None,{'friction':.7},.0005)
     assert np.allclose(u[:4],0)
+
+
+def test_recontact_drive_ramp_does_not_disable_corrective_slip_braking():
+    from ddevsim.strategies.shallow_press.actuation import CrawlActuation
+    a=CrawlActuation(ShallowPressConfig());d=feedback()
+    for w in ('L1','R1','L2','R2'):d['AVy_'+w]=1.3/.263
+    # Newly regained load: nominal drive must ramp, but a spinning wheel still
+    # needs bounded corrective braking during that ramp, not 120ms of waiting.
+    u=a.step(0.,0.,d,np.r_[[100]*4,[0]*5],None,{'friction':.7},.0005)
+    assert np.all(u[:4]<0)
+    assert np.max(abs(u[:4]))<=.5
+
+
+def test_slip_acceleration_feedback_reacts_before_large_speed_error():
+    from ddevsim.strategies.shallow_press.actuation import CrawlActuation
+    outputs=[]
+    for gain in (0.,5.):
+        a=CrawlActuation(ShallowPressConfig(motor_slip_derivative=gain))
+        for t in np.arange(0,.101,.0005):
+            d=feedback()
+            for w in ('L1','R1','L2','R2'):d['AVy_'+w]=(.3+3*t)/.263
+            u=a.step(float(t),float(t),d,np.r_[[100]*4,[0]*5],None,{'friction':.7},.0005)
+        outputs.append(u[:4])
+    assert np.all(outputs[1]<outputs[0]-5.)
+
+
+def test_capability_scan_keeps_baseline_and_only_changes_explicit_torque_slew():
+    import pytest
+    with pytest.raises(ValueError):ShallowPressConfig(torque_rate_nm_s=10000)
+    c=ShallowPressConfig(diagnostic_torque_rate_nm_s=10000)
+    assert c.torque_rate_nm_s==1000
+    assert c.actuation_torque_rate_nm_s==10000
+    assert c.force_rate_n_s==45400
+    assert ShallowPressConfig().actuation_torque_rate_nm_s==1000

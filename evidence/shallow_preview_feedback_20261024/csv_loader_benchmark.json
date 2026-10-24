@@ -1,0 +1,7 @@
+{
+  "rows": 60001,
+  "columns": 144,
+  "genfromtxt_s": 3.228344,
+  "loadtxt_s": 0.7876979,
+  "all_values_identical": true
+}

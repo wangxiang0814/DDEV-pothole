@@ -1,0 +1,32 @@
+{
+  "scope": "LOCAL_DEPENDENCY_AUDIT_COLLECTED_AFTER_INITIAL_MATRIX",
+  "python": "3.8.5 (default, Sep  3 2020, 21:29:08) [MSC v.1916 64 bit (AMD64)]",
+  "numpy": "1.24.4",
+  "files": {
+    "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Programs\\solvers\\trucksim_64.dll": "8b8acbb2eaad46813a8c2431b409baf80a808479b9bef1a5b7e595c92b927b4c",
+    "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Extensions\\External_Tire_API\\win64\\DelftTyreWrapper.dll": "00555bdc77ce617d39c9e1a05fa6e9d69b7a2ce1d1b61b8b60865a32a8a51da3",
+    "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Resources\\Extensions\\TNO_DelftTyre\\win64\\tno_delfttyre.dll": "47a2ef97e93d19761fe4621ce0dd4a3b7c8218337ebd141a75c5e0a48923163a",
+    "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Help\\Screens\\Tire_Models.pdf": "0590aad9a3adcfcb4b9f58cb3f26d3c68ffad3e8585f7a099711a900bebece2b",
+    "F:\\TruckSim2019\\TruckSim2019.0_Prog\\Help\\Manuals\\MFTyre-MFSwift_Help.pdf": "c123af3aa62c0c301d23f158fb627a128e28cda3797c2abafb4d6e1fbd9a89a6"
+  },
+  "manual_pages": {
+    "tire_models": [
+      48,
+      49,
+      58,
+      66
+    ],
+    "mf_tyre_mfswift": [
+      34,
+      35,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46
+    ]
+  }
+}

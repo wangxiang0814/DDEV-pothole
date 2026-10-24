@@ -5,6 +5,14 @@ from .controller import WHEELS
 from ddevsim.chassis_contact import rotation_matrix,plate_clearance
 
 
+def read_native_log(path):
+    """The native logger writes an entirely numeric, fixed-width CSV schema."""
+    with path.open(encoding='utf-8') as stream:names=stream.readline().strip().split(',')
+    if not all(names) or len(set(names))!=len(names):raise ValueError('invalid native CSV header')
+    return np.atleast_1d(np.loadtxt(path,delimiter=',',skiprows=1,
+        dtype=[(name,np.float64) for name in names],encoding='utf-8'))
+
+
 def exit_progress_metrics(values,scene,target_kph):
     """Separate wheel-exit low-speed dwell from merely reaching the final station."""
     t=np.asarray(values['time_s']);dt=float(np.median(np.diff(t)))
@@ -22,13 +30,13 @@ def exit_progress_metrics(values,scene,target_kph):
     return results
 
 
-def input_screen(values):
+def input_screen(values,torque_rate_nm_s=1000.):
     names=['imp_IMP_MYUSM_'+w for w in WHEELS]+['imp_IMP_FS_'+w for w in WHEELS]+['imp_IMP_STEER_SW']
     available=all(n in (values.dtype.names if hasattr(values,'dtype') else values) for n in names)
     if not available:return dict(input_amplitude=False,input_slew=False),dict(input_log_complete=False)
     u=np.column_stack([values[n] for n in names]);t=np.asarray(values['time_s'])
     rate=np.abs(np.diff(u,axis=0)/np.diff(t)[:,None])
-    cap=np.array([500.]*4+[18200.]*4+[220.]);slew=np.array([1000.]*4+[45400.]*4+[400.])
+    cap=np.array([500.]*4+[18200.]*4+[220.]);slew=np.array([torque_rate_nm_s]*4+[45400.]*4+[400.])
     finite=bool(np.isfinite(u).all() and np.isfinite(rate).all() and np.all(np.diff(t)>0))
     criteria=dict(input_amplitude=finite and bool(np.all(abs(u)<=cap+1e-5)),
                   input_slew=finite and bool(np.all(rate<=slew+0.1)))
@@ -36,6 +44,15 @@ def input_screen(values):
         suspension_force_peak_n=float(abs(u[:,4:8]).max()),steering_wheel_peak_deg=float(abs(u[:,8]).max()),
         torque_rate_peak_nm_s=float(rate[:,:4].max()),force_rate_peak_n_s=float(rate[:,4:8].max()),
         steering_rate_peak_deg_s=float(rate[:,8].max()))
+
+
+def capability_diagnostic(result,values,torque_rate_nm_s):
+    """Keep nominal failures visible; a capability scan is never baseline acceptance."""
+    actual,_=input_screen(values,torque_rate_nm_s)
+    criteria={**result['criteria'],**actual}
+    return dict(result,status='CAPABILITY_DIAGNOSTIC_ONLY',simulation_pass=False,acceptance_pass=False,
+        scope='CAPABILITY_DIAGNOSTIC_NOT_BASELINE_ACCEPTANCE',diagnostic_criteria=criteria,
+        diagnostic_motion_pass=all(criteria.values()))
 
 
 def assumed_clearance(values,scene,settle_s=3.):
@@ -105,13 +122,17 @@ def assess(values,scene,summary,settle_s=3.,crossing_kph=1.):
     input_criteria,input_metrics=input_screen(values);criteria.update(input_criteria)
     progress=exit_progress_metrics(values,scene,crossing_kph)
     criteria['no_exit_pause']=bool(progress) and all(r['observed'] and r['longest_pause_s']<.5 for r in progress)
+    crossing_speed=speed[mask]*3.6;mean_speed=float(crossing_speed.mean())
+    criteria['speed_tracking']=bool(has_crossing and abs(mean_speed-crossing_kph)<max(.15*crossing_kph,.15))
     metrics=dict(roll_peak_deg=float(np.rad2deg(roll)),pitch_peak_deg=float(np.rad2deg(pitch)),
         path_peak_m=lateral,jounce_min_m=float(j[live].min()),jounce_max_m=float(j[live].max()),
         loaded_slip_proxy_peak_m_s=slipmax if np.isfinite(slipmax) else None,az_rms_m_s2=float(np.sqrt(np.mean(az[mask]**2))),
         az_10ms_peak_m_s2=peak,max_wheel_load_n=ncload,contact_loss_s=(lost.sum(axis=0)*dt).tolist(),
         longest_contact_loss_s=longest,loaded_contact_fraction=contact_fraction.tolist(),
         wheel_load_peak_ratio_to_static=ratios.tolist(),
-        crossing_mean_kph=float(speed[mask].mean()*3.6),crossing_max_kph=float(speed[mask].max()*3.6),
+        crossing_mean_kph=mean_speed,crossing_max_kph=float(crossing_speed.max()),
+        crossing_median_kph=float(np.median(crossing_speed)),crossing_speed_std_kph=float(crossing_speed.std()),
+        requested_crossing_kph=float(crossing_kph),mean_speed_error_kph=mean_speed-crossing_kph,
         min_speed_m_s=float(speed[live].min()),backward_distance_m=backwards,
         stop_hold_peak_speed_m_s=float(np.max(abs(speed[tail]))),observed_duration_s=float(t[-1]),**input_metrics)
     criteria={k:bool(v) for k,v in criteria.items()}

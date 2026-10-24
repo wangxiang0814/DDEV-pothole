@@ -121,8 +121,9 @@ def test_input_provenance_refreshes_generated_hashes_and_carries_comparison(tmp_
     record=dict(generated_assets={'model/run_all.par':'old','model/simfile.sim':'old'},
         vehicle=dict(profile_id='parent',vehicle_sha256='parent-hash'),
         comparison_vehicle=dict(modification='external',adopted=False,ascii_stage='C:/Temp/run'),
-        source_sha256={},effective_config={},diagnostic_options={})
+        source_sha256={},effective_config={},diagnostic_options={},capability={'diagnostic':True})
     plant=freeze(tmp_path,record)
+    assert json.loads((tmp_path/'input_provenance.json').read_text())['capability']=={'diagnostic':True}
     assert record['generated_assets']['model/run_all.par']==sha256_file(tmp_path/'model/run_all.par')
     assert record['prepared_assets']['model/run_all.par']=='old'
     assert not plant['same_vehicle_as_parent']

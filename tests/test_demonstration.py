@@ -183,7 +183,9 @@ def test_shallow_capture_uses_its_own_identity_and_phase_log(tmp_path):
         {'time_s':3,'phase':'APPROACH'},{'time_s':7,'phase':'CROSSING'}]))
     assert phase_rows(tmp_path)==[(3.,'APPROACH'),(7.,'CROSSING')]
     plant={'parent_profile_id':'tuned_ii_20261005','comparison':{'adopted':False}}
-    identity=episode_identity(tmp_path,{'scene':{'depth_m':.04},'status':'SIMULATION_PASS','plant':plant})
+    capability={'diagnostic':True,'actual_torque_rate_nm_s':10000}
+    identity=episode_identity(tmp_path,{'scene':{'depth_m':.04},'status':'SIMULATION_PASS','plant':plant,'capability':capability})
+    assert identity['capability']==capability
     assert identity['strategy_id']=='shallow_press'
     assert identity['scene']=={'depth_m':.04}
     assert identity['plant']==plant

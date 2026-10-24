@@ -7,6 +7,11 @@
     "right_track": "scenarios/shallow_press/right_track.json",
     "wide": "scenarios/shallow_press/wide.json"
   },
-  "scope": "Independent SI controller and worker; original plant retained, external tire comparison is explicitly unadopted. Real geometry/power unknown.",
-  "route": "PREVIEW_FEEDFORWARD_FEEDBACK"
+  "scope": "User-adopted MF52 expert-two research baseline; original internal PAC52 retained as explicit comparison. Not physically calibrated or fully accepted.",
+  "route": "PREVIEW_FEEDFORWARD_FEEDBACK",
+  "research_baseline_id": "expert2_mf52_research_20261024",
+  "tire_model": "mf52_research",
+  "candidate_config": "configs/shallow_press/preview_multispeed_v2_20261024.json",
+  "validation_index": "evidence/shallow_multispeed_v2_20261024/case_index.md",
+  "capability_scan_adopted": false
 }
