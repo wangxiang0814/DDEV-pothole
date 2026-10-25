@@ -1,0 +1,3 @@
+# Rejected control diagnostics, 2026-10-25
+
+Original experimental modules and focused tests, SHA256 checked. Not an active controller or a complete runnable release. Fast groundhook, passive-force support cancellation and torque-rate feedback did not pass deep-pit joint screening. Hub-tangent kinematics remains a diagnostic utility only. Exact runnable sources, configs and native histories are frozen in each corresponding run directory; plans and verified results are in evidence/shallow_deep_coordination_20261025/. These variants were removed from the live configuration interface; the live PD controller retains the measured-yaw consistency fix and contact derivative reset. Expert one and the adopted MF52 model are unchanged.

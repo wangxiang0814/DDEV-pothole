@@ -1,0 +1,9 @@
+{
+  "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "8b9982fe70d25d4db98b9a51d71df2a2da6d4976fd174b1f98b201bb873f3148",
+  "src\\ddevsim\\strategies\\shallow_press\\config.py": "6c9e442046b3f557af7dc8ae7ebe4e12d84879d380fd7fd067464d0cd4cacb1c",
+  "src\\ddevsim\\strategies\\shallow_press\\controller.py": "bce286831e7acbc4e1112369a675d202749ae9a9083dbb109faa6278eae96c18",
+  "src\\ddevsim\\strategies\\shallow_press\\native.py": "0147cc9e3072403f6bdb4db17321b28a03cb297d7f2412b3b8de04875577c9cb",
+  "tests\\shallow_press\\test_motor_rate_control.py": "f0341f1666a76a286dd25eddf98b8733895570db6481f5f623a952e1ff0e4214",
+  "tests\\shallow_press\\test_suspension_inner.py": "8ae742d5eaa06829e2af6f6931e68185d7e983e65932160ebd7db09e8985703c",
+  "tests\\shallow_press\\test_contact_kinematics.py": "d60500dfb515f8142a8ff8edc0cf0fe5ba26076710767824b4a7bcaafcf48b6c"
+}

@@ -2,3 +2,9 @@
 **/run_all.par binary
 *.csv.gz binary
 *.png binary
+# Preserve this study's frozen text bytes as well as its binary source bundles.
+/archive/preview_development_20261025/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/evidence/shallow_deep_baseline_20261025/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/evidence/shallow_deep_coordination_20261025/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/evidence/shallow_extension_20261025/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/evidence/shallow_model_applicability_20261025/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

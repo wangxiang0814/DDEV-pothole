@@ -61,15 +61,30 @@ def make_mf52_tir(source):
         omitted_internal_scalars={k:data[k] for k in ('MU_REF_X','MU_REF_Y')})
 
 
-def install_mf52_comparison(source,tir_path,program_dir):
+def operating_mode_metadata(record,mode):
+    if mode not in (3104,3114,3124,3534,3544):raise ValueError('unsupported tire mode diagnostic')
+    if mode==3114:return dict(record)
+    updated={k:v for k,v in record.items() if k not in ('baseline_id','adoption_date','adoption_basis')}
+    updated.update(adopted=False,adoption_scope='NOT_ADOPTED_MODEL_DIAGNOSTIC',
+        baseline_parent_id='expert2_mf52_research_20261024',operating_mode=mode,
+        comparison_id='mf52_mode_'+str(mode),diagnostic_only=True,
+        parameter_status='SAME_TIR_WITH_UNVALIDATED_MODE_SPECIFIC_DEFAULTS',
+        manual_basis='Installed MFTyre-MFSwift_Help.pdf pp24-29; contact B=5 needs MF-Swift',
+        assumptions=list(record.get('assumptions',[]))+['Operating switch explicitly overridden to'+str(mode)+
+            '; transient/enveloping parameters and belt mass/inertia allocation are not calibrated'])
+    return updated
+
+
+def install_mf52_comparison(source,tir_path,program_dir,operating_mode=3114):
     """Native model8 replaces native model7 including its shear installation."""
     if not str(tir_path).isascii():raise ValueError('external tire requires ASCII path')
+    if operating_mode not in (3104,3114,3124,3534,3544):raise ValueError('unsupported tire mode diagnostic')
     program=str(program_dir).replace('/','\\')
     install=('OPT_TIRE_INERTIA_EXTERNAL 1\n'
              'EXTERNAL_TIRE_MODULE_DLL '+program+'\\Resources\\Extensions\\External_Tire_API\\win64\\DelftTyreWrapper.dll\n'
              'INSTALL_EXTERNAL_TIRE_API\nDELFT_TYRE_DATA '+str(tir_path).replace('/','\\')+'\n'
              'DELFT_TYRE_DLL '+program+'\\Resources\\Extensions\\TNO_DelftTyre\\win64\\tno_delfttyre.dll\n'
-             'DELFT_TYRE_SW 3114\nDELFT_TYRE_INIT')
+             'DELFT_TYRE_SW '+str(operating_mode)+'\nDELFT_TYRE_INIT')
     source,count=re.subn(r'INSTALL_TIRE_PAC52[^\n]*\nBEGIN_PACEJKA_52_DATA\n.*?END_PACEJKA_52_DATA',lambda _:install,source,flags=re.S)
     if count!=4:raise ValueError('expected four MF52 installations')
     source,count=re.subn(r'(?m)^OPT_TIRE_MODEL 7$','OPT_TIRE_MODEL 8',source)

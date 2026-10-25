@@ -69,19 +69,23 @@ def test_force_and_steering_are_slew_limited_at_native_step():
         old=u
 
 
-def test_motor_straight_reference_damps_yaw_instead_of_following_it():
+def test_motor_slip_frame_does_not_substitute_countersteering_for_actual_yaw():
     from ddevsim.strategies.shallow_press.config import ShallowPressConfig
     s=Recorder(); s.config=ShallowPressConfig(); s.speed_reference=.3
     b=NativePreviewBridge(s,REQUIRED)
     raw=np.zeros(len(REQUIRED)); raw[REQUIRED.index('AVz')]=np.rad2deg(-.1)
+    raw[REQUIRED.index('Vx')]=.3*3.6
     for i,w in enumerate(('L1','R1','L2','R2')):
         raw[REQUIRED.index('Y_'+w)]=.63 if i%2==0 else -.63
         raw[REQUIRED.index('Fz_'+w)]=3300
         raw[REQUIRED.index('CmpT_'+w+'i')]=15
         raw[REQUIRED.index('RRE_'+w+'i')]=263
-        raw[REQUIRED.index('AVy_'+w)]=.3/.263*30/np.pi
+        local=.3+.1*(.63 if i%2==0 else -.63)
+        raw[REQUIRED.index('AVy_'+w)]=local/.263*30/np.pi
     for t in np.arange(.0005,.2,.0005):command=b(float(t),raw)
-    assert command[1]>command[0]
+    # Freely rolling through the measured turn has zero longitudinal slip.
+    # Yaw correction belongs to outer torque allocation and steering feedback.
+    assert np.allclose(command[:4],20.)
 
 
 def test_crawl_procedure_releases_brake_without_changing_hardware():

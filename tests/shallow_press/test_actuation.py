@@ -77,3 +77,13 @@ def test_capability_scan_keeps_baseline_and_only_changes_explicit_torque_slew():
     assert c.actuation_torque_rate_nm_s==10000
     assert c.force_rate_n_s==45400
     assert ShallowPressConfig().actuation_torque_rate_nm_s==1000
+
+
+def test_slip_measurement_uses_actual_yaw_rate_not_corrective_yaw_demand():
+    from ddevsim.strategies.shallow_press.actuation import CrawlActuation
+    a=CrawlActuation(ShallowPressConfig());d=feedback();d['AVz']=.1
+    for w in ('L1','R1','L2','R2'):
+        d['AVy_'+w]=(d['Vx']-d['AVz']*(d['Y_'+w]-d['Yo']))/.263
+    for t in np.arange(0,.2,.0005):
+        u=a.step(float(t),float(t),d,np.zeros(9),None,{'friction':.7},.0005)
+    assert np.allclose(u[:4],0.,atol=1e-10)

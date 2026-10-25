@@ -27,13 +27,11 @@ class CrawlActuation:
                 w=('L1','R1','L2','R2')
                 radii=np.array([feedback['RRE_'+n+'i'] for n in w])
                 spin=np.array([feedback['AVy_'+n] for n in w])
-                origin=origin or dict(Yaw=feedback['Yaw'],Yo=feedback['Yo'])
-                desired_yaw=np.clip(-feedback['AVz']-1.5*(feedback['Yaw']-origin['Yaw'])
-                                    -.5*(feedback['Yo']-origin['Yo']),-.25,.25)
                 # Outer speed PI owns target-speed tracking. This loop uses
                 # measured translation to suppress tire slip, avoiding a second
                 # hard wheel-speed brake when gravity accelerates the body.
-                local=feedback['Vx']-desired_yaw*np.array([feedback['Y_'+n]-feedback['Yo'] for n in w])
+                # Measured rolling velocity; outer feedback owns yaw correction.
+                local=feedback['Vx']-feedback['AVz']*np.array([feedback['Y_'+n]-feedback['Yo'] for n in w])
                 slip=spin*radii-local
                 elapsed=0. if self.previous_slip_time is None else t-self.previous_slip_time
                 if self.previous_slip is None or not 0<elapsed<=2*c.motor_period_s:
@@ -42,12 +40,13 @@ class CrawlActuation:
                     derivative=np.clip((slip-self.previous_slip)/elapsed,-50.,50.)
                     self.slip_acceleration+=(1-math.exp(-elapsed/.01))*(derivative-self.slip_acceleration)
                 self.previous_slip=slip.copy();self.previous_slip_time=t
-                correction=-c.motor_slip_gain*slip-c.motor_slip_derivative*self.slip_acceleration
                 load=np.array([feedback['Fz_'+n] for n in w])
                 compression=np.array([feedback['CmpT_'+n+'i'] for n in w])
                 was=self.contact.copy()
                 self.contact=np.where((load<150)|(compression<=0),False,
                     np.where((load>300)&(compression>.0001),True,self.contact))
+                self.slip_acceleration[was!=self.contact]=0.
+                correction=-c.motor_slip_gain*slip-c.motor_slip_derivative*self.slip_acceleration
                 self.contact_since=np.where(self.contact&~was,t,self.contact_since)
                 self.contact_since=np.where(self.contact,self.contact_since,np.nan)
                 restored=np.where(self.contact,np.clip((t-self.contact_since-.02)/.10,0,1),0)

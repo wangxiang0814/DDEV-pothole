@@ -56,7 +56,7 @@ def main(argv=None):
     p.add_argument('--friction',type=float,default=.7)
     p.add_argument('--duration-s',type=float,default=60)
     p.add_argument('--mode',choices=['full','passive','traction','suspension'])
-    p.add_argument('--step-s',type=float,choices=[.0005,.00025,.000125],default=.0005)
+    p.add_argument('--step-s',type=float,choices=[.0005,.00025,.000125,.0001,.00005,.00002,.00001],default=.0005)
     p.add_argument('--delay-s',type=float,default=0)
     p.add_argument('--motor-delay-s',type=float,default=.002)
     p.add_argument('--contact-length-m',type=float,default=0,
@@ -66,6 +66,8 @@ def main(argv=None):
     p.add_argument('--tire-model',choices=['internal','mf52_compare','mf52_research'],default='mf52_research',
                    help='user-adopted expert-two research baseline; internal retains original plant')
     p.add_argument('--config',type=Path)
+    p.add_argument('--mf52-operating-mode',type=int,choices=[3104,3114,3124,3534,3544],default=3114,
+                   help='non3114 modes are unadopted model diagnostics, never baseline acceptance')
     p.add_argument('--diagnostic-torque-rate-nm-s',type=float)
     p.add_argument('--probe',action='store_true')
     p.add_argument('--coast-contact-probe',action='store_true',
@@ -79,6 +81,7 @@ def main(argv=None):
     if a.tyre_low_speed_m_s is not None and not 0<a.tyre_low_speed_m_s<=2:p.error('invalid tyre low speed')
     if a.tire_model!='internal' and (a.tyre_low_speed_m_s is not None or a.contact_length_m):
         p.error('external comparison defines its own contact/low-speed model; cannot combine internal patches')
+    if a.tire_model=='internal' and a.mf52_operating_mode!=3114:p.error('external operating mode needs external tire')
     capture=None
     if a.demonstration_config:
         from ddevsim.demonstration.cameras import load_config
@@ -124,15 +127,16 @@ def execute_run(a,config,case,run,capture):
             raise ValueError('brake release unexpectedly changed vehicle hardware identity')
         manifest['procedure_brake_release_mpa']=0.
     if a.tire_model in ('mf52_compare','mf52_research'):
-        from ddevsim.strategies.shallow_press.tire_comparison import make_mf52_tir,install_mf52_comparison,research_baseline_metadata
+        from ddevsim.strategies.shallow_press.tire_comparison import make_mf52_tir,install_mf52_comparison,research_baseline_metadata,operating_mode_metadata
         model=run/'model/run_all.par';source=model.read_text(encoding='utf-8')
         tir,record=make_mf52_tir(source);(run/'model/tire_comparison.tir').write_text(tir,encoding='ascii')
         if a.tire_model=='mf52_research':record=research_baseline_metadata(record)
+        record=operating_mode_metadata(record,a.mf52_operating_mode)
         stage=Path(tempfile.gettempdir())/'DDEV_tire_comparison'/hashlib.sha256(str(run).encode('utf-8')).hexdigest()[:16]
         stage.mkdir(parents=True,exist_ok=False);tire=stage/'tire_comparison.tir';tire.write_text(tir,encoding='ascii')
         from ddevsim.solver_api import parse_simfile
         program=parse_simfile(run/'model/simfile.sim')['PROGDIR'].rstrip('\\/')
-        model.write_text(install_mf52_comparison(source,tire,program),encoding='utf-8')
+        model.write_text(install_mf52_comparison(source,tire,program,a.mf52_operating_mode),encoding='utf-8')
         from ddevsim.vehicle_profiles.tuned_ii import vehicle_identity
         manifest['comparison_vehicle']={**record,'parent':case.vehicle_profile_id,
             'vehicle_sha256':vehicle_identity(model),'tire_sha256':sha256_file(tire),'ascii_stage':str(tire)}
@@ -167,7 +171,7 @@ def execute_run(a,config,case,run,capture):
     bridge=NativePreviewBridge(strategy,manifest['export_names'],step_s=a.step_s,delay_s=a.delay_s,motor_delay_s=a.motor_delay_s)
     (run/'control_config.json').write_text(json.dumps(asdict(config),indent=2)+'\n',encoding='utf-8')
     sources=[Path(__file__).resolve()]+[ROOT/'src/ddevsim/strategies/shallow_press'/n for n in
-        ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py','body_control.py')]
+        ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py','body_control.py','contact_kinematics.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('units.py','cosim.py','chassis_contact.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('solver_api.py','pothole_case.py','visual_mesh.py',
         'scenarios/pit.py','scenarios/builder.py','scenarios/parameters.py','vehicle_profiles/tuned_ii.py',
@@ -213,6 +217,10 @@ def execute_run(a,config,case,run,capture):
             if a.coast_contact_probe:
                 result.update(status='CONTACT_COAST_PROBE_ONLY',simulation_pass=False,
                               coast_started_s=coast_started[0],acceptance_pass=False)
+        if a.mf52_operating_mode!=3114:
+            result.update(model_diagnostic_motion_pass=result.get('diagnostic_motion_pass',result['simulation_pass']),
+                status='MODEL_DIAGNOSTIC_ONLY',simulation_pass=False,acceptance_pass=False,
+                scope='UNADOPTED_TIRE_MODEL_DIAGNOSTIC')
         result.update(strategy_id='shallow_press',native=native,scene=asdict(case.geometry),config=asdict(config),
             plant=plant,capability=config.capability_metadata(),input_provenance_sha256=manifest['input_provenance_sha256'],
             native_csv_sha256=sha256_file(run/'native_1ms.csv'),model_sha256=manifest['final_model_sha256'])
