@@ -1,0 +1,303 @@
+{
+  "scope": "EXACT_LISTED_FROZEN_SOURCES_NOT_NATIVE_HISTORY_OR_ENTIRE_REPOSITORY",
+  "archives": {
+    "beb11be428e8e276a5419d440935696136f0a51202ba8c9d62c04c83362acad1": {
+      "archive": "evidence\\shallow_deep_coordination_20261025\\source_archives\\beb11be428e8e276.zip",
+      "archive_sha256": "3bf1ecebca9e4f6bab501decbfdf82629bfd42b47b3c09f1a126f7d23b77c48b",
+      "source_sha256": {
+        "scripts\\run_shallow_preview.py": "fec0f80056c4d2609eccac27b6279e8a433e6630a03d806da32e01de47fa509e",
+        "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+        "src\\ddevsim\\strategies\\shallow_press\\config.py": "9e0131019c23b209775baedf77c86e03f2ee2f491073633e197c91c32f2d9331",
+        "src\\ddevsim\\strategies\\shallow_press\\controller.py": "fb8ec97639d0f067e8eb0964c1fd8a4b7f7e24e7a59adcabc7948762dd646436",
+        "src\\ddevsim\\strategies\\shallow_press\\traction.py": "c2854d4d5a49d5525bace1b60cb678de1a113182784ecccab930ad2819853f45",
+        "src\\ddevsim\\strategies\\shallow_press\\native.py": "8b532332e196c6a82afb0f4566269b87abc9eb413cc22df0dfe85b32b7dc41bb",
+        "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "2474a9743d3ba21798ce6681560a81134e934023f99aed85158320216dd219ac",
+        "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+        "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "4386ffbc5fcbbd801a14f47be2609f1e31611324e7846abaa85e5829643883b1",
+        "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+        "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+        "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+        "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+        "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+        "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+        "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+        "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+        "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+        "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+        "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+        "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+        "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+        "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16"
+      }
+    },
+    "6c16d0ac98a363165fe67f5fdae0f53c9263e983b47887a616c0535cd3759bc0": {
+      "archive": "evidence\\shallow_deep_coordination_20261025\\source_archives\\6c16d0ac98a36316.zip",
+      "archive_sha256": "b93f5ffb96c8f2dc0862cd5891c1f7e5e7fa7f922b32cf0a35db5c0832ff1a38",
+      "source_sha256": {
+        "scripts\\run_shallow_preview.py": "89cf60866d37ad5cfcc5c81f1e91ca5faf16091336576fcf3059e13158b31bfc",
+        "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+        "src\\ddevsim\\strategies\\shallow_press\\config.py": "9e0131019c23b209775baedf77c86e03f2ee2f491073633e197c91c32f2d9331",
+        "src\\ddevsim\\strategies\\shallow_press\\controller.py": "ddc623c45be0e12f84e4d08eaf1b298b952c8c417d042191cf95b1b326f0c227",
+        "src\\ddevsim\\strategies\\shallow_press\\traction.py": "c2854d4d5a49d5525bace1b60cb678de1a113182784ecccab930ad2819853f45",
+        "src\\ddevsim\\strategies\\shallow_press\\native.py": "8b532332e196c6a82afb0f4566269b87abc9eb413cc22df0dfe85b32b7dc41bb",
+        "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "ffa03a92b937b212a1223fa7844cb2e73e8d63b006f60fb13541362f66369d74",
+        "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+        "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "453fd30858e80c68912d33350a178d05180d0a41f518e97ae6b7b367198cac3f",
+        "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+        "src\\ddevsim\\strategies\\shallow_press\\contact_kinematics.py": "66f26ade096f2cdd2a1680be8488f9c59852bc52503c78b62780e6c16408dba5",
+        "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+        "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+        "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+        "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+        "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+        "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+        "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+        "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+        "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+        "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+        "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+        "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+        "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16"
+      }
+    },
+    "b03010786d15695f79bfab27d81cb01a32a4bb4a7fda25aac5076af82be131a9": {
+      "archive": "evidence\\shallow_deep_coordination_20261025\\source_archives\\b03010786d15695f.zip",
+      "archive_sha256": "299a28416c79fb824033463f3e4b28c8c1338aa76681949e504555e761588c1e",
+      "source_sha256": {
+        "scripts\\run_shallow_preview.py": "bab334caff569982952cdb05464566e20a7a0fe99e259b967870eba20dadbe6e",
+        "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+        "src\\ddevsim\\strategies\\shallow_press\\config.py": "4a179298d9998784ae87fe5d53e34cf67b483343aba8f248ce009ad1ddcf4b90",
+        "src\\ddevsim\\strategies\\shallow_press\\controller.py": "4496327cee16af3efb10326e167ea19fc7b701421b43a015a0b84293257c67e7",
+        "src\\ddevsim\\strategies\\shallow_press\\traction.py": "c2854d4d5a49d5525bace1b60cb678de1a113182784ecccab930ad2819853f45",
+        "src\\ddevsim\\strategies\\shallow_press\\native.py": "8b532332e196c6a82afb0f4566269b87abc9eb413cc22df0dfe85b32b7dc41bb",
+        "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "c871ed94d70ef712560647f48ae4022ce0d79aea6348592198345af58ec5f8a8",
+        "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+        "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "4386ffbc5fcbbd801a14f47be2609f1e31611324e7846abaa85e5829643883b1",
+        "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+        "src\\ddevsim\\strategies\\shallow_press\\contact_kinematics.py": "04229cf71626e931cec9fbab134a2d6492be10ae0d45d81117f18048fcd13d2b",
+        "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+        "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+        "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+        "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+        "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+        "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+        "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+        "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+        "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+        "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+        "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+        "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+        "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16"
+      }
+    },
+    "26581d3f9fdae1540d7361b9dc919fdd3f66b80e906e81381021c07f6f4dda31": {
+      "archive": "evidence\\shallow_deep_coordination_20261025\\source_archives\\26581d3f9fdae154.zip",
+      "archive_sha256": "e05f3f2b25d71c08f06afc441780739d73c950102cda2d74a2d5cc433ee6aa92",
+      "source_sha256": {
+        "scripts\\run_shallow_preview.py": "bab334caff569982952cdb05464566e20a7a0fe99e259b967870eba20dadbe6e",
+        "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+        "src\\ddevsim\\strategies\\shallow_press\\config.py": "c42dfe19954a9075f61a22a78e19e124c87292996b989280c79ed4d6396c2ac7",
+        "src\\ddevsim\\strategies\\shallow_press\\controller.py": "bce286831e7acbc4e1112369a675d202749ae9a9083dbb109faa6278eae96c18",
+        "src\\ddevsim\\strategies\\shallow_press\\traction.py": "c2854d4d5a49d5525bace1b60cb678de1a113182784ecccab930ad2819853f45",
+        "src\\ddevsim\\strategies\\shallow_press\\native.py": "0147cc9e3072403f6bdb4db17321b28a03cb297d7f2412b3b8de04875577c9cb",
+        "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "bd8d50e437a2af7df7f42ee25a437c86c57773bc0711c5863d4c221434035850",
+        "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+        "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "4386ffbc5fcbbd801a14f47be2609f1e31611324e7846abaa85e5829643883b1",
+        "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+        "src\\ddevsim\\strategies\\shallow_press\\contact_kinematics.py": "66f26ade096f2cdd2a1680be8488f9c59852bc52503c78b62780e6c16408dba5",
+        "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+        "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+        "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+        "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+        "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+        "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+        "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+        "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+        "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+        "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+        "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+        "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+        "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16"
+      }
+    },
+    "83bf28129bfbf0fff68fd0e5d14432195322163a33fd2fef14a9690137293c60": {
+      "archive": "evidence\\shallow_deep_coordination_20261025\\source_archives\\83bf28129bfbf0ff.zip",
+      "archive_sha256": "b77a410fc06eff6eaeb54e6109b37f2e25e7e52d7139a09718730c07f689a9bb",
+      "source_sha256": {
+        "scripts\\run_shallow_preview.py": "89cf60866d37ad5cfcc5c81f1e91ca5faf16091336576fcf3059e13158b31bfc",
+        "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+        "src\\ddevsim\\strategies\\shallow_press\\config.py": "6c9e442046b3f557af7dc8ae7ebe4e12d84879d380fd7fd067464d0cd4cacb1c",
+        "src\\ddevsim\\strategies\\shallow_press\\controller.py": "bce286831e7acbc4e1112369a675d202749ae9a9083dbb109faa6278eae96c18",
+        "src\\ddevsim\\strategies\\shallow_press\\traction.py": "c2854d4d5a49d5525bace1b60cb678de1a113182784ecccab930ad2819853f45",
+        "src\\ddevsim\\strategies\\shallow_press\\native.py": "0147cc9e3072403f6bdb4db17321b28a03cb297d7f2412b3b8de04875577c9cb",
+        "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "8b9982fe70d25d4db98b9a51d71df2a2da6d4976fd174b1f98b201bb873f3148",
+        "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+        "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "453fd30858e80c68912d33350a178d05180d0a41f518e97ae6b7b367198cac3f",
+        "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+        "src\\ddevsim\\strategies\\shallow_press\\contact_kinematics.py": "66f26ade096f2cdd2a1680be8488f9c59852bc52503c78b62780e6c16408dba5",
+        "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+        "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+        "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+        "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+        "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+        "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+        "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+        "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+        "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+        "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+        "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+        "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+        "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16"
+      }
+    },
+    "017f1e3c7f2837ed455ebe92485995b5d796b48bb5c0cfd5c078ec1289c7ff70": {
+      "archive": "evidence\\shallow_deep_coordination_20261025\\source_archives\\017f1e3c7f2837ed.zip",
+      "archive_sha256": "cff2d4c609f7c22c912aff33d817309b9ea317621d99c6047a24804e0ac8a647",
+      "source_sha256": {
+        "scripts\\probe_shallow_extension.py": "e79f1564841d886e8fb8c790457008085948248cb14965e13e89ac923cfc856b",
+        "scripts\\run_shallow_preview.py": "fec0f80056c4d2609eccac27b6279e8a433e6630a03d806da32e01de47fa509e",
+        "src\\ddevsim\\strategies\\shallow_press\\__init__.py": "88de4de21989362918c0a2afbbdc0285c8f5a00d9997795d63e5e490587b47c0",
+        "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "2474a9743d3ba21798ce6681560a81134e934023f99aed85158320216dd219ac",
+        "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+        "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+        "src\\ddevsim\\strategies\\shallow_press\\config.py": "9e0131019c23b209775baedf77c86e03f2ee2f491073633e197c91c32f2d9331",
+        "src\\ddevsim\\strategies\\shallow_press\\controller.py": "fb8ec97639d0f067e8eb0964c1fd8a4b7f7e24e7a59adcabc7948762dd646436",
+        "src\\ddevsim\\strategies\\shallow_press\\identification.py": "4e80b9732c6f4b7c06bcf38e022f14d829a861de4f6ede1339c951e6c779cc69",
+        "src\\ddevsim\\strategies\\shallow_press\\native.py": "8b532332e196c6a82afb0f4566269b87abc9eb413cc22df0dfe85b32b7dc41bb",
+        "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+        "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "4386ffbc5fcbbd801a14f47be2609f1e31611324e7846abaa85e5829643883b1",
+        "src\\ddevsim\\strategies\\shallow_press\\traction.py": "c2854d4d5a49d5525bace1b60cb678de1a113182784ecccab930ad2819853f45",
+        "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+        "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+        "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+        "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+        "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+        "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+        "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+        "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+        "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+        "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+        "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+        "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+        "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16"
+      }
+    },
+    "94c5e10f73ca28ace26560baa53627b068ff5b6ef7a0752234920802f77c601b": {
+      "archive": "evidence\\shallow_deep_coordination_20261025\\source_archives\\94c5e10f73ca28ac.zip",
+      "archive_sha256": "612f1e170ca3b11a0fb8011600c8206eaaa36f6877b724eada128e09cc854255",
+      "source_sha256": {
+        "scripts\\run_shallow_preview.py": "89cf60866d37ad5cfcc5c81f1e91ca5faf16091336576fcf3059e13158b31bfc",
+        "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+        "src\\ddevsim\\strategies\\shallow_press\\config.py": "c42dfe19954a9075f61a22a78e19e124c87292996b989280c79ed4d6396c2ac7",
+        "src\\ddevsim\\strategies\\shallow_press\\controller.py": "bce286831e7acbc4e1112369a675d202749ae9a9083dbb109faa6278eae96c18",
+        "src\\ddevsim\\strategies\\shallow_press\\traction.py": "c2854d4d5a49d5525bace1b60cb678de1a113182784ecccab930ad2819853f45",
+        "src\\ddevsim\\strategies\\shallow_press\\native.py": "0147cc9e3072403f6bdb4db17321b28a03cb297d7f2412b3b8de04875577c9cb",
+        "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "bd8d50e437a2af7df7f42ee25a437c86c57773bc0711c5863d4c221434035850",
+        "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+        "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "453fd30858e80c68912d33350a178d05180d0a41f518e97ae6b7b367198cac3f",
+        "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+        "src\\ddevsim\\strategies\\shallow_press\\contact_kinematics.py": "66f26ade096f2cdd2a1680be8488f9c59852bc52503c78b62780e6c16408dba5",
+        "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+        "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+        "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+        "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+        "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+        "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+        "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+        "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+        "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+        "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+        "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+        "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+        "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16"
+      }
+    }
+  },
+  "cohorts": [
+    {
+      "cohort": "evidence\\shallow_deep_baseline_20261025\\derivative_diagnostic\\frozen_plan.json",
+      "source_identity": "beb11be428e8e276a5419d440935696136f0a51202ba8c9d62c04c83362acad1",
+      "run": "runs\\shallow_press\\wide\\deep_d0_diagnostic_wide_d10_v30_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "evidence\\shallow_deep_baseline_20261025\\frozen_plan.json",
+      "source_identity": "beb11be428e8e276a5419d440935696136f0a51202ba8c9d62c04c83362acad1",
+      "run": "runs\\shallow_press\\right_track\\deep_v2_baseline_right_track_d10_v10_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "evidence\\shallow_deep_coordination_20261025\\confirmation\\frozen_plan.json",
+      "source_identity": "6c16d0ac98a363165fe67f5fdae0f53c9263e983b47887a616c0535cd3759bc0",
+      "run": "runs\\shallow_press\\wide\\confirm_v2yaw_repeat_wide_d10_v10_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "evidence\\shallow_deep_coordination_20261025\\coverage\\frozen_plan.json",
+      "source_identity": "6c16d0ac98a363165fe67f5fdae0f53c9263e983b47887a616c0535cd3759bc0",
+      "run": "runs\\shallow_press\\wide\\coverage_v2yaw_wide_d10_v10_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "evidence\\shallow_deep_coordination_20261025\\intermediate\\frozen_plan.json",
+      "source_identity": "6c16d0ac98a363165fe67f5fdae0f53c9263e983b47887a616c0535cd3759bc0",
+      "run": "runs\\shallow_press\\wide\\intermediate_v2yaw_wide_d04_v15_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "evidence\\shallow_deep_coordination_20261025\\kinematics\\frozen_plan.json",
+      "source_identity": "b03010786d15695f79bfab27d81cb01a32a4bb4a7fda25aac5076af82be131a9",
+      "run": "runs\\shallow_press\\wide\\deep_hub_kinematics_wide_d10_v10_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "evidence\\shallow_deep_coordination_20261025\\suspension_inner\\fast_groundhook\\frozen_plan.json",
+      "source_identity": "26581d3f9fdae1540d7361b9dc919fdd3f66b80e906e81381021c07f6f4dda31",
+      "run": "runs\\shallow_press\\wide\\deep_fast_groundhook_wide_d10_v10_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "evidence\\shallow_deep_coordination_20261025\\suspension_inner\\support\\frozen_plan.json",
+      "source_identity": "26581d3f9fdae1540d7361b9dc919fdd3f66b80e906e81381021c07f6f4dda31",
+      "run": "runs\\shallow_press\\wide\\deep_support_wide_d10_v10_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "evidence\\shallow_deep_coordination_20261025\\torque_rate\\frozen_plan.json",
+      "source_identity": "83bf28129bfbf0fff68fd0e5d14432195322163a33fd2fef14a9690137293c60",
+      "run": "runs\\shallow_press\\wide\\deep_rate_control_wide_d10_v10_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "SPECIAL_DIAGNOSTIC/stationary_mf52_extension_20261025_001",
+      "source_identity": "017f1e3c7f2837ed455ebe92485995b5d796b48bb5c0cfd5c078ec1289c7ff70",
+      "run": "runs\\shallow_press\\right_track\\stationary_mf52_extension_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "SPECIAL_DIAGNOSTIC/mf52_mode3544_availability_20261025_001",
+      "source_identity": "94c5e10f73ca28ace26560baa53627b068ff5b6ef7a0752234920802f77c601b",
+      "run": "runs\\shallow_press\\wide\\mf52_mode3544_availability_20261025_001",
+      "run_status": "ERROR"
+    },
+    {
+      "cohort": "SPECIAL_DIAGNOSTIC/mf52_mode3124_availability_20261025_001",
+      "source_identity": "94c5e10f73ca28ace26560baa53627b068ff5b6ef7a0752234920802f77c601b",
+      "run": "runs\\shallow_press\\wide\\mf52_mode3124_availability_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "SPECIAL_DIAGNOSTIC/mf52_mode3124_deep10_v3_20261025_001",
+      "source_identity": "94c5e10f73ca28ace26560baa53627b068ff5b6ef7a0752234920802f77c601b",
+      "run": "runs\\shallow_press\\wide\\mf52_mode3124_deep10_v3_20261025_001",
+      "run_status": "COMPLETED"
+    },
+    {
+      "cohort": "SPECIAL_DIAGNOSTIC/mf52_mode3124_deep10_v3_step100us_20261025_001",
+      "source_identity": "94c5e10f73ca28ace26560baa53627b068ff5b6ef7a0752234920802f77c601b",
+      "run": "runs\\shallow_press\\wide\\mf52_mode3124_deep10_v3_step100us_20261025_001",
+      "run_status": "COMPLETED"
+    }
+  ],
+  "bytes": 431323
+}

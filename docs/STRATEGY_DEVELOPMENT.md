@@ -4,6 +4,8 @@
 
 当前专家二已有独立的预瞄前馈与反馈控制器、原生 worker、研究筛查和播放接口。`implemented=True`表示代码可运行；`SIMULATION_PASS`只表示明确参数与模型下通过研究筛查，完整实车能力与底盘安全验收仍未完成。
 
+2026-10-25深坑优先研究见[本轮报告](SHALLOW_DEEP_COORDINATION_20261025.md)。72项整数速度/深度矩阵与重复、步长、时延、中间速度分开统计；失败对照不混入活动参数。新增`probe_shallow_extension.py`用于有界静态行程诊断，`analyze_shallow_contact.py`用于已有完整原生结果的接触事件分析；二者都不授予完整安全PASS。MF-Swift授权不可用，当前不默认尝试该分支。精确冻结源码压缩快照及索引随本轮证据保存，复现旧计划须在独立目录恢复对应原始字节，不能改旧SHA绕过校验。
+
 所有命令从本 Git 项目根目录执行。使用能运行现有 requirements.txt 的 Python 环境；本轮验证环境为 F:\anaconda3\python.exe（Python 3.8.5）。
 
 ## 抬轮策略

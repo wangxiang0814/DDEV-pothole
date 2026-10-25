@@ -1,0 +1,723 @@
+{
+  "scope": "SINGLE_FACTOR_DERIVATIVE_DIAGNOSTIC",
+  "plan_sha256": "d8124ba3baaf6d5144f6cdf9fc6531e0ce46a4fdcdbd5f4f77a1a69e39ab7e37",
+  "source_sha256": {
+    "scripts\\run_shallow_preview.py": "fec0f80056c4d2609eccac27b6279e8a433e6630a03d806da32e01de47fa509e",
+    "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+    "src\\ddevsim\\strategies\\shallow_press\\config.py": "9e0131019c23b209775baedf77c86e03f2ee2f491073633e197c91c32f2d9331",
+    "src\\ddevsim\\strategies\\shallow_press\\controller.py": "fb8ec97639d0f067e8eb0964c1fd8a4b7f7e24e7a59adcabc7948762dd646436",
+    "src\\ddevsim\\strategies\\shallow_press\\traction.py": "c2854d4d5a49d5525bace1b60cb678de1a113182784ecccab930ad2819853f45",
+    "src\\ddevsim\\strategies\\shallow_press\\native.py": "8b532332e196c6a82afb0f4566269b87abc9eb413cc22df0dfe85b32b7dc41bb",
+    "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "2474a9743d3ba21798ce6681560a81134e934023f99aed85158320216dd219ac",
+    "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+    "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "4386ffbc5fcbbd801a14f47be2609f1e31611324e7846abaa85e5829643883b1",
+    "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+    "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+    "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+    "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+    "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+    "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+    "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+    "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+    "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+    "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+    "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+    "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+    "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+    "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16"
+  },
+  "config_sha256": "92acabb8e7b2d67f00ae9753217d69efd7b4526e29774bbe6316ea9810bd4195",
+  "count": 4,
+  "passing": 0,
+  "full_acceptance": false,
+  "rows": [
+    {
+      "case": "wide",
+      "run_id": "deep_d0_diagnostic_wide_d10_v30_20261025_001",
+      "kind": "derivative_diagnostic",
+      "depth_m": 0.1,
+      "crossing_kph": 3,
+      "status": "FAIL",
+      "failed_criteria": [
+        "loaded_wheel_speed_error",
+        "no_backward_motion",
+        "contact_retention",
+        "wheel_load_peak",
+        "backward_distance",
+        "no_exit_pause",
+        "speed_tracking"
+      ],
+      "metrics": {
+        "roll_peak_deg": 1.32338987,
+        "pitch_peak_deg": 4.61146178,
+        "path_peak_m": 0.022419205085,
+        "jounce_min_m": -0.0788296589,
+        "jounce_max_m": 0.128186406,
+        "loaded_slip_proxy_peak_m_s": 10.191851679656459,
+        "az_rms_m_s2": 3.141575644784976,
+        "az_10ms_peak_m_s2": 10.26202190096001,
+        "max_wheel_load_n": 12848.2477,
+        "contact_loss_s": [
+          0.20900000000000019,
+          0.4260000000000004,
+          0.6430000000000006,
+          0.8200000000000007
+        ],
+        "longest_contact_loss_s": [
+          0.1140000000000001,
+          0.13200000000000012,
+          0.19100000000000017,
+          0.2200000000000002
+        ],
+        "loaded_contact_fraction": [
+          0.9478475543897547,
+          0.9081931800648048,
+          0.8967751890140411,
+          0.8603610553926864
+        ],
+        "wheel_load_peak_ratio_to_static": [
+          2.9352909210869846,
+          2.933242279768345,
+          3.1633792853368417,
+          4.460391667194163
+        ],
+        "crossing_mean_kph": 2.1250184957438436,
+        "crossing_max_kph": 5.026356080000001,
+        "crossing_median_kph": 2.73820849,
+        "crossing_speed_std_kph": 1.8501946214463758,
+        "requested_crossing_kph": 3.0,
+        "mean_speed_error_kph": -0.8749815042561564,
+        "min_speed_m_s": -0.533350125,
+        "backward_distance_m": 0.2542386814489447,
+        "stop_hold_peak_speed_m_s": 0.0013252904944444446,
+        "observed_duration_s": 40.0,
+        "input_log_complete": true,
+        "torque_peak_nm": 500.0,
+        "suspension_force_peak_n": 6000.0,
+        "steering_wheel_peak_deg": 25.7429112,
+        "torque_rate_peak_nm_s": 1000.0005000023293,
+        "force_rate_peak_n_s": 45400.005000105884,
+        "steering_rate_peak_deg_s": 400.0000500009314
+      },
+      "exit_progress": [
+        {
+          "wheel": "FL",
+          "observed": true,
+          "zone_duration_s": 1.6170000000000013,
+          "longest_pause_s": 0.5850000000000005,
+          "min_speed_kph": -1.37868431
+        },
+        {
+          "wheel": "FR",
+          "observed": true,
+          "zone_duration_s": 1.6210000000000013,
+          "longest_pause_s": 0.5850000000000005,
+          "min_speed_kph": -1.37868431
+        },
+        {
+          "wheel": "RL",
+          "observed": true,
+          "zone_duration_s": 2.158000000000002,
+          "longest_pause_s": 0.8110000000000007,
+          "min_speed_kph": -1.92006045
+        },
+        {
+          "wheel": "RR",
+          "observed": true,
+          "zone_duration_s": 2.151000000000002,
+          "longest_pause_s": 0.8110000000000007,
+          "min_speed_kph": -1.92006045
+        }
+      ],
+      "chassis_diagnostic": {
+        "geometry_status": "ASSUMED_NOT_MEASURED",
+        "bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "physical_contact_force": "NOT_MODELED",
+        "sampling_s": 0.0010000000000000009,
+        "sweep": [
+          {
+            "static_min_clearance_m": 0.1,
+            "min_gap_m": -0.02286405546701553,
+            "first_intersection_s": 22.7415
+          },
+          {
+            "static_min_clearance_m": 0.15,
+            "min_gap_m": 0.027290797059661337,
+            "first_intersection_s": null
+          },
+          {
+            "static_min_clearance_m": 0.2,
+            "min_gap_m": 0.07744564958633907,
+            "first_intersection_s": null
+          }
+        ],
+        "limitation": "Sprung rectangular plane only; excludes axles/exhaust. After first intersection trajectory is counterfactual."
+      },
+      "plant": {
+        "parent_profile_id": "tuned_ii_20261005",
+        "parent_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+        "same_vehicle_as_parent": false,
+        "comparison": {
+          "modification": "MF_TYRE_52_EXTERNAL_COMPARISON",
+          "adopted": true,
+          "is_same_vehicle_identity": false,
+          "source_coefficient_count": 129,
+          "coefficient_mapping": "P52_ prefix removed; LFZ0 -> LFZO; special geometry/load fields mapped",
+          "assumptions": [
+            "175/70R13 rim width127mm and mass9.3kg are unverified tire-file metadata",
+            "External rigid tire inertia overridden to original IT=.4; native IW=.9 retained",
+            "Linear vertical stiffness220000N/m; no added vertical damping; constant nominal RRE",
+            "VXLOW=.2m/s; dynamics switch3114 (smooth road, linear transient, symmetric combined)"
+          ],
+          "omitted_internal_scalars": {
+            "MU_REF_X": 1.0,
+            "MU_REF_Y": 1.0
+          },
+          "baseline_id": "expert2_mf52_research_20261024",
+          "adoption_scope": "EXPERT2_RESEARCH_ONLY",
+          "adoption_date": "2026-10-24",
+          "adoption_basis": "USER_SELECTED_AFTER_22_CASE_COMPARISON",
+          "real_vehicle_validated": false,
+          "parent": "tuned_ii_20261005",
+          "vehicle_sha256": "3ebb01c84cfb1d9e87de14c2c3d26d46e1d52be44d5aa0b0cde5812cef4fa0d5",
+          "tire_sha256": "a2b317f2a2f06bc58c2c518814ee3ac1b6f39aadb31bef1a5c734c4f6eb444fa",
+          "ascii_stage": "C:\\Users\\32356\\AppData\\Local\\Temp\\DDEV_tire_comparison\\4d8661286f3f4f5b\\tire_comparison.tir"
+        },
+        "recipe_sha256": "230241df54e2c258aacd8414cb6ac5533ae3fc7a68b91c1435ca5aeed990a742"
+      },
+      "capability": {
+        "diagnostic": false,
+        "baseline_torque_rate_nm_s": 1000.0,
+        "actual_torque_rate_nm_s": 1000.0,
+        "torque_limit_nm": 500.0,
+        "force_limit_n": 18200.0,
+        "force_rate_n_s": 45400.0,
+        "scope": "EXPERT_ONE_ALIGNED_SOFTWARE_BASELINE",
+        "physical_hardware_validated": false
+      },
+      "diagnostic_motion_pass": null,
+      "diagnostic_failed_criteria": [],
+      "result_sha256": "15cc2950b088e9c32144b8bbe0ded5bfef6fc3b18c50113cdb513075950cedbb",
+      "input_provenance_sha256": "24e9d939b33a9b37b0017266d8bf8c7377bc6aae3664b6165c5115f917f0cec3",
+      "native_history_sha256": {
+        "model\\output\\shallow_preview.vs": "b6656619e7098a378ae2d724299caaffdf7be766dc16d5b5f67e45d7e0576673",
+        "model\\output\\shallow_preview.vsb": "2e5e75d5f0675bdb512e7518110d52448002f99d851eb87727bda55152eedd67"
+      }
+    },
+    {
+      "case": "wide",
+      "run_id": "deep_d0_diagnostic_wide_d10_v10_20261025_001",
+      "kind": "derivative_diagnostic",
+      "depth_m": 0.1,
+      "crossing_kph": 1,
+      "status": "FAIL",
+      "failed_criteria": [
+        "loaded_wheel_speed_error",
+        "no_backward_motion",
+        "contact_retention",
+        "wheel_load_peak",
+        "backward_distance"
+      ],
+      "metrics": {
+        "roll_peak_deg": 1.3434181,
+        "pitch_peak_deg": 2.83240973,
+        "path_peak_m": 0.012452138185,
+        "jounce_min_m": -0.0800513292,
+        "jounce_max_m": 0.0801568315,
+        "loaded_slip_proxy_peak_m_s": 9.527924376943023,
+        "az_rms_m_s2": 1.8169631668768416,
+        "az_10ms_peak_m_s2": 9.521582341021048,
+        "max_wheel_load_n": 10165.0672,
+        "contact_loss_s": [
+          0.15300000000000014,
+          0.2140000000000002,
+          0.26800000000000024,
+          0.6020000000000005
+        ],
+        "longest_contact_loss_s": [
+          0.08300000000000007,
+          0.10100000000000009,
+          0.14500000000000013,
+          0.16600000000000015
+        ],
+        "loaded_contact_fraction": [
+          0.9862290756163932,
+          0.9789725406118578,
+          0.9774057887358786,
+          0.9430197080893873
+        ],
+        "wheel_load_peak_ratio_to_static": [
+          1.9890457452910446,
+          2.192557193028334,
+          2.5027508626360753,
+          3.241557208663187
+        ],
+        "crossing_mean_kph": 1.1367698710570224,
+        "crossing_max_kph": 3.9439174100000005,
+        "crossing_median_kph": 0.9780140820000001,
+        "crossing_speed_std_kph": 0.819721281301555,
+        "requested_crossing_kph": 1.0,
+        "mean_speed_error_kph": 0.13676987105702243,
+        "min_speed_m_s": -0.1671204377777778,
+        "backward_distance_m": 0.04926702127823893,
+        "stop_hold_peak_speed_m_s": 0.00041920512500000007,
+        "observed_duration_s": 40.0,
+        "input_log_complete": true,
+        "torque_peak_nm": 496.636309,
+        "suspension_force_peak_n": 6000.0,
+        "steering_wheel_peak_deg": 18.8462077,
+        "torque_rate_peak_nm_s": 1000.000500000553,
+        "force_rate_peak_n_s": 45400.005000105884,
+        "steering_rate_peak_deg_s": 400.0000499995103
+      },
+      "exit_progress": [
+        {
+          "wheel": "FL",
+          "observed": true,
+          "zone_duration_s": 1.5940000000000014,
+          "longest_pause_s": 0.29300000000000026,
+          "min_speed_kph": -0.601633576
+        },
+        {
+          "wheel": "FR",
+          "observed": true,
+          "zone_duration_s": 1.5940000000000014,
+          "longest_pause_s": 0.29300000000000026,
+          "min_speed_kph": -0.601633576
+        },
+        {
+          "wheel": "RL",
+          "observed": true,
+          "zone_duration_s": 2.298000000000002,
+          "longest_pause_s": 0.3160000000000003,
+          "min_speed_kph": -0.302448062
+        },
+        {
+          "wheel": "RR",
+          "observed": true,
+          "zone_duration_s": 2.267000000000002,
+          "longest_pause_s": 0.3160000000000003,
+          "min_speed_kph": -0.302448062
+        }
+      ],
+      "chassis_diagnostic": {
+        "geometry_status": "ASSUMED_NOT_MEASURED",
+        "bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "physical_contact_force": "NOT_MODELED",
+        "sampling_s": 0.0010000000000000009,
+        "sweep": [
+          {
+            "static_min_clearance_m": 0.1,
+            "min_gap_m": -0.006718806534045774,
+            "first_intersection_s": 15.1055
+          },
+          {
+            "static_min_clearance_m": 0.15,
+            "min_gap_m": 0.04322170887327356,
+            "first_intersection_s": null
+          },
+          {
+            "static_min_clearance_m": 0.2,
+            "min_gap_m": 0.09211089358388165,
+            "first_intersection_s": null
+          }
+        ],
+        "limitation": "Sprung rectangular plane only; excludes axles/exhaust. After first intersection trajectory is counterfactual."
+      },
+      "plant": {
+        "parent_profile_id": "tuned_ii_20261005",
+        "parent_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+        "same_vehicle_as_parent": false,
+        "comparison": {
+          "modification": "MF_TYRE_52_EXTERNAL_COMPARISON",
+          "adopted": true,
+          "is_same_vehicle_identity": false,
+          "source_coefficient_count": 129,
+          "coefficient_mapping": "P52_ prefix removed; LFZ0 -> LFZO; special geometry/load fields mapped",
+          "assumptions": [
+            "175/70R13 rim width127mm and mass9.3kg are unverified tire-file metadata",
+            "External rigid tire inertia overridden to original IT=.4; native IW=.9 retained",
+            "Linear vertical stiffness220000N/m; no added vertical damping; constant nominal RRE",
+            "VXLOW=.2m/s; dynamics switch3114 (smooth road, linear transient, symmetric combined)"
+          ],
+          "omitted_internal_scalars": {
+            "MU_REF_X": 1.0,
+            "MU_REF_Y": 1.0
+          },
+          "baseline_id": "expert2_mf52_research_20261024",
+          "adoption_scope": "EXPERT2_RESEARCH_ONLY",
+          "adoption_date": "2026-10-24",
+          "adoption_basis": "USER_SELECTED_AFTER_22_CASE_COMPARISON",
+          "real_vehicle_validated": false,
+          "parent": "tuned_ii_20261005",
+          "vehicle_sha256": "26fb7c0a7fedef427ade83877dc3ca62da4b261589ba634b8337437cd792088e",
+          "tire_sha256": "a2b317f2a2f06bc58c2c518814ee3ac1b6f39aadb31bef1a5c734c4f6eb444fa",
+          "ascii_stage": "C:\\Users\\32356\\AppData\\Local\\Temp\\DDEV_tire_comparison\\925cb504f791d980\\tire_comparison.tir"
+        },
+        "recipe_sha256": "230241df54e2c258aacd8414cb6ac5533ae3fc7a68b91c1435ca5aeed990a742"
+      },
+      "capability": {
+        "diagnostic": false,
+        "baseline_torque_rate_nm_s": 1000.0,
+        "actual_torque_rate_nm_s": 1000.0,
+        "torque_limit_nm": 500.0,
+        "force_limit_n": 18200.0,
+        "force_rate_n_s": 45400.0,
+        "scope": "EXPERT_ONE_ALIGNED_SOFTWARE_BASELINE",
+        "physical_hardware_validated": false
+      },
+      "diagnostic_motion_pass": null,
+      "diagnostic_failed_criteria": [],
+      "result_sha256": "dec9be0e2e6ca2915d5aac53f49cecc44606852b2dff5421907ed11fcac082b8",
+      "input_provenance_sha256": "172058b43f53b19668e471a51e2b5337cf948bbd118af4678aec193bdf73ba88",
+      "native_history_sha256": {
+        "model\\output\\shallow_preview.vs": "b6656619e7098a378ae2d724299caaffdf7be766dc16d5b5f67e45d7e0576673",
+        "model\\output\\shallow_preview.vsb": "ebb63911886182b61deb3ba41eefd65ce57bcc58d163717f04d60d8627acedb9"
+      }
+    },
+    {
+      "case": "right_track",
+      "run_id": "deep_d0_diagnostic_right_track_d10_v30_20261025_001",
+      "kind": "derivative_diagnostic",
+      "depth_m": 0.1,
+      "crossing_kph": 3,
+      "status": "FAIL",
+      "failed_criteria": [
+        "loaded_wheel_speed_error",
+        "contact_retention",
+        "wheel_load_peak"
+      ],
+      "metrics": {
+        "roll_peak_deg": 2.34128266,
+        "pitch_peak_deg": 1.39013752,
+        "path_peak_m": 0.029456631714999997,
+        "jounce_min_m": -0.0782361049,
+        "jounce_max_m": 0.0943243079,
+        "loaded_slip_proxy_peak_m_s": 2.546106569624998,
+        "az_rms_m_s2": 1.4712062295908719,
+        "az_10ms_peak_m_s2": 4.895938449153168,
+        "max_wheel_load_n": 11613.8254,
+        "contact_loss_s": [
+          0.0,
+          0.13900000000000012,
+          0.1140000000000001,
+          0.3600000000000003
+        ],
+        "longest_contact_loss_s": [
+          0.0,
+          0.08500000000000008,
+          0.1140000000000001,
+          0.19200000000000017
+        ],
+        "loaded_contact_fraction": [
+          1.0,
+          0.9674468085106382,
+          0.9742553191489361,
+          0.9191489361702128
+        ],
+        "wheel_load_peak_ratio_to_static": [
+          1.812331544975764,
+          2.739263226176212,
+          2.419185656959381,
+          4.429272565805401
+        ],
+        "crossing_mean_kph": 2.936458188470213,
+        "crossing_max_kph": 3.87056222,
+        "crossing_median_kph": 3.0118001000000003,
+        "crossing_speed_std_kph": 0.4285117165107508,
+        "requested_crossing_kph": 3.0,
+        "mean_speed_error_kph": -0.06354181152978722,
+        "min_speed_m_s": -5.9848438333333335e-05,
+        "backward_distance_m": 0.0,
+        "stop_hold_peak_speed_m_s": 0.004945597166666666,
+        "observed_duration_s": 40.0,
+        "input_log_complete": true,
+        "torque_peak_nm": 261.990558,
+        "suspension_force_peak_n": 3790.71154,
+        "steering_wheel_peak_deg": 20.4442756,
+        "torque_rate_peak_nm_s": 1000.0004999987766,
+        "force_rate_peak_n_s": 45400.005000105775,
+        "steering_rate_peak_deg_s": 400.00004000093236
+      },
+      "exit_progress": [
+        {
+          "wheel": "FR",
+          "observed": true,
+          "zone_duration_s": 0.7360000000000007,
+          "longest_pause_s": 0.0,
+          "min_speed_kph": 1.59245389
+        },
+        {
+          "wheel": "RR",
+          "observed": true,
+          "zone_duration_s": 0.7760000000000007,
+          "longest_pause_s": 0.0,
+          "min_speed_kph": 1.82211846
+        }
+      ],
+      "chassis_diagnostic": {
+        "geometry_status": "ASSUMED_NOT_MEASURED",
+        "bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "physical_contact_force": "NOT_MODELED",
+        "sampling_s": 0.0010000000000000009,
+        "sweep": [
+          {
+            "static_min_clearance_m": 0.1,
+            "min_gap_m": 0.051017970600976376,
+            "first_intersection_s": null
+          },
+          {
+            "static_min_clearance_m": 0.15,
+            "min_gap_m": 0.10103735033121987,
+            "first_intersection_s": null
+          },
+          {
+            "static_min_clearance_m": 0.2,
+            "min_gap_m": 0.1510567300614636,
+            "first_intersection_s": null
+          }
+        ],
+        "limitation": "Sprung rectangular plane only; excludes axles/exhaust. After first intersection trajectory is counterfactual."
+      },
+      "plant": {
+        "parent_profile_id": "tuned_ii_20261005",
+        "parent_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+        "same_vehicle_as_parent": false,
+        "comparison": {
+          "modification": "MF_TYRE_52_EXTERNAL_COMPARISON",
+          "adopted": true,
+          "is_same_vehicle_identity": false,
+          "source_coefficient_count": 129,
+          "coefficient_mapping": "P52_ prefix removed; LFZ0 -> LFZO; special geometry/load fields mapped",
+          "assumptions": [
+            "175/70R13 rim width127mm and mass9.3kg are unverified tire-file metadata",
+            "External rigid tire inertia overridden to original IT=.4; native IW=.9 retained",
+            "Linear vertical stiffness220000N/m; no added vertical damping; constant nominal RRE",
+            "VXLOW=.2m/s; dynamics switch3114 (smooth road, linear transient, symmetric combined)"
+          ],
+          "omitted_internal_scalars": {
+            "MU_REF_X": 1.0,
+            "MU_REF_Y": 1.0
+          },
+          "baseline_id": "expert2_mf52_research_20261024",
+          "adoption_scope": "EXPERT2_RESEARCH_ONLY",
+          "adoption_date": "2026-10-24",
+          "adoption_basis": "USER_SELECTED_AFTER_22_CASE_COMPARISON",
+          "real_vehicle_validated": false,
+          "parent": "tuned_ii_20261005",
+          "vehicle_sha256": "aa25af946f459bcaed8856b13b8d6f878dcbd505083268cf36026900492dd315",
+          "tire_sha256": "a2b317f2a2f06bc58c2c518814ee3ac1b6f39aadb31bef1a5c734c4f6eb444fa",
+          "ascii_stage": "C:\\Users\\32356\\AppData\\Local\\Temp\\DDEV_tire_comparison\\753a78daf1949152\\tire_comparison.tir"
+        },
+        "recipe_sha256": "230241df54e2c258aacd8414cb6ac5533ae3fc7a68b91c1435ca5aeed990a742"
+      },
+      "capability": {
+        "diagnostic": false,
+        "baseline_torque_rate_nm_s": 1000.0,
+        "actual_torque_rate_nm_s": 1000.0,
+        "torque_limit_nm": 500.0,
+        "force_limit_n": 18200.0,
+        "force_rate_n_s": 45400.0,
+        "scope": "EXPERT_ONE_ALIGNED_SOFTWARE_BASELINE",
+        "physical_hardware_validated": false
+      },
+      "diagnostic_motion_pass": null,
+      "diagnostic_failed_criteria": [],
+      "result_sha256": "f319b384b97a19e435c7f11a8c0a0d1b3d51eb8f58464511ea333c3b85261bd5",
+      "input_provenance_sha256": "4f919f7af16f283db488c5048021ffb0bfe5a8e143994386bbe6256a53968b80",
+      "native_history_sha256": {
+        "model\\output\\shallow_preview.vs": "b6656619e7098a378ae2d724299caaffdf7be766dc16d5b5f67e45d7e0576673",
+        "model\\output\\shallow_preview.vsb": "0ce473e2f8de61829022079f690aa8c391db1d62fe57e88a9fc0c454c7f54a9f"
+      }
+    },
+    {
+      "case": "wide",
+      "run_id": "deep_d0_diagnostic_wide_d06_v30_20261025_001",
+      "kind": "derivative_diagnostic",
+      "depth_m": 0.06,
+      "crossing_kph": 3,
+      "status": "FAIL",
+      "failed_criteria": [
+        "loaded_wheel_speed_error",
+        "contact_retention",
+        "wheel_load_peak"
+      ],
+      "metrics": {
+        "roll_peak_deg": 1.03081578,
+        "pitch_peak_deg": 1.86246928,
+        "path_peak_m": 0.006812624105000001,
+        "jounce_min_m": -0.0441022311,
+        "jounce_max_m": 0.08727940270000001,
+        "loaded_slip_proxy_peak_m_s": 1.041959632462484,
+        "az_rms_m_s2": 2.1208903935590975,
+        "az_10ms_peak_m_s2": 7.170233168406786,
+        "max_wheel_load_n": 9710.13668,
+        "contact_loss_s": [
+          0.04200000000000004,
+          0.052000000000000046,
+          0.2310000000000002,
+          0.48800000000000043
+        ],
+        "longest_contact_loss_s": [
+          0.04200000000000004,
+          0.052000000000000046,
+          0.14200000000000013,
+          0.16800000000000015
+        ],
+        "loaded_contact_fraction": [
+          0.9905172413793103,
+          0.9883620689655173,
+          0.9355603448275862,
+          0.8890086206896551
+        ],
+        "wheel_load_peak_ratio_to_static": [
+          2.05280333667808,
+          1.8668793474312548,
+          2.390741986652503,
+          3.156911061480317
+        ],
+        "crossing_mean_kph": 2.970961604129311,
+        "crossing_max_kph": 3.9290478900000005,
+        "crossing_median_kph": 3.0091478900000004,
+        "crossing_speed_std_kph": 0.4343321062447991,
+        "requested_crossing_kph": 3.0,
+        "mean_speed_error_kph": -0.029038395870689016,
+        "min_speed_m_s": -5.9848438333333335e-05,
+        "backward_distance_m": 0.0,
+        "stop_hold_peak_speed_m_s": 0.003566194861111111,
+        "observed_duration_s": 40.0,
+        "input_log_complete": true,
+        "torque_peak_nm": 247.985084,
+        "suspension_force_peak_n": 3839.11849,
+        "steering_wheel_peak_deg": 12.9225119,
+        "torque_rate_peak_nm_s": 1000.0003999987825,
+        "force_rate_peak_n_s": 45400.005000105884,
+        "steering_rate_peak_deg_s": 400.0000199995114
+      },
+      "exit_progress": [
+        {
+          "wheel": "FL",
+          "observed": true,
+          "zone_duration_s": 0.7260000000000006,
+          "longest_pause_s": 0.0,
+          "min_speed_kph": 1.56705525
+        },
+        {
+          "wheel": "FR",
+          "observed": true,
+          "zone_duration_s": 0.7270000000000006,
+          "longest_pause_s": 0.0,
+          "min_speed_kph": 1.56705525
+        },
+        {
+          "wheel": "RL",
+          "observed": true,
+          "zone_duration_s": 0.7330000000000007,
+          "longest_pause_s": 0.0,
+          "min_speed_kph": 1.9567620399999999
+        },
+        {
+          "wheel": "RR",
+          "observed": true,
+          "zone_duration_s": 0.7340000000000007,
+          "longest_pause_s": 0.0,
+          "min_speed_kph": 1.9567620399999999
+        }
+      ],
+      "chassis_diagnostic": {
+        "geometry_status": "ASSUMED_NOT_MEASURED",
+        "bounds_m": [
+          -2.225,
+          0.3,
+          -0.5,
+          0.5
+        ],
+        "physical_contact_force": "NOT_MODELED",
+        "sampling_s": 0.0010000000000000009,
+        "sweep": [
+          {
+            "static_min_clearance_m": 0.1,
+            "min_gap_m": 0.02995969653436023,
+            "first_intersection_s": null
+          },
+          {
+            "static_min_clearance_m": 0.15,
+            "min_gap_m": 0.07993771744450412,
+            "first_intersection_s": null
+          },
+          {
+            "static_min_clearance_m": 0.2,
+            "min_gap_m": 0.12991559620386398,
+            "first_intersection_s": null
+          }
+        ],
+        "limitation": "Sprung rectangular plane only; excludes axles/exhaust. After first intersection trajectory is counterfactual."
+      },
+      "plant": {
+        "parent_profile_id": "tuned_ii_20261005",
+        "parent_vehicle_sha256": "a059431c563efcb2955863f1e5c41e1082c559ce178a039ff4952280ce1ab6cc",
+        "same_vehicle_as_parent": false,
+        "comparison": {
+          "modification": "MF_TYRE_52_EXTERNAL_COMPARISON",
+          "adopted": true,
+          "is_same_vehicle_identity": false,
+          "source_coefficient_count": 129,
+          "coefficient_mapping": "P52_ prefix removed; LFZ0 -> LFZO; special geometry/load fields mapped",
+          "assumptions": [
+            "175/70R13 rim width127mm and mass9.3kg are unverified tire-file metadata",
+            "External rigid tire inertia overridden to original IT=.4; native IW=.9 retained",
+            "Linear vertical stiffness220000N/m; no added vertical damping; constant nominal RRE",
+            "VXLOW=.2m/s; dynamics switch3114 (smooth road, linear transient, symmetric combined)"
+          ],
+          "omitted_internal_scalars": {
+            "MU_REF_X": 1.0,
+            "MU_REF_Y": 1.0
+          },
+          "baseline_id": "expert2_mf52_research_20261024",
+          "adoption_scope": "EXPERT2_RESEARCH_ONLY",
+          "adoption_date": "2026-10-24",
+          "adoption_basis": "USER_SELECTED_AFTER_22_CASE_COMPARISON",
+          "real_vehicle_validated": false,
+          "parent": "tuned_ii_20261005",
+          "vehicle_sha256": "ad59766cd9c1d8152ca78aef4ac6ebe2f2a5e582d9072932828289e5264840d5",
+          "tire_sha256": "a2b317f2a2f06bc58c2c518814ee3ac1b6f39aadb31bef1a5c734c4f6eb444fa",
+          "ascii_stage": "C:\\Users\\32356\\AppData\\Local\\Temp\\DDEV_tire_comparison\\8b4648d0d424796c\\tire_comparison.tir"
+        },
+        "recipe_sha256": "230241df54e2c258aacd8414cb6ac5533ae3fc7a68b91c1435ca5aeed990a742"
+      },
+      "capability": {
+        "diagnostic": false,
+        "baseline_torque_rate_nm_s": 1000.0,
+        "actual_torque_rate_nm_s": 1000.0,
+        "torque_limit_nm": 500.0,
+        "force_limit_n": 18200.0,
+        "force_rate_n_s": 45400.0,
+        "scope": "EXPERT_ONE_ALIGNED_SOFTWARE_BASELINE",
+        "physical_hardware_validated": false
+      },
+      "diagnostic_motion_pass": null,
+      "diagnostic_failed_criteria": [],
+      "result_sha256": "9e142e346a45e9e54aaf4609a27dc4db5daa12fe2634299ca06d0fa4ff17d78b",
+      "input_provenance_sha256": "83a7514ac131c3742680eaa61fb37621cdaf8a1b5d0c30ac779ac843b97f23fa",
+      "native_history_sha256": {
+        "model\\output\\shallow_preview.vs": "b6656619e7098a378ae2d724299caaffdf7be766dc16d5b5f67e45d7e0576673",
+        "model\\output\\shallow_preview.vsb": "acb8f66f31386484adcc4c939c2afed5b4eda01ba1d9eb60a07f8475d6e27990"
+      }
+    }
+  ]
+}

@@ -87,3 +87,7 @@ runs/<strategy>/<case>/<run_id>/
 `body_control.py`按实际CG和轮位将升沉、侧倾、俯仰目标力/矩分配四角；`body_leveling_s`先静止平滑调平，再进入蠕行。悬架预瞄与参考带宽按请求速度在reset时选择，转矩爬沿预瞄独立，过坑过程中不随瞬时车速跳变。`actuation.py`实现接地滞回、名义驱动恢复坡道和独立防滑制动；滤波轮速差微分仅在显式启用时使用，失效重置历史。
 
 默认能力仍与专家一对齐。仅显式`--diagnostic-torque-rate-nm-s`或同名配置字段启动用户批准的更快转矩扫描；`capability`记录原1000 Nm/s和实际值，随不可变输入、结果、清单和episode携带。原基线criteria不改写，诊断另列diagnostic_criteria；状态CAPABILITY_DIAGNOSTIC_ONLY、simulation_pass=false、acceptance_pass=false，不能混入普通筛查通过点。
+
+2026-10-25接触协调核查：活动轮速环使用实测横摆角速度计算局部滚动速度，接地切换重置微分记忆。`contact_kinematics.py`只提供轮心/径向切平面近似诊断，未作为活动反馈量；失败的快速groundhook、被动力补偿与转矩率控制退出活动配置并独立归档。`identification.py`和`probe_shallow_extension.py`只做连续限速的静态模型可达核查，不输出实体执行器额定值或策略PASS。
+
+外置轮胎非3114工作模式仅为显式、未采纳模型诊断，必须清除研究采纳身份，并固定MODEL_DIAGNOSTIC_ONLY及两个pass=false；现有3114研究基线不变。MF-Swift授权初始化失败与已完成的控制失败分别记录。派生矩阵汇总重新绑定冻结计划、原始结果状态、失败项与完整工况域，不能直接相信可编辑表中的PASS。见[深坑验证与限制](SHALLOW_DEEP_COORDINATION_20261025.md)。

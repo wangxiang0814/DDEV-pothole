@@ -1,10 +1,16 @@
 # TruckSim–Python 四角独立悬架研究工程
 
+## 专家二深坑优先验证（2026-10-25，尚未达到完整目标）
+
+修正轮速环实际轮迹速度中的横摆项，并在接地状态切换时清除微分记忆。两类坑2/4/6/8/10/12 cm × 1–6 km/h六个整数速度点的72项矩阵完整运行，20项通过研究筛查：2 cm两类坑六点均通过；4 cm两类坑1/2/3 km/h通过；6 cm单侧1/2 km/h通过；8–12 cm均未通过。研究筛查不等于真实安全，也不能把离散点连成连续能力区间。
+
+静态轮端下伸余量约17.2 cm不是执行器实体行程，10 cm不能直接作为切换边界。现用MF52平滑单点模式的陡坑沿适用性未核验；MF-Swift初始化授权不可用，非线性瞬态单点对照未通过且步长敏感。未采用的快速悬架/转矩率控制已退出活动接口。见[深坑分析、控制流程与限制](docs/SHALLOW_DEEP_COORDINATION_20261025.md)、[72项工况索引](evidence/shallow_deep_coordination_20261025/coverage/case_index.md)。原生历史可直接播放，不导出视频；专家一与本轮共享车型代码不变。
+
 ## 专家二预瞄前馈与反馈（2026-10-24，研究验证中）
 
 已加入独立浅坑控制器：已知坑形预瞄、悬架前馈与姿态/轮端反馈、轮载分配与防滑、直行转向反馈、后轴退出与停车判定。MPC原型及证据退出活动目录并作[可恢复归档](archive/mpc_20261013/README.md)。专家一控制代码、参数与历史保持原样。
 
-用户已批准MF-Tyre5.2为专家二研究基线（`mf52_research`），原内部PAC52保留对照，专家一车型不变。最新V2统一参数30项矩阵18项通过：单侧4 cm在1/1.5/2/2.5/3 km/h通过；宽坑4 cm在1/3 km/h通过，中间速度未通过；两类2 cm在3/5 km/h通过。宽坑3 km/h裕量较薄、80 ms时延未通过，不能宣称连续速度鲁棒或完整安全。见[最新调优、控制流程和失败边界](docs/SHALLOW_MULTISPEED_TUNING_20261024.md)、[工况索引](evidence/shallow_multispeed_v2_20261024/case_index.md)、[首批低速历史报告](docs/SHALLOW_PREVIEW_FEEDBACK_20261024.md)。
+用户已批准MF-Tyre5.2为专家二研究基线（`mf52_research`），原内部PAC52保留对照，专家一车型不变。此前V2统一参数30项矩阵18项通过：单侧4 cm在1/1.5/2/2.5/3 km/h通过；宽坑4 cm在1/3 km/h通过，中间速度未通过；两类2 cm在3/5 km/h通过。宽坑3 km/h裕量较薄、80 ms时延未通过，不能宣称连续速度鲁棒或完整安全。见[当时的调优、控制流程和失败边界](docs/SHALLOW_MULTISPEED_TUNING_20261024.md)、[历史工况索引](evidence/shallow_multispeed_v2_20261024/case_index.md)、[首批低速历史报告](docs/SHALLOW_PREVIEW_FEEDBACK_20261024.md)。
 
 入口：`python scripts/run_strategy.py --strategy shallow_press --case right_track --depth-m .04 --config configs/shallow_press/preview_multispeed_v2_20261024.json --speed-kph 3 --crossing-kph 3 --approach-distance-m 12 --delay-s .04 --duration-s 40 --run-id preview_trial_001`。每次独立目录，原生历史可直接播放。参数必须显式传入，不传`--config`不等于最新候选。用户允许的更快转矩扫描只标诊断，原±500 Nm／1000 Nm/s基线保留，扫描不计入正常通过。
 

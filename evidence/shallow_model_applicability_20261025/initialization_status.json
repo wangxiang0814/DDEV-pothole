@@ -1,0 +1,8 @@
+{
+  "run": "runs\\shallow_press\\wide\\mf52_mode3544_availability_20261025_001",
+  "status": "TIRE_LICENSE_INITIALIZATION_FAILED",
+  "native_simulation_started": false,
+  "mode": 3544,
+  "source": "Installed official TNO manual pp24-29",
+  "license_required": true
+}
