@@ -1,0 +1,62 @@
+{
+  "scope": "CONTACT_EVENT_DIAGNOSTIC_NOT_ACCEPTANCE",
+  "run": "F:\\1tongji\\1 \u5206\u5e03\u5f0f\u7535\u9a71\\Research\\TruckSim\u4eff\u771f\\runs\\shallow_press\\wide\\fast_load05_wide_d10_v10_20261025b_001",
+  "result_sha256": "8857ca67d882bb1b1578dfffb44d39f891e83f2d24514a9414d89456b7093771",
+  "native_csv_sha256": "2d9de7846d1943cb179195f65b7474aa6f24bc7bbc882bd0e84e277f99901c65",
+  "analyzer_sha256": "198e497be89147306f6e194ae2baf8dd7f165debb2bfa1f976bf6ace4e0adb83",
+  "diagnostic_source_sha256": {
+    "scripts\\analyze_shallow_contact.py": "198e497be89147306f6e194ae2baf8dd7f165debb2bfa1f976bf6ace4e0adb83",
+    "scripts\\analyze_shallow_preview.py": "b468524b782ce2d688c37480ae2291e51bc5bb049f94b075ffeee7c29241209e",
+    "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+    "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+    "src\\ddevsim\\strategies\\shallow_press\\contact_kinematics.py": "66f26ade096f2cdd2a1680be8488f9c59852bc52503c78b62780e6c16408dba5"
+  },
+  "event": {
+    "time_s": 20.7545,
+    "body_vx_m_s": 0.2685833038888889,
+    "wheel_x_m": 101.881085,
+    "wheel_rim_speed_m_s": -3.7677093051628625,
+    "hub_vx_m_s": 0.3349999999991269,
+    "hub_vz_m_s": -0.1283499999998554,
+    "body_proxy_m_s": -4.064738725087929,
+    "hub_horizontal_error_m_s": -4.102709305161989,
+    "radial_tangent_error_m_s": -3.9555534521396902,
+    "native_kappa": -19.8503305,
+    "wheel_load_n": 4351.99002,
+    "motor_torque_nm": 210.034047,
+    "ground_moment_nm": -256.537295,
+    "active_force_n": 71.623133,
+    "body_az_m_s2": 0.96790184508066,
+    "wheel": "RR",
+    "native_wheel": "R2",
+    "rate_saturation_fraction": 0.911,
+    "body_proxy_threshold_m_s": 0.35,
+    "radial_tangent_is_approximate": true,
+    "hub_velocity_method": "OFFLINE_CENTRED_POSITION_DIFFERENCE_NOT_CAUSAL_FEEDBACK"
+  },
+  "criteria_unchanged": {
+    "crossing_observed": true,
+    "rear_and_stop": true,
+    "controller_no_fault": true,
+    "roll": true,
+    "pitch": true,
+    "path": true,
+    "travel": true,
+    "loaded_wheel_speed_error": false,
+    "impact_10ms": true,
+    "no_backward_motion": false,
+    "contact_retention": true,
+    "wheel_load_peak": false,
+    "stop_hold": true,
+    "backward_distance": false,
+    "input_amplitude": true,
+    "input_slew": true,
+    "no_exit_pause": true,
+    "speed_tracking": true
+  },
+  "limitations": [
+    "Radial vector is not necessarily the native tire contact-frame normal.",
+    "Wheel steering/camber and contact-frame motion require native model validation.",
+    "Native Kappa corroborates slip but is not a calibrated physical observation."
+  ]
+}

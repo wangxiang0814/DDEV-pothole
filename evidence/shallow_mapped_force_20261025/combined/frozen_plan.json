@@ -1,0 +1,63 @@
+{
+  "scope": "MODEL_MAPPED_PREVIEW_DEEP_FIRST_RESEARCH_ONLY",
+  "config_path": "evidence\\shallow_mapped_force_20261025\\combined\\config.json",
+  "config_sha256": "47905539cc8a3fa430c7aafd30ca8f0b3bf121061cfc21b57f4e7f1180284a49",
+  "source_sha256": {
+    "scripts\\run_shallow_preview.py": "aadd298d668b5871df3c3e842b5b925325d8722f37424bfd4d664b7b2b263ff3",
+    "src\\ddevsim\\strategies\\shallow_press\\preview.py": "864b205374088bbc103bcf51800e01f194382246848c24eddf07f60511d9150f",
+    "src\\ddevsim\\strategies\\shallow_press\\config.py": "1a22cf02abffefd5dfdd2bdc209d362de287ce7ff97b215eb9cf713510b6ee29",
+    "src\\ddevsim\\strategies\\shallow_press\\controller.py": "e5515be43e50de2c850471e7c2d61249bff31cf7d5c603d84feffc02d1e4092c",
+    "src\\ddevsim\\strategies\\shallow_press\\traction.py": "489cc557455d1730bc247753349e44e844a2fccd7acd7e9d070765eb5d18cd78",
+    "src\\ddevsim\\strategies\\shallow_press\\native.py": "7f9351c60e9e5e68e187d17979f6baec2c0ab626b107517d0e8f80f6ee8c9fbc",
+    "src\\ddevsim\\strategies\\shallow_press\\actuation.py": "1eaab559a9a5dfc5a97f8d3053e7b80df2542465f8e3c5c19bb060df39b4a22c",
+    "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "4766b1e2c392d7bf4b6d22d77e26033112655e639029afc9bddce1862c109990",
+    "src\\ddevsim\\strategies\\shallow_press\\tire_comparison.py": "453fd30858e80c68912d33350a178d05180d0a41f518e97ae6b7b367198cac3f",
+    "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65",
+    "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+    "src\\ddevsim\\cosim.py": "b9720270c6ffd7335f51a8f55c746e28eb578b4230d991fcd92b329639ca4995",
+    "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+    "src\\ddevsim\\solver_api.py": "34b4ecb59f3131c14a6bbf74be1b8936a93d844714b8498a2b43c5ed9deb3470",
+    "src\\ddevsim\\pothole_case.py": "14d3e0de9fb9d97cc72205f4cf202779b60ca38b5cedee44a95777f0119b17d5",
+    "src\\ddevsim\\visual_mesh.py": "571177bed91ee4fc72963c0011b5508bb81c8a8369ea12b4d8749d4b5e0a1a3e",
+    "src\\ddevsim\\scenarios\\pit.py": "c9f8ad5d2e7939f4b53ace5842a4c13078a62acffb047477ea4f25e75d9c7cee",
+    "src\\ddevsim\\scenarios\\builder.py": "326905c9c2ea58a6470dea7adc7df97f7d36b9e5c78652a00aaf1005a68399c1",
+    "src\\ddevsim\\scenarios\\parameters.py": "aff8aa845b61f172020a0ff1369fcdf186810f959e4fbc69e8d881ba5680a334",
+    "src\\ddevsim\\vehicle_profiles\\tuned_ii.py": "4d681906cb5d1236b854466bf10248d8bd627ace4e69e048ba93d3fafd55ae53",
+    "src\\ddevsim\\vehicle_profiles\\transformations.py": "c20d437535d30fca0e24101121f0aeeed9cf944a871efd2052f062e5757a349e",
+    "src\\ddevsim\\runtime\\contracts.py": "b72d12e40198c2002da79d5b5623081cab68bc933ad034dccd8eb3fecaa6347d",
+    "src\\ddevsim\\runtime\\run_workspace.py": "45332bd2ec27aca213f54d43e1712872ebfe69468be54cbc6cf2bc297363dc16",
+    "src\\ddevsim\\strategies\\shallow_press\\contact_kinematics.py": "66f26ade096f2cdd2a1680be8488f9c59852bc52503c78b62780e6c16408dba5",
+    "src/ddevsim/strategies/shallow_press/force_preview.py": "0c3be13a22bbf3853643a5b50cac8ef11cd1fbe10039c2fe54ce6277bfb32d3e",
+    "src/ddevsim/vehicle_case.py": "f68d6c0df3396969cc351043cc2bc8d6c83a2c12cde0204dedc21311379bc911",
+    "src/ddevsim/strategies/shallow_press/fast_load.py": "5f895081ef320acdbd98467b324a081d3b0fec23742e24df45b2c01df822566a"
+  },
+  "cases": [
+    {
+      "case": "wide",
+      "depth_m": 0.1,
+      "crossing_kph": 1,
+      "kind": "exit_balance_combined",
+      "run_id": "exit_combined_wide_d10_v10_20261025b_001",
+      "args": [
+        "--case",
+        "wide",
+        "--depth-m",
+        "0.1",
+        "--run-id",
+        "exit_combined_wide_d10_v10_20261025b_001",
+        "--config",
+        "evidence\\shallow_mapped_force_20261025\\combined\\config.json",
+        "--speed-kph",
+        "1",
+        "--crossing-kph",
+        "1",
+        "--approach-distance-m",
+        "2",
+        "--delay-s",
+        ".04",
+        "--duration-s",
+        "40"
+      ]
+    }
+  ]
+}

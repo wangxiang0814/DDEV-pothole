@@ -1,0 +1,189 @@
+{
+  "plan_sha256": "990463f1b11eb99ff3c44dddefeceaf04c81c4ea0578bcef9e03b31a57b7660e",
+  "results": [
+    {
+      "case": "right_track",
+      "run_id": "load05_right_right_track_d10_v10_20261025b_001",
+      "kind": "load05_right",
+      "depth_m": 0.1,
+      "crossing_kph": 1,
+      "returncode": 0,
+      "resumed": false,
+      "status": "FAIL",
+      "simulation_pass": false,
+      "failed_criteria": [
+        "loaded_wheel_speed_error"
+      ],
+      "metrics": {
+        "roll_peak_deg": 1.90766168,
+        "pitch_peak_deg": 1.07145385,
+        "path_peak_m": 0.018857521805,
+        "jounce_min_m": -0.0705721235,
+        "jounce_max_m": 0.0621332577,
+        "loaded_slip_proxy_peak_m_s": 3.4171029341516648,
+        "az_rms_m_s2": 0.495769270800404,
+        "az_10ms_peak_m_s2": 3.5577414793060917,
+        "max_wheel_load_n": 7063.0973,
+        "contact_loss_s": [
+          0.0,
+          0.028000000000000025,
+          0.0,
+          0.14300000000000013
+        ],
+        "longest_contact_loss_s": [
+          0.0,
+          0.028000000000000025,
+          0.0,
+          0.14300000000000013
+        ],
+        "loaded_contact_fraction": [
+          1.0,
+          0.997694310152473,
+          1.0,
+          0.9874302714763853
+        ],
+        "wheel_load_peak_ratio_to_static": [
+          1.4581148359619605,
+          1.7039738602860932,
+          1.7388607234301745,
+          2.339709858896681
+        ],
+        "crossing_mean_kph": 1.024943407935887,
+        "crossing_max_kph": 2.2233054300000004,
+        "crossing_median_kph": 0.9899135460000001,
+        "crossing_speed_std_kph": 0.24490923603947093,
+        "requested_crossing_kph": 1.0,
+        "mean_speed_error_kph": 0.024943407935887008,
+        "min_speed_m_s": -0.0015666443222222223,
+        "backward_distance_m": 0.0,
+        "stop_hold_peak_speed_m_s": 8.946102e-07,
+        "observed_duration_s": 40.0,
+        "input_log_complete": true,
+        "torque_peak_nm": 319.779735,
+        "suspension_force_peak_n": 4478.49479,
+        "steering_wheel_peak_deg": 18.3920389,
+        "torque_rate_peak_nm_s": 1000.0005000023293,
+        "force_rate_peak_n_s": 45400.00400010578,
+        "steering_rate_peak_deg_s": 400.0000399995113
+      },
+      "exit_progress": [
+        {
+          "wheel": "FR",
+          "observed": true,
+          "zone_duration_s": 2.115000000000002,
+          "longest_pause_s": 0.0,
+          "min_speed_kph": 0.301313757
+        },
+        {
+          "wheel": "RR",
+          "observed": true,
+          "zone_duration_s": 1.7740000000000016,
+          "longest_pause_s": 0.0,
+          "min_speed_kph": 0.520637858
+        }
+      ],
+      "result_sha256": "d426889da6d8d2e24f11214773fa28018d17f783a15c1eb9110e4e230b8bbada"
+    },
+    {
+      "case": "wide",
+      "run_id": "load05_halfstep_wide_d10_v10_20261025b_001",
+      "kind": "load05_halfstep",
+      "depth_m": 0.1,
+      "crossing_kph": 1,
+      "returncode": 0,
+      "resumed": false,
+      "status": "FAIL",
+      "simulation_pass": false,
+      "failed_criteria": [
+        "loaded_wheel_speed_error",
+        "no_backward_motion",
+        "wheel_load_peak",
+        "backward_distance",
+        "speed_tracking"
+      ],
+      "metrics": {
+        "roll_peak_deg": 0.969517399,
+        "pitch_peak_deg": 2.95020856,
+        "path_peak_m": 0.011118400455,
+        "jounce_min_m": -0.0968811967,
+        "jounce_max_m": 0.09970544099999999,
+        "loaded_slip_proxy_peak_m_s": 5.558390414040302,
+        "az_rms_m_s2": 1.4231764812016126,
+        "az_10ms_peak_m_s2": 6.490881973740635,
+        "max_wheel_load_n": 8145.78592,
+        "contact_loss_s": [
+          0.06600000000000006,
+          0.1120000000000001,
+          0.1080000000000001,
+          0.2120000000000002
+        ],
+        "longest_contact_loss_s": [
+          0.06600000000000006,
+          0.07800000000000007,
+          0.1080000000000001,
+          0.12300000000000011
+        ],
+        "loaded_contact_fraction": [
+          0.9916626272418807,
+          0.9856519631604459,
+          0.9894328647600582,
+          0.9765390208434319
+        ],
+        "wheel_load_peak_ratio_to_static": [
+          2.140650554767107,
+          2.0805059070828444,
+          2.005405813633939,
+          2.8074502065113864
+        ],
+        "crossing_mean_kph": 1.3347883183711515,
+        "crossing_max_kph": 4.65645728,
+        "crossing_median_kph": 0.9797184450000002,
+        "crossing_speed_std_kph": 1.0177244967527603,
+        "requested_crossing_kph": 1.0,
+        "mean_speed_error_kph": 0.3347883183711515,
+        "min_speed_m_s": -0.2277478891666667,
+        "backward_distance_m": 0.3319285693782864,
+        "stop_hold_peak_speed_m_s": 0.01047518675,
+        "observed_duration_s": 40.0,
+        "input_log_complete": true,
+        "torque_peak_nm": 500.0,
+        "suspension_force_peak_n": 4744.38419,
+        "steering_wheel_peak_deg": 14.9430331,
+        "torque_rate_peak_nm_s": 1000.0004000023353,
+        "force_rate_peak_n_s": 45400.005000105775,
+        "steering_rate_peak_deg_s": 400.0000500009332
+      },
+      "exit_progress": [
+        {
+          "wheel": "FL",
+          "observed": true,
+          "zone_duration_s": 1.8120000000000016,
+          "longest_pause_s": 0.39000000000000035,
+          "min_speed_kph": -0.819892401
+        },
+        {
+          "wheel": "FR",
+          "observed": true,
+          "zone_duration_s": 1.8140000000000016,
+          "longest_pause_s": 0.39000000000000035,
+          "min_speed_kph": -0.819892401
+        },
+        {
+          "wheel": "RL",
+          "observed": true,
+          "zone_duration_s": 1.6260000000000014,
+          "longest_pause_s": 0.29600000000000026,
+          "min_speed_kph": -0.164147685
+        },
+        {
+          "wheel": "RR",
+          "observed": true,
+          "zone_duration_s": 1.6070000000000015,
+          "longest_pause_s": 0.29600000000000026,
+          "min_speed_kph": -0.164147685
+        }
+      ],
+      "result_sha256": "4613849baada891efb018a926d840a685bf9196256c5c36bd0cd460bae750ffc"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "all_identical": true,
+  "rows": [
+    {
+      "run_id": "legacy_regression_wide_d10_v10_20261025b_001",
+      "reference": "coverage_v2yaw_wide_d10_v10_20261025_001",
+      "native_csv_byte_identical": true,
+      "criteria_identical": true,
+      "metrics_identical": true,
+      "new_status": "FAIL",
+      "reference_status": "FAIL",
+      "native_sha256": "e3687ebac74ff2280ea58ac30b9ed37ff24d5f2c225182fa632d6e5837654321"
+    },
+    {
+      "run_id": "legacy_regression_wide_d04_v30_20261025b_001",
+      "reference": "coverage_v2yaw_wide_d04_v30_20261025_001",
+      "native_csv_byte_identical": true,
+      "criteria_identical": true,
+      "metrics_identical": true,
+      "new_status": "SIMULATION_PASS",
+      "reference_status": "SIMULATION_PASS",
+      "native_sha256": "4ac5895a48a939c1107d0b2dae3c1d61d205bbe80cfd30930df538f4ffddf5ea"
+    }
+  ]
+}

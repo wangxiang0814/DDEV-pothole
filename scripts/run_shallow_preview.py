@@ -18,7 +18,7 @@ from ddevsim.scenarios.builder import prepare_case
 from ddevsim.strategies.shallow_press.config import ShallowPressConfig
 from ddevsim.strategies.shallow_press.controller import ShallowPressStrategy
 from ddevsim.strategies.shallow_press.native import NativePreviewBridge,release_constant_brake,contact_patch_comparison,low_speed_comparison
-from ddevsim.strategies.shallow_press.assessment import assess,read_native_log,capability_diagnostic
+from ddevsim.strategies.shallow_press.assessment import assess,read_native_log,capability_diagnostic,model_diagnostic_result
 
 
 def freeze_run_inputs(run,manifest):
@@ -69,6 +69,7 @@ def main(argv=None):
     p.add_argument('--mf52-operating-mode',type=int,choices=[3104,3114,3124,3534,3544],default=3114,
                    help='non3114 modes are unadopted model diagnostics, never baseline acceptance')
     p.add_argument('--diagnostic-torque-rate-nm-s',type=float)
+    p.add_argument('--model-diagnostic',action='store_true',help='explicit unadopted model comparison; never a baseline pass')
     p.add_argument('--probe',action='store_true')
     p.add_argument('--coast-contact-probe',action='store_true',
                    help='diagnostic: remove all commands before entry, never an expert acceptance run')
@@ -146,10 +147,12 @@ def execute_run(a,config,case,run,capture):
         if a.tyre_low_speed_m_s is not None:text=low_speed_comparison(text,a.tyre_low_speed_m_s)
         model.write_text(text,encoding='utf-8')
         from ddevsim.vehicle_profiles.tuned_ii import vehicle_identity
-        manifest['comparison_vehicle']=dict(parent=case.vehicle_profile_id,
+        inherited={k:v for k,v in manifest.get('comparison_vehicle',{}).items() if k not in ('ascii_stage','vehicle_sha256')}
+        manifest['comparison_vehicle']=dict(parent=case.vehicle_profile_id,underlying_tire=inherited,
             modification='EXPLICIT_TIRE_COMPARISON',length_m=a.contact_length_m,
             low_speed_m_s=a.tyre_low_speed_m_s,
-            vehicle_sha256=vehicle_identity(model),adopted=False)
+            vehicle_sha256=vehicle_identity(model),adopted=False,diagnostic_only=True,
+            adoption_scope='NOT_ADOPTED_CONTACT_CONFIGURATION_DIAGNOSTIC')
     # Additional telemetry changes no physical vehicle parameter or input port.
     model=run/'model/run_all.par'; text=model.read_text(encoding='utf-8')
     extra=[root+w for root in ('My_Bk_','My_WC_') for w in ('L1','R1','L2','R2')]
@@ -171,9 +174,9 @@ def execute_run(a,config,case,run,capture):
     bridge=NativePreviewBridge(strategy,manifest['export_names'],step_s=a.step_s,delay_s=a.delay_s,motor_delay_s=a.motor_delay_s)
     (run/'control_config.json').write_text(json.dumps(asdict(config),indent=2)+'\n',encoding='utf-8')
     sources=[Path(__file__).resolve()]+[ROOT/'src/ddevsim/strategies/shallow_press'/n for n in
-        ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py','body_control.py','contact_kinematics.py')]
+        ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py','body_control.py','contact_kinematics.py','suspension_geometry.py','fast_load.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('units.py','cosim.py','chassis_contact.py')]
-    sources += [ROOT/'src/ddevsim'/n for n in ('solver_api.py','pothole_case.py','visual_mesh.py',
+    sources += [ROOT/'src/ddevsim'/n for n in ('solver_api.py','pothole_case.py','vehicle_case.py','visual_mesh.py',
         'scenarios/pit.py','scenarios/builder.py','scenarios/parameters.py','vehicle_profiles/tuned_ii.py',
         'vehicle_profiles/transformations.py','runtime/contracts.py','runtime/run_workspace.py')]
     code={str(f.relative_to(ROOT)):sha256_file(f) for f in sources}
@@ -217,10 +220,8 @@ def execute_run(a,config,case,run,capture):
             if a.coast_contact_probe:
                 result.update(status='CONTACT_COAST_PROBE_ONLY',simulation_pass=False,
                               coast_started_s=coast_started[0],acceptance_pass=False)
-        if a.mf52_operating_mode!=3114:
-            result.update(model_diagnostic_motion_pass=result.get('diagnostic_motion_pass',result['simulation_pass']),
-                status='MODEL_DIAGNOSTIC_ONLY',simulation_pass=False,acceptance_pass=False,
-                scope='UNADOPTED_TIRE_MODEL_DIAGNOSTIC')
+        if a.model_diagnostic or a.mf52_operating_mode!=3114 or a.contact_length_m or a.tyre_low_speed_m_s is not None:
+            result=model_diagnostic_result(result)
         result.update(strategy_id='shallow_press',native=native,scene=asdict(case.geometry),config=asdict(config),
             plant=plant,capability=config.capability_metadata(),input_provenance_sha256=manifest['input_provenance_sha256'],
             native_csv_sha256=sha256_file(run/'native_1ms.csv'),model_sha256=manifest['final_model_sha256'])

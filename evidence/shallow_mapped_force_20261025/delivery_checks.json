@@ -1,0 +1,33 @@
+{
+  "base_commit": "a0443eb",
+  "backup_tag": "backup/pre-mapped-force-preview-20261025",
+  "control_experiments": 13,
+  "model_experiments": 3,
+  "legacy_regressions": 2,
+  "total_native_runs": 18,
+  "new_deep_control_passes": 0,
+  "full_acceptance": false,
+  "legacy_csv_criteria_metrics_identical": true,
+  "pytest_passed": 586,
+  "pytest_warnings": 10,
+  "pytest_log_sha256": "37c206805bdb6090f05ba0b8bdbba34a00c4e069cc450dcf2ae7b08d499e3421",
+  "protected_paths_unchanged": [
+    "src/ddevsim/strategies/wheel_lift",
+    "static_wheel_lift",
+    "configs/wheel_lift",
+    "scenarios/wheel_lift",
+    "src/ddevsim/vehicle_profiles",
+    "src/ddevsim/strategies/shallow_press/controller.py",
+    "src/ddevsim/strategies/shallow_press/traction.py",
+    "configs/shallow_press/*.json"
+  ],
+  "diff_check": true,
+  "default_fast_load_gain": 0,
+  "rejected_branches_removed_from_active_code": [
+    "mapped_spring",
+    "mapped_passive",
+    "exit_torque_balance"
+  ],
+  "regression_source_archive_sha256": "6a19f8402351a993ef6f0be069002f308efc0a488872fc85b8fbb667e02bbd3e",
+  "review": "Fresh-context read-only reviews found no remaining blocking issue; report counts and scope match verified JSON"
+}

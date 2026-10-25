@@ -34,6 +34,9 @@ class ShallowPressConfig:
     grade_torque_gain: float = 1.
     climb_geometry_lag_m: float = .15
     groundhook_gain: float = 2000.
+    fast_load_gain: float = 0.
+    fast_load_limit_n: float = 2000.
+    fast_load_filter_s: float = .01
     exit_relief_n: float = 0.
     acceleration_m_s2: float = .16
     force_working_limit_n: float = 3500.
@@ -72,6 +75,8 @@ class ShallowPressConfig:
         if self.climb_geometry_lag_m>.263:raise ValueError('exit uncertainty exceeds tire radius')
         if self.body_modal_blend>1:raise ValueError('body modal blend must be within0..1')
         if self.motor_slip_derivative>20:raise ValueError('motor slip derivative exceeds research envelope')
+        if self.fast_load_gain>2 or not 0<self.fast_load_limit_n<=4000 or not .002<=self.fast_load_filter_s<=.1:
+            raise ValueError('invalid fast load feedback research settings')
         if self.body_leveling_s and (not 1<=self.body_leveling_s<=10 or self.body_modal_blend!=1):
             raise ValueError('body leveling needs full modal feedback and1..10s transition')
         if self.diagnostic_torque_rate_nm_s is not None and not 1000<self.diagnostic_torque_rate_nm_s<=50000:

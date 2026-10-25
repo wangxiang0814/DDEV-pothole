@@ -55,6 +55,13 @@ def capability_diagnostic(result,values,torque_rate_nm_s):
         diagnostic_motion_pass=all(criteria.values()))
 
 
+def model_diagnostic_result(result):
+    """Unadopted contact/mode variants never count as baseline controller passes."""
+    return dict(result,model_diagnostic_motion_pass=result.get('diagnostic_motion_pass',result['simulation_pass']),
+        status='MODEL_DIAGNOSTIC_ONLY',simulation_pass=False,acceptance_pass=False,
+        scope='UNADOPTED_TIRE_MODEL_DIAGNOSTIC')
+
+
 def assumed_clearance(values,scene,settle_s=3.):
     """Full rectangle against physical road, no forces and no real CAD claim."""
     t=np.asarray(values['time_s']);static=(t>1)&(t<settle_s);active=t>=settle_s

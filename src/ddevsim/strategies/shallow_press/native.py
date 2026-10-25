@@ -84,6 +84,7 @@ class NativePreviewBridge:
         if outer:
             row=dict(observed_time_s=observed,command_start_s=observed,command_end_s=t,
                      feedback_time_s=stamp,motor_feedback_time_s=motor_stamp)
+            row.update({'diag_fast_load_n_'+w:float(v) for w,v in zip(('L1','R1','L2','R2'),self.actuation.load_correction)})
             row.update({'exp_'+n:float(exports[i]) for i,n in enumerate(self.names)})
             names=tuple('IMP_MYUSM_'+w for w in ('L1','R1','L2','R2'))+tuple('IMP_FS_'+w for w in ('L1','R1','L2','R2'))+('IMP_STEER_SW',)
             row.update({'imp_'+n:v for n,v in zip(names,self.command)})

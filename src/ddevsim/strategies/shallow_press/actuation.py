@@ -5,6 +5,7 @@ refinement changes neither control sample period. No tire-force cancellation.
 """
 import math
 import numpy as np
+from .fast_load import FastLoadFeedback
 
 
 class CrawlActuation:
@@ -13,6 +14,8 @@ class CrawlActuation:
         self.next_motor=0.;self.motor_ticks=0
         self.contact=np.zeros(4,bool);self.contact_since=np.full(4,np.nan)
         self.previous_slip=None;self.previous_slip_time=None;self.slip_acceleration=np.zeros(4)
+        self.load_loop=FastLoadFeedback(config) if config.fast_load_gain else None
+        self.load_correction=np.zeros(4)
 
     def step(self,t,stamp,feedback,target,origin,scene,dt,fault=False):
         c=self.config;target=np.array(target,float).copy()
@@ -20,6 +23,7 @@ class CrawlActuation:
         if stale:
             target[:]=0
             self.previous_slip=None;self.previous_slip_time=None;self.slip_acceleration[:]=0
+            self.load_correction[:]=0
         if t+1e-8>=self.next_motor:
             self.next_motor+=c.motor_period_s*max(1,math.floor((t-self.next_motor+1e-8)/c.motor_period_s)+1)
             self.motor_ticks+=1;desired=target[:4].copy()
@@ -58,7 +62,13 @@ class CrawlActuation:
                 nominal=np.clip(desired,-limit*restored,limit*restored)
                 desired=np.clip(nominal+correction,-limit,limit)
             self.motor_target=desired
+            if self.load_loop is not None and c.mode in ('full','suspension') and not stale:
+                w=('L1','R1','L2','R2')
+                get=lambda p:np.array([feedback[p+n] for n in w])
+                self.load_correction=self.load_loop.step(t,get('Fz_'),get('Jnc_'),get('X_'),get('Y_'),scene,c.motor_period_s)
         if stale:self.motor_target[:]=0
+        if self.load_loop is not None and not stale:
+            target[4:8]=np.clip(target[4:8]+self.load_correction,-c.force_working_limit_n,c.force_working_limit_n)
         cap=np.array([c.torque_limit_nm]*4+[c.force_limit_n]*4+[math.radians(220)])
         rate=np.array([c.actuation_torque_rate_nm_s]*4+[c.force_rate_n_s]*4+[math.radians(400)])
         desired=np.clip(np.r_[self.motor_target,target[4:]],-cap,cap)

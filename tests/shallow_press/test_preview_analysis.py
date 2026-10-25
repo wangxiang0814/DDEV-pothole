@@ -5,6 +5,29 @@ import runpy
 import pytest
 
 
+def test_source_hash_comparison_accepts_windows_separators_but_rejects_aliases():
+    import runpy
+    from pathlib import Path
+    normalize=runpy.run_path(str(Path(__file__).resolve().parents[2]/'scripts/analyze_shallow_preview.py'))['source_digest_map']
+    assert normalize({'src/a.py':'one'})==normalize({'src\\a.py':'one'})
+    assert normalize({'src/a.py':'one'})!=normalize({'src\\a.py':'two'})
+    with pytest.raises(ValueError,match='alias'):normalize({'src/a.py':'one','src\\a.py':'two'})
+    assert normalize({'SRC/A.py':'one'})==normalize({'src/a.py':'one'})
+    with pytest.raises(ValueError,match='alias'):normalize({'SRC/A.py':'one','src/a.py':'one'})
+    for name in ('src/./a.py','src/x/../a.py','src//a.py','/src/a.py','C:/src/a.py'):
+        with pytest.raises(ValueError,match='canonical'):normalize({name:'one'})
+
+
+def test_unadopted_model_cannot_be_counted_as_baseline_controller_pass():
+    from ddevsim.strategies.shallow_press.assessment import model_diagnostic_result
+    result=dict(simulation_pass=True,acceptance_pass=False,status='SIMULATION_PASS',criteria={'motion':True})
+    diagnostic=model_diagnostic_result(result)
+    assert diagnostic['model_diagnostic_motion_pass']
+    assert diagnostic['simulation_pass'] is False and diagnostic['acceptance_pass'] is False
+    assert diagnostic['status']=='MODEL_DIAGNOSTIC_ONLY'
+    assert diagnostic['criteria']==result['criteria']
+
+
 def test_analysis_rejects_edited_native_data_and_portable_plant_identity(tmp_path):
     module=runpy.run_path(str(Path(__file__).resolve().parents[2]/'scripts/analyze_shallow_preview.py'))
     sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()

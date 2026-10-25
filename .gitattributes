@@ -10,3 +10,7 @@
 /evidence/shallow_model_applicability_20261025/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 # Raw vendor diagnostic log: preserve formatting and exact error-log identity.
 /evidence/shallow_model_applicability_20261025/mf_swift_initialization_error.txt binary
+/archive/preview_development_20261025b/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/evidence/shallow_mapped_force_20261025/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/evidence/shallow_contact_patch_20261025/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/evidence/shallow_preview_regression_20261025b/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

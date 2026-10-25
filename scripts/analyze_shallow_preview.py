@@ -15,6 +15,18 @@ def sha(path):
     return h.hexdigest()
 
 
+def source_digest_map(files):
+    """Canonical relative source names; reject aliases instead of hiding drift."""
+    result={}
+    for name,digest in files.items():
+        key=name.replace('\\','/').casefold()
+        if ':' in key or any(p in ('','.','..') for p in key.split('/')):
+            raise ValueError('non-canonical relative source path')
+        if key in result:raise ValueError('duplicate source path alias')
+        result[key]=digest
+    return result
+
+
 def verified_run(run):
     manifest=json.loads((run/'run_manifest.json').read_text(encoding='utf-8'))
     result=json.loads((run/'result.json').read_text(encoding='utf-8'))
@@ -99,10 +111,10 @@ def main():
         run=ROOT/'runs/shallow_press'/case['case']/case['run_id'];result,manifest=verified_run(run)
         marker=json.loads((run/'matrix_identity.json').read_text(encoding='utf-8'))
         if marker!=dict(plan_sha256=sha(plan_path),args=case['args']):raise ValueError('matrix identity mismatch')
-        actual=manifest['source_sha256']
+        actual=source_digest_map(manifest['source_sha256'])
         if reference is None:reference=actual
         if actual!=reference:raise ValueError('matrix source drift')
-        if any(actual.get(name)!=expected for name,expected in plan['source_sha256'].items() if Path(name).name!='__init__.py'):
+        if any(actual.get(name)!=expected for name,expected in source_digest_map(plan['source_sha256']).items() if Path(name).name!='__init__.py'):
             raise ValueError('run does not match frozen sources')
         rows.append(dict(**{k:case[k] for k in ('case','run_id','kind','depth_m','crossing_kph')},
             status=result['status'],failed_criteria=[k for k,v in result['criteria'].items() if not v],

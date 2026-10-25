@@ -1,0 +1,13 @@
+# Expert-two mapped force preview continuation
+
+User authorization: continue the already selected known-pit preview feedforward + classical feedback route efficiently; independent model diagnostics allowed, adoption separate. Routine control implementation is delegated by the user. No repeated route approval or baseline replacement is required.
+
+Root evidence: source model spring-seat maps have changing motion ratios, front spring30N/mm and nonlinear hysteretic rear springs. Current5000N/m FF underestimates support restoration; deep10cm/1kmh first contact loss occurs while filtered reference is only−16mm and geometric preview is−100mm. Actual speed overshoots; FF amplitude, phase and feedback opposition must be separated. Earlier fast reactive cancellation and torque-rate branches failed and are not reused.
+
+Approaches considered: increase one scalar FF gain (cheap but wrong axle/coordinate map); instantaneous measured passive-force cancellation (already failed); selected model-derived PREVIEW passive-force increment from initialized flat pose and a reference-only spring path state, with independent timing tests. The physical plant and historical criteria remain unchanged. This choice is an implementation decision under the user's existing route, not new model adoption.
+
+Add opt-in legacy / mapped_spring / mapped_passive modes. Read Fs and CmpS only during static anchor calibration. Predict seat displacement g(j0+r), motion ratio g′, and passive force from the known model tables. Front spring is linear; rear reference-path hysteresis is an explicit6mm exponential branch-transition approximation, not the native2mm internal hysteresis law. Apply virtual-work coordinate conversion; mapped_passive adds an explicitly approximate piecewise-linear asymmetric damper table and inertia in wheel coordinates. No live Fs/Fd cancellation.
+
+Keep legacy default byte-level behavior in computations. Conditional observations only; common SI contract and expert one unchanged. Expose existing reference velocity/acceleration shaping as explicit configuration values, defaults0.25m/s and1.5m/s²; these are not hardware specifications. Preserve ±18200N/45400N/s, ±500Nm/1000Nm/s; initial working force6000N. Log unclipped FF/total force, clipping and geometric-reference phase error.
+
+Efficient native sequence: wide10cm/1kmh spring-only; same with predicted asymmetric damping; then timing adjustment grounded in observed phase lag. Test best candidate half-step, right10cm/1kmh and wide8cm/3kmh. Expand only if joint criteria or an explicitly evidenced metric improves without regressions. Retain failures and full40s simulations; no video export. MF52 applicability and real geometry remain unresolved, so full acceptance remains false.
