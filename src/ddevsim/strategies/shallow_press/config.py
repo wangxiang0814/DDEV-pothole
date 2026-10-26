@@ -1,11 +1,15 @@
 """Shallow controller settings are independent of wheel-lift settings."""
-from dataclasses import dataclass,fields
+from dataclasses import dataclass,fields,field
 import math
 from typing import Optional,Tuple
+from collections.abc import Mapping
+from .event_config import EventCrawlConfig
 
 
 @dataclass(frozen=True)
 class ShallowPressConfig:
+    policy: str='legacy'
+    event: EventCrawlConfig=field(default_factory=EventCrawlConfig)
     control_period_s: float = .02
     cruise_kph: float = 2.
     crossing_kph: float = 1.
@@ -51,7 +55,13 @@ class ShallowPressConfig:
     def __post_init__(self):
         for item in fields(self):
             value=getattr(self,item.name)
-            if item.name=='preview_schedule':
+            if item.name=='policy':
+                if value not in ('legacy','event_crawl'):raise ValueError('invalid shallow policy')
+            elif item.name=='event':
+                if not isinstance(value,EventCrawlConfig):
+                    if not isinstance(value,Mapping):raise ValueError('event settings must be a mapping')
+                    object.__setattr__(self,'event',EventCrawlConfig(**value))
+            elif item.name=='preview_schedule':
                 try:rows=tuple(tuple(float(v) for v in row) for row in value)
                 except (TypeError,ValueError):raise ValueError('invalid preview schedule')
                 if any(len(row)!=3 or not all(math.isfinite(v) for v in row) or

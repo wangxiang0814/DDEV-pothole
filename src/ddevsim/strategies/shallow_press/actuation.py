@@ -17,7 +17,7 @@ class CrawlActuation:
         self.load_loop=FastLoadFeedback(config) if config.fast_load_gain else None
         self.load_correction=np.zeros(4)
 
-    def step(self,t,stamp,feedback,target,origin,scene,dt,fault=False):
+    def step(self,t,stamp,feedback,target,origin,scene,dt,fault=False,event_context=None):
         c=self.config;target=np.array(target,float).copy()
         stale=fault or t-stamp>c.max_age_s
         if stale:
@@ -61,6 +61,13 @@ class CrawlActuation:
                 # Total corrective torque still obeys load, amplitude and slew.
                 nominal=np.clip(desired,-limit*restored,limit*restored)
                 desired=np.clip(nominal+correction,-limit,limit)
+                if c.policy=='event_crawl' and event_context is not None:
+                    phases=event_context.get('phases',[])
+                    if len(phases)!=4:raise ValueError('event motor context requires four phases')
+                    air=np.array([p not in ('BYPASS','APPROACH','RECOVERED') for p in phases])&~self.contact
+                    sync_limit=min(c.torque_limit_nm,c.event.airborne_sync_limit_nm,float(event_context.get('airborne_sync_limit_nm',0)))
+                    sync=np.clip(-float(event_context.get('airborne_sync_gain',0))*slip,-sync_limit,sync_limit)
+                    desired=np.where(air,sync,desired)
             self.motor_target=desired
             if self.load_loop is not None and c.mode in ('full','suspension') and not stale:
                 w=('L1','R1','L2','R2')

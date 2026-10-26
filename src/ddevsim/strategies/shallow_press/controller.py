@@ -21,6 +21,8 @@ class ShallowPressStrategy:
         if context.strategy_id!='shallow_press' or context.vehicle_id!='tuned_ii_20261005' or 'scenario' not in context.config:
             raise ValueError('shallow_press requires same-vehicle scenario context')
         self.config=ShallowPressConfig(**dict(context.config.get('controller',{})))
+        if self.config.policy!='legacy' and not getattr(self,'supports_event_policy',False):
+            raise ValueError('event policy requires EventCrawlStrategy')
         self.preview_s=self.config.preview_s;self.reference_bandwidth=self.config.reference_bandwidth
         if self.config.preview_schedule:
             schedule=np.asarray(self.config.preview_schedule)
@@ -42,6 +44,17 @@ class ShallowPressStrategy:
         rate=np.array([c.actuation_torque_rate_nm_s]*4+[c.force_rate_n_s]*4+[math.radians(400)])
         self.command=np.clip(self.command+np.clip(desired-self.command,-rate*dt,rate*dt),-cap,cap)
         return ControlCommand(tuple(self.command[:4]),tuple(self.command[4:8]),float(self.command[8]))
+
+    def _target_speed(self,target,x,xs,t,dt,finished):return target
+
+    def _advance_speed(self,target,dt):
+        self.speed_reference+=float(np.clip(target-self.speed_reference,-self.config.acceleration_m_s2*dt,self.config.acceleration_m_s2*dt))
+
+    def _drive_request(self,total,grade_torque,x,dt):return total
+
+    def _on_allocated(self,total,torques,dt):pass
+
+    def _force_request(self,ff,feedback,x,j,load,dt):return ff+feedback
 
     def step(self,observation):
         if self.context is None: raise RuntimeError('reset required')
@@ -94,9 +107,10 @@ class ShallowPressStrategy:
             reference_roll_rate=-self.origin['Roll_E']*6*progress*(1-progress)/c.body_leveling_s
             reference_pitch_rate=-self.origin['Pitch']*6*progress*(1-progress)/c.body_leveling_s
             if t<c.settle_s+c.body_leveling_s:target=0.;self.phase='LEVELING'
+        target=self._target_speed(target,x,xs,t,dt,behind and rear_clear)
         if max(abs(x['Roll_E']),abs(x['Pitch']))>math.radians(8):
             self.failures.add('ATTITUDE'); target=min(target,.15)
-        self.speed_reference+=float(np.clip(target-self.speed_reference,-c.acceleration_m_s2*dt,c.acceleration_m_s2*dt))
+        self._advance_speed(target,dt)
         error=self.speed_reference-x['Vx']; proposed=self.integral+error*dt
         common=c.speed_kp*error+c.speed_ki*proposed
         if abs(common)<400 or common*error<0: self.integral=proposed
@@ -122,10 +136,12 @@ class ShallowPressStrategy:
             c.climb_geometry_lag_m,[math.cos(x['Yaw']),math.sin(x['Yaw'])])
         climb_torque=resistance*assist_weight
         if c.mode in ('full','traction'):total+=float(climb_torque.sum())
+        total=self._drive_request(total,grade_torque,x,dt)
         if c.mode in ('full','traction'):
             torques=allocate_torque(total,effective,slip,x['Yaw']-self.origin['Yaw'],x['AVz'],
                                     self.scene['friction'],radii,c.slip_gain)
         else: torques=np.full(4,total/4)
+        self._on_allocated(total,torques,dt)
         geometric=wheel_support_height(points,self.scene)
         rdd=np.clip(self.reference_bandwidth**2*(geometric-self.r)-2*self.reference_bandwidth*self.rd,-1.5,1.5)
         self.rd=np.clip(self.rd+rdd*dt,-.25,.25); self.r+=self.rd*dt
@@ -150,7 +166,7 @@ class ShallowPressStrategy:
             feedback=(1-c.body_modal_blend)*feedback+c.body_modal_blend*modal
         feedback+=c.travel_gain*(j-self.j0-self.r)+c.load_gain*(self.fz0-self.filtered_load)
         feedback+=c.groundhook_gain*(corner_v+jr-self.rd)
-        force=np.clip(ff+feedback,-c.force_working_limit_n,c.force_working_limit_n)
+        force=np.clip(self._force_request(ff,feedback,x,j,load,dt),-c.force_working_limit_n,c.force_working_limit_n)
         if c.mode in ('passive','traction'): force[:]=0
         steer=np.clip(-6.1*(x['Yo']-self.origin['Yo'])-12*(x['Yaw']-self.origin['Yaw'])-2*x['AVz'],
                       -math.radians(220),math.radians(220))

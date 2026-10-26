@@ -168,13 +168,17 @@ def execute_run(a,config,case,run,capture):
         txt,n=re.subn(r'(?m)^tstep\s+[-+0-9.eE]+$','tstep '+str(a.step_s),txt)
         if n!=1:raise ValueError('native step declaration missing')
         path.write_text(txt,encoding='utf-8')
-    strategy=ShallowPressStrategy()
+    if config.policy=='event_crawl':
+        from ddevsim.strategies.shallow_press.event_controller import EventCrawlStrategy
+        strategy=EventCrawlStrategy()
+    else:strategy=ShallowPressStrategy()
     strategy.reset(StrategyContext('shallow_press',case.vehicle_profile_id,a.case,.02,
         dict(scenario=asdict(case.geometry),controller=asdict(config)),{}))
     bridge=NativePreviewBridge(strategy,manifest['export_names'],step_s=a.step_s,delay_s=a.delay_s,motor_delay_s=a.motor_delay_s)
     (run/'control_config.json').write_text(json.dumps(asdict(config),indent=2)+'\n',encoding='utf-8')
     sources=[Path(__file__).resolve()]+[ROOT/'src/ddevsim/strategies/shallow_press'/n for n in
-        ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py','body_control.py','contact_kinematics.py','suspension_geometry.py','fast_load.py')]
+        ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py','body_control.py','contact_kinematics.py','suspension_geometry.py','fast_load.py',
+         'event_config.py','event_phases.py','event_speed.py','event_controller.py','event_assessment.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('units.py','cosim.py','chassis_contact.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('solver_api.py','pothole_case.py','vehicle_case.py','visual_mesh.py',
         'scenarios/pit.py','scenarios/builder.py','scenarios/parameters.py','vehicle_profiles/tuned_ii.py',
@@ -211,7 +215,10 @@ def execute_run(a,config,case,run,capture):
         if a.probe: result=dict(status='PROBE_ONLY',simulation_pass=False,acceptance_pass=False)
         else:
             values=read_native_log(run/'native_1ms.csv')
-            result=assess(values,asdict(case.geometry),strategy.summary(),config.settle_s,config.crossing_kph)
+            if config.policy=='event_crawl':
+                from ddevsim.strategies.shallow_press.event_assessment import assess_event
+                result=assess_event(values,asdict(case.geometry),strategy.summary(),config,strategy.records)
+            else:result=assess(values,asdict(case.geometry),strategy.summary(),config.settle_s,config.crossing_kph)
             if config.diagnostic_torque_rate_nm_s is not None:
                 result=capability_diagnostic(result,values,config.actuation_torque_rate_nm_s)
             with (run/'control_intervals.csv').open('x',newline='',encoding='utf-8') as f:

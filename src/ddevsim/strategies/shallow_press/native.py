@@ -79,7 +79,8 @@ class NativePreviewBridge:
         self.last_time=t
         applied=self.actuation.step(observed,motor_stamp,motor_feedback,self.outer_command,
             getattr(self.strategy,'origin',None),
-            getattr(self.strategy,'scene',{}),dt,getattr(self.strategy,'phase','')=='FEEDBACK_FAULT')
+            getattr(self.strategy,'scene',{}),dt,getattr(self.strategy,'phase','')=='FEEDBACK_FAULT',
+            event_context=getattr(self.strategy,'motor_context',None))
         self.command=tuple(applied[:8])+(math.degrees(applied[8]),)
         if outer:
             row=dict(observed_time_s=observed,command_start_s=observed,command_end_s=t,
