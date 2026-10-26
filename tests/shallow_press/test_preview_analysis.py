@@ -46,3 +46,24 @@ def test_analysis_rejects_edited_native_data_and_portable_plant_identity(tmp_pat
     (tmp_path/'native_1ms.csv').write_text('data');manifest['plant']={'variant':'parent'}
     (tmp_path/'run_manifest.json').write_text(json.dumps(manifest))
     with pytest.raises(ValueError,match='plant'):module['verified_run'](tmp_path)
+
+    manifest['plant']=result['plant']
+    diagnostics=tmp_path/'control_diagnostics.json';diagnostics.write_text('[{}]')
+    result.update(assessment_revision='raw_events_reference_v2',control_diagnostics_sha256=sha(diagnostics),config={})
+    (tmp_path/'result.json').write_text(json.dumps(result))
+    manifest.update(result_sha256=sha(tmp_path/'result.json'),control_diagnostics_sha256=sha(diagnostics),effective_config={})
+    (tmp_path/'run_manifest.json').write_text(json.dumps(manifest))
+    module['verified_run'](tmp_path)
+    diagnostics.write_text('[]')
+    with pytest.raises(ValueError,match='diagnostics'):module['verified_run'](tmp_path)
+
+
+def test_event_index_names_approach_and_actual_pit_speeds_separately():
+    module=runpy.run_path(str(Path(__file__).resolve().parents[2]/'scripts/analyze_shallow_preview.py'))
+    row=dict(run_id='event_test',case='wide',kind='full',depth_m=.1,crossing_kph=1.,
+        requested_approach_kph=3.,task_version='event_crawl_v1',status='FAIL',failed_criteria=['contact_retention'],
+        metrics=dict(crossing_mean_kph=.6,crossing_max_kph=1.7))
+    text='\n'.join(module['case_index_lines']([row]))
+    assert '接近速度km/h' in text and '实际坑区均速/峰值km/h' in text
+    assert '|10|3|0.600 / 1.700|' in text
+    assert '恒定坑内速度能力' in text

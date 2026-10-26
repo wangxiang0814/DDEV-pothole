@@ -43,3 +43,16 @@ def test_event_configuration_is_frozen_and_legacy_cannot_silently_ignore_policy(
     settings={'entry_kph':.4};c=ShallowPressConfig(policy='event_crawl',event=settings);settings['entry_kph']=2.
     assert c.event.entry_kph==.4
     with pytest.raises(ValueError):controller(policy='event_crawl')
+
+
+def test_early_entry_keeps_body_trim_until_hub_descends_and_signed_braking_uses_evidence():
+    a=event_controller(force_policy='phase',load_feedback_gain=0.,descent_brake_gain=1.)
+    a.wheel_state=dict(phases=['BYPASS','ENTRY','BYPASS','PREPARE'],
+        base_phases=['BYPASS','ENTRY','BYPASS','PREPARE'])
+    from ddevsim.strategies.shallow_press.controller import WHEELS
+    x={'X_'+w:101.04 for w in WHEELS}
+    f=a._force_request(np.zeros(4),np.full(4,-200.),x,np.zeros(4),np.full(4,3300.),.02)
+    assert f[1]==-200.
+    assert a._drive_request(0.,np.array([0.,-150.,0.,0.]),x,.02)==-150.
+    a.wheel_state['base_phases'][1]='PREPARE'
+    assert a._drive_request(0.,np.array([0.,-150.,0.,0.]),x,.02)==0.

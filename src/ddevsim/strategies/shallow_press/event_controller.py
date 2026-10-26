@@ -12,7 +12,7 @@ class EventCrawlStrategy(ShallowPressStrategy):
     def reset(self,context):
         super().reset(context)
         if self.config.policy!='event_crawl':raise ValueError('explicit event_crawl policy required')
-        e=self.config.event;self.tracker=WheelPhaseTracker(e);self.planner=EventSpeedPlanner(e)
+        e=self.config.event;self.tracker=WheelPhaseTracker(e,context.scenario_id);self.planner=EventSpeedPlanner(e)
         self.preview_s=e.suspension_preview_s;self.reference_bandwidth=e.suspension_bandwidth
         self.wheel_state=None;self.motor_context=None;self.event_record={};self.ceiling=float('inf')
         self.speed_target=0.;self.force_components={}
@@ -36,7 +36,8 @@ class EventCrawlStrategy(ShallowPressStrategy):
 
     def _target_speed(self,target,x,xs,t,dt,finished):
         if finished or self.phase=='LEVELING':self.ceiling=0.;self.speed_target=0.;return 0.
-        self.ceiling=speed_ceiling(xs,self.wheel_state['expected'],self.scene,self.config.event)
+        self.ceiling=speed_ceiling(xs,self.wheel_state['expected'],self.scene,self.config.event,
+            planning_margin_m=self.planner.braking_margin_m())
         self.speed_target=min(self.config.cruise_kph/3.6,self.ceiling)
         return self.speed_target
 
@@ -69,7 +70,8 @@ class EventCrawlStrategy(ShallowPressStrategy):
             -e.load_correction_limit_n,e.load_correction_limit_n)
         request=staged_ff+body_feedback+correction
         floor=np.array([min(e.contact_force_floor_n,e.contact_force_floor_fraction*max(staged_ff[i],0))
-            if p in ('ENTRY','UNLOADED') else -c.force_working_limit_n for i,p in enumerate(phases)])
+            if p=='UNLOADED' or (p=='ENTRY' and x['X_'+WHEELS[i]]>=self.scene['start_station_m'])
+            else -c.force_working_limit_n for i,p in enumerate(phases)])
         request=np.maximum(request,floor)
         self.force_components=dict(feedforward_n=staged_ff.tolist(),body_feedback_n=body_feedback.tolist(),
             load_correction_n=correction.tolist(),unclipped_n=request.tolist(),body_reference_m=body_reference)

@@ -6,7 +6,7 @@ from test_preview_control import SCENE
 def test_right_track_phases_require_both_axles_and_real_recontact_dwell():
     from ddevsim.strategies.shallow_press.event_phases import WheelPhaseTracker
     from ddevsim.strategies.shallow_press.event_config import EventCrawlConfig
-    tracker=WheelPhaseTracker(EventCrawlConfig())
+    tracker=WheelPhaseTracker(EventCrawlConfig(),'right_track')
     y=np.array([.63,-.63,.63,-.63]);fz=np.full(4,3300.);cmp=np.full(4,.015)
     out=tracker.update(0.,np.full(4,99.),y,fz,cmp,SCENE)
     assert out['expected']==[False,True,False,True]
@@ -28,7 +28,7 @@ def test_right_track_phases_require_both_axles_and_real_recontact_dwell():
 def test_wide_phase_geometry_and_instance_isolation():
     from ddevsim.strategies.shallow_press.event_phases import WheelPhaseTracker
     from ddevsim.strategies.shallow_press.event_config import EventCrawlConfig
-    a=WheelPhaseTracker(EventCrawlConfig());b=WheelPhaseTracker(EventCrawlConfig())
+    a=WheelPhaseTracker(EventCrawlConfig(),'wide');b=WheelPhaseTracker(EventCrawlConfig(),'wide')
     scene=dict(SCENE,width_m=1.8,center_y_m=0.)
     args=(np.array([100.8,101.2,101.5,101.8]),np.array([.63,-.63,.63,-.63]),np.full(4,3300.),np.full(4,.015),scene)
     out=a.update(0.,*args)
@@ -40,10 +40,29 @@ def test_wide_phase_geometry_and_instance_isolation():
 def test_boundary_noise_does_not_chatter_and_lateral_drift_cannot_drop_required_wheels():
     from ddevsim.strategies.shallow_press.event_phases import WheelPhaseTracker
     from ddevsim.strategies.shallow_press.event_config import EventCrawlConfig
-    a=WheelPhaseTracker(EventCrawlConfig());y=np.array([.63,-.63,.63,-.63]);fz=np.full(4,3300.);cmp=np.full(4,.015)
+    a=WheelPhaseTracker(EventCrawlConfig(),'right_track');y=np.array([.63,-.63,.63,-.63]);fz=np.full(4,3300.);cmp=np.full(4,.015)
     a.update(0.,np.full(4,101.08),y,fz,cmp,SCENE)
     for i,position in enumerate([101.101,101.099,101.102,101.098]):
         out=a.update((i+1)*.02,np.full(4,position),y,fz,cmp,SCENE)
         assert out['base_phases'][1]=='PREPARE'
     out=a.update(.12,np.full(4,101.12),y+3,fz,cmp,SCENE)
     assert out['expected']==[False,True,False,True] and out['base_phases'][1]=='ENTRY'
+
+
+def test_load_evidence_recognizes_contact_entry_before_hub_crossing_without_faking_progress():
+    from ddevsim.strategies.shallow_press.event_phases import WheelPhaseTracker
+    from ddevsim.strategies.shallow_press.event_config import EventCrawlConfig
+    a=WheelPhaseTracker(EventCrawlConfig(),'right_track');y=np.array([.63,-.63,.63,-.63])
+    fz=np.full(4,3300.);cmp=np.full(4,.015)
+    a.update(0.,np.full(4,99.),y,fz,cmp,SCENE)
+    x=np.full(4,101.04)
+    out=a.update(.02,x,y,fz*.98,cmp,SCENE)
+    assert out['base_phases'][1]=='PREPARE'
+    loads=fz.copy();loads[1]=2600.
+    out=a.update(.04,x,y,loads,cmp,SCENE)
+    assert out['base_phases'][1]=='ENTRY'
+    assert not any(out['entered']) and not any(out['crossed'])
+    out=a.update(.06,x,y,fz,cmp,SCENE)
+    assert out['base_phases'][1]=='ENTRY'  # latch through load oscillation
+    out=a.update(.08,np.full(4,100.7),y,fz,cmp,SCENE)
+    assert out['base_phases'][1]=='PREPARE'  # genuine retreat resets

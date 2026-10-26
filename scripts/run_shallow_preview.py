@@ -217,13 +217,16 @@ def execute_run(a,config,case,run,capture):
             values=read_native_log(run/'native_1ms.csv')
             if config.policy=='event_crawl':
                 from ddevsim.strategies.shallow_press.event_assessment import assess_event
-                result=assess_event(values,asdict(case.geometry),strategy.summary(),config,strategy.records)
+                result=assess_event(values,asdict(case.geometry),strategy.summary(),config,strategy.records,case_id=a.case)
             else:result=assess(values,asdict(case.geometry),strategy.summary(),config.settle_s,config.crossing_kph)
             if config.diagnostic_torque_rate_nm_s is not None:
                 result=capability_diagnostic(result,values,config.actuation_torque_rate_nm_s)
             with (run/'control_intervals.csv').open('x',newline='',encoding='utf-8') as f:
                 w=csv.DictWriter(f,fieldnames=list(bridge.rows[0])); w.writeheader(); w.writerows(bridge.rows)
             (run/'control_diagnostics.json').write_text(json.dumps(strategy.records,indent=2,allow_nan=False)+'\n',encoding='utf-8')
+            if config.policy=='event_crawl':
+                digest=sha256_file(run/'control_diagnostics.json')
+                result['control_diagnostics_sha256']=digest;manifest['control_diagnostics_sha256']=digest
             if a.coast_contact_probe:
                 result.update(status='CONTACT_COAST_PROBE_ONLY',simulation_pass=False,
                               coast_started_s=coast_started[0],acceptance_pass=False)

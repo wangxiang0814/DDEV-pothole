@@ -16,6 +16,7 @@ class EventCrawlConfig:
     reference_jerk_m_s3: float=.4
     recontact_s: float=.08
     phase_hysteresis_m: float=.01
+    entry_load_deviation: float=.1
     radius_m: float=.263
     suspension_preview_s: float=.35
     suspension_bandwidth: float=8.
@@ -51,6 +52,8 @@ class EventCrawlConfig:
             raise ValueError('invalid event force shaping bounds')
         if self.load_feedback_gain>2 or self.load_correction_limit_n>4000 or self.airborne_sync_limit_nm>100:
             raise ValueError('event research correction envelope exceeded')
+        if not 0<self.entry_load_deviation<1 or self.descent_brake_gain>2:
+            raise ValueError('invalid entry evidence or braking gain')
 
 
 def four(value):

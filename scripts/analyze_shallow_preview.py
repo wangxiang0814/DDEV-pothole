@@ -36,6 +36,10 @@ def verified_run(run):
         'provenance':sha(run/'input_provenance.json')==result['input_provenance_sha256']==manifest['input_provenance_sha256'],
         'plant':result['plant']==manifest['plant'],
         'complete':manifest['run_status']=='COMPLETED' and result['native']['reached_configured_stop']}
+    if result.get('assessment_revision') in ('raw_events_reference_v2','raw_events_reference_v3'):
+        path=run/'control_diagnostics.json'
+        checks['diagnostics']=(path.is_file() and sha(path)==result.get('control_diagnostics_sha256')==manifest.get('control_diagnostics_sha256'))
+        checks['effective_config']=result['config']==manifest['effective_config']
     for prefix,files in (('',manifest['generated_assets']),('source/',manifest['source_sha256'])):
         for name,expected in files.items():checks[prefix+name]=sha(run/(prefix+name))==expected
     failed=[k for k,v in checks.items() if not v]
@@ -99,6 +103,27 @@ def plot_comparison(before,after,output):
     (output/'exit_comparison.json').write_text(json.dumps(comparison,indent=2)+'\n',encoding='utf-8')
 
 
+def case_index_lines(rows):
+    event=bool(rows) and all(r.get('task_version')=='event_crawl_v1' for r in rows)
+    lines=['# 固定参数验证工况索引','',
+        '所有视频为原生历史，未导出视频文件。MF52采纳身份以各运行plant元数据为准；SIMULATION_PASS仅指参数化研究筛查，能力扫描不计入基线通过。','']
+    if event:
+        lines+=['本任务允许关键坑沿主动降速；接近速度不代表恒定坑内速度能力。','',
+            '|工况名称|类别|坑深cm|接近速度km/h|实际坑区均速/峰值km/h|筛查|未通过项目|',
+            '|---|---|---:|---:|---:|---|---|']
+    else:
+        lines+=['|工况名称|类别|坑深cm|目标km/h|筛查|未通过项目|','|---|---|---:|---:|---|---|']
+    for row in rows:
+        speed='%g'%row['crossing_kph']
+        if event:
+            m=row['metrics']
+            speed='%g|%.3f / %.3f'%(row['requested_approach_kph'],m['crossing_mean_kph'],m['crossing_max_kph'])
+        lines.append('|%s|%s/%s|%g|%s|%s|%s|'%(row['run_id'],row['case'],row['kind'],
+            row['depth_m']*100,speed,row['status'],', '.join(row['failed_criteria']) or '—'))
+    return lines+['','播放：`python scripts/open_run_visualizer.py runs/shallow_press/<case>/<run_id>`。',
+        '详细速度、出坑停顿、姿态、轮速误差、轮载、净空假设及哈希见`verified_analysis.json`。']
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--evidence',required=True,type=Path)
@@ -117,6 +142,10 @@ def main():
         if any(actual.get(name)!=expected for name,expected in source_digest_map(plan['source_sha256']).items() if Path(name).name!='__init__.py'):
             raise ValueError('run does not match frozen sources')
         rows.append(dict(**{k:case[k] for k in ('case','run_id','kind','depth_m','crossing_kph')},
+            task_version=result.get('task_version','constant_speed_v1'),
+            requested_approach_kph=result['config']['cruise_kph'],
+            assessment_revision=result.get('assessment_revision','historical'),
+            diagnostics_integrity='BOUND_AND_VERIFIED' if result.get('control_diagnostics_sha256') else 'HISTORICAL_NOT_BOUND_BY_RESULT',
             status=result['status'],failed_criteria=[k for k,v in result['criteria'].items() if not v],
             metrics=result['metrics'],exit_progress=result['exit_progress'],
             chassis_diagnostic=result['chassis_diagnostic'],plant=result['plant'],
@@ -128,15 +157,7 @@ def main():
         config_sha256=plan['config_sha256'],count=len(rows),passing=sum(r['status']=='SIMULATION_PASS' for r in rows),
         full_acceptance=False,rows=rows)
     (evidence/'verified_analysis.json').write_text(json.dumps(output,indent=2)+'\n',encoding='utf-8')
-    lines=['# 固定参数验证工况索引','',
-        '所有视频为原生历史，未导出视频文件。MF52采纳身份以各运行plant元数据为准；SIMULATION_PASS仅指参数化研究筛查，能力扫描不计入基线通过。', '',
-        '|工况名称|类别|坑深cm|目标km/h|筛查|未通过项目|', '|---|---|---:|---:|---|---|']
-    for row in rows:
-        lines.append('|%s|%s/%s|%g|%g|%s|%s|'%(
-            row['run_id'],row['case'],row['kind'],row['depth_m']*100,row['crossing_kph'],
-            row['status'],', '.join(row['failed_criteria']) or '—'))
-    lines+=['','播放：`python scripts/open_run_visualizer.py runs/shallow_press/<case>/<run_id>`。',
-            '详细速度、出坑停顿、姿态、轮速误差、轮载、净空假设及哈希见`verified_analysis.json`。']
+    lines=case_index_lines(rows)
     (evidence/'case_index.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     if any(row['diagnostic_motion_pass'] is not None for row in rows):
         lines=['# 独立转矩能力扫描','',
