@@ -70,6 +70,8 @@ def main(argv=None):
                    help='non3114 modes are unadopted model diagnostics, never baseline acceptance')
     p.add_argument('--diagnostic-torque-rate-nm-s',type=float)
     p.add_argument('--model-diagnostic',action='store_true',help='explicit unadopted model comparison; never a baseline pass')
+    p.add_argument('--road-callback',choices=['none','passthrough','circle'],default='none',
+                   help='unadopted official road-query interface comparison; never baseline acceptance')
     p.add_argument('--probe',action='store_true')
     p.add_argument('--coast-contact-probe',action='store_true',
                    help='diagnostic: remove all commands before entry, never an expert acceptance run')
@@ -83,6 +85,8 @@ def main(argv=None):
     if a.tire_model!='internal' and (a.tyre_low_speed_m_s is not None or a.contact_length_m):
         p.error('external comparison defines its own contact/low-speed model; cannot combine internal patches')
     if a.tire_model=='internal' and a.mf52_operating_mode!=3114:p.error('external operating mode needs external tire')
+    if a.road_callback!='none' and (a.tire_model!='mf52_research' or a.mf52_operating_mode not in (3104,3114) or a.contact_length_m or a.tyre_low_speed_m_s is not None or a.probe or a.coast_contact_probe):
+        p.error('road callback needs isolated MF52-3104/3114 with no other contact modifications or actuator probes')
     capture=None
     if a.demonstration_config:
         from ddevsim.demonstration.cameras import load_config
@@ -90,6 +94,8 @@ def main(argv=None):
     config=json.loads(a.config.read_text(encoding='utf-8')) if a.config else {}
     config.update({k:v for k,v in dict(cruise_kph=a.speed_kph,crossing_kph=a.crossing_kph,mode=a.mode,diagnostic_torque_rate_nm_s=a.diagnostic_torque_rate_nm_s).items() if v is not None})
     config=ShallowPressConfig(**config)
+    if a.road_callback!='none' and config.diagnostic_torque_rate_nm_s is not None:
+        p.error('road callback interface comparisons require the aligned torque capability')
     case=load_case(ROOT/('scenarios/shallow_press/'+a.case+'.json'),depth_m=a.depth_m,
                   length_m=a.length_m,width_m=a.width_m if a.width_m is not None else (.9 if a.case=='right_track' else 1.8),
                   approach_distance_m=2,friction=a.friction,stop_s=a.duration_s)
@@ -100,7 +106,8 @@ def main(argv=None):
     validate_case(case)
     if a.dry_run:
         print(json.dumps(dict(strategy='shallow_press',route='PREVIEW_FEEDFORWARD_FEEDBACK',config=asdict(config),
-            scene=asdict(case.geometry),tire_model=a.tire_model,body_feedback_delay_s=a.delay_s,motor_feedback_delay_s=a.motor_delay_s)))
+            scene=asdict(case.geometry),tire_model=a.tire_model,road_callback=a.road_callback,
+            body_feedback_delay_s=a.delay_s,motor_feedback_delay_s=a.motor_delay_s)))
         return 0
     if a.claimed_output:
         run=ROOT/'runs/shallow_press'/a.case/a.run_id
@@ -153,6 +160,15 @@ def execute_run(a,config,case,run,capture):
             low_speed_m_s=a.tyre_low_speed_m_s,
             vehicle_sha256=vehicle_identity(model),adopted=False,diagnostic_only=True,
             adoption_scope='NOT_ADOPTED_CONTACT_CONFIGURATION_DIAGNOSTIC')
+    if a.road_callback!='none':
+        record=dict(manifest['comparison_vehicle'])
+        for key in ('baseline_id','adoption_date','adoption_basis'):record.pop(key,None)
+        record.update(adopted=False,diagnostic_only=True,adoption_scope='UNADOPTED_ROAD_CALLBACK_DIAGNOSTIC',
+            baseline_parent_id='expert2_mf52_research_20261024',road_callback=a.road_callback,
+            modification='EXTERNAL_ROAD_CALLBACK_'+a.road_callback.upper(),
+            callback_contract='VS_STI_GET_ROAD_CONTACT_EXT_FUNC_Y_X_ID_Z_DY_DX_MUY_MUX',
+            isotropic_friction_only=True,physical_road_geometry_changed=False)
+        manifest['comparison_vehicle']=record
     # Additional telemetry changes no physical vehicle parameter or input port.
     model=run/'model/run_all.par'; text=model.read_text(encoding='utf-8')
     extra=[root+w for root in ('My_Bk_','My_WC_') for w in ('L1','R1','L2','R2')]
@@ -178,7 +194,7 @@ def execute_run(a,config,case,run,capture):
     (run/'control_config.json').write_text(json.dumps(asdict(config),indent=2)+'\n',encoding='utf-8')
     sources=[Path(__file__).resolve()]+[ROOT/'src/ddevsim/strategies/shallow_press'/n for n in
         ('preview.py','config.py','controller.py','traction.py','native.py','actuation.py','assessment.py','tire_comparison.py','body_control.py','contact_kinematics.py','suspension_geometry.py','fast_load.py',
-         'event_config.py','event_phases.py','event_speed.py','event_controller.py','event_assessment.py')]
+         'event_config.py','event_phases.py','event_speed.py','event_controller.py','event_assessment.py','road_callback.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('units.py','cosim.py','chassis_contact.py')]
     sources += [ROOT/'src/ddevsim'/n for n in ('solver_api.py','pothole_case.py','vehicle_case.py','visual_mesh.py',
         'scenarios/pit.py','scenarios/builder.py','scenarios/parameters.py','vehicle_profiles/tuned_ii.py',
@@ -200,7 +216,17 @@ def execute_run(a,config,case,run,capture):
             if begin+2<=t<begin+3:u[4+i]=-400
         return u
     coast_started=[None]
+    callback_road=None
+    if a.road_callback!='none':
+        from ddevsim.strategies.shallow_press.road_callback import CallbackRoad
+        from ddevsim.solver_api import parse_simfile
+        libraries=set(re.findall(r'(?m)^EXTERNAL_TIRE_MODULE_DLL (.+)$',(run/'model/run_all.par').read_text(encoding='utf-8')))
+        if len(libraries)!=1:raise ValueError('one external tire wrapper required')
+        callback_road=CallbackRoad(manifest['export_names'],asdict(case.geometry),
+            Path(parse_simfile(run/'model/simfile.sim')['DLLFILE']),Path(next(iter(libraries)).strip()),a.road_callback)
     def command(t,exports):
+        if callback_road is not None:
+            callback_road.update(t,exports);callback_road.install()
         if a.coast_contact_probe:
             front=max(exports[manifest['export_names'].index('X_'+w)] for w in ('L1','R1'))
             if coast_started[0] is None and front>case.geometry.start_station_m-.5:
@@ -230,7 +256,12 @@ def execute_run(a,config,case,run,capture):
             if a.coast_contact_probe:
                 result.update(status='CONTACT_COAST_PROBE_ONLY',simulation_pass=False,
                               coast_started_s=coast_started[0],acceptance_pass=False)
-        if a.model_diagnostic or a.mf52_operating_mode!=3114 or a.contact_length_m or a.tyre_low_speed_m_s is not None:
+        if callback_road is not None:
+            callback_record=callback_road.write(run);result['contact_callback']=callback_record
+            result['criteria']['contact_callback_interface']=callback_record['interface_valid']
+            result['simulation_pass']=result['simulation_pass'] and callback_record['interface_valid']
+            manifest['contact_callback']=callback_record
+        if a.model_diagnostic or a.mf52_operating_mode!=3114 or a.contact_length_m or a.tyre_low_speed_m_s is not None or a.road_callback!='none':
             result=model_diagnostic_result(result)
         result.update(strategy_id='shallow_press',native=native,scene=asdict(case.geometry),config=asdict(config),
             plant=plant,capability=config.capability_metadata(),input_provenance_sha256=manifest['input_provenance_sha256'],

@@ -1,0 +1,11 @@
+{
+  "archive_sha256": "b7fec4409ad39f9fac68be550c7a089bdab594383b5cb51ffa9498286964ba4b",
+  "files": {
+    "src/ddevsim/strategies/shallow_press/controller.py": "ad7c19917ed26e0ddbdc0b208e4cfd8338b979197d896ac73f26e5e7fa18f0f5",
+    "src/ddevsim/strategies/shallow_press/event_controller.py": "a37cbce7a43518daad269f2577d91d71b7bd6c1e8d6b5c51af84d77fc8fac32b",
+    "src/ddevsim/strategies/shallow_press/event_config.py": "eeb6bb842a91eada61a0fb1152247bf4c42b8febf85331a3883ab2d26361dcd7",
+    "src/ddevsim/strategies/shallow_press/traction.py": "5547857c8d6aed80080d0b3020a061a8bf9d89e6df37f7328bef237d9c0fe162",
+    "tests/shallow_press/test_event_control.py": "8f421353bedd7a95293b8d33350a35f17f8dc24d7ea7149a16b41f69e71c327c",
+    "tests/shallow_press/test_rotation_allocation.py": "04a24c22ac06b74350eef7c76c376d77971f55ee54d09c5b76b7c57310039e66"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "zip_sha256": "4ffda207a1e31ccb331a465aaa16f9e460d754bc047fa2c30c3050a5bce584ef",
+  "files": {
+    "src/ddevsim/strategies/shallow_press/event_config.py": "40428e63a4b228d8a7771e361f32c441f71f729b51b26276debdc2e5ca93923e",
+    "src/ddevsim/strategies/shallow_press/event_controller.py": "7f2bf70b0cf5222ccef008deb441b9e1432fbd182b31e458c02fffc23b59f792",
+    "src/ddevsim/strategies/shallow_press/controller.py": "473bb3797d681854fff9f5c652e74a1c8744d666d78ed2f14a9816f0882604c6",
+    "src/ddevsim/strategies/shallow_press/actuation.py": "4d5745cb298a6292ea012b30b292222da35e84c74375c6a8a838f55fc340a910",
+    "src/ddevsim/strategies/shallow_press/native.py": "62535eac9b2eb850852b4ec882880f5b22c7fbd225b5f9db33dd2b602010d795",
+    "tests/shallow_press/test_event_actuation.py": "c4927289e11b67b5aaa69074f2695bc1a30dcdeffc4d55bee269cba4aeb6efb3",
+    "tests/shallow_press/test_event_control.py": "adc598561e15699045530e021972d463bf402ff7166f1a90f38928e87bfeba3d"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "archive_sha256": "91ccccf8f97a95dac47a9b9ee1ae817b5038b55c7cbd6cea4a461cc9a69c2f43",
+  "files": {
+    "src/ddevsim/strategies/shallow_press/contact_reference.py": "2d4c17d6958bccf35509f2a8b8a2a74d4f540d844730a29c18f25a68dc96def2",
+    "tests/shallow_press/test_contact_reference.py": "1232b2f7c71f932cac3750c5b2579c2517ee4664ed363c50c25054efcd292736",
+    "scripts/run_shallow_preview.py": "a7d00c22fec4cff9aa7d8c6af4e2a5f66bfd40b4616c15feef561a5abaebdc66"
+  }
+}

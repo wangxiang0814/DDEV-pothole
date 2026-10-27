@@ -1,0 +1,9 @@
+{
+  "archive_sha256": "d67bba3f469d7ec850497d689b8d95eb215801b343f9ea8c915b499ab880d377",
+  "files": {
+    "src/ddevsim/strategies/shallow_press/config.py": "7c90ed675249a5bedd31a274ca5e31f064a62f090fe1743d3232ae447c38f0f9",
+    "src/ddevsim/strategies/shallow_press/controller.py": "5fbedce9f2b64f75a45dc95e6d0b1b84e47ba8838145a8891652f8592361900c",
+    "src/ddevsim/strategies/shallow_press/traction.py": "0402d16a6eb9fe59ed5cafb684bb7bed5731eabfddb0386e21260bece79834c2",
+    "tests/shallow_press/test_preview_control.py": "076afed58ed7c9f6b17162e592a11e41b99781117e9b9159550f708f3d9766d6"
+  }
+}

@@ -40,6 +40,11 @@ def verified_run(run):
         path=run/'control_diagnostics.json'
         checks['diagnostics']=(path.is_file() and sha(path)==result.get('control_diagnostics_sha256')==manifest.get('control_diagnostics_sha256'))
         checks['effective_config']=result['config']==manifest['effective_config']
+    if 'contact_callback' in result:
+        callback=result['contact_callback']
+        checks['contact_callback_summary']=sha(run/'contact_callback.json')==callback['summary_sha256']
+        checks['contact_callback_csv']=sha(run/'contact_callback.csv')==callback['csv_sha256']
+        checks['contact_callback_manifest']=manifest.get('contact_callback')==callback
     for prefix,files in (('',manifest['generated_assets']),('source/',manifest['source_sha256'])):
         for name,expected in files.items():checks[prefix+name]=sha(run/(prefix+name))==expected
     failed=[k for k,v in checks.items() if not v]

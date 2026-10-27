@@ -29,6 +29,7 @@ class EventCrawlConfig:
     recontact_ff_scale: float=.2
     climb_ff_scale: float=.35
     descent_brake_gain: float=0.
+    descent_lead_m: float=0.
     allocation_antiwindup_gain: float=0.
     airborne_sync_gain: float=0.
     airborne_sync_limit_nm: float=40.
@@ -54,6 +55,7 @@ class EventCrawlConfig:
             raise ValueError('event research correction envelope exceeded')
         if not 0<self.entry_load_deviation<1 or self.descent_brake_gain>2:
             raise ValueError('invalid entry evidence or braking gain')
+        if self.descent_lead_m>self.radius_m:raise ValueError('descent window exceeds tire radius')
 
 
 def four(value):

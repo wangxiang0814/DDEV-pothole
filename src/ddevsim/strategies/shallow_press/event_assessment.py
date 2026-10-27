@@ -26,9 +26,8 @@ def envelope_series(xs,expected,scene,c):
     return np.where(active,np.minimum(cap,c.pit_kph/3.6),cap)
 
 
-def assess_event(values,scene,summary,config,diagnostics,*,case_id):
-    legacy=assess(values,scene,summary,config.settle_s,config.crossing_kph)
-    result=dict(legacy);criteria=dict(legacy['criteria']);criteria.pop('speed_tracking');criteria.pop('no_exit_pause')
+def event_checks(values,scene,summary,config,diagnostics,*,case_id):
+    """Independent event checks; no controller phase label is passage truth."""
     e=config.event;t=np.asarray(values['time_s']);dt=float(np.median(np.diff(t)))
     x=lambda n:np.asarray(values['exp_'+n],float)*si_factor(n)
     xs=np.column_stack([x('X_'+w) for w in WHEELS]);ys=np.column_stack([x('Y_'+w) for w in WHEELS])
@@ -76,14 +75,14 @@ def assess_event(values,scene,summary,config,diagnostics,*,case_id):
     tracking_excess=(speed-reference)*3.6
     tracking_peak=float(np.max(tracking_excess[crossing])) if crossing.any() else float('inf')
     tracking_overspeed_s=longest_interval(crossing&(tracking_excess>e.speed_tolerance_kph),dt)
-    criteria.update(event_diagnostics_complete=bool(valid),phase_completion=bool(phase_complete),
+    criteria=dict(event_diagnostics_complete=bool(valid),phase_completion=bool(phase_complete),
         event_speed_envelope=bool(crossing.any() and excess_peak<=e.max_speed_overshoot_kph and overspeed_s<=e.max_overspeed_duration_s),
         event_scene_coverage=bool(np.array_equal(observed_coverage,expected)),
         event_motion_reference=reference_motion,
         event_reference_envelope=bool(valid and crossing.any() and reference_peak<=e.max_speed_overshoot_kph and reference_overspeed_s<=e.max_overspeed_duration_s),
         event_reference_overspeed=bool(valid and crossing.any() and tracking_peak<=e.max_speed_overshoot_kph and tracking_overspeed_s<=e.max_overspeed_duration_s),
         finite_progress=bool(crossing.any() and stall_s<=e.max_uncommanded_stall_s))
-    metrics=dict(legacy['metrics'],event_speed_overshoot_peak_kph=excess_peak if np.isfinite(excess_peak) else None,
+    metrics=dict(event_speed_overshoot_peak_kph=excess_peak if np.isfinite(excess_peak) else None,
         event_longest_overspeed_s=overspeed_s,event_longest_uncommanded_stall_s=stall_s,
         event_total_duration_s=float(t[-1]),requested_approach_kph=config.cruise_kph,
         event_raw_crossings=observed,event_reference_overshoot_peak_kph=reference_peak if np.isfinite(reference_peak) else None,
@@ -91,6 +90,14 @@ def assess_event(values,scene,summary,config,diagnostics,*,case_id):
         event_speed_above_reference_peak_kph=tracking_peak if np.isfinite(tracking_peak) else None,
         event_speed_above_reference_longest_s=tracking_overspeed_s,
         phase_reference_scope='ACTUAL_RAW_WHEEL_POSITIONS_AND_FROZEN_EVENT_CONFIG')
+    return criteria,metrics
+
+
+def assess_event(values,scene,summary,config,diagnostics,*,case_id):
+    legacy=assess(values,scene,summary,config.settle_s,config.crossing_kph)
+    result=dict(legacy);criteria=dict(legacy['criteria']);criteria.pop('speed_tracking');criteria.pop('no_exit_pause')
+    event_criteria,event_metrics=event_checks(values,scene,summary,config,diagnostics,case_id=case_id)
+    criteria.update(event_criteria);metrics=dict(legacy['metrics'],**event_metrics)
     passed=all(criteria.values())
     result.update(status='SIMULATION_PASS' if passed else 'FAIL',simulation_pass=passed,acceptance_pass=False,
         task_version='event_crawl_v1',scope='EVENT_CRAWL_PARAMETERIZED_SCREEN',criteria=criteria,metrics=metrics,

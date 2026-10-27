@@ -8,6 +8,12 @@ import numpy as np
 from .fast_load import FastLoadFeedback
 
 
+def _clip(value,lower,upper):
+    # Small fixed-size, finite-bound arrays dominate this sampled loop.
+    # Ufuncs avoid the general np.clip dispatch path; order is unchanged.
+    return np.minimum(np.maximum(value,lower),upper)
+
+
 class CrawlActuation:
     def __init__(self,config):
         self.config=config;self.command=np.zeros(9);self.motor_target=np.zeros(4)
@@ -16,6 +22,8 @@ class CrawlActuation:
         self.previous_slip=None;self.previous_slip_time=None;self.slip_acceleration=np.zeros(4)
         self.load_loop=FastLoadFeedback(config) if config.fast_load_gain else None
         self.load_correction=np.zeros(4)
+        self.cap=np.array([config.torque_limit_nm]*4+[config.force_limit_n]*4+[math.radians(220)])
+        self.rate=np.array([config.actuation_torque_rate_nm_s]*4+[config.force_rate_n_s]*4+[math.radians(400)])
 
     def step(self,t,stamp,feedback,target,origin,scene,dt,fault=False,event_context=None):
         c=self.config;target=np.array(target,float).copy()
@@ -41,7 +49,7 @@ class CrawlActuation:
                 if self.previous_slip is None or not 0<elapsed<=2*c.motor_period_s:
                     self.slip_acceleration[:]=0
                 else:
-                    derivative=np.clip((slip-self.previous_slip)/elapsed,-50.,50.)
+                    derivative=_clip((slip-self.previous_slip)/elapsed,-50.,50.)
                     self.slip_acceleration+=(1-math.exp(-elapsed/.01))*(derivative-self.slip_acceleration)
                 self.previous_slip=slip.copy();self.previous_slip_time=t
                 load=np.array([feedback['Fz_'+n] for n in w])
@@ -53,20 +61,20 @@ class CrawlActuation:
                 correction=-c.motor_slip_gain*slip-c.motor_slip_derivative*self.slip_acceleration
                 self.contact_since=np.where(self.contact&~was,t,self.contact_since)
                 self.contact_since=np.where(self.contact,self.contact_since,np.nan)
-                restored=np.where(self.contact,np.clip((t-self.contact_since-.02)/.10,0,1),0)
+                restored=np.where(self.contact,_clip((t-self.contact_since-.02)/.10,0,1),0)
                 limit=np.where(self.contact,np.minimum(c.torque_limit_nm,.85*scene.get('friction',.7)*load*radii),0)
                 # Ramp nominal drive/brake demand after contact restoration.
                 # Slip correction must remain available during that ramp: a
                 # spinning wheel cannot wait120ms for braking to be restored.
                 # Total corrective torque still obeys load, amplitude and slew.
-                nominal=np.clip(desired,-limit*restored,limit*restored)
-                desired=np.clip(nominal+correction,-limit,limit)
+                nominal=_clip(desired,-limit*restored,limit*restored)
+                desired=_clip(nominal+correction,-limit,limit)
                 if c.policy=='event_crawl' and event_context is not None:
                     phases=event_context.get('phases',[])
                     if len(phases)!=4:raise ValueError('event motor context requires four phases')
                     air=np.array([p not in ('BYPASS','APPROACH','RECOVERED') for p in phases])&~self.contact
                     sync_limit=min(c.torque_limit_nm,c.event.airborne_sync_limit_nm,float(event_context.get('airborne_sync_limit_nm',0)))
-                    sync=np.clip(-float(event_context.get('airborne_sync_gain',0))*slip,-sync_limit,sync_limit)
+                    sync=_clip(-float(event_context.get('airborne_sync_gain',0))*slip,-sync_limit,sync_limit)
                     desired=np.where(air,sync,desired)
             self.motor_target=desired
             if self.load_loop is not None and c.mode in ('full','suspension') and not stale:
@@ -75,9 +83,7 @@ class CrawlActuation:
                 self.load_correction=self.load_loop.step(t,get('Fz_'),get('Jnc_'),get('X_'),get('Y_'),scene,c.motor_period_s)
         if stale:self.motor_target[:]=0
         if self.load_loop is not None and not stale:
-            target[4:8]=np.clip(target[4:8]+self.load_correction,-c.force_working_limit_n,c.force_working_limit_n)
-        cap=np.array([c.torque_limit_nm]*4+[c.force_limit_n]*4+[math.radians(220)])
-        rate=np.array([c.actuation_torque_rate_nm_s]*4+[c.force_rate_n_s]*4+[math.radians(400)])
-        desired=np.clip(np.r_[self.motor_target,target[4:]],-cap,cap)
-        self.command=np.clip(self.command+np.clip(desired-self.command,-rate*dt,rate*dt),-cap,cap)
+            target[4:8]=_clip(target[4:8]+self.load_correction,-c.force_working_limit_n,c.force_working_limit_n)
+        desired=_clip(np.concatenate((self.motor_target,target[4:])), -self.cap,self.cap)
+        self.command=_clip(self.command+_clip(desired-self.command,-self.rate*dt,self.rate*dt),-self.cap,self.cap)
         return self.command.copy()

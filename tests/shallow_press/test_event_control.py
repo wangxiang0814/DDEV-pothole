@@ -50,9 +50,22 @@ def test_early_entry_keeps_body_trim_until_hub_descends_and_signed_braking_uses_
     a.wheel_state=dict(phases=['BYPASS','ENTRY','BYPASS','PREPARE'],
         base_phases=['BYPASS','ENTRY','BYPASS','PREPARE'])
     from ddevsim.strategies.shallow_press.controller import WHEELS
-    x={'X_'+w:101.04 for w in WHEELS}
+    x={'X_'+w:101.04 for w in WHEELS};x['Vx']=.15;a.speed_reference=.15
     f=a._force_request(np.zeros(4),np.full(4,-200.),x,np.zeros(4),np.full(4,3300.),.02)
     assert f[1]==-200.
     assert a._drive_request(0.,np.array([0.,-150.,0.,0.]),x,.02)==-150.
-    a.wheel_state['base_phases'][1]='PREPARE'
+    x['Vx']=.02
     assert a._drive_request(0.,np.array([0.,-150.,0.,0.]),x,.02)==0.
+    x['Vx']=.15
+    a.wheel_state['base_phases'][1]='PREPARE'
+    assert a._drive_request(0.,np.array([0.,-150.,0.,0.]),x,.02)==-150.
+
+
+def test_final_stop_is_latched_when_small_rollback_reenters_the_stop_margin():
+    a=event_controller()
+    for t in np.arange(0,8,.02):a.step(observation(float(t)))
+    a.step(observation(8.,101.5));a.step(observation(8.02,103.4))
+    a.step(observation(8.04,105.2))
+    assert a.speed_target==0. and a.phase=='STOPPING'
+    a.step(observation(8.06,104.7))
+    assert a.speed_target==0. and a.phase=='STOPPING'

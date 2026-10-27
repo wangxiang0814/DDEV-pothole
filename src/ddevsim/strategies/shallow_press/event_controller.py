@@ -4,6 +4,7 @@ from .controller import ShallowPressStrategy,REQUIRED,WHEELS
 from .event_phases import WheelPhaseTracker
 from .event_speed import EventSpeedPlanner,speed_ceiling
 from .suspension_geometry import seat_kinematics
+from .preview import descent_resistance_envelope
 
 
 class EventCrawlStrategy(ShallowPressStrategy):
@@ -16,6 +17,7 @@ class EventCrawlStrategy(ShallowPressStrategy):
         self.preview_s=e.suspension_preview_s;self.reference_bandwidth=e.suspension_bandwidth
         self.wheel_state=None;self.motor_context=None;self.event_record={};self.ceiling=float('inf')
         self.speed_target=0.;self.force_components={}
+        self.stop_latched=False
 
     def step(self,observation):
         c=self.config
@@ -35,7 +37,11 @@ class EventCrawlStrategy(ShallowPressStrategy):
         return command
 
     def _target_speed(self,target,x,xs,t,dt,finished):
-        if finished or self.phase=='LEVELING':self.ceiling=0.;self.speed_target=0.;return 0.
+        self.stop_latched|=bool(finished or self.completed)
+        if self.stop_latched:
+            self.phase='COMPLETE' if self.completed else 'STOPPING'
+            self.ceiling=0.;self.speed_target=0.;return 0.
+        if self.phase=='LEVELING':self.ceiling=0.;self.speed_target=0.;return 0.
         self.ceiling=speed_ceiling(xs,self.wheel_state['expected'],self.scene,self.config.event,
             planning_margin_m=self.planner.braking_margin_m())
         self.speed_target=min(self.config.cruise_kph/3.6,self.ceiling)
@@ -46,8 +52,18 @@ class EventCrawlStrategy(ShallowPressStrategy):
 
     def _drive_request(self,total,grade_torque,x,dt):
         e=self.config.event;phase=np.array(self.wheel_state['base_phases'])
-        braking=e.descent_brake_gain*float(np.minimum(grade_torque,0)[phase=='ENTRY'].sum())
-        self.event_record=dict(drive_requested_nm=float(total),descent_brake_nm=braking)
+        if e.descent_lead_m and e.descent_brake_gain:
+            points=np.array([[x['X_'+w],x['Y_'+w]] for w in WHEELS])
+            radii=np.array([x['RRE_'+w+'i'] for w in WHEELS])
+            grade_torque=descent_resistance_envelope(points,self.scene,self.filtered_load,radii,
+                self.config.grade_torque_gain,e.descent_lead_m,[np.cos(x['Yaw']),np.sin(x['Yaw'])])
+        # Cancel downhill demand while rolling; release before low-speed stall
+        # or rollback instead of driving backwards with a negative feedforward.
+        weight=float(np.clip((x['Vx']-.5*self.speed_reference)/max(.5*self.speed_reference,.03),0,1))
+        if self.stop_latched or self.config.mode not in ('full','traction'):weight=0.
+        braking=weight*e.descent_brake_gain*float(np.minimum(grade_torque,0)[np.isin(phase,['PREPARE','ENTRY'])].sum())
+        self.event_record=dict(drive_requested_nm=float(total),descent_brake_nm=braking,descent_weight=weight,
+            descent_resistance_nm=np.asarray(grade_torque).tolist())
         return total+braking
 
     def _on_allocated(self,total,torques,dt):
@@ -80,5 +96,6 @@ class EventCrawlStrategy(ShallowPressStrategy):
     def summary(self):
         summary=super().summary()
         summary.update(policy='event_crawl',task_version='event_crawl_v1',
-            wheel_state=self.wheel_state,event_settings=self.config.event.__dict__.copy())
+            wheel_state=self.wheel_state,event_settings=self.config.event.__dict__.copy(),
+            motor_feedback_scope='BODY_LOCAL_ROLLING_PROXY')
         return summary

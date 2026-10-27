@@ -54,3 +54,16 @@ def climb_resistance_envelope(points,scene,loads_n,radii_m,gain,lag_m,heading):
     loads=np.repeat(loads_n,7);radii=np.repeat(radii_m,7)
     torques=grade_torque_feedforward(candidates.reshape(-1,2),scene,loads,radii,gain).reshape(-1,7)
     return np.maximum(0,torques.max(axis=1))
+
+
+def descent_resistance_envelope(points,scene,loads_n,radii_m,gain,lead_m,heading):
+    """Conservative downhill demand over an explicit forward spatial window.
+
+    The window prepares finite-rate braking before an edge load change. It is a
+    control assumption, not a changed physical road or a tire-force oracle.
+    """
+    offsets=np.linspace(0,lead_m,7)
+    candidates=np.asarray(points)[:,None,:]+offsets[None,:,None]*np.asarray(heading)[None,None,:]
+    loads=np.repeat(loads_n,7);radii=np.repeat(radii_m,7)
+    torques=grade_torque_feedforward(candidates.reshape(-1,2),scene,loads,radii,gain).reshape(-1,7)
+    return np.minimum(0,torques.min(axis=1))

@@ -57,6 +57,19 @@ def test_analysis_rejects_edited_native_data_and_portable_plant_identity(tmp_pat
     diagnostics.write_text('[]')
     with pytest.raises(ValueError,match='diagnostics'):module['verified_run'](tmp_path)
 
+    diagnostics.write_text('[{}]')
+    callback_csv=tmp_path/'contact_callback.csv';callback_csv.write_text('query,plane\n1,0\n')
+    callback_summary=tmp_path/'contact_callback.json';callback_summary.write_text('{"valid":true}')
+    result['contact_callback']=dict(csv_sha256=sha(callback_csv),summary_sha256=sha(callback_summary))
+    (tmp_path/'result.json').write_text(json.dumps(result))
+    manifest.update(result_sha256=sha(tmp_path/'result.json'),contact_callback=result['contact_callback'])
+    (tmp_path/'run_manifest.json').write_text(json.dumps(manifest))
+    module['verified_run'](tmp_path)
+    callback_csv.write_text('query,plane\n1,99\n')
+    with pytest.raises(ValueError,match='contact_callback_csv'):module['verified_run'](tmp_path)
+    callback_csv.write_text('query,plane\n1,0\n');callback_summary.write_text('{"valid":false}')
+    with pytest.raises(ValueError,match='contact_callback_summary'):module['verified_run'](tmp_path)
+
 
 def test_event_index_names_approach_and_actual_pit_speeds_separately():
     module=runpy.run_path(str(Path(__file__).resolve().parents[2]/'scripts/analyze_shallow_preview.py'))
