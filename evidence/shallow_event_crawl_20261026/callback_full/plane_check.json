@@ -1,0 +1,55 @@
+{
+  "scope": "GEOMETRIC_INTERFACE_CHECK_NOT_TIRE_PHYSICAL_CALIBRATION",
+  "run": "runs\\shallow_press\\wide\\event_callback_circle_wide_d10_a30_20261027_001",
+  "result_sha256": "04f8be8cb727bb8be23315f1ef8fce83dc493fda5e4dfeb9ed4cc955442fe378",
+  "callback_summary_sha256": "ef4ba3ff85f9bc128368f6543927e22758924cd21c96a738f5fcc1fdd3041469",
+  "checker_sha256": "a0087a552bfc6acae8c88e5b9a53d0848c47a6f33f4a9fd593542f3f1d79f555",
+  "time_match_tolerance_s": 1e-06,
+  "rows": [
+    {
+      "wheel": "L1",
+      "merged_rows": 100000,
+      "loaded_rows": 100000,
+      "loaded_contact_plane_peak_residual_m": 6.156358129238287e-07,
+      "loaded_p99_residual_m": 9.875650491669086e-08,
+      "actual_query_plane_peak_residual_m": 3.558264793923627e-14,
+      "worst_time_s": 26.4915,
+      "worst_expected_z_m": -0.014130427764187076,
+      "worst_native_z_m": -0.0141310434
+    },
+    {
+      "wheel": "R1",
+      "merged_rows": 100000,
+      "loaded_rows": 100000,
+      "loaded_contact_plane_peak_residual_m": 6.113200744402303e-07,
+      "loaded_p99_residual_m": 1.0068448925260053e-07,
+      "actual_query_plane_peak_residual_m": 3.547162563677375e-14,
+      "worst_time_s": 26.9385,
+      "worst_expected_z_m": -0.01354399697992556,
+      "worst_native_z_m": -0.0135446083
+    },
+    {
+      "wheel": "L2",
+      "merged_rows": 100000,
+      "loaded_rows": 100000,
+      "loaded_contact_plane_peak_residual_m": 6.253044858850476e-07,
+      "loaded_p99_residual_m": 2.627341777122406e-07,
+      "actual_query_plane_peak_residual_m": 3.5665914666083154e-14,
+      "worst_time_s": 37.9975,
+      "worst_expected_z_m": -0.013940539295514115,
+      "worst_native_z_m": -0.0139411646
+    },
+    {
+      "wheel": "R2",
+      "merged_rows": 100000,
+      "loaded_rows": 100000,
+      "loaded_contact_plane_peak_residual_m": 6.266234103963209e-07,
+      "loaded_p99_residual_m": 2.521722974717357e-07,
+      "actual_query_plane_peak_residual_m": 3.58046925441613e-14,
+      "worst_time_s": 37.9955,
+      "worst_expected_z_m": -0.010549654276589604,
+      "worst_native_z_m": -0.0105502809
+    }
+  ],
+  "millimetre_plane_gate": true
+}

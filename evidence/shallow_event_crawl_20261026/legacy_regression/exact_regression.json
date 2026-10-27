@@ -1,0 +1,30 @@
+{
+  "scope": "LEGACY_FULL40S_NATIVE_BYTES_AND_CRITERIA",
+  "rows": [
+    {
+      "case": "wide",
+      "before": "runs\\shallow_press\\wide\\coverage_v2yaw_wide_d04_v10_20261025_001",
+      "after": "runs\\shallow_press\\wide\\event_legacy_regression_wide_d04_a10_20261027_001",
+      "native_sha_before": "a7677acac79c3c775f7d04744a9d1e73866e4d980c39b725b5105cfb3d28b07e",
+      "native_sha_after": "a7677acac79c3c775f7d04744a9d1e73866e4d980c39b725b5105cfb3d28b07e",
+      "same_native_csv": true,
+      "same_metrics": true,
+      "same_criteria": true,
+      "same_scene": true,
+      "same_parent": true
+    },
+    {
+      "case": "right_track",
+      "before": "runs\\shallow_press\\right_track\\coverage_v2yaw_right_track_d04_v10_20261025_001",
+      "after": "runs\\shallow_press\\right_track\\event_legacy_regression_right_track_d04_a10_20261027_001",
+      "native_sha_before": "ececb3b93e0a1d32c3d7979e570a9de5270b951bec3f799e0a5a48a7af2e577a",
+      "native_sha_after": "ececb3b93e0a1d32c3d7979e570a9de5270b951bec3f799e0a5a48a7af2e577a",
+      "same_native_csv": true,
+      "same_metrics": true,
+      "same_criteria": true,
+      "same_scene": true,
+      "same_parent": true
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,72 @@
+{
+  "scope": "MATCHED_CONFIG_DEPTH_DIAGNOSTIC",
+  "rows": [
+    {
+      "run_id": "event_spatial_descent_wide_d04_a30_20261027_001",
+      "result_sha256": "123dfb962877ffdda1a8dba81776daddfdb492b2431d0810c074b0682f62c391",
+      "native_csv_sha256": "c197c78fcd61d0c918d5a969b20a57ab6c69a08905f2b768343ce7b511e676a2",
+      "front_entry_s": 25.6745,
+      "rear_exit_s": 39.0825,
+      "criteria": {
+        "crossing_observed": true,
+        "rear_and_stop": true,
+        "controller_no_fault": true,
+        "roll": true,
+        "pitch": true,
+        "path": true,
+        "travel": true,
+        "loaded_wheel_speed_error": true,
+        "impact_10ms": true,
+        "no_backward_motion": true,
+        "contact_retention": true,
+        "wheel_load_peak": true,
+        "stop_hold": true,
+        "backward_distance": true,
+        "input_amplitude": true,
+        "input_slew": true,
+        "event_diagnostics_complete": true,
+        "phase_completion": true,
+        "event_speed_envelope": true,
+        "event_scene_coverage": true,
+        "event_motion_reference": true,
+        "event_reference_envelope": true,
+        "event_reference_overspeed": true,
+        "finite_progress": true
+      }
+    },
+    {
+      "run_id": "event_spatial_descent_wide_d10_a30_20261027_001",
+      "result_sha256": "384f2391887f00520a31cc7f9912f68aefdf36869da3f33a299075a6c4dc45de",
+      "native_csv_sha256": "6e070bfb9f1b57d4510249183ce3596485cc124f28d508bd8a830386860f39e2",
+      "front_entry_s": 25.5755,
+      "rear_exit_s": 45.8115,
+      "criteria": {
+        "crossing_observed": true,
+        "rear_and_stop": true,
+        "controller_no_fault": true,
+        "roll": true,
+        "pitch": true,
+        "path": true,
+        "travel": true,
+        "loaded_wheel_speed_error": false,
+        "impact_10ms": true,
+        "no_backward_motion": false,
+        "contact_retention": true,
+        "wheel_load_peak": false,
+        "stop_hold": true,
+        "backward_distance": false,
+        "input_amplitude": true,
+        "input_slew": true,
+        "event_diagnostics_complete": true,
+        "phase_completion": true,
+        "event_speed_envelope": false,
+        "event_scene_coverage": true,
+        "event_motion_reference": true,
+        "event_reference_envelope": true,
+        "event_reference_overspeed": false,
+        "finite_progress": true
+      }
+    }
+  ],
+  "script_sha256": "3c28accaf00cad197f3328777e786139e209cafd3de6bf243cf66a3734127bd7"
+}

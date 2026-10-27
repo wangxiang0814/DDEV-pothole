@@ -1,0 +1,10 @@
+{
+  "scope": "SCENE_DISTANCE_ONLY_UNCHANGED_CONTROLLER",
+  "baseline_run": "runs\\shallow_press\\wide\\event_execution_wide_d04_a60_20261027_001",
+  "baseline_result_sha256": "115b59e9faff6690e19ea7db01d6e3eacf7e09155560515c4cbf241ab064912d",
+  "observed_accel_distance_to_5_85_kph_m": 8.2355732,
+  "observed_braking_start_distance_to_pit_m": 10.88739395,
+  "selected_6kph_start_m": 22,
+  "selected_3kph_start_m": 8,
+  "purpose": "Reduce pre-pit playback while retaining standstill acceleration and planned braking; explicit full80s stop."
+}

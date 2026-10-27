@@ -1,0 +1,38 @@
+{
+  "scope": "MATCHED_OFFLINE_CSV_REPLAY_NOT_NATIVE_SOLVER_SPEED_OR_CONTROL_CAPABILITY",
+  "samples": 60000,
+  "sample_period_s": 0.001,
+  "run": "runs\\shallow_press\\wide\\event_approach6_wide_d04_a60_20261027_001",
+  "native_csv_sha256": "3674b6857a9d81e6fc9f3796be9cd898b9599c55f9a78119be03189056fec836",
+  "records": [
+    {
+      "variant": "before",
+      "elapsed_s": 17.5326013,
+      "command_sha256": "173889664d60d7ddfa7e3a40b57713955c14d3437ca9bb12ce02503b2c72ca7a"
+    },
+    {
+      "variant": "after",
+      "elapsed_s": 19.888925899999997,
+      "command_sha256": "173889664d60d7ddfa7e3a40b57713955c14d3437ca9bb12ce02503b2c72ca7a"
+    },
+    {
+      "variant": "after",
+      "elapsed_s": 14.222559600000004,
+      "command_sha256": "173889664d60d7ddfa7e3a40b57713955c14d3437ca9bb12ce02503b2c72ca7a"
+    },
+    {
+      "variant": "before",
+      "elapsed_s": 17.9197525,
+      "command_sha256": "173889664d60d7ddfa7e3a40b57713955c14d3437ca9bb12ce02503b2c72ca7a"
+    }
+  ],
+  "median_before_s": 17.7261769,
+  "median_after_s": 17.05574275,
+  "median_speedup": 1.0393084112387894,
+  "same_command_bytes": true,
+  "source_sha256": {
+    "actuation_after.py": "289ba351a1926f3811be7c520b5a252b6bd82246da234517d96fdfc0422dbb04",
+    "actuation_before.py": "0e60634d2947b1d501dee3c0c53af8e7e7d0f6b8db942740f02e9f2efead9625",
+    "compare_event_replay.py": "a7567cf71565f4042dda23f237b57895b05a7e9ad068949c1571ab1b1c3d7374"
+  }
+}

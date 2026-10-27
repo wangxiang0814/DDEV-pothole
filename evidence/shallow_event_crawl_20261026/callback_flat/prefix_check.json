@@ -1,0 +1,20 @@
+[
+  {
+    "mode": "passthrough",
+    "matching_lines": 20001,
+    "expected": 20001,
+    "sha_before": "671a67923f421db5b9f997cb7466fb7fe67ca2c59bfd895c5d1725b1ede33f83",
+    "sha_after": "671a67923f421db5b9f997cb7466fb7fe67ca2c59bfd895c5d1725b1ede33f83",
+    "query_count": 640000,
+    "interface_valid": true
+  },
+  {
+    "mode": "circle",
+    "matching_lines": 20001,
+    "expected": 20001,
+    "sha_before": "671a67923f421db5b9f997cb7466fb7fe67ca2c59bfd895c5d1725b1ede33f83",
+    "sha_after": "671a67923f421db5b9f997cb7466fb7fe67ca2c59bfd895c5d1725b1ede33f83",
+    "query_count": 640000,
+    "interface_valid": true
+  }
+]

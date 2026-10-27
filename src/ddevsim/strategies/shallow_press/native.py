@@ -52,12 +52,13 @@ class NativePreviewBridge:
     def __init__(self,strategy,exports,step_s=.0005,delay_s=0.,motor_delay_s=.002):
         if not 0<step_s<=.001 or not 0<=delay_s<=.08 or not 0<=motor_delay_s<=.08: raise ValueError('invalid time settings')
         self.strategy=strategy; self.names=tuple(exports); self.index={n:i for i,n in enumerate(exports)}
-        self.factors={n:si_factor(n) for n in REQUIRED}
-        if any(n not in self.index for n in REQUIRED): raise ValueError('missing native observation')
+        self.config=getattr(strategy,'config',ShallowPressConfig())
+        required=REQUIRED
+        self.factors={n:si_factor(n) for n in required}
+        if any(n not in self.index for n in required): raise ValueError('missing native observation')
         self.step_s=step_s; self.delay=delay_s; self.history=deque(); self.last_tick=None
         self.motor_history=deque();self.motor_delay=motor_delay_s
         self.command=(0.,)*9; self.outer_command=(0.,)*9; self.rows=[]
-        self.config=getattr(strategy,'config',ShallowPressConfig())
         self.actuation=CrawlActuation(self.config);self.last_time=None
 
     def __call__(self,t,exports):

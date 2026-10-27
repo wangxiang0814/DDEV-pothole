@@ -1,5 +1,14 @@
 # 策略开发与运行入口
 
+2026-10-27：分阶段可变速度开发使用显式`policy=event_crawl`，入口示例：
+
+```powershell
+python scripts/run_shallow_preview.py --case right_track --depth-m .04 --speed-kph 3 --approach-distance-m 12 --duration-s 100 --delay-s .04 --motor-delay-s .002 --config configs/shallow_press/event_crawl_development_20261027.json --run-id event_trial_unique
+python scripts/open_run_visualizer.py runs/shallow_press/right_track/event_trial_unique
+```
+
+该配置是开发入口，不是已验证的深坑参数发行版。`--speed-kph`是接近速度；坑沿速度由`event.entry_kph/climb_kph/pit_kph`规划，原`crossing_kph`只供恒速旧判据对照。更高接近速度应增大初始化距离，报告必须同时给出实际达到的接近速度、坑区均速和峰值。每项输入、源码和原生历史独立冻结，不修改旧结果；不导出视频。
+
 2026-10-24更新：MPC已退出主开发路线，专属代码与证据移至[可校验归档](../archive/mpc_20261013/README.md)。以下带2026-10-13日期的段落为历史记录。当前预瞄前馈与反馈开发见[实现设计](superpowers/specs/2026-10-24-shallow-preview-feedback-design.md)。
 
 当前专家二已有独立的预瞄前馈与反馈控制器、原生 worker、研究筛查和播放接口。`implemented=True`表示代码可运行；`SIMULATION_PASS`只表示明确参数与模型下通过研究筛查，完整实车能力与底盘安全验收仍未完成。
@@ -86,3 +95,5 @@ git diff --check
 2026-10-13 MPC前置模型验证见 [SHALLOW_MPC_VALIDATION_20261013.md](../archive/mpc_20261013/README.md)。完成30条独立原生矩阵运行、67状态原生线性化及多步预测/步长对照；局部平地模型有用，但当前统一预测器18条过坑验证均未通过轮载/接触门控。新增辨识/预测研究模块不启用专家入口；MPC闭环尚未释放，`shallow_press`仍为NOT_IMPLEMENTED。正式证据采用 `evidence/shallow_mpc_validation_20261013/verified_analysis/`。
 
 2026-10-24 多速度调优见[SHALLOW_MULTISPEED_TUNING_20261024.md](SHALLOW_MULTISPEED_TUNING_20261024.md)。新候选需显式传入`--config configs/shallow_press/preview_multispeed_v2_20261024.json`。两类坑保持同一配置，并按请求速度调度预瞄整形；实际通过范围读取该版本矩阵，不能拼接旧配置结果。用户批准的更快转矩扫描单独标识，不能覆盖专家一1000 Nm/s能力基线或统计为普通通过。
+
+2026-10-27分阶段降速开发见[SHALLOW_EVENT_CRAWL_20261027.md](SHALLOW_EVENT_CRAWL_20261027.md)，显式配置为`configs/shallow_press/event_crawl_development_20261027.json`。接近速度与实际坑沿低速分开，四轮真实过沿与最后停车分别验收。用户检查4cm宽坑回放后认可该点效果，并要求仅缩短初始距离后暂停；本轮版本作为开发检查点，不宣称10cm宽坑策略已完成。后续恢复调优须继续使用唯一run名称、冻结配置和源版本，不能覆盖历史结果。

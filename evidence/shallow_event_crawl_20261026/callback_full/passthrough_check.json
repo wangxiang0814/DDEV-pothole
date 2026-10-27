@@ -1,0 +1,25 @@
+{
+  "same_native_csv": true,
+  "native_before": "c197c78fcd61d0c918d5a969b20a57ab6c69a08905f2b768343ce7b511e676a2",
+  "native_after": "c197c78fcd61d0c918d5a969b20a57ab6c69a08905f2b768343ce7b511e676a2",
+  "baseline_run": "event_spatial_descent_wide_d04_a30_20261027_001",
+  "callback_run": "event_callback_passthrough_wide_d04_a30_20261027_001",
+  "interface": {
+    "mode": "passthrough",
+    "installed": true,
+    "query_count": 3200000,
+    "sampled_queries": 400000,
+    "unsupported_queries": 0,
+    "error": null,
+    "interface_valid": true,
+    "csv_sha256": "03a86b7f659a4e48cfdffbdfb23b5fc933fe0f6087365bbfec65f6a871bbffcc",
+    "adopted": false,
+    "physical_road_unchanged": true,
+    "assumptions": [
+      "Actual native query coordinates; latest hub state delayed one integration step",
+      "Isotropic road friction delegated through public vs_get_road_contact",
+      "Circle mode is a longitudinal massless support-plane approximation, not MF-Swift or a calibrated tire"
+    ],
+    "summary_sha256": "326b710b62fa9cd83f470b798be5614aa614a2fae75a1e1c0cd244772cf551ff"
+  }
+}

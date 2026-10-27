@@ -1,0 +1,204 @@
+{
+  "plan_sha256": "8fe79c79c43e60788d6d3b8613306256b7a79a4a9508e99f5ca22d18e1ae2bdc",
+  "results": [
+    {
+      "case": "right_track",
+      "run_id": "event_speed_right_track_d10_a10_20261026_001",
+      "kind": "event_speed_legacy_force",
+      "depth_m": 0.1,
+      "crossing_kph": 1,
+      "returncode": 0,
+      "resumed": false,
+      "status": "FAIL",
+      "simulation_pass": false,
+      "failed_criteria": [
+        "loaded_wheel_speed_error",
+        "contact_retention",
+        "event_speed_envelope"
+      ],
+      "metrics": {
+        "roll_peak_deg": 2.46795472,
+        "pitch_peak_deg": 1.20541661,
+        "path_peak_m": 0.014260667405,
+        "jounce_min_m": -0.049609281000000005,
+        "jounce_max_m": 0.0683652057,
+        "loaded_slip_proxy_peak_m_s": 0.7258014385497216,
+        "az_rms_m_s2": 0.4318652003925687,
+        "az_10ms_peak_m_s2": 2.9510423564263117,
+        "max_wheel_load_n": 6684.15738,
+        "contact_loss_s": [
+          0.0,
+          0.0,
+          0.0,
+          0.20199999999997775
+        ],
+        "longest_contact_loss_s": [
+          0.0,
+          0.0,
+          0.0,
+          0.20199999999997775
+        ],
+        "loaded_contact_fraction": [
+          1.0,
+          0.9999489326932898,
+          1.0,
+          0.9894801348176897
+        ],
+        "wheel_load_peak_ratio_to_static": [
+          1.5239724513909214,
+          1.6654643233922293,
+          1.6455696762534955,
+          2.303693478293887
+        ],
+        "crossing_mean_kph": 0.7040183707276503,
+        "crossing_max_kph": 1.79538837,
+        "crossing_median_kph": 0.6831510985000001,
+        "crossing_speed_std_kph": 0.2927181036436692,
+        "requested_crossing_kph": 1.0,
+        "mean_speed_error_kph": -0.2959816292723497,
+        "min_speed_m_s": -0.03975045361111111,
+        "backward_distance_m": 0.00904979159659345,
+        "stop_hold_peak_speed_m_s": 0.00011492333083333334,
+        "observed_duration_s": 80.0,
+        "input_log_complete": true,
+        "torque_peak_nm": 316.014945,
+        "suspension_force_peak_n": 3072.42807,
+        "steering_wheel_peak_deg": 14.2290779,
+        "torque_rate_peak_nm_s": 1000.0004999987766,
+        "force_rate_peak_n_s": 45400.00500002513,
+        "steering_rate_peak_deg_s": 400.0000400002218,
+        "event_speed_overshoot_peak_kph": 1.29538837,
+        "event_longest_overspeed_s": 0.4649999999999488,
+        "event_longest_uncommanded_stall_s": 0.07999999999999119,
+        "event_total_duration_s": 80.0,
+        "requested_approach_kph": 1.0,
+        "phase_reference_scope": "ACTUAL_RAW_WHEEL_POSITIONS_AND_FROZEN_EVENT_CONFIG"
+      },
+      "exit_progress": [
+        {
+          "wheel": "FR",
+          "observed": true,
+          "zone_duration_s": 2.7839999999996934,
+          "longest_pause_s": 0.22899999999997478,
+          "min_speed_kph": -0.143101633
+        },
+        {
+          "wheel": "RR",
+          "observed": true,
+          "zone_duration_s": 2.7229999999997,
+          "longest_pause_s": 0.24199999999997335,
+          "min_speed_kph": -0.10708526
+        }
+      ],
+      "result_sha256": "d6afc8b2e71c8e40336aec442056537671484840c63fa56975d1ff73b6a50a14"
+    },
+    {
+      "case": "wide",
+      "run_id": "event_speed_wide_d10_a10_20261026_001",
+      "kind": "event_speed_legacy_force",
+      "depth_m": 0.1,
+      "crossing_kph": 1,
+      "returncode": 0,
+      "resumed": false,
+      "status": "FAIL",
+      "simulation_pass": false,
+      "failed_criteria": [
+        "loaded_wheel_speed_error",
+        "no_backward_motion",
+        "contact_retention",
+        "wheel_load_peak",
+        "backward_distance",
+        "event_speed_envelope"
+      ],
+      "metrics": {
+        "roll_peak_deg": 1.07071836,
+        "pitch_peak_deg": 2.99798827,
+        "path_peak_m": 0.024747764695,
+        "jounce_min_m": -0.0808344602,
+        "jounce_max_m": 0.0801765594,
+        "loaded_slip_proxy_peak_m_s": 8.618805772114634,
+        "az_rms_m_s2": 1.6445153316696242,
+        "az_10ms_peak_m_s2": 10.000648207064675,
+        "max_wheel_load_n": 10431.3479,
+        "contact_loss_s": [
+          0.19099999999997896,
+          0.30999999999996586,
+          0.30999999999996586,
+          0.3949999999999565
+        ],
+        "longest_contact_loss_s": [
+          0.08599999999999053,
+          0.10199999999998877,
+          0.14199999999998436,
+          0.16599999999998172
+        ],
+        "loaded_contact_fraction": [
+          0.9874206442511169,
+          0.9797201975076416,
+          0.9807194921232072,
+          0.9733129555607807
+        ],
+        "wheel_load_peak_ratio_to_static": [
+          2.1820638528410994,
+          2.1338596777272376,
+          2.5680888122192274,
+          3.3102543641847695
+        ],
+        "crossing_mean_kph": 0.8119188536754245,
+        "crossing_max_kph": 3.72398088,
+        "crossing_median_kph": 0.7409212760000001,
+        "crossing_speed_std_kph": 0.8039978404840578,
+        "requested_crossing_kph": 1.0,
+        "mean_speed_error_kph": -0.1880811463245755,
+        "min_speed_m_s": -0.6633197805555556,
+        "backward_distance_m": 1.130586376004859,
+        "stop_hold_peak_speed_m_s": 0.0012066404611111112,
+        "observed_duration_s": 80.0,
+        "input_log_complete": true,
+        "torque_peak_nm": 500.0,
+        "suspension_force_peak_n": 6000.0,
+        "steering_wheel_peak_deg": 28.6556119,
+        "torque_rate_peak_nm_s": 1000.0005000023293,
+        "force_rate_peak_n_s": 45400.005000105884,
+        "steering_rate_peak_deg_s": 400.0000499995103,
+        "event_speed_overshoot_peak_kph": 3.2239808800000005,
+        "event_longest_overspeed_s": 0.6609999999999272,
+        "event_longest_uncommanded_stall_s": 0.046999999999994824,
+        "event_total_duration_s": 80.0,
+        "requested_approach_kph": 1.0,
+        "phase_reference_scope": "ACTUAL_RAW_WHEEL_POSITIONS_AND_FROZEN_EVENT_CONFIG"
+      },
+      "exit_progress": [
+        {
+          "wheel": "FL",
+          "observed": true,
+          "zone_duration_s": 3.968999999999563,
+          "longest_pause_s": 0.5459999999999399,
+          "min_speed_kph": -2.38795121
+        },
+        {
+          "wheel": "FR",
+          "observed": true,
+          "zone_duration_s": 3.9819999999995614,
+          "longest_pause_s": 0.5459999999999399,
+          "min_speed_kph": -2.38795121
+        },
+        {
+          "wheel": "RL",
+          "observed": true,
+          "zone_duration_s": 2.0399999999997753,
+          "longest_pause_s": 0.32899999999996377,
+          "min_speed_kph": -0.371666174
+        },
+        {
+          "wheel": "RR",
+          "observed": true,
+          "zone_duration_s": 1.988999999999781,
+          "longest_pause_s": 0.32899999999996377,
+          "min_speed_kph": -0.371666174
+        }
+      ],
+      "result_sha256": "bbf428e32e3354ba9814eb206e7200018d10deab8d9d4e16588e6c2201f8a817"
+    }
+  ]
+}

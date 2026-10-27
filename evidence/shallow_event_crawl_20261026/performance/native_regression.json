@@ -1,0 +1,8 @@
+{
+  "before": "runs\\shallow_press\\wide\\event_approach6_wide_d04_a60_20261027_001",
+  "after": "runs\\shallow_press\\wide\\event_execution_wide_d04_a60_20261027_001",
+  "native_sha256": "3674b6857a9d81e6fc9f3796be9cd898b9599c55f9a78119be03189056fec836",
+  "same_native_csv": true,
+  "same_metrics": true,
+  "same_criteria": true
+}

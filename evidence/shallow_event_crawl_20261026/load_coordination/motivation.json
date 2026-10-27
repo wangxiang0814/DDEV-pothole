@@ -1,0 +1,23 @@
+{
+  "scope": "OFFLINE_FORCE_LOOP_OPPOSITION_NOT_PROOF_OF_CAUSAL_BENEFIT",
+  "run": "runs\\shallow_press\\wide\\event_crest_release_wide_d10_a30_20261027_001",
+  "result_sha256": "63b7ecfb23510474a85b9fcc7b8a54263ce599f780454e8e145a93a8de468a6f",
+  "rows": [
+    {
+      "wheel": "R1",
+      "climbing_samples": 115,
+      "opposed_samples": 41,
+      "mean_body_force_when_opposed_n": -1209.7394311848448,
+      "mean_fast_force_when_opposed_n": 1459.346488016827,
+      "max_fast_force_when_opposed_n": 3342.4409722017463
+    },
+    {
+      "wheel": "R2",
+      "climbing_samples": 497,
+      "opposed_samples": 8,
+      "mean_body_force_when_opposed_n": -734.7580359604805,
+      "mean_fast_force_when_opposed_n": 660.763823327603,
+      "max_fast_force_when_opposed_n": 1329.7501901185767
+    }
+  ]
+}

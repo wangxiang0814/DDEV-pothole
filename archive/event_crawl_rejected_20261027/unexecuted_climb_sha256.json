@@ -1,0 +1,11 @@
+{
+  "status": "UNEXECUTED_NATIVE_PROTOTYPE_NOT_ADOPTED_NOT_A_FAILED_NATIVE_TRIAL",
+  "reason": "User requested one brief scenario-distance comparison, then pause tuning and complete Git management.",
+  "zip_sha256": "ece3aa22de79491e8dcb18aa570afeb3415e89488f8cad5163b06f40a9222a2c",
+  "files": {
+    "src/ddevsim/strategies/shallow_press/event_loads.py": "2c603cb30bdf71be8adc344e0571705dc9b7fcb115cb0f80a4642b235f06a7b3",
+    "tests/shallow_press/test_event_loads.py": "b0741a1db746d5c8d3772bd3302ae4a00bccc36010019ce4bb2f5d33291f9cd5",
+    "tests/shallow_press/test_event_control.py": "02e767c66297a3ef5b988c1921b9c03afdbb455f0d663e6b82f0816593130a3f",
+    "tmp/run_climb_factorial.py": "af09c2c18d4c4a6edcbedf995700edcb51356c1a0d61872eb02481c6b7790460"
+  }
+}

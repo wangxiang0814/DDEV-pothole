@@ -1,0 +1,15 @@
+{
+  "finalize_event_evidence_20261027.py": "4d40c992fe7a2b7b2a1038f206af51daf86e9319dbfff57cd7e5bbe09616636a",
+  "scripts\\analyze_shallow_preview.py": "f83339a06fc19586da59f1c2da3c6dce724364a1c6219c8dd1a47833f2ff4a47",
+  "src\\ddevsim\\units.py": "50df2e7ac9ead1344e85c672efd3590aa53bd44ef121fe76523af5771262c2db",
+  "src\\ddevsim\\chassis_contact.py": "54a4e3ea147114def35d8503370316e3d799e17dd9486902b22a292bfdb32ec7",
+  "src\\ddevsim\\strategies\\shallow_press\\event_assessment.py": "ba9653c32b368725f01529d9ecfba87b7207ab2cf43db5fed98941bdbac8e79c",
+  "src\\ddevsim\\strategies\\shallow_press\\event_phases.py": "cfd36f4e426dd1228dd2a86bc9b7dc7f17bc7fb3c99c7d3ac7f30f96ec1c471e",
+  "src\\ddevsim\\strategies\\shallow_press\\event_config.py": "c62892184ced17ad5fc21abfacd3582f3aa5247834b22cc0ef82ad9f3308ff1f",
+  "src\\ddevsim\\strategies\\shallow_press\\assessment.py": "70e26c8bc8f70bc15add1f57c679f604016e63304df6f36b5b8eb8dfd91ab99b",
+  "src\\ddevsim\\strategies\\shallow_press\\config.py": "e92c3c28db078c3f1c223bc46eccb40590b12a1b3bd60367e36a9459f45b96ce",
+  "src\\ddevsim\\strategies\\shallow_press\\controller.py": "50fe8e64263f2df785ac873d4d2709f50ae157d97cfc3fdc5bced64dd3ee57f5",
+  "src\\ddevsim\\strategies\\shallow_press\\preview.py": "f5bcfcba56c6059e85189312bf18d1ddc2d8acce4761d6b626bb1c1d229cd36e",
+  "src\\ddevsim\\strategies\\shallow_press\\traction.py": "90c08d59973d621b20f6e80c8f2c8fb2dcc2c7489d208b93ee82e1ef0b6ffa88",
+  "src\\ddevsim\\strategies\\shallow_press\\body_control.py": "f92ab0ea939b2a33af6100cdd7501d97928da7cd9639d50e9f574343411dfc65"
+}
