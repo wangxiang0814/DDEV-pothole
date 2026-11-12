@@ -13,26 +13,55 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 from ddevsim.runtime.registry import load_strategy
 from ddevsim.runtime.run_workspace import claim_run, run_worker, sha256_file, write_run_manifest
+from ddevsim.scenarios.approach import DEFAULT_INITIAL_DISTANCE_M, approach_distance, select_expert
 from ddevsim.vehicle_profiles.tuned_ii import DEFAULT_PROFILE, vehicle_identity
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--strategy', required=True, choices=('wheel_lift', 'shallow_press'))
+    parser.add_argument('--strategy', required=True, choices=('wheel_lift', 'shallow_press', 'auto'))
     parser.add_argument('--case', required=True)
     parser.add_argument('--run-id', default=None)
     parser.add_argument('--manifest', type=Path)
     parser.add_argument('--reference-model', type=Path)
+    parser.add_argument('--approach-distance-m', type=float, default=DEFAULT_INITIAL_DISTANCE_M)
     parser.add_argument('--dry-run', action='store_true')
     parser.add_argument('--demonstration-config', type=Path,
                         help='optional five-camera demonstration configuration')
     args,extra = parser.parse_known_args(argv)
+    try:
+        distance_m = approach_distance(args.approach_distance_m)
+    except ValueError as exc:
+        parser.error(str(exc))
+    scene_route = None
+    if args.strategy == 'auto':
+        scene = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
+        scene.add_argument('--depth-m', required=True, type=float)
+        scene.add_argument('--length-m', type=float, default=.8)
+        scene.add_argument('--width-m', type=float)
+        dimensions = scene.parse_args(extra)
+        width = dimensions.width_m if dimensions.width_m is not None else (1.8 if args.case == 'wide' else .9)
+        try:
+            route = select_expert(args.case, dimensions.depth_m, dimensions.length_m, width)
+        except ValueError as exc:
+            parser.error(str(exc))
+        if args.manifest or args.reference_model:
+            parser.error('automatic scene routing uses the nominal strategy configurations')
+        scene_route = dict(coverage=args.case, depth_m=dimensions.depth_m, length_m=dimensions.length_m,
+                           width_m=width, selected_strategy=route.strategy, selected_case=route.case)
+        args.strategy, args.case = route.strategy, route.case
+        extra = [] if route.speed_kph is None else [
+            '--depth-m', str(dimensions.depth_m), '--length-m', str(dimensions.length_m),
+            '--width-m', str(width), '--speed-kph', str(route.speed_kph), '--duration-s', '100',
+            '--delay-s', '.04', '--config', 'configs/shallow_press/preview_multispeed_v2_20261024.json',
+        ]
     if args.strategy=='shallow_press':
         if args.manifest or args.reference_model:
             parser.error('shallow_press uses --config and explicit --depth-m, not wheel_lift manifests')
         run_id=args.run_id or datetime.now().strftime('%Y%m%d_%H%M%S_%f')
         command=[sys.executable,str(ROOT/'scripts/run_shallow_preview.py'),
-                 '--case',args.case,'--run-id',run_id]+extra
+                 '--case',args.case,'--run-id',run_id,
+                 '--approach-distance-m',str(distance_m)]+extra
         if args.demonstration_config:
             command+=['--demonstration-config',str(args.demonstration_config.resolve())]
         # Validate geometry/options in a separate process before claiming output.
@@ -47,6 +76,8 @@ def main(argv=None):
             process=subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)
         record=json.loads((run/'run_manifest.json').read_text(encoding='utf-8'))
         record.update(argv=command,process_exit_code=process.returncode)
+        if scene_route is not None:
+            record['scene_route'] = scene_route
         if process.returncode and record.get('run_status')!='ERROR':
             record.update(run_status='ERROR',task_status='ERROR',acceptance_pass=False)
         write_run_manifest(run,record)
@@ -69,7 +100,7 @@ def main(argv=None):
         command = build_command(manifest, args.case, proposed, args.reference_model)
     except ValueError as exc:
         parser.error(str(exc))
-    command.append('--claimed-output')
+    command.extend(('--claimed-output', '--approach-distance-m', str(distance_m)))
     if args.demonstration_config:
         from ddevsim.demonstration.cameras import load_config
         capture_config = load_config(args.demonstration_config)
@@ -82,6 +113,9 @@ def main(argv=None):
               'solver_step_s': .0005, 'control_period_s': .02,
               'source_assets': {}, 'scope': manifest['scope']}
     options = record['effective_options']
+    options['approach-distance-m'] = distance_m
+    if scene_route is not None:
+        record['scene_route'] = scene_route
     if args.demonstration_config:
         record['source_assets'][str(args.demonstration_config.resolve())] = sha256_file(args.demonstration_config)
         record['demonstration_config'] = capture_config

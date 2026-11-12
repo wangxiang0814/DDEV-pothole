@@ -54,6 +54,9 @@ class WheelLiftStrategy:
     def status(self):
         if self.controller is None:
             return StrategyStatus('NOT_INITIALIZED')
+        approach = self.controller.approach
+        if approach is not None and not approach.ready:
+            return StrategyStatus(approach.phase, approach.failed, approach.abort_reason)
         selected = self.controller.rear if self.controller.rear_started else self.controller.front
         return StrategyStatus(selected.mode, selected.mode == 'RR_COMPLETE', selected.abort_reason)
 

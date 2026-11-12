@@ -1,7 +1,7 @@
 """Native expert-two preview/feedforward/feedback worker; one process per run."""
 import argparse
 import csv
-from dataclasses import asdict,replace
+from dataclasses import asdict
 import json
 from pathlib import Path
 import re
@@ -13,7 +13,8 @@ sys.path.insert(0,str(ROOT/'src'))
 from ddevsim.cosim import run_stepwise
 from ddevsim.runtime.contracts import StrategyContext
 from ddevsim.runtime.run_workspace import claim_run,sha256_file,write_run_manifest
-from ddevsim.scenarios.pit import load_case,validate_case
+from ddevsim.scenarios.pit import load_case
+from ddevsim.scenarios.approach import DEFAULT_INITIAL_DISTANCE_M, DRY_ROAD_FRICTION
 from ddevsim.scenarios.builder import prepare_case
 from ddevsim.strategies.shallow_press.config import ShallowPressConfig
 from ddevsim.strategies.shallow_press.controller import ShallowPressStrategy
@@ -52,8 +53,8 @@ def main(argv=None):
     p.add_argument('--crossing-kph',type=float)
     p.add_argument('--length-m',type=float,default=.8)
     p.add_argument('--width-m',type=float)
-    p.add_argument('--approach-distance-m',type=float,default=2)
-    p.add_argument('--friction',type=float,default=.7)
+    p.add_argument('--approach-distance-m',type=float,default=DEFAULT_INITIAL_DISTANCE_M)
+    p.add_argument('--friction',type=float,default=DRY_ROAD_FRICTION,choices=[DRY_ROAD_FRICTION])
     p.add_argument('--duration-s',type=float,default=60)
     p.add_argument('--mode',choices=['full','passive','traction','suspension'])
     p.add_argument('--step-s',type=float,choices=[.0005,.00025,.000125,.0001,.00005,.00002,.00001],default=.0005)
@@ -98,12 +99,7 @@ def main(argv=None):
         p.error('road callback interface comparisons require the aligned torque capability')
     case=load_case(ROOT/('scenarios/shallow_press/'+a.case+'.json'),depth_m=a.depth_m,
                   length_m=a.length_m,width_m=a.width_m if a.width_m is not None else (.9 if a.case=='right_track' else 1.8),
-                  approach_distance_m=2,friction=a.friction,stop_s=a.duration_s)
-    geometry=replace(case.geometry,approach_distance_m=a.approach_distance_m,
-                     road_lead_in_m=max(15,a.approach_distance_m+3))
-    case=replace(case,geometry=geometry,initial_state=dict(speed_mps=0.,
-        vehicle_start_station_m=geometry.leading_edge_m-a.approach_distance_m))
-    validate_case(case)
+                  approach_distance_m=a.approach_distance_m,stop_s=a.duration_s,fixed_origin=True)
     if a.dry_run:
         print(json.dumps(dict(strategy='shallow_press',route='PREVIEW_FEEDFORWARD_FEEDBACK',config=asdict(config),
             scene=asdict(case.geometry),tire_model=a.tire_model,road_callback=a.road_callback,

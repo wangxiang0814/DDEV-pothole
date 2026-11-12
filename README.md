@@ -15,9 +15,16 @@
 python scripts/prepare_strategy_case.py --case right_track --depth-m .04 --length-m .8 --width-m .9 --run-id scene_001
 python scripts/run_strategy.py --strategy wheel_lift --case seed_repeat --run-id lift_001
 python scripts/run_strategy.py --strategy shallow_press --case right_track --depth-m .04 --speed-kph 2 --duration-s 40 --delay-s .04 --config configs/shallow_press/preview_multispeed_v2_20261024.json --run-id press_001
+python scripts/run_strategy.py --strategy auto --case right_track --depth-m .20 --approach-distance-m 12 --run-id deep_auto_001
 ~~~
 
 两种专家都可用 `--dry-run` 检查参数。每轮写入 `runs/<strategy>/<case>/<run_id>/`。`run_manifest.json` 和 `result.json` 保存执行与验收结果，`run.log` 保存 worker 输出，CSV 保存原生信号及控制诊断，`model/output/` 保存原生回放历史。需要 VLA 示范时可传 `--demonstration-config`。
+
+新轮次的车辆前轴参考点统一从道路坐标 `s=0` 静止起步。`--approach-distance-m` 把坑沿放在前方 10–15 m，默认 12 m。道路固定为 `[-20, 65] m`，干燥路面 `μ=0.70`。物理坑形、路面网格和坑沿标记由同一场景生成。
+
+抬轮入口先进入 `APPROACH_DRIVE` 和 `APPROACH_BRAKE`，通过四轮转矩与方向盘反馈驶至坑前并停车。四轮承载、车身和车轮均停稳后，才交接给原 `INIT_SETTLE`、卸载和 FR/RR 抬轮流程。驶近日志为 `approach_control_20ms.csv`，结果写入 `result.json` 的 `approach` 字段。
+
+`--strategy auto` 接受场景提供的坑长、宽、深及轮迹覆盖。0.8 m 长的名义单侧 20 cm 深坑路由到抬轮，已有筛查依据的 2/4 cm 浅坑和单侧 6 cm 浅坑路由到下压。未列入的几何需要显式选择研究工况。当前路由直接使用仿真场景几何。
 
 ## 批量运行
 

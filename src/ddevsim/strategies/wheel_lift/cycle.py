@@ -13,6 +13,7 @@ from pathlib import Path
 import numpy as np
 
 from . import front as front_run
+from .approach import ApproachConfig, PitApproach
 
 from ddevsim.cosim import run_stepwise
 from ddevsim.pothole_case import corner_module_scenario
@@ -73,6 +74,9 @@ class FullRightSideController:
         self.last_command = (0.,) * 9
         self.last_command_time_s = None
         self.last_stale_log_s = None
+        self.approach = (PitApproach(scenario['start_station_m'], scenario['pre_lift_stop_station_m'],
+                                    ApproachConfig(period_s=front_config.control_period_s))
+                         if 'pre_lift_stop_station_m' in scenario else None)
 
     def set_feedback_timestamp(self, now_s, measurement_time_s):
         if measurement_time_s is None:
@@ -82,6 +86,15 @@ class FullRightSideController:
         self.feedback_fresh = bool(np.isfinite(age) and 0. <= age <= FEEDBACK_HEALTH.max_packet_age_s)
 
     def __call__(self, now_s, exports):
+        approach = getattr(self, 'approach', None)
+        if approach is not None and not approach.ready:
+            if not self.feedback_fresh:
+                approach.abort(now_s, 'approach feedback packet stale')
+            command = approach.step(now_s, dict(zip(front_run.EXPORTS, exports)) if self.feedback_fresh else None)
+            self.last_command, self.last_command_time_s = command, now_s
+            if approach.ready:
+                self.front.begin_settle(now_s)
+            return command
         if not getattr(self, 'feedback_fresh', True):
             self.feedback_was_stale=True
             selected = self.rear if self.rear_started else self.front

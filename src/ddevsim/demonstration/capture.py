@@ -27,7 +27,7 @@ def sha(path):
 
 def phase_rows(run):
     rows = []
-    for name in ('front_control_20ms.csv', 'rear_control_20ms.csv'):
+    for name in ('approach_control_20ms.csv', 'front_control_20ms.csv', 'rear_control_20ms.csv'):
         path = run / name
         if path.exists():
             with path.open(encoding='utf-8', newline='') as src:

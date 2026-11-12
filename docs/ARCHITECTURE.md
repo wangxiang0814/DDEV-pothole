@@ -2,6 +2,8 @@
 
 2026-11-12：普通单轮和批量采集统一经 `scripts/run_strategy.py` 启动。批量入口 `scripts/run_expert_batch.py` 支持两种专家混合计划，每轮仍由独立进程执行，汇总写入 `runs/_batches/<batch_id>/`。用法和计划格式见[项目首页](../README.md)。
 
+两套专家的新场景共用车辆原点、10–15 m 坑沿距离及固定干燥路面。抬轮在 `strategies/wheel_lift/approach.py` 管理驶近和停车，停车后从当前仿真时间开始静稳及卸载参考。现有支持增益先按原标定车型和工况校验，再生成固定原点的运行场景。两份模型的哈希及实际附着系数分别记录。
+
 保留代表性原生回放、引用中的源轮次、车型和验收证据。退役调参的原始运行已清理，状态和来源索引位于本机 `runs/_cleanup_20261112/result_index.jsonl.gz`。此前各研究记录中的运行保留说明描述当时状态。
 
 2026-10-27：专家二新增显式`event_crawl`策略分支，按逐轮入坑/爬沿风险规划可变低速；旧恒速研究控制器继续保留作回归。`event_phases.py`、`event_speed.py`、`event_controller.py`、`event_assessment.py`分别负责阶段、速度规划、协调控制和独立验收，不依赖专家一。当前仍处于参数研究，不能把可运行代码视为10cm深坑能力已完成。

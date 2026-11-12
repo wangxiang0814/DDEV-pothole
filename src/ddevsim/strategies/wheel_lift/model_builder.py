@@ -16,6 +16,7 @@ import math
 import re
 import shutil
 import sys
+from dataclasses import asdict, fields
 from pathlib import Path
 
 import numpy as np
@@ -26,7 +27,9 @@ sys.path.insert(0, str(ROOT / "src"))
 from ddevsim.cosim import run_stepwise
 from ddevsim.contact_geometry import GEOMETRY_EXPORTS
 from ddevsim.interface_validation import EXPORT_NAMES, IMPORT_NAMES
-from ddevsim.pothole_case import SCENARIO_EXPORTS
+from ddevsim.pothole_case import PotholeScenario, SCENARIO_EXPORTS
+from ddevsim.scenarios.approach import VEHICLE_START_STATION_M, place_pit_from_origin
+from ddevsim.scenarios.parameters import replace_scene_road_parameters
 from ddevsim.visual_mesh import write_visual_mesh
 from ddevsim.static_wheel_lift.closed_loop import (
     CrawlTorqueFeedback, PreloadProgress, ScalarLoadFeedback,
@@ -143,6 +146,25 @@ def _set_vehicle_start_offset(model: Path, scenario: dict, offset_m: float) -> N
     scenario["approach_distance_m"] = float(scenario["start_station_m"]) - new_start
     (model / "scenario.json").write_text(json.dumps(scenario, indent=2) + "\n",
                                           encoding="utf-8")
+
+
+def set_approach_start(model: Path, scenario: dict, distance_m: float) -> None:
+    """Translate the proven pit-relative lift station into the shared origin scene."""
+    path = model / 'run_all.par'
+    content = path.read_text(encoding='utf-8')
+    starts = re.findall(r'(?m)^SSTART[ \t]+([-+0-9.eE]+)[ \t]*$', content)
+    if len(starts) != 2 or starts[0] != starts[1]:
+        raise ValueError('expected two identical vehicle starting stations')
+    gap_m = float(scenario['start_station_m']) - float(starts[0])
+    values = {field.name: scenario[field.name] for field in fields(PotholeScenario) if field.name in scenario}
+    geometry = place_pit_from_origin(corner_module_scenario(**values), distance_m)
+    content = replace_scene_road_parameters(content, geometry)
+    content = re.sub(r'(?m)^SSTART[ \t]+[-+0-9.eE]+[ \t]*$', f'SSTART {VEHICLE_START_STATION_M:g}', content)
+    path.write_text(content, encoding='utf-8')
+    write_visual_mesh(model / 'visual_assets', geometry)
+    scenario.update(asdict(geometry), vehicle_start_station_m=VEHICLE_START_STATION_M,
+                    pre_lift_stop_station_m=geometry.leading_edge_m - gap_m)
+    (model / 'scenario.json').write_text(json.dumps(scenario, indent=2) + '\n', encoding='utf-8')
 
 
 from ddevsim.vehicle_profiles.transformations import (configure_crawl_text,

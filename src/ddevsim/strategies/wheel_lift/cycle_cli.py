@@ -16,6 +16,7 @@ from . import front as front_run
 
 from ddevsim.cosim import run_stepwise
 from ddevsim.pothole_case import corner_module_scenario
+from ddevsim.scenarios.approach import approach_distance
 from ddevsim.visual_mesh import write_visual_mesh
 from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
                                              RIGHT_SIDE_MODEL, TUNED_REAR_RUN,
@@ -45,7 +46,8 @@ STEERING_IMPORT = "IMP_STEER_SW"
 from .cycle import FullRightSideController
 from .acceptance import evaluate_full_cycle
 from .model_builder import (_enable_steering_import, _clamp_kinematics_at_original_bounds,
-                            _scale_lateral_ride_movement, _set_pit_geometry, _set_vehicle_start_offset)
+                            _scale_lateral_ride_movement, _set_pit_geometry, _set_vehicle_start_offset,
+                            set_approach_start)
 
 def _write_rows(path: Path, rows: list[dict]) -> None:
     if not rows:
@@ -124,7 +126,16 @@ def main(argv=None) -> None:
     parser.add_argument("--pit-depth-m", type=float)
     parser.add_argument("--road-friction", type=float)
     parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
+    parser.add_argument('--approach-distance-m', type=float,
+                        help='drive from this distance before the pit to the original lift station')
     args = parser.parse_args(argv)
+    if args.approach_distance_m is not None:
+        try:
+            approach_distance(args.approach_distance_m)
+        except ValueError as exc:
+            parser.error(str(exc))
+        if args.identify_rr_swing or args.contact_gain_bundle:
+            parser.error('explicit identification or exact contact-gain runs use the original start')
     capture_enabled = False
     if args.demonstration_config:
         from ddevsim.demonstration.cameras import load_config
@@ -344,6 +355,19 @@ def main(argv=None) -> None:
                                  'model_sha256': model_hash, 'mode': args.support_allocation}
         if transfer is not None:
             allocation_provenance['scene_transfer'] = transfer
+    if args.approach_distance_m is not None:
+        # Validate the existing gain model first. Only the scene is transformed
+        # to the shared fixed origin. Gains remain inactive on approach.
+        gain_model_friction = scenario['friction']
+        set_approach_start(model, scenario, args.approach_distance_m)
+        if allocation_provenance is not None:
+            allocation_provenance['approach_start'] = {
+                'simulation_model_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                'gain_model_friction': gain_model_friction,
+                'simulation_road_friction': scenario['friction'],
+                'scene_transform': 'fixed origin, translated pit and road markers, common dry road',
+                'gain_activation': 'after approach and stationary settle',
+            }
     controller = FullRightSideController(
         scenario=scenario,
         rr_gain_per_coupled_force=float(
@@ -368,6 +392,7 @@ def main(argv=None) -> None:
                           demonstration_dir=(output / 'demonstration' if capture_enabled else None),
                           stop_at_s=args.stop_at,
                           stop_when=(lambda now_s: (
+                              (controller.approach is not None and controller.approach.failed) or
                               (controller.front.mode == "COMPLETE" and
                                controller.front.abort_reason is not None and
                                now_s - controller.front.lower_start_s >=
@@ -382,6 +407,8 @@ def main(argv=None) -> None:
     if trial:
         _write_rows(output / "front_observed_20ms.csv", controller.front.rows)
         _write_rows(output / "rear_observed_20ms.csv", controller.rear.rows)
+    if controller.approach is not None:
+        _write_rows(output / 'approach_control_20ms.csv', controller.approach.rows)
     _write_rows(output / "front_control_20ms.csv", front_rows)
     _write_rows(output / "rear_control_20ms.csv", rear_rows)
     path_yo = trial.path_reference_yo_m if trial else controller.front.initial_yo_m
@@ -397,6 +424,12 @@ def main(argv=None) -> None:
                                  truth_rows=rear_rows,
                                  path_reference_yo_m=path_yo,
                                  path_reference_yaw_deg=path_yaw)
+    if controller.approach is not None:
+        report = controller.approach.summary()
+        result['approach'] = {**report, 'config': asdict(controller.approach.config)}
+        result['criteria'].update(report['criteria'])
+        if not all(report['criteria'].values()):
+            result['status'] = 'FAIL'
     if disturbance is not None:
         report = disturbance.summary()
         result['force_disturbance'] = report
@@ -455,6 +488,9 @@ def main(argv=None) -> None:
                            "friction")}
     result["scenario"]["vehicle_start_offset_m"] = args.vehicle_start_offset_m
     result["scenario"]["approach_distance_m"] = scenario["approach_distance_m"]
+    if controller.approach is not None:
+        for key in ('vehicle_start_station_m', 'pre_lift_stop_station_m'):
+            result['scenario'][key] = scenario[key]
     result["rear_speed_config"] = {
         "target_kph": rear_config.crawl_speed_kph,
         "minimum_pit_kph": rear_config.min_pit_speed_kph,

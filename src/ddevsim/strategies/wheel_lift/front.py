@@ -111,6 +111,7 @@ class LiftCrawlController:
         self.scenario = scenario
         self.mode = "INIT_SETTLE"
         self.mode_start_s = 0.
+        self.settle_start_s = 0.
         self.ready_since_s: float | None = None
         self.preload_end_since_s: float | None = None
         self.stop_since_s: float | None = None
@@ -128,6 +129,10 @@ class LiftCrawlController:
         self.initial_yo_m: float | None = None
         self.initial_yaw_deg: float | None = None
         self.rows: list[dict] = []
+
+    def begin_settle(self, now_s: float) -> None:
+        self.settle_start_s = now_s
+        self._enter('INIT_SETTLE', now_s)
 
     def _enter(self, mode: str, now_s: float) -> None:
         self.mode = mode
@@ -201,6 +206,7 @@ class LiftCrawlController:
         return tuple(float(v) for v in base)
 
     def _tick(self, now_s: float, x: dict[str, float]) -> None:
+        since_settle_s = now_s - self.settle_start_s
         fz = np.array([max(0., x["Fz_" + wheel]) for wheel in WHEELS])
         gate_fz = self.load_filter.update(now_s, fz)
         if self.mode in ("INIT_SETTLE", "PRELOAD_SHIFT"):
@@ -215,7 +221,7 @@ class LiftCrawlController:
         if self.mode in ("INIT_SETTLE", "PRELOAD_SHIFT"):
             tracking_error = float(np.max(np.abs(
                 gate_fz - self._ref_loads(now_s))))
-            self.preload_clock.update(now_s, load_error_n=tracking_error)
+            self.preload_clock.update(since_settle_s, load_error_n=tracking_error)
         travel = np.array([x["Jnc_" + wheel] for wheel in WHEELS])
         contacts = {corner: (x["Xctc_" + wheel + "i"],
                              x["Yctc_" + wheel + "i"])
@@ -229,7 +235,7 @@ class LiftCrawlController:
         top_clearance = x["Z_R1"] - self.config.tyre_radius_m
         attitude = max(abs(x["Roll_E"]), abs(x["Pitch"]))
         support_load = float(min(gate_fz[SUPPORT]))
-        if self.initial_yo_m is None and now_s >= self.config.init_settle_s:
+        if self.initial_yo_m is None and since_settle_s >= self.config.init_settle_s:
             self.initial_yo_m = x["Yo"]
             self.initial_yaw_deg = x["Yaw"]
         ready = (gate_fz[1] <= self.config.fr_ready_load_n and support_load >=
@@ -241,12 +247,12 @@ class LiftCrawlController:
                 self.ready_since_s = now_s
         else:
             self.ready_since_s = None
-        if self.mode == "INIT_SETTLE" and now_s >= self.config.init_settle_s:
+        if self.mode == "INIT_SETTLE" and since_settle_s >= self.config.init_settle_s:
             if (np.min(gate_fz) > self.config.support_floor_n and
                     abs(x["Vx"]) <= self.config.init_max_vx_kph):
                 if self.preload_clock.progress_s < self.config.preload_feedback_start_s:
                     self.preload_clock.align_reference(
-                        now_s, self.config.preload_feedback_start_s)
+                        since_settle_s, self.config.preload_feedback_start_s)
                 self._enter("PRELOAD_SHIFT", now_s)
         if (self.mode == "PRELOAD_SHIFT" and
                 self.preload_clock.progress_s >= self.trace.time_s[-1]):

@@ -10,6 +10,7 @@ from typing import Mapping
 from ddevsim.pothole_case import PotholeScenario, corner_module_scenario
 from ddevsim.runtime.contracts import freeze
 from ddevsim.vehicle_profiles.tuned_ii import DEFAULT_PROFILE
+from .approach import place_pit_from_origin
 
 
 @dataclass(frozen=True)
@@ -80,7 +81,7 @@ def validate_case(case: PitCase, profile=DEFAULT_PROFILE) -> None:
 
 
 def load_case(template: Path, *, depth_m=None, length_m=None, width_m=None,
-              approach_distance_m=None, friction=None, stop_s=None) -> PitCase:
+              approach_distance_m=None, friction=None, stop_s=None, fixed_origin=False) -> PitCase:
     data = json.loads(Path(template).read_text(encoding='utf-8'))
     values = dict(data['geometry'])
     overrides = dict(depth_m=depth_m, length_m=length_m, width_m=width_m,
@@ -90,6 +91,8 @@ def load_case(template: Path, *, depth_m=None, length_m=None, width_m=None,
         if values.get(name) is None:
             raise ValueError('explicit scene dimension required: ' + name)
     geometry = corner_module_scenario(**values)
+    if fixed_origin:
+        geometry = place_pit_from_origin(geometry, geometry.approach_distance_m)
     case = PitCase(data['strategy_id'], data['case_id'], data['vehicle_profile_id'],
                    data['coverage'], geometry,
                    {'speed_mps': 0., 'vehicle_start_station_m': geometry.leading_edge_m - geometry.approach_distance_m},

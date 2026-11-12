@@ -119,6 +119,9 @@ class NoisyFeedbackTrial:
         front_count = len(self.controller.front.rows)
         rear_count = len(self.controller.rear.rows)
         command = self.controller(now_s, [observed[key] for key in self.export_names])
+        approach = getattr(self.controller, 'approach', None)
+        if approach is not None:
+            approach.record_truth(now_s, truth)
         if (self.path_reference_yo_m is None and
                 self.controller.front.initial_yo_m is not None):
             self.path_reference_yo_m = truth['Yo']

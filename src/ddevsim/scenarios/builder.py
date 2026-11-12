@@ -11,7 +11,7 @@ from ddevsim.runtime.run_workspace import sha256_file, write_run_manifest, code_
 from ddevsim.vehicle_profiles.tuned_ii import DEFAULT_PROFILE, build_vehicle, vehicle_identity
 from ddevsim.visual_mesh import write_visual_mesh
 from .pit import validate_case
-from .parameters import replace_pit_geometry_parameters
+from .parameters import replace_pit_geometry_parameters, replace_scene_road_parameters
 
 
 def prepare_case(case, run_dir: Path, profile=DEFAULT_PROFILE) -> dict:
@@ -24,7 +24,9 @@ def prepare_case(case, run_dir: Path, profile=DEFAULT_PROFILE) -> dict:
     vehicle = build_vehicle(model, profile)
     geometry = case.geometry
     path = model / 'run_all.par'
-    text = replace_pit_geometry_parameters(path.read_text(encoding='utf-8'), geometry)
+    replace_road = (replace_scene_road_parameters if case.initial_state['vehicle_start_station_m'] == 0.
+                    else replace_pit_geometry_parameters)
+    text = replace_road(path.read_text(encoding='utf-8'), geometry)
     replacements = {
         'SSTART': case.initial_state['vehicle_start_station_m'], 'TSTOP': geometry.stop_s,
         'MU_ROAD_CONSTANT': geometry.friction,
