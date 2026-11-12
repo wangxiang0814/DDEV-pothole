@@ -148,7 +148,8 @@ def _set_vehicle_start_offset(model: Path, scenario: dict, offset_m: float) -> N
                                           encoding="utf-8")
 
 
-def set_approach_start(model: Path, scenario: dict, distance_m: float, *, stop_gap_m=None) -> None:
+def set_approach_start(model: Path, scenario: dict, distance_m: float, *, stop_gap_m=None,
+                       lift_scene=None) -> None:
     """Build the shared origin scene and place the lift stop relative to the lip."""
     path = model / 'run_all.par'
     content = path.read_text(encoding='utf-8')
@@ -157,6 +158,8 @@ def set_approach_start(model: Path, scenario: dict, distance_m: float, *, stop_g
         raise ValueError('expected two identical vehicle starting stations')
     gap_m = float(scenario['start_station_m']) - float(starts[0]) if stop_gap_m is None else stop_gap_m
     values = {field.name: scenario[field.name] for field in fields(PotholeScenario) if field.name in scenario}
+    if lift_scene is not None:
+        values.update(lift_scene.geometry())
     geometry = place_pit_from_origin(corner_module_scenario(**values), distance_m)
     content = replace_scene_road_parameters(content, geometry)
     content = re.sub(r'(?m)^SSTART[ \t]+[-+0-9.eE]+[ \t]*$', f'SSTART {VEHICLE_START_STATION_M:g}', content)
@@ -164,6 +167,8 @@ def set_approach_start(model: Path, scenario: dict, distance_m: float, *, stop_g
     write_visual_mesh(model / 'visual_assets', geometry)
     scenario.update(asdict(geometry), vehicle_start_station_m=VEHICLE_START_STATION_M,
                     pre_lift_stop_station_m=geometry.leading_edge_m - gap_m)
+    if lift_scene is not None:
+        scenario.update(side=lift_scene.side, wheel_sequence=lift_scene.wheel_sequence)
     (model / 'scenario.json').write_text(json.dumps(scenario, indent=2) + '\n', encoding='utf-8')
 
 

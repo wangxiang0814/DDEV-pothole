@@ -45,6 +45,7 @@ STEERING_IMPORT = "IMP_STEER_SW"
 
 
 from .cycle import FullRightSideController
+from .lift_scene import LiftScene, SideMirror
 from .acceptance import evaluate_full_cycle
 from .model_builder import (_enable_steering_import, _clamp_kinematics_at_original_bounds,
                             _scale_lateral_ride_movement, _set_pit_geometry, _set_vehicle_start_offset,
@@ -129,7 +130,18 @@ def main(argv=None) -> None:
     parser.add_argument("--vehicle-start-offset-m", type=float, default=0.0)
     parser.add_argument('--approach-distance-m', type=float,
                         help='drive from this distance before the pit to the original lift station')
+    parser.add_argument('--lift-scene', type=Path, help='single-track scene JSON in integer centimetres')
     args = parser.parse_args(argv)
+    lift_scene = None
+    if args.lift_scene is not None:
+        if args.approach_distance_m is None or args.pit_width_m is not None or args.pit_depth_m is not None:
+            parser.error('--lift-scene requires fixed-origin approach and owns pit geometry')
+        try:
+            lift_scene = LiftScene.read(args.lift_scene)
+        except (OSError, TypeError, ValueError) as exc:
+            parser.error(str(exc))
+        if lift_scene.side == 'left' and args.demonstration_config:
+            parser.error('left-side native logs are supported; legacy capture requires phase-label migration')
     responsive = args.efficiency_profile == 'responsive'
     if responsive and args.approach_distance_m is None:
         parser.error('responsive cycle requires a fixed-origin approach')
@@ -367,7 +379,7 @@ def main(argv=None) -> None:
         # to the shared fixed origin. Gains remain inactive on approach.
         gain_model_friction = scenario['friction']
         set_approach_start(model, scenario, args.approach_distance_m,
-                           stop_gap_m=RESPONSIVE_STOP_GAP_M if responsive else None)
+                           stop_gap_m=RESPONSIVE_STOP_GAP_M if responsive else None, lift_scene=lift_scene)
         if allocation_provenance is not None:
             allocation_provenance['approach_start'] = {
                 'simulation_model_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
@@ -393,7 +405,11 @@ def main(argv=None) -> None:
                                          feedback_delay_s=args.feedback_delay_s)
     trial = (NoisyFeedbackTrial(controller, front_run.EXPORTS, front_config,
                                noise_config) if args.measurement_noise else None)
-    native = run_stepwise(model / "simfile.sim", trial or controller,
+    command = trial or controller
+    left_side = lift_scene is not None and lift_scene.side == 'left'
+    if left_side:
+        command = SideMirror(front_run.EXPORTS).wrap(command)
+    native = run_stepwise(model / "simfile.sim", command,
                           output / "native_5ms.csv",
                           (*front_run.IMPORT_NAMES, STEERING_IMPORT),
                           front_run.EXPORTS, log_decimation=10,
@@ -496,6 +512,10 @@ def main(argv=None) -> None:
                            "friction")}
     result["scenario"]["vehicle_start_offset_m"] = args.vehicle_start_offset_m
     result["scenario"]["approach_distance_m"] = scenario["approach_distance_m"]
+    if lift_scene is not None:
+        result['scenario'].update(side=lift_scene.side, center_y_m=lift_scene.center_y_m,
+                                  wheel_sequence=lift_scene.wheel_sequence)
+        result['diagnostic_coordinates'] = 'right-side canonical' if left_side else 'physical'
     if controller.approach is not None:
         for key in ('vehicle_start_station_m', 'pre_lift_stop_station_m'):
             result['scenario'][key] = scenario[key]

@@ -26,6 +26,8 @@ python scripts/run_strategy.py --strategy auto --case right_track --depth-m .20 
 
 默认 `seed_repeat` 和自动选择的名义 20 cm 单侧深坑使用 `responsive` 配置。前轴停车目标距坑沿 1.22 m，缩短前轮停车后静稳、抬升及后轮卸载、抬升、恢复斜坡。两次三轮支撑各保持至少 5 s，保留原前轮回正斜坡和验收条件。用 `--efficiency-profile efficient` 复现原时序和停车距离。原生对照和边界验证见[效率验证](evidence/static_fr_ii/responsive_cycle_20261112.json)。
 
+单轮迹边界试验可用 `--strategy wheel_lift --case seed_repeat --lift-scene <scene.json>`，场景使用整数厘米和左右侧标签。镜像方案、实测限制和后续采集格式见[左右抬轮与采集方案](docs/WHEEL_LIFT_DATA_COLLECTION.md)。
+
 `--strategy auto` 接受场景提供的坑长、宽、深及轮迹覆盖。0.8 m 长的名义单侧 20 cm 深坑路由到抬轮，已有筛查依据的 2/4 cm 浅坑和单侧 6 cm 浅坑路由到下压。未列入的几何需要显式选择研究工况。当前路由直接使用仿真场景几何。
 
 ## 批量运行

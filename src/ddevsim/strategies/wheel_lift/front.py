@@ -82,6 +82,7 @@ class LiftCrawlController:
             max_rate=self.config.preload_max_reference_rate,
             slow_error_n=self.config.preload_slow_tracking_error_n,
             pause_error_n=self.config.preload_pause_tracking_error_n)
+        self.preload_initial_bias_n = None
         self.swing_gain = np.asarray(gain["gain_fz_per_command"], dtype=float)
         static_gain = np.asarray(json.loads((evidence / "gain_matrix.json").read_text(
             encoding="utf-8"))["gains"]["Fz_n"], dtype=float)
@@ -157,8 +158,14 @@ class LiftCrawlController:
             reference_time = self.trace.time_s[-1] + now_s - self.lift_start_s
             if self.crawl:
                 reference_time = min(reference_time, self.config.reference_hold_s)
-        return np.array([np.interp(reference_time, self.ref_time, self.ref_fz[:, i])
-                         for i in range(4)])
+        loads = np.array([np.interp(reference_time, self.ref_time, self.ref_fz[:, i])
+                          for i in range(4)])
+        if self.lift_start_s is None and self.preload_initial_bias_n is not None:
+            start = self.config.preload_feedback_start_s
+            remaining = np.clip((self.trace.time_s[-1] - reference_time) /
+                                (self.trace.time_s[-1] - start), 0., 1.)
+            loads = np.maximum(0., loads + remaining * self.preload_initial_bias_n)
+        return loads
 
     def __call__(self, now_s: float, exports) -> tuple[float, ...]:
         x = dict(zip(EXPORTS, exports))
@@ -253,6 +260,11 @@ class LiftCrawlController:
                 if self.preload_clock.progress_s < self.config.preload_feedback_start_s:
                     self.preload_clock.align_reference(
                         since_settle_s, self.config.preload_feedback_start_s)
+                if self.scenario.get('side') == 'left':
+                    # The plant's fixed lateral payload bias survives reflection.
+                    # Start tracking at measured static loads and fade the offset
+                    # out before the original unload/stability gate.
+                    self.preload_initial_bias_n = gate_fz - self._ref_loads(now_s)
                 self._enter("PRELOAD_SHIFT", now_s)
         if (self.mode == "PRELOAD_SHIFT" and
                 self.preload_clock.progress_s >= self.trace.time_s[-1]):

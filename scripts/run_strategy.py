@@ -25,6 +25,7 @@ def main(argv=None):
     parser.add_argument('--manifest', type=Path)
     parser.add_argument('--reference-model', type=Path)
     parser.add_argument('--approach-distance-m', type=float, default=DEFAULT_INITIAL_DISTANCE_M)
+    parser.add_argument('--lift-scene', type=Path, help='single-track wheel_lift scene JSON')
     parser.add_argument('--efficiency-profile', choices=('efficient', 'responsive'),
                         help='override the wheel_lift cycle timing profile')
     parser.add_argument('--dry-run', action='store_true')
@@ -37,6 +38,8 @@ def main(argv=None):
         parser.error(str(exc))
     scene_route = None
     if args.strategy == 'auto':
+        if args.lift_scene is not None:
+            parser.error('--lift-scene uses explicit --strategy wheel_lift')
         scene = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
         scene.add_argument('--depth-m', required=True, type=float)
         scene.add_argument('--length-m', type=float, default=.8)
@@ -58,6 +61,8 @@ def main(argv=None):
             '--delay-s', '.04', '--config', 'configs/shallow_press/preview_multispeed_v2_20261024.json',
         ]
     if args.strategy=='shallow_press':
+        if args.lift_scene is not None:
+            parser.error('--lift-scene is for wheel_lift')
         if args.efficiency_profile is not None:
             parser.error('--efficiency-profile is for wheel_lift')
         if args.manifest or args.reference_model:
@@ -110,6 +115,14 @@ def main(argv=None):
     except ValueError as exc:
         parser.error(str(exc))
     command.extend(('--claimed-output', '--approach-distance-m', str(distance_m)))
+    if args.lift_scene is not None:
+        from dataclasses import asdict
+        from ddevsim.strategies.wheel_lift.lift_scene import LiftScene
+        try:
+            lift_scene = LiftScene.read(args.lift_scene)
+        except (OSError, TypeError, ValueError) as exc:
+            parser.error(str(exc))
+        command.extend(('--lift-scene', str(args.lift_scene.resolve())))
     if args.demonstration_config:
         from ddevsim.demonstration.cameras import load_config
         capture_config = load_config(args.demonstration_config)
@@ -122,6 +135,9 @@ def main(argv=None):
               'solver_step_s': .0005, 'control_period_s': .02,
               'source_assets': {}, 'scope': manifest['scope']}
     options = record['effective_options']
+    if args.lift_scene is not None:
+        record['lift_scene'] = asdict(lift_scene)
+        record['source_assets'][str(args.lift_scene.resolve())] = sha256_file(args.lift_scene)
     options['approach-distance-m'] = distance_m
     if scene_route is not None:
         record['scene_route'] = scene_route
