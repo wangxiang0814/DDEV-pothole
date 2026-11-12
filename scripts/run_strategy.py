@@ -25,6 +25,8 @@ def main(argv=None):
     parser.add_argument('--manifest', type=Path)
     parser.add_argument('--reference-model', type=Path)
     parser.add_argument('--approach-distance-m', type=float, default=DEFAULT_INITIAL_DISTANCE_M)
+    parser.add_argument('--efficiency-profile', choices=('efficient', 'responsive'),
+                        help='override the wheel_lift cycle timing profile')
     parser.add_argument('--dry-run', action='store_true')
     parser.add_argument('--demonstration-config', type=Path,
                         help='optional five-camera demonstration configuration')
@@ -56,6 +58,8 @@ def main(argv=None):
             '--delay-s', '.04', '--config', 'configs/shallow_press/preview_multispeed_v2_20261024.json',
         ]
     if args.strategy=='shallow_press':
+        if args.efficiency_profile is not None:
+            parser.error('--efficiency-profile is for wheel_lift')
         if args.manifest or args.reference_model:
             parser.error('shallow_press uses --config and explicit --depth-m, not wheel_lift manifests')
         run_id=args.run_id or datetime.now().strftime('%Y%m%d_%H%M%S_%f')
@@ -94,6 +98,11 @@ def main(argv=None):
     manifest = json.loads(path.read_text(encoding='utf-8'))
     if manifest.get('strategy_id', 'wheel_lift') != args.strategy:
         parser.error('manifest belongs to another strategy')
+    profile = args.efficiency_profile
+    if profile is None and args.manifest is None and args.case == 'seed_repeat':
+        profile = 'responsive'
+    if profile is not None and args.case in manifest['cases']:
+        manifest['cases'][args.case]['options']['efficiency-profile'] = profile
     run_id = args.run_id or datetime.now().strftime('%Y%m%d_%H%M%S_%f')
     proposed = ROOT / 'runs' / args.strategy / args.case / run_id
     try:

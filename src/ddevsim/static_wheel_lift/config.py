@@ -257,6 +257,12 @@ EFFICIENT_CYCLE_FRONT = replace(
     preload_max_reference_rate=5.0,
     return_ramp_s=9.0,
 )
+RESPONSIVE_CYCLE_FRONT = replace(
+    EFFICIENT_CYCLE_FRONT,
+    init_settle_s=1.4,
+    lift_ramp_s=2.8,
+)
+RESPONSIVE_STOP_GAP_M = 1.22
 
 
 @dataclass(frozen=True)
@@ -465,6 +471,8 @@ ROBUST_REAR_RUN = replace(
     posture_hold_fl_force_n=-450.0,
 )
 COMPACT_REAR_RETURN_RAMP_S = 6.0
+RESPONSIVE_REAR_TIMING = dict(settle_dwell_s=.8, preload_ramp_s=6.0, lift_ramp_s=3.0,
+                             posture_settle_s=.7, lower_ramp_s=3.2, return_ramp_s=4.8)
 
 
 @dataclass(frozen=True)

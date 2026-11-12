@@ -63,3 +63,30 @@ def test_overshoot_blocks_lift_handoff():
     approach.step(1., observation(99.8, .5))
     assert approach.phase == 'APPROACH_ABORT'
     assert not approach.ready
+
+def test_responsive_stop_target_moves_without_moving_pit_or_spawn(tmp_path):
+    import json
+    from ddevsim.strategies.wheel_lift.model_builder import set_approach_start
+
+    root = Path(__file__).resolve().parents[1]
+    base_model = root / 'evidence/static_fr_ii/model/run_all.par'
+    (tmp_path / 'run_all.par').write_bytes(base_model.read_bytes())
+    scene = json.loads((root / 'models/corner_module_ddev/single_wheel_deep_pothole/scenario.json').read_text())
+    set_approach_start(tmp_path, scene, 12., stop_gap_m=1.22)
+    assert scene['pre_lift_stop_station_m'] == pytest.approx(10.78)
+    assert scene['start_station_m'] == 12.
+    assert scene['vehicle_start_station_m'] == 0.
+
+def test_nominal_lift_uses_responsive_profile_and_keeps_reference_override():
+    import json
+    import subprocess
+    import sys
+
+    root = Path(__file__).resolve().parents[1]
+    argv = [sys.executable, str(root / 'scripts/run_strategy.py'), '--strategy', 'auto',
+            '--case', 'right_track', '--depth-m', '.20', '--dry-run']
+    for options, expected in (([], 'responsive'), (['--efficiency-profile', 'efficient'], 'efficient')):
+        result = subprocess.run([*argv, *options], cwd=root, check=True, capture_output=True, text=True)
+        record = json.loads(result.stdout)
+        assert record['effective_options']['efficiency-profile'] == expected
+        assert record['argv'][record['argv'].index('--efficiency-profile') + 1] == expected

@@ -24,6 +24,8 @@ python scripts/run_strategy.py --strategy auto --case right_track --depth-m .20 
 
 抬轮入口先进入 `APPROACH_DRIVE` 和 `APPROACH_BRAKE`，通过四轮转矩与方向盘反馈驶至坑前并停车。四轮承载、车身和车轮均停稳后，才交接给原 `INIT_SETTLE`、卸载和 FR/RR 抬轮流程。驶近日志为 `approach_control_20ms.csv`，结果写入 `result.json` 的 `approach` 字段。
 
+默认 `seed_repeat` 和自动选择的名义 20 cm 单侧深坑使用 `responsive` 配置。前轴停车目标距坑沿 1.22 m，缩短前轮停车后静稳、抬升及后轮卸载、抬升、恢复斜坡。两次三轮支撑各保持至少 5 s，保留原前轮回正斜坡和验收条件。用 `--efficiency-profile efficient` 复现原时序和停车距离。原生对照和边界验证见[效率验证](evidence/static_fr_ii/responsive_cycle_20261112.json)。
+
 `--strategy auto` 接受场景提供的坑长、宽、深及轮迹覆盖。0.8 m 长的名义单侧 20 cm 深坑路由到抬轮，已有筛查依据的 2/4 cm 浅坑和单侧 6 cm 浅坑路由到下压。未列入的几何需要显式选择研究工况。当前路由直接使用仿真场景几何。
 
 ## 批量运行

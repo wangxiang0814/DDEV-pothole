@@ -148,14 +148,14 @@ def _set_vehicle_start_offset(model: Path, scenario: dict, offset_m: float) -> N
                                           encoding="utf-8")
 
 
-def set_approach_start(model: Path, scenario: dict, distance_m: float) -> None:
-    """Translate the proven pit-relative lift station into the shared origin scene."""
+def set_approach_start(model: Path, scenario: dict, distance_m: float, *, stop_gap_m=None) -> None:
+    """Build the shared origin scene and place the lift stop relative to the lip."""
     path = model / 'run_all.par'
     content = path.read_text(encoding='utf-8')
     starts = re.findall(r'(?m)^SSTART[ \t]+([-+0-9.eE]+)[ \t]*$', content)
     if len(starts) != 2 or starts[0] != starts[1]:
         raise ValueError('expected two identical vehicle starting stations')
-    gap_m = float(scenario['start_station_m']) - float(starts[0])
+    gap_m = float(scenario['start_station_m']) - float(starts[0]) if stop_gap_m is None else stop_gap_m
     values = {field.name: scenario[field.name] for field in fields(PotholeScenario) if field.name in scenario}
     geometry = place_pit_from_origin(corner_module_scenario(**values), distance_m)
     content = replace_scene_road_parameters(content, geometry)

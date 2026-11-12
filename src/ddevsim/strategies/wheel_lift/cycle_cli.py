@@ -23,6 +23,7 @@ from ddevsim.static_wheel_lift.config import (REAR_CYCLE_RUN,
                                              FAST_CYCLE_FRONT, FAST_CYCLE_REAR,
                                              BALANCED_CYCLE_FRONT, CLOSED_LOOP_RUN,
                                              COMPACT_CYCLE_FRONT, EFFICIENT_CYCLE_FRONT, COMPACT_REAR_RETURN_RAMP_S,
+                                             RESPONSIVE_CYCLE_FRONT, RESPONSIVE_REAR_TIMING, RESPONSIVE_STOP_GAP_M,
                                              ROBUST_REAR_RUN,
                                              rear_speed_trial_config)
 from ddevsim.static_wheel_lift.rear_cycle import RearCycleController
@@ -65,7 +66,7 @@ def main(argv=None) -> None:
     parser.add_argument('--demonstration-config', type=Path)
     parser.add_argument('--claimed-output', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast", "compact", "efficient"),
+    parser.add_argument("--efficiency-profile", choices=("baseline", "balanced", "fast", "compact", "efficient", "responsive"),
                         default="baseline")
     parser.add_argument("--identify-rr-swing", action="store_true")
     parser.add_argument('--contact-gain-bundle', type=Path,
@@ -129,6 +130,9 @@ def main(argv=None) -> None:
     parser.add_argument('--approach-distance-m', type=float,
                         help='drive from this distance before the pit to the original lift station')
     args = parser.parse_args(argv)
+    responsive = args.efficiency_profile == 'responsive'
+    if responsive and args.approach_distance_m is None:
+        parser.error('responsive cycle requires a fixed-origin approach')
     if args.approach_distance_m is not None:
         try:
             approach_distance(args.approach_distance_m)
@@ -175,6 +179,7 @@ def main(argv=None) -> None:
         "fast": FAST_CYCLE_FRONT,
         "compact": COMPACT_CYCLE_FRONT,
         "efficient": EFFICIENT_CYCLE_FRONT,
+        "responsive": RESPONSIVE_CYCLE_FRONT,
     }[args.efficiency_profile]
     if args.front_preload_reference_rate is not None:
         if (not np.isfinite(args.front_preload_reference_rate) or
@@ -267,6 +272,8 @@ def main(argv=None) -> None:
                    TUNED_REAR_RUN)
     if args.efficiency_profile in ("compact", "efficient"):
         rear_config = replace(rear_config, return_ramp_s=COMPACT_REAR_RETURN_RAMP_S)
+    elif responsive:
+        rear_config = replace(rear_config, **RESPONSIVE_REAR_TIMING)
     if args.rear_adaptive_preload:
         rear_config = replace(rear_config, adaptive_preload=True,
                               preload_ready_timeout_s=rear_config.adaptive_preload_timeout_s)
@@ -359,7 +366,8 @@ def main(argv=None) -> None:
         # Validate the existing gain model first. Only the scene is transformed
         # to the shared fixed origin. Gains remain inactive on approach.
         gain_model_friction = scenario['friction']
-        set_approach_start(model, scenario, args.approach_distance_m)
+        set_approach_start(model, scenario, args.approach_distance_m,
+                           stop_gap_m=RESPONSIVE_STOP_GAP_M if responsive else None)
         if allocation_provenance is not None:
             allocation_provenance['approach_start'] = {
                 'simulation_model_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
