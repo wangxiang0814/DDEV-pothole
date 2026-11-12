@@ -28,26 +28,14 @@ from ddevsim.native_video import (  # noqa: E402
     default_workdir,
     find_history,
     launch_visualizer,
+    resolve_run_source,
     stage_history,
     write_animator_par,
 )
 
 
 def resolve_source(value: str) -> Path:
-    """Accept a run name, a run directory, an output directory, or a .vs file."""
-    supplied = Path(value)
-    candidates = [supplied] if supplied.is_absolute() else [ROOT / supplied, ROOT / "runs" / supplied]
-    source = next((path for path in candidates if path.exists()), None)
-    if source is None:
-        raise FileNotFoundError("run/history not found: %s" % value)
-    if source.is_file():
-        if source.suffix.lower() not in (".vs", ".vsb"):
-            raise ValueError("expected a .vs or .vsb history file: %s" % source)
-        return source
-    for directory in (source / "model" / "output", source / "native", source):
-        if directory.is_dir() and any(directory.glob("*.vs")):
-            return directory
-    raise FileNotFoundError("no TruckSim .vs history below: %s" % source)
+    return resolve_run_source(value, ROOT)
 
 
 def stage_directory(source: Path) -> Path:
@@ -73,7 +61,7 @@ def main(argv=None) -> int:
 
     source = resolve_source(args.run)
     history = find_history(source)
-    staged = stage_history(history, stage_directory(source), show_driver=args.show_driver)
+    staged = stage_history(history, stage_directory(source), show_driver=args.show_driver, cargo_box=True)
     animator = write_animator_par(staged.vs.parent, staged)
     visualizer = DEFAULT_VISUALIZER_32 if DEFAULT_VISUALIZER_32.exists() else default_visualizer()
     workdir = default_workdir()

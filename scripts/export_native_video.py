@@ -36,6 +36,7 @@ from ddevsim.native_video import (  # noqa: E402
     default_visualizer,
     default_workdir,
     export_native_video,
+    resolve_run_source,
 )
 
 
@@ -59,7 +60,7 @@ def main(argv=None) -> int:
                              "Visualizer mangles non-ASCII command-line arguments")
     args = parser.parse_args(argv)
 
-    source = args.source if args.source.is_absolute() else (ROOT / args.source)
+    source = resolve_run_source(args.source, ROOT)
     stage_dir = args.stage_dir or (source.parent if source.is_file() else source) / "native_video"
 
     report = export_native_video(

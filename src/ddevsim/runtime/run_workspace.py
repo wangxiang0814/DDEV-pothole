@@ -26,11 +26,17 @@ def _inside(path, parent):
         return False
 
 
-def claim_run(root: Path, strategy_id: str, case_id: str, run_id: str) -> Path:
+def validate_identifier(value: str) -> None:
+    if (not isinstance(value, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,95}', value)
+            or value.upper() in _RESERVED):
+        raise ValueError('run identifiers must be safe single path segments')
+
+
+def run_output_path(root: Path, strategy_id: str, case_id: str, run_id: str) -> Path:
+    """Validate the intended output path before creating anything."""
     root = Path(root).resolve()
     for value in (strategy_id, case_id, run_id):
-        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,95}', value) or value.upper() in _RESERVED:
-            raise ValueError('run identifiers must be safe single path segments')
+        validate_identifier(value)
     if strategy_id not in ('wheel_lift', 'shallow_press'):
         raise ValueError('unknown strategy')
     protected = ('models', 'evidence', 'src', 'scripts', 'interfaces', 'configs', 'scenarios', '.git')
@@ -39,6 +45,11 @@ def claim_run(root: Path, strategy_id: str, case_id: str, run_id: str) -> Path:
     target = (root / strategy_id / case_id / run_id).resolve()
     if not _inside(target, root):
         raise ValueError('run output escapes root')
+    return target
+
+
+def claim_run(root: Path, strategy_id: str, case_id: str, run_id: str) -> Path:
+    target = run_output_path(root, strategy_id, case_id, run_id)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.mkdir(exist_ok=False)
     identity = {'strategy_id': strategy_id, 'case_id': case_id, 'run_id': run_id,

@@ -27,7 +27,7 @@ def test_export_default_forwards_resource_workdir(tmp_path, monkeypatch):
     history = SimpleNamespace(basename='run', as_dict=lambda: {})
     monkeypatch.setattr(native_video, 'default_workdir', lambda: resources)
     monkeypatch.setattr(native_video, 'find_history', lambda _: history)
-    monkeypatch.setattr(native_video, 'stage_history', lambda *_: history)
+    monkeypatch.setattr(native_video, 'stage_history', lambda *_, **kwargs: history)
     monkeypatch.setattr(native_video, 'write_animator_par', lambda *_: tmp_path / 'animator.par')
     monkeypatch.setattr(native_video, 'manual_export_steps', lambda *_: [])
     calls = []

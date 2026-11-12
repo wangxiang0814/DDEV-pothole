@@ -1,5 +1,9 @@
 # 两种主动悬架专家策略架构
 
+2026-11-12：普通单轮和批量采集统一经 `scripts/run_strategy.py` 启动。批量入口 `scripts/run_expert_batch.py` 支持两种专家混合计划，每轮仍由独立进程执行，汇总写入 `runs/_batches/<batch_id>/`。用法和计划格式见[项目首页](../README.md)。
+
+保留代表性原生回放、引用中的源轮次、车型和验收证据。退役调参的原始运行已清理，状态和来源索引位于本机 `runs/_cleanup_20261112/result_index.jsonl.gz`。此前各研究记录中的运行保留说明描述当时状态。
+
 2026-10-27：专家二新增显式`event_crawl`策略分支，按逐轮入坑/爬沿风险规划可变低速；旧恒速研究控制器继续保留作回归。`event_phases.py`、`event_speed.py`、`event_controller.py`、`event_assessment.py`分别负责阶段、速度规划、协调控制和独立验收，不依赖专家一。当前仍处于参数研究，不能把可运行代码视为10cm深坑能力已完成。
 
 本工程维护两套独立专家：`wheel_lift`（抬轮过深坑）和 `shallow_press`（预瞄前馈与反馈下压过浅坑）。两者保留同一调参 I_I 基础车身；浅坑已有研究控制器、专属 worker 和验收。用户2026-10-24批准`expert2_mf52_research_20261024`为专家二轮胎研究基线，原内部PAC52保留对照，专家一车型不变。新旧模型必须记录不同物理身份；采纳研究基线不等于完整安全验收。
@@ -14,7 +18,8 @@
 | `src/ddevsim/runtime/` | 版本化 SI 合同、策略选择、输出认领、运行清单和进程管理 |
 | `src/ddevsim/vehicle_profiles/` | 两套策略共用的调参 I_I 车辆版本与中性参数生成规则 |
 | `src/ddevsim/scenarios/` | 坑槽覆盖/初始化校验、物理地形与显示资源同步生成 |
-| `src/ddevsim/native_video.py` | 原生历史读取、运行专属网格暂存、隐藏驾驶员和视频准备 |
+| `src/ddevsim/native_video.py` | 播放和导出共用的运行定位、原生历史读取、显示暂存 |
+| `src/ddevsim/vehicle_appearance.py`、`display_chassis.py` | 欧式平头货厢车外观和随原生轮心运动的机械展示部件 |
 | `src/ddevsim/chassis_contact.py` | 中性底盘参数化净空、物理路面及可选诊断接触模型；专家不默认启用 |
 | `scripts/` | 用户命令及历史诊断入口；三个主要旧运行入口为兼容封装 |
 | `configs/wheel_lift/`, `configs/shallow_press/` | 各自参数清单，禁止相互覆盖 |
@@ -51,7 +56,7 @@ report = strategy.summary()
 
 浅坑研究结果 `SIMULATION_PASS` 与完整安全 `PASS` 分开：真实底盘几何、执行器实体行程/带宽/功率仍未知，因此 `acceptance_pass=false`。场景准备不运行控制，清单为 PREPARED / UNASSESSED。独立轮胎版本的父车型、实际变更与采纳范围同时进入运行清单、结果和示范元数据；旧对照保留`adopted=false`，用户批准后的研究版本为专家二研究采纳。最终模型/端口哈希在生成修改后刷新，冻结输入另存 `input_provenance.json`，避免结果与清单哈希循环依赖。
 
-MPC专属旧代码、脚本、测试与研究证据已退出活动目录，保留于[校验归档](../archive/mpc_20261013/README.md)和备份tag。原生历史不删除。
+MPC专属旧代码、脚本、测试与研究证据已退出活动目录，保留于[校验归档](../archive/mpc_20261013/README.md)和备份tag。当前复现和代表性回放所需的原生历史保留在本机。
 
 ## 运行和显示隔离
 

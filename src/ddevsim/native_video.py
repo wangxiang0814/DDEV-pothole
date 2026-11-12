@@ -58,6 +58,28 @@ DEFAULT_RESOURCE_ROOT = Path(r"F:\TruckSim2019\TruckSim2019.0_Prog\Resources")
 
 
 # --------------------------------------------------------------------- discovery
+def resolve_run_source(value: str | Path, root: Path) -> Path:
+    """Resolve a repository path, runs-relative path, or unique expert run ID."""
+    supplied = Path(value)
+    runs = root / 'runs'
+    candidates = [supplied] if supplied.is_absolute() else [root / supplied, runs / supplied]
+    source = next((path for path in candidates if path.exists()), None)
+    if source is None and not supplied.is_absolute() and len(supplied.parts) == 1:
+        matches = sorted(case / supplied for strategy in ('wheel_lift', 'shallow_press')
+                         for case in (runs / strategy).glob('*')
+                         if case.is_dir() and (case / supplied).is_dir())
+        if len(matches) > 1:
+            raise ValueError('ambiguous run ID; specify its path: ' + ', '.join(
+                str(path.relative_to(root)) for path in matches))
+        if matches:
+            source = matches[0]
+    if source is None:
+        raise FileNotFoundError('run/history not found: ' + str(value))
+    if source.is_file() and source.suffix.lower() not in ('.vs', '.vsb'):
+        raise ValueError('expected a .vs or .vsb history file: ' + str(source))
+    return source
+
+
 @dataclass
 class HistorySet:
     """A complete TruckSim native history triple."""
@@ -236,7 +258,8 @@ def _without_driver_shapes(content: bytes) -> bytes:
     return display
 
 
-def stage_history(history: HistorySet, stage_dir: Path, *, show_driver: bool = False) -> HistorySet:
+def stage_history(history: HistorySet, stage_dir: Path, *, show_driver: bool = False,
+                  cargo_box: bool = False) -> HistorySet:
     """Stage history plus a separate display par; hide driver meshes by default.
 
     The original merged model and binary history remain byte-identical, even
@@ -254,11 +277,19 @@ def stage_history(history: HistorySet, stage_dir: Path, *, show_driver: bool = F
     # Each run carries its own road mesh. Rewrite only the display copy, so replay
     # never silently picks a different strategy's globally installed DDEV mesh.
     content = _stage_local_scene(history, stage_dir, content)
+    vs, vsb = stage_dir / history.vs.name, stage_dir / history.vsb.name
+    if cargo_box:
+        from .vehicle_appearance import stage_cargo_box, stage_flat_cab
+        boxed = stage_cargo_box(content, stage_dir, default_workdir())
+        if boxed != content:
+            from .display_chassis import stage_chassis
+            content = stage_flat_cab(boxed, stage_dir, default_workdir())
+            content, vs, vsb = stage_chassis(content, history, stage_dir)
     display_par = stage_dir / (history.basename + '_display.par')
     display_par.write_bytes(content if show_driver else _without_driver_shapes(content))
     return describe_history(
-        stage_dir / history.vs.name,
-        stage_dir / history.vsb.name,
+        vs,
+        vsb,
         display_par,
     )
 
@@ -510,7 +541,7 @@ def export_native_video(
 
     # Stage a copy so the .vsrap and the parsfle live side by side.  Paths may stay
     # non-ASCII because the parsfle is written with the ANSI codepage.
-    staged = stage_history(history, stage_dir)
+    staged = stage_history(history, stage_dir, cargo_box=True)
     animator_par = write_animator_par(stage_dir, staged)
     report: Dict[str, object] = {
         "source_history": history.as_dict(),
