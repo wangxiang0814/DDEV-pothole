@@ -210,6 +210,64 @@
       ],
       "front_speed_min_kph": null,
       "rear_pit_speed_kph": null
+    },
+    {
+      "run": "runs/wheel_lift/seed_repeat/centered_left_integrated_20261113",
+      "model_sha256": "379aa84f8935f3676f939153903bef5106bbeddd6219803cbf352f6741ca7375",
+      "status": "FAIL",
+      "scenario": {
+        "start_station_m": 12.0,
+        "length_m": 0.8,
+        "width_m": 0.9,
+        "depth_m": 0.2,
+        "friction": 0.7,
+        "vehicle_start_offset_m": 0.3,
+        "approach_distance_m": 12.0,
+        "side": "left",
+        "center_y_m": 0.63,
+        "wheel_sequence": [
+          "FL",
+          "RL"
+        ],
+        "vehicle_start_station_m": 0.0,
+        "pre_lift_stop_station_m": 10.78
+      },
+      "failure": "preload tracking deadline exceeded",
+      "failed_criteria": [
+        "fr_stage_pass",
+        "rr_fsm_complete",
+        "rr_forces_within_sim_limits",
+        "rr_hold_at_least_5_s",
+        "rr_hold_unloaded",
+        "rr_support_loaded",
+        "rr_zmp_safe",
+        "rr_com_safe",
+        "rr_clear_over_pit",
+        "rr_pit_speed",
+        "rr_straight",
+        "rr_stopped_before_lowering",
+        "rr_recovery_attitude_safe",
+        "rr_recovery_support_loaded",
+        "rr_recovery_travel_safe",
+        "rr_recovery_straight",
+        "rr_recovery_stopped_on_solid_ground",
+        "four_wheel_recovered"
+      ],
+      "failed_front_criteria": [
+        "no_abort",
+        "hold_at_least_5_s",
+        "hold_fr_clearance",
+        "hold_fr_unloaded",
+        "support_wheels_loaded",
+        "support_triangle_zmp",
+        "support_triangle_com",
+        "pit_crossed",
+        "pit_speed_in_requested_range",
+        "lifted_fr_over_pit",
+        "straight_path"
+      ],
+      "front_speed_min_kph": null,
+      "rear_pit_speed_kph": null
     }
   ],
   "centered_static_force_probe": {
@@ -606,5 +664,60 @@
     },
     "candidate_force_n": null,
     "conclusion": "local linearization near static state only"
+  },
+  "original_payload_paired_matrix": {
+    "batch": "runs/_batches/lift_final_edges_20261113/summary.json",
+    "right_pass": 6,
+    "left_pass": 0,
+    "cases": [
+      {
+        "run": "edge_left_anchor_final_20261113",
+        "status": "FAIL"
+      },
+      {
+        "run": "edge_right_anchor_final_20261113",
+        "status": "PASS"
+      },
+      {
+        "run": "edge_left_short_narrow_shallow_final_20261113",
+        "status": "FAIL"
+      },
+      {
+        "run": "edge_right_short_narrow_shallow_final_20261113",
+        "status": "PASS"
+      },
+      {
+        "run": "edge_right_short_narrow_deep_final_20261113",
+        "status": "PASS"
+      },
+      {
+        "run": "edge_left_short_narrow_deep_final_20261113",
+        "status": "FAIL"
+      },
+      {
+        "run": "edge_left_long_wide_deep_final_20261113",
+        "status": "FAIL"
+      },
+      {
+        "run": "edge_right_long_wide_deep_final_20261113",
+        "status": "PASS"
+      },
+      {
+        "run": "edge_right_long_wide_shallow_final_20261113",
+        "status": "PASS"
+      },
+      {
+        "run": "edge_left_long_wide_shallow_final_20261113",
+        "status": "FAIL"
+      },
+      {
+        "run": "edge_left_deep_isolated_final_20261113",
+        "status": "FAIL"
+      },
+      {
+        "run": "edge_right_deep_isolated_final_20261113",
+        "status": "PASS"
+      }
+    ]
   }
 }
