@@ -362,6 +362,12 @@ class LiftCrawlController:
                 ref[SUPPORT] = fz.sum() * target_lambda
             self.support.update(now_s, fz[SUPPORT], ref[SUPPORT],
                                 travel_mm=travel[SUPPORT])
+            if (self.config.calibrated_support_leak_s > 0. and
+                    margin >= self.config.lambda_target and
+                    self.mode in ("THREE_WHEEL_HOLD", "CRAWL", "STOP")):
+                # Release tracking bias slowly once measured support is safe.
+                self.support.correction *= np.exp(
+                    -self.config.control_period_s / self.config.calibrated_support_leak_s)
         if self.mode == "PRELOAD_SHIFT" and self.config.calibrated_preload_n is None:
             self.fr_correction_n = self.fr_feedback.update(
                 now_s, measured_n=float(gate_fz[1]),

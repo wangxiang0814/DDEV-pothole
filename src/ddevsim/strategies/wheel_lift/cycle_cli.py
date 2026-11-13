@@ -414,7 +414,8 @@ def main(argv=None) -> None:
             brake_start_before_far_edge_m=min(
                 .9 * float(scenario['length_m']),
                 .72 * float(scenario['length_m']) / .8),
-            support_feedback_limit_n=850., calibrated_support_ridge=.05)
+            support_feedback_limit_n=950., calibrated_support_ridge=.05,
+            calibrated_support_leak_s=11.)
         rear_config = replace(
             rear_config, calibrated_preload_n=(-4300., 7600., 5100., 4200.),
             calibrated_lift_delta_n=(-150., 250., -100., -1250.),

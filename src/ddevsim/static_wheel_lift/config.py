@@ -240,6 +240,7 @@ class ClosedLoopRunConfig:
     calibrated_preload_settle_s: float = 1.
     calibrated_support_ref_n: tuple[float, float, float, float] | None = None
     calibrated_support_ridge: float = .08
+    calibrated_support_leak_s: float = 0.
     calibrated_braking_support_n: float = 0.
 
 
