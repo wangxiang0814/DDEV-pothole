@@ -73,6 +73,29 @@ def test_preload_tracking_stall_has_total_deadline():
     assert controller.abort_reason == "preload tracking deadline exceeded"
 
 
+def test_single_track_preload_matches_the_validated_right_baseline():
+    values = dict.fromkeys(EXPORTS, 0.)
+    values.update({
+        "Fz_L1": 3400., "Fz_R1": 3450., "Fz_L2": 3950., "Fz_R2": 2750.,
+        "Xctc_L1i": 1., "Yctc_L1i": .625,
+        "Xctc_R1i": 1., "Yctc_R1i": -.625,
+        "Xctc_L2i": -1., "Yctc_L2i": .625,
+        "Xctc_R2i": -1., "Yctc_R2i": -.625,
+        "Z_R1": .263,
+    })
+    commands = []
+    references = []
+    for scenario in ({"friction": .7}, {"friction": .7, "side": "right"},
+                     {"friction": .7, "side": "left"}):
+        controller = LiftCrawlController(crawl=True, scenario=scenario)
+        commands.append(controller(CFG.init_settle_s, tuple(values[name] for name in EXPORTS)))
+        assert controller.mode == "PRELOAD_SHIFT"
+        references.append(controller._ref_loads(CFG.init_settle_s))
+    for command, reference in zip(commands[1:], references[1:]):
+        assert command == pytest.approx(commands[0])
+        assert reference == pytest.approx(references[0])
+
+
 def test_near_zero_FR_uses_swing_support_gain_before_liftoff():
     controller = LiftCrawlController(crawl=False, scenario={"friction": 0.7})
     controller.mode = "PRELOAD_SHIFT"

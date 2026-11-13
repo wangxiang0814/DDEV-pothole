@@ -48,6 +48,29 @@ class TunedIIProfile:
 
 
 DEFAULT_PROFILE = TunedIIProfile()
+CENTERED_PAYLOAD_PROFILE_ID = 'tuned_ii_centered_payload_20261113'
+
+
+def center_rear_payload(text: str) -> str:
+    """Center the known third payload on a generated I_I model copy."""
+    identifier = r'Payloads\Custom\Custom_fc53abde-d4b1-4bf4-bd95-c49bcb1b709d.par'
+    path = re.escape(identifier)
+    pattern = rf'(?ms)^ENTER_PARSFILE {path}\n.*?^EXIT_PARSFILE {path}$'
+
+    def center(match):
+        block = match.group()
+        if re.findall(r'(?m)^M_PL (.*)$', block) != ['200']:
+            raise ValueError('unexpected rear payload mass')
+        for key, old_value in (('Y_CG_PL', '500'), ('SET_OFFSET_Y', '0.5')):
+            block, count = re.subn(rf'(?m)^{key} {re.escape(old_value)}$', f'{key} 0', block)
+            if count != 1:
+                raise ValueError(f'unexpected rear payload {key}')
+        return block
+
+    centered, count = re.subn(pattern, center, text)
+    if count != 1 or re.findall(r'(?m)^Y_CG_PL (.*)$', centered) != ['375', '-375', '0']:
+        raise ValueError('unexpected I_I payload layout')
+    return centered
 
 
 def vehicle_identity(run_all: Path) -> str:

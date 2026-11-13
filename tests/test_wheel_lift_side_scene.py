@@ -21,3 +21,20 @@ def test_lift_scene_checks_offset_against_width():
         LiftScene('left', 100, 50, 40, 6)
     with pytest.raises(ValueError, match='integer'):
         LiftScene('left', 100.5, 50, 40, 0)
+
+
+def test_mirrored_adapter_uses_the_same_controller_step():
+    from ddevsim.strategies.wheel_lift.front import EXPORTS
+
+    mirror = SideMirror(EXPORTS)
+    observed = []
+    reference_command = (1., 0., 2., 3., 6100., -200., -4500., 3700., 4.)
+
+    def right_controller(t, observation):
+        observed.append((t, observation))
+        return reference_command
+
+    canonical = tuple(float(i) for i in range(len(EXPORTS)))
+    assert mirror.wrap(right_controller)(12.3, mirror.observation(canonical)) == (
+        0., 1., 3., 2., -200., 6100., 3700., -4500., -4.)
+    assert observed == [(12.3, canonical)]

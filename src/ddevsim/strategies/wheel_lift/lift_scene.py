@@ -6,6 +6,28 @@ import re
 from ddevsim.vehicle_profiles.tuned_ii import DEFAULT_PROFILE
 
 
+# Endpoints for the responsive single-track profile. The long-pit endpoint
+# starts braking earlier and reaches rear crossing speed in less distance.
+_CRAWL_LENGTH_RANGE_CM = (80, 100)
+_FRONT_BRAKE_LEAD_M = (.50, .60)
+_REAR_ACCEL_RAMP_S = (2.50, 2.10)
+_FRONT_SUPPORT_FEEDBACK_N = (500., 550.)
+
+
+def length_adjusted_crawl_timing(scene, front_brake_lead_m, rear_accel_ramp_s,
+                                front_support_feedback_n):
+    """Adjust nominal responsive timing for the actual pit length on either side."""
+    low, high = _CRAWL_LENGTH_RANGE_CM
+    fraction = max(0., min(1., (scene.length_cm - low) / (high - low)))
+    if front_brake_lead_m == _FRONT_BRAKE_LEAD_M[0]:
+        front_brake_lead_m += fraction * (_FRONT_BRAKE_LEAD_M[1] - front_brake_lead_m)
+    if rear_accel_ramp_s == _REAR_ACCEL_RAMP_S[0]:
+        rear_accel_ramp_s += fraction * (_REAR_ACCEL_RAMP_S[1] - rear_accel_ramp_s)
+    if front_support_feedback_n == _FRONT_SUPPORT_FEEDBACK_N[0]:
+        front_support_feedback_n += fraction * (_FRONT_SUPPORT_FEEDBACK_N[1] - front_support_feedback_n)
+    return front_brake_lead_m, rear_accel_ramp_s, front_support_feedback_n
+
+
 @dataclass(frozen=True)
 class LiftScene:
     side: str

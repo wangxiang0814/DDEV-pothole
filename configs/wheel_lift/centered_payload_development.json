@@ -1,0 +1,24 @@
+{
+  "strategy_id": "wheel_lift",
+  "scope": "Unvalidated centered-payload I_I calibration; isolated native trials only.",
+  "common": {
+    "efficiency-profile": "responsive",
+    "centered-payload-trial": true,
+    "lateral-ride-scale": 0,
+    "rear-control-profile": "robust",
+    "front-steering-feedback": true,
+    "front-target-speed-kph": 3.4,
+    "front-min-pit-speed-kph": 3,
+    "front-accel-ramp-s": 1,
+    "front-brake-lead-m": 0.5,
+    "rear-target-speed-kph": 3.6,
+    "rear-min-pit-speed-kph": 3,
+    "rear-accel-ramp-s": 2.5,
+    "measurement-noise": true,
+    "average-path-reference": true,
+    "feedback-delay-s": 0.04,
+    "front-lift-force-n": -200,
+    "front-stop-support-slew-n-s": 1200
+  },
+  "cases": {"seed_repeat": {"options": {"noise-seed": 20261012, "road-friction": 0.6, "vehicle-start-offset-m": 0.3}}}
+}

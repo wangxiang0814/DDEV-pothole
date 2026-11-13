@@ -45,7 +45,8 @@ STEERING_IMPORT = "IMP_STEER_SW"
 
 
 from .cycle import FullRightSideController
-from .lift_scene import LiftScene, SideMirror
+from .lift_scene import LiftScene, SideMirror, length_adjusted_crawl_timing
+from ddevsim.vehicle_profiles.tuned_ii import CENTERED_PAYLOAD_PROFILE_ID, center_rear_payload, vehicle_identity
 from .acceptance import evaluate_full_cycle
 from .model_builder import (_enable_steering_import, _clamp_kinematics_at_original_bounds,
                             _scale_lateral_ride_movement, _set_pit_geometry, _set_vehicle_start_offset,
@@ -131,6 +132,8 @@ def main(argv=None) -> None:
     parser.add_argument('--approach-distance-m', type=float,
                         help='drive from this distance before the pit to the original lift station')
     parser.add_argument('--lift-scene', type=Path, help='single-track scene JSON in integer centimetres')
+    parser.add_argument('--centered-payload-trial', action='store_true',
+                        help='run a centered I_I development trial without legacy support QP gains')
     args = parser.parse_args(argv)
     lift_scene = None
     if args.lift_scene is not None:
@@ -152,6 +155,11 @@ def main(argv=None) -> None:
             parser.error(str(exc))
         if args.identify_rr_swing or args.contact_gain_bundle:
             parser.error('explicit identification or exact contact-gain runs use the original start')
+    if args.centered_payload_trial:
+        if lift_scene is None or args.support_allocation != 'off' or args.support_allocation_gains is not None:
+            parser.error('centered payload trial requires an explicit lift scene and no legacy support QP gains')
+        if args.demonstration_config or getattr(args, 'dynamics_episode_id', None):
+            parser.error('centered payload trial is not released for demonstration or dynamics collection')
     capture_enabled = False
     if args.demonstration_config:
         from ddevsim.demonstration.cameras import load_config
@@ -348,6 +356,13 @@ def main(argv=None) -> None:
         if args.support_allocation != 'active' or args.support_allocation_gains is None:
             parser.error('rear abort exit requires active support allocation and gains')
         rear_config = replace(rear_config, allow_abort_exit=True)
+    if responsive and lift_scene is not None:
+        brake_lead, rear_ramp, support_feedback = length_adjusted_crawl_timing(
+            lift_scene, front_config.brake_start_before_far_edge_m,
+            rear_config.crawl_accel_ramp_s, front_config.support_feedback_limit_n)
+        front_config = replace(front_config, brake_start_before_far_edge_m=brake_lead,
+                               support_feedback_limit_n=support_feedback)
+        rear_config = replace(rear_config, crawl_accel_ramp_s=rear_ramp)
     allocation, allocation_provenance = None, None
     if args.support_allocation_reference_model is not None and args.support_allocation_gains is None:
         parser.error('scene gain reuse requires --support-allocation-gains')
@@ -388,6 +403,16 @@ def main(argv=None) -> None:
                 'scene_transform': 'fixed origin, translated pit and road markers, common dry road',
                 'gain_activation': 'after approach and stationary settle',
             }
+    centered_provenance = None
+    if args.centered_payload_trial:
+        original_sha = hashlib.sha256(path.read_bytes()).hexdigest()
+        path.write_text(center_rear_payload(path.read_text(encoding='utf-8')), encoding='utf-8')
+        centered_provenance = dict(profile_id=CENTERED_PAYLOAD_PROFILE_ID,
+                                   original_model_sha256=original_sha,
+                                   model_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                                   vehicle_sha256=vehicle_identity(path),
+                                   experimental=True,
+                                   feedback_seed='legacy reference and base scalar/support feedback; not reidentified')
     controller = FullRightSideController(
         scenario=scenario,
         rr_gain_per_coupled_force=float(
@@ -496,6 +521,8 @@ def main(argv=None) -> None:
         "front": asdict(front_config), "rear": asdict(rear_config),
     }
     result['identified_gain_provenance'] = gain_provenance
+    if centered_provenance is not None:
+        result['vehicle_profile'] = centered_provenance
     if allocation is not None:
         result['support_allocation'] = {**allocation.summary(), 'config': asdict(allocation.config),
                                          'provenance': allocation_provenance}

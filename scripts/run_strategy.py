@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / 'src'))
 from ddevsim.runtime.registry import load_strategy
 from ddevsim.runtime.run_workspace import claim_run, run_worker, sha256_file, write_run_manifest
 from ddevsim.scenarios.approach import DEFAULT_INITIAL_DISTANCE_M, approach_distance, select_expert
-from ddevsim.vehicle_profiles.tuned_ii import DEFAULT_PROFILE, vehicle_identity
+from ddevsim.vehicle_profiles.tuned_ii import CENTERED_PAYLOAD_PROFILE_ID, DEFAULT_PROFILE, vehicle_identity
 
 
 def main(argv=None):
@@ -135,6 +135,10 @@ def main(argv=None):
               'solver_step_s': .0005, 'control_period_s': .02,
               'source_assets': {}, 'scope': manifest['scope']}
     options = record['effective_options']
+    if options.get('centered-payload-trial'):
+        if args.lift_scene is None or args.demonstration_config:
+            parser.error('centered payload trial requires --lift-scene and is not released for collection')
+        record['vehicle_profile_id'] = CENTERED_PAYLOAD_PROFILE_ID
     if args.lift_scene is not None:
         record['lift_scene'] = asdict(lift_scene)
         record['source_assets'][str(args.lift_scene.resolve())] = sha256_file(args.lift_scene)
