@@ -235,6 +235,12 @@ class ClosedLoopRunConfig:
     reference_hold_s: float = 56.0
     init_max_vx_kph: float = 0.1
     ready_attitude_limit_deg: float = 5.0
+    calibrated_preload_n: tuple[float, float, float, float] | None = None
+    calibrated_preload_ramp_s: float = 4.
+    calibrated_preload_settle_s: float = 1.
+    calibrated_support_ref_n: tuple[float, float, float, float] | None = None
+    calibrated_support_ridge: float = .08
+    calibrated_braking_support_n: float = 0.
 
 
 CLOSED_LOOP_RUN = ClosedLoopRunConfig()
@@ -378,6 +384,19 @@ class RearCycleConfig:
     preload_fl_force_n: float = -3200.0
     preload_fr_force_n: float = 6400.0
     preload_rl_force_n: float = 0.0
+    calibrated_preload_n: tuple[float, float, float, float] | None = None
+    calibrated_lift_delta_n: tuple[float, float, float, float] | None = None
+    calibrated_brake_delta_n: tuple[float, float, float, float] | None = None
+    calibrated_crawl_delta_n: tuple[float, float, float, float] | None = None
+    calibrated_post_pit_clearance_m: float = .002
+    calibrated_rebound_relief_mm: float = -137.
+    calibrated_rebound_gain_n_mm: float = 0.
+    calibrated_rebound_max_n: float = 0.
+    calibrated_rebound_slew_n_s: float = 1800.
+    calibrated_roll_relief_deg: float = 8.1
+    calibrated_roll_relief_n_deg: float = 0.
+    calibrated_roll_swing_ratio: float = 0.
+    calibrated_launch_fl_trim_n: float = 0.
     preload_feedback_fl_per_fr: float = -0.5
     preload_feedback_limit_n: float = 1000.0
     preload_feedback_slew_n_s: float = 1000.0

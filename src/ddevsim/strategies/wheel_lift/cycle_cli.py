@@ -405,6 +405,30 @@ def main(argv=None) -> None:
             }
     centered_provenance = None
     if args.centered_payload_trial:
+        front_config = replace(
+            front_config, calibrated_preload_n=(5230., -1970., -9850., 11300.),
+            calibrated_support_ref_n=(6580., 0., 850., 6000.),
+            calibrated_braking_support_n=20., preload_max_reference_rate=1.,
+            ready_attitude_limit_deg=7.85, rl_support_force_n=0.,
+            crawl_accel_ramp_s=1.65, stop_ramp_s=3.9,
+            brake_start_before_far_edge_m=min(
+                .9 * float(scenario['length_m']),
+                .72 * float(scenario['length_m']) / .8),
+            support_feedback_limit_n=850., calibrated_support_ridge=.05)
+        rear_config = replace(
+            rear_config, calibrated_preload_n=(-4300., 7600., 5100., 4200.),
+            calibrated_lift_delta_n=(-150., 250., -100., -1250.),
+            calibrated_crawl_delta_n=(-40., -39., -24., -170.),
+            calibrated_brake_delta_n=(148., -560., 175., -1390.),
+            calibrated_rebound_relief_mm=-141.,
+            calibrated_rebound_gain_n_mm=125., calibrated_rebound_max_n=1350.,
+            calibrated_roll_relief_deg=8.65,
+            calibrated_roll_relief_n_deg=1150., calibrated_roll_swing_ratio=.12,
+            calibrated_launch_fl_trim_n=75.,
+            crawl_accel_ramp_s=4.78, stop_ramp_s=3.65,
+            brake_start_before_far_edge_m=min(.45, .56 * float(scenario['length_m'])),
+            posture_target_roll_deg=-6.5, posture_target_clearance_m=.015,
+            posture_timeout_s=6.)
         original_sha = hashlib.sha256(path.read_bytes()).hexdigest()
         path.write_text(center_rear_payload(path.read_text(encoding='utf-8')), encoding='utf-8')
         centered_provenance = dict(profile_id=CENTERED_PAYLOAD_PROFILE_ID,
@@ -412,7 +436,7 @@ def main(argv=None) -> None:
                                    model_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
                                    vehicle_sha256=vehicle_identity(path),
                                    experimental=True,
-                                   feedback_seed='legacy reference and base scalar/support feedback; not reidentified')
+                                   feedback_seed='centered force calibration; front support feedback seeded from legacy gain')
     controller = FullRightSideController(
         scenario=scenario,
         rr_gain_per_coupled_force=float(

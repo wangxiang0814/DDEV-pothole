@@ -8,6 +8,7 @@ the original TruckSim projects and models are never modified.
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import csv
 import gzip
 import hashlib
@@ -33,7 +34,7 @@ from ddevsim.static_wheel_lift.closed_loop import (
     front_abort_recovery_ready, front_restoration_checks,
     WheelLoadFilter,
 )
-from ddevsim.static_wheel_lift.command_trace import load_command_trace
+from ddevsim.static_wheel_lift.command_trace import CommandTrace, load_command_trace
 from ddevsim.static_wheel_lift.config import CLOSED_LOOP_RUN as CFG, speed_trial_config
 from ddevsim.static_wheel_lift.quintic_trajectory import quintic_step
 from ddevsim.static_wheel_lift.support_geometry import assess_support
@@ -75,6 +76,14 @@ class LiftCrawlController:
         if gain["model_sha256"] != model_hash:
             raise ValueError("identified swing gain does not match I_I model")
         self.trace = load_command_trace(evidence / "preload_trace.csv.gz", IMPORT_NAMES)
+        if config.calibrated_preload_n is not None:
+            start = config.preload_feedback_start_s
+            duration = config.calibrated_preload_ramp_s
+            end = start + duration + config.calibrated_preload_settle_s
+            times = np.r_[0., np.linspace(start, end, 51)]
+            blend = np.array([quintic_step(t, start, duration)[0] for t in times])
+            self.trace = CommandTrace(times, np.c_[np.zeros((len(times), 4)),
+                                                   blend[:, None] * config.calibrated_preload_n])
         self.ref_time, self.ref_fz = _reference(evidence / "lift_reference.csv.gz")
         self.preload_clock = PreloadProgress(
             start_s=self.config.preload_feedback_start_s,
@@ -101,6 +110,9 @@ class LiftCrawlController:
                                             correction_limit_n=self.config.support_feedback_limit_n,
                                             rebound_guard_mm=(self.config.moving_rebound_guard_mm
                                                               if crawl else self.config.rebound_guard_mm))
+        if config.calibrated_preload_n is not None:
+            self.support.config = replace(self.support.config,
+                                          ridge_gain=config.calibrated_support_ridge)
         self.load_filter = WheelLoadFilter(
             cutoff_hz=self.config.wheel_load_filter_cutoff_hz, wheel_count=4)
         self.drive = CrawlTorqueFeedback(control_period_s=self.config.control_period_s,
@@ -151,6 +163,11 @@ class LiftCrawlController:
             self.lower_start_torques_nm = self.torques_nm.copy()
 
     def _ref_loads(self, now_s: float) -> np.ndarray:
+        if self.config.calibrated_preload_n is not None:
+            reference = np.array(self.config.calibrated_support_ref_n)
+            if self.mode == "STOP":
+                reference[2] += self.config.calibrated_braking_support_n
+            return reference
         if self.lift_start_s is None:
             reference_time = self.preload_clock.progress_s
         else:
@@ -219,8 +236,10 @@ class LiftCrawlController:
                 (self.config.gain_blend_stance_fr_load_n -
                  self.config.gain_blend_swing_fr_load_n), 0., 1.))
         if self.mode in ("INIT_SETTLE", "PRELOAD_SHIFT"):
-            tracking_error = float(np.max(np.abs(
-                gate_fz - self._ref_loads(now_s))))
+            # The centered preload follows an identified force trajectory.
+            # Its contact and stability gates remain measured independently.
+            tracking_error = (0. if self.config.calibrated_preload_n is not None else
+                              float(np.max(np.abs(gate_fz - self._ref_loads(now_s)))))
             self.preload_clock.update(since_settle_s, load_error_n=tracking_error)
         travel = np.array([x["Jnc_" + wheel] for wheel in WHEELS])
         contacts = {corner: (x["Xctc_" + wheel + "i"],
@@ -333,8 +352,8 @@ class LiftCrawlController:
                 self.abort_reason = "three-wheel support or clearance limit"
                 self._enter("ABORT_STOP", now_s)
         ref = self._ref_loads(now_s)
-        if self.mode in ("PRELOAD_SHIFT", "LIFTING", "THREE_WHEEL_HOLD",
-                         "CRAWL", "STOP"):
+        if (self.mode in ("LIFTING", "THREE_WHEEL_HOLD", "CRAWL", "STOP") or
+                self.mode == "PRELOAD_SHIFT" and self.config.calibrated_preload_n is None):
             if (self.mode in ("CRAWL", "STOP") and
                     (assessment.lambda_min < self.config.lambda_target or
                      min(com_lambda) < self.config.lambda_target)):
@@ -343,7 +362,7 @@ class LiftCrawlController:
                 ref[SUPPORT] = fz.sum() * target_lambda
             self.support.update(now_s, fz[SUPPORT], ref[SUPPORT],
                                 travel_mm=travel[SUPPORT])
-        if self.mode == "PRELOAD_SHIFT":
+        if self.mode == "PRELOAD_SHIFT" and self.config.calibrated_preload_n is None:
             self.fr_correction_n = self.fr_feedback.update(
                 now_s, measured_n=float(gate_fz[1]),
                 reference_n=float(ref[1]))

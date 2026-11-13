@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from .closed_loop import (CrawlFeedbackConfig, CrawlTorqueFeedback,
-                          ScalarLoadFeedback, WheelLoadFilter)
+                          ScalarLoadFeedback, WheelLoadFilter, front_clearance_guard_m)
 from .config import REAR_CYCLE_RUN, RearCycleConfig
 from .quintic_trajectory import quintic_step
 from .support_geometry import assess_support, _lambda
@@ -77,6 +77,9 @@ class RearCycleController:
         self.posture_release_start_s: float | None = None
         self.posture_stop_release_start_s: float | None = None
         self.stop_roll_counter_start_s: float | None = None
+        self.calibrated_brake_start_s: float | None = None
+        self.calibrated_crawl_start_s: float | None = None
+        self.calibrated_rebound_relief_n = 0.
         self.preload_start_s: float | None = None
         self.lift_start_s: float | None = None
         self.last_suspension_force_n = np.zeros(4)
@@ -213,6 +216,30 @@ class RearCycleController:
                     lift *= 1. - quintic_step(now_s, self.lower_start_s,
                                               cfg.lower_ramp_s)[0]
                 command[7] = cfg.lift_force_n * lift
+            if cfg.calibrated_preload_n is not None:
+                # The identified centered posture uses all four corners, and
+                # must retain its preload contribution on the swing corner.
+                lift = (0. if self.lift_start_s is None else quintic_step(
+                    now_s, self.lift_start_s, cfg.lift_ramp_s)[0])
+                command[4:] = release * (preload * np.asarray(cfg.calibrated_preload_n) +
+                                         lift * np.asarray(cfg.calibrated_lift_delta_n))
+                if self.calibrated_crawl_start_s is not None:
+                    crawl_age = now_s - self.calibrated_crawl_start_s
+                    crawl = quintic_step(crawl_age, 0.,
+                                         cfg.stop_roll_counter_ramp_s)[0]
+                    command[4:] += release * crawl * np.asarray(cfg.calibrated_crawl_delta_n)
+                    # The diagonal support needs a temporary reserve while drive
+                    # torque builds. Release it before the braking posture.
+                    rise = quintic_step(crawl_age, 0., .30 * cfg.crawl_accel_ramp_s)[0]
+                    fall = quintic_step(crawl_age, .58 * cfg.crawl_accel_ramp_s,
+                                        .25 * cfg.crawl_accel_ramp_s)[0]
+                    command[4] -= release * cfg.calibrated_launch_fl_trim_n * rise * (1. - fall)
+                if self.calibrated_brake_start_s is not None:
+                    brake = quintic_step(now_s, self.calibrated_brake_start_s,
+                                         cfg.stop_roll_counter_ramp_s)[0]
+                    command[4:] += release * brake * np.asarray(cfg.calibrated_brake_delta_n)
+                command[5] -= release * self.calibrated_rebound_relief_n
+                command[7] -= release * cfg.calibrated_roll_swing_ratio * self.calibrated_rebound_relief_n
         if self.abort_suspension_force_n is not None and self.mode in (
                 'RR_ABORT_STOP', 'RR_ABORT_EXIT', 'RR_LOWERING', 'RR_RETURN'):
             # Freeze actual inputs at the fault; do not finish a preload script.
@@ -244,6 +271,17 @@ class RearCycleController:
         filtered = self.filter.update(now_s, fz)
         gate = assess_rear_gate(x, filtered, cfg)
         self.last_gate = gate
+        if cfg.calibrated_rebound_gain_n_mm > 0. and self.mode in (
+                "RR_LIFTING", "RR_POSTURE", "RR_HOLD", "RR_CRAWL", "RR_STOP"):
+            travel_relief = cfg.calibrated_rebound_gain_n_mm * (
+                cfg.calibrated_rebound_relief_mm - x["Jnc_R1"])
+            roll_relief = cfg.calibrated_roll_relief_n_deg * (
+                abs(x["Roll_E"]) - cfg.calibrated_roll_relief_deg)
+            desired_relief = np.clip(max(travel_relief, roll_relief),
+                                     0., cfg.calibrated_rebound_max_n)
+            relief_step = cfg.calibrated_rebound_slew_n_s * cfg.control_period_s
+            self.calibrated_rebound_relief_n += float(np.clip(
+                desired_relief - self.calibrated_rebound_relief_n, -relief_step, relief_step))
         self.last_rr_load_n = float(filtered[3])
         rpm = np.array([x.get(f"AVy_{wheel}", 0.) for wheel in TRUCKSIM_WHEELS])
         parking_target = np.clip(-cfg.parking_damping_nm_per_rpm * rpm,
@@ -284,8 +322,9 @@ class RearCycleController:
             ref = (self.start_rr_load_n or 0.) * (
                 1. - cfg.preload_fl_unload_share * diagonal -
                 (1. - cfg.preload_fl_unload_share) * other)
-            self.unload_feedback.update(now_s, measured_n=float(filtered[3]),
-                                        reference_n=ref)
+            if cfg.calibrated_preload_n is None:
+                self.unload_feedback.update(now_s, measured_n=float(filtered[3]),
+                                            reference_n=ref)
             if gate.ready:
                 if self.ready_since_s is None:
                     self.ready_since_s = now_s
@@ -332,6 +371,8 @@ class RearCycleController:
                 self._enter("RR_LOWERING", now_s)
         if self.mode == "RR_HOLD" and now_s - self.mode_start_s >= cfg.hold_s:
             self._enter("RR_CRAWL", now_s)
+            if cfg.calibrated_crawl_delta_n is not None:
+                self.calibrated_crawl_start_s = now_s
         far_edge = (float(self.scenario["start_station_m"]) +
                     float(self.scenario["length_m"]))
         if self.mode == "RR_CRAWL":
@@ -342,6 +383,8 @@ class RearCycleController:
                 self.abort_reason = "RR crossing deadline exceeded"
                 self._enter("RR_ABORT_STOP", now_s)
         if self.mode == "RR_STOP":
+            if cfg.calibrated_brake_delta_n is not None and self.calibrated_brake_start_s is None:
+                self.calibrated_brake_start_s = now_s
             # Positive FR spring-seat force extends FR in the measured model.
             # Reduce it only once RR has cleared the far edge, with bounded slew.
             desired_relief = 0.0
@@ -419,7 +462,12 @@ class RearCycleController:
                          "RR_HOLD", "RR_CRAWL", "RR_STOP"):
             if (not gate.safe or
                     self.mode in ("RR_CRAWL", "RR_STOP") and
-                    gate.clearance_m < cfg.lip_clearance_m):
+                    gate.clearance_m < (
+                        front_clearance_guard_m(x["X_R2"], far_edge,
+                                                cfg.crossing_clearance_m,
+                                                cfg.lip_clearance_m,
+                                                cfg.calibrated_post_pit_clearance_m)
+                        if cfg.calibrated_preload_n is not None else cfg.lip_clearance_m)):
                 travel = [x[f"Jnc_{wheel}"] for wheel in TRUCKSIM_WHEELS]
                 if min(travel) <= cfg.travel_rebound_abort_mm:
                     self.abort_reason = "RR support suspension rebound limit"
